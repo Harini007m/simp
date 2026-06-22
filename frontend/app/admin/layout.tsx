@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Sidebar } from '@/components/admin/Sidebar';
 import { TopNav } from '@/components/admin/TopNav';
-import { DashboardProvider } from '@/src/context/DashboardContext';
 
 export default function SuperAdminLayout({
   children,
