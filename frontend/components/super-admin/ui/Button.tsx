@@ -1,0 +1,61 @@
+import React, { ButtonHTMLAttributes } from 'react';
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className = '', variant = 'default', size = 'default', ...props }, ref) => {
+    let variantStyles = '';
+    switch (variant) {
+      case 'default':
+        variantStyles = 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm';
+        break;
+      case 'destructive':
+        variantStyles = 'bg-red-500 text-white hover:bg-red-600 shadow-sm';
+        break;
+      case 'outline':
+        variantStyles = 'border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900';
+        break;
+      case 'secondary':
+        variantStyles = 'bg-slate-100 text-slate-900 hover:bg-slate-200';
+        break;
+      case 'ghost':
+        variantStyles = 'hover:bg-slate-100 hover:text-slate-900';
+        break;
+      case 'link':
+        variantStyles = 'text-blue-600 underline-offset-4 hover:underline';
+        break;
+    }
+
+    let sizeStyles = '';
+    switch (size) {
+      case 'default':
+        sizeStyles = 'h-10 px-4 py-2';
+        break;
+      case 'sm':
+        sizeStyles = 'h-9 rounded-md px-3 text-xs';
+        break;
+      case 'lg':
+        sizeStyles = 'h-11 rounded-md px-8';
+        break;
+      case 'icon':
+        sizeStyles = 'h-10 w-10';
+        break;
+    }
+
+    const baseStyles = 'inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+    
+    return (
+      <button
+        ref={ref}
+        className={`${baseStyles} ${variantStyles} ${sizeStyles} ${className}`}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+
+export { Button };
