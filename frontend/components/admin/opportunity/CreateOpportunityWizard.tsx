@@ -9,11 +9,14 @@ import { ChevronRight, ChevronLeft, Briefcase, Calendar, MapPin, Users, Info, Do
 import { programService } from '@/src/services/program.service';
 import { opportunityService } from '@/src/services/opportunity.service';
 import { Program } from '@/src/data/mock-programs';
+import { Opportunity } from '@/src/data/mock-opportunities';
 
 interface CreateOpportunityWizardProps {
   isOpen: boolean;
   onClose: () => void;
   onOpportunityCreated?: () => void;
+  opportunityToView?: Opportunity | null;
+  viewMode?: boolean;
 }
 
 const STEPS = ['Opportunity Details', 'Review & Post'];
@@ -24,7 +27,13 @@ const COLOR_THEMES = [
   { name: 'Emerald (Analytics)', value: 'from-emerald-600/20 to-teal-600/20 border-emerald-500/30 text-emerald-400' }
 ];
 
-export function CreateOpportunityWizard({ isOpen, onClose, onOpportunityCreated }: CreateOpportunityWizardProps) {
+export function CreateOpportunityWizard({ 
+  isOpen, 
+  onClose, 
+  onOpportunityCreated, 
+  opportunityToView, 
+  viewMode = false 
+}: CreateOpportunityWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loadingPrograms, setLoadingPrograms] = useState(false);
@@ -67,26 +76,60 @@ export function CreateOpportunityWizard({ isOpen, onClose, onOpportunityCreated 
 
     if (isOpen) {
       loadPrograms();
-      // Reset form fields
-      setTitle('');
-      setProgramId('');
-      setOpenings(1);
-      setLocationType('Remote');
-      setCustomLocation('');
-      setStatus('Open');
-      setType('Tech');
-      setInternshipType('free');
-      setAmount('');
-      setValue('High Demand');
-      setDescription('');
-      setDuration('6 Months');
-      setEligibility('B.Tech CS/IT (3rd or 4th Year)');
-      setStartDate('Starts Jan 2024');
-      setColor('from-blue-600/20 to-cyan-600/20 border-blue-500/30 text-blue-400');
-      setCurrentStep(0);
+      
+      if (opportunityToView) {
+        setTitle(opportunityToView.title || '');
+        setProgramId(opportunityToView.programId || '');
+        setOpenings(opportunityToView.openings || 1);
+        
+        // Location Type matching
+        const loc = opportunityToView.location || 'Remote';
+        if (['Remote', 'Hybrid', 'San Francisco, CA', 'New York, NY'].includes(loc)) {
+          setLocationType(loc);
+          setCustomLocation('');
+        } else {
+          setLocationType('Custom');
+          setCustomLocation(loc);
+        }
+        
+        setStatus(opportunityToView.status || 'Open');
+        setType(opportunityToView.type || 'Tech');
+        setInternshipType(opportunityToView.internshipType || 'free');
+        setAmount(opportunityToView.amount || '');
+        setValue(opportunityToView.value || 'High Demand');
+        setDescription(opportunityToView.description || '');
+        setDuration(opportunityToView.duration || '6 Months');
+        setEligibility(opportunityToView.eligibility || 'B.Tech CS/IT (3rd or 4th Year)');
+        setStartDate(opportunityToView.startDate || 'Starts Jan 2024');
+        setColor(opportunityToView.color || 'from-blue-600/20 to-cyan-600/20 border-blue-500/30 text-blue-400');
+        
+        if (viewMode) {
+          setCurrentStep(1);
+        } else {
+          setCurrentStep(0);
+        }
+      } else {
+        // Reset form fields
+        setTitle('');
+        setProgramId('');
+        setOpenings(1);
+        setLocationType('Remote');
+        setCustomLocation('');
+        setStatus('Open');
+        setType('Tech');
+        setInternshipType('free');
+        setAmount('');
+        setValue('High Demand');
+        setDescription('');
+        setDuration('6 Months');
+        setEligibility('B.Tech CS/IT (3rd or 4th Year)');
+        setStartDate('Starts Jan 2024');
+        setColor('from-blue-600/20 to-cyan-600/20 border-blue-500/30 text-blue-400');
+        setCurrentStep(0);
+      }
       setErrors({});
     }
-  }, [isOpen]);
+  }, [isOpen, opportunityToView, viewMode]);
 
   const validateStep0 = () => {
     const newErrors: Record<string, string> = {};
@@ -176,6 +219,11 @@ export function CreateOpportunityWizard({ isOpen, onClose, onOpportunityCreated 
 
   const selectedProgram = programs.find(p => p.id === programId);
   const displayLocation = locationType === 'Custom' ? customLocation : locationType;
+
+  const getDrawerTitle = () => {
+    if (viewMode) return "View Opportunity Details";
+    return "Post New Opportunity";
+  };
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -578,41 +626,51 @@ export function CreateOpportunityWizard({ isOpen, onClose, onOpportunityCreated 
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} title="Post New Opportunity">
+    <Drawer isOpen={isOpen} onClose={onClose} title={getDrawerTitle()}>
       <div className="flex flex-col h-[calc(100vh-65px)]">
-        <Stepper steps={STEPS} currentStep={currentStep} />
+        {!viewMode && <Stepper steps={STEPS} currentStep={currentStep} />}
         
         <div className="flex-1 overflow-y-auto bg-white">
           {renderStepContent()}
         </div>
         
         <div className="shrink-0 border-t border-slate-200 p-4 bg-slate-50 flex items-center justify-between">
-          <Button 
-            variant="outline" 
-            onClick={currentStep === 0 ? onClose : handleBack}
-            disabled={isSubmitting}
-          >
-            {currentStep === 0 ? 'Cancel' : (
-              <>
-                <ChevronLeft className="mr-2 h-4 w-4" /> Back
-              </>
-            )}
-          </Button>
-          
-          <Button 
-            onClick={currentStep === STEPS.length - 1 ? handlePostOpportunity : handleNext}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              'Posting...'
-            ) : currentStep === STEPS.length - 1 ? (
-              'Post Opportunity'
-            ) : (
-              <>
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
+          {viewMode ? (
+            <div className="w-full flex justify-end">
+              <Button variant="outline" onClick={onClose}>
+                Close
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={currentStep === 0 ? onClose : handleBack}
+                disabled={isSubmitting}
+              >
+                {currentStep === 0 ? 'Cancel' : (
+                  <>
+                    <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                  </>
+                )}
+              </Button>
+              
+              <Button 
+                onClick={currentStep === STEPS.length - 1 ? handlePostOpportunity : handleNext}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  'Posting...'
+                ) : currentStep === STEPS.length - 1 ? (
+                  'Post Opportunity'
+                ) : (
+                  <>
+                    Next <ChevronRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Drawer>

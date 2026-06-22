@@ -17,6 +17,8 @@ export default function OpportunityPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [viewMode, setViewMode] = useState(false);
 
   const loadData = async () => {
     try {
@@ -75,7 +77,11 @@ export default function OpportunityPage() {
         
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setIsCreateWizardOpen(true)}
+            onClick={() => {
+              setSelectedOpportunity(null);
+              setViewMode(false);
+              setIsCreateWizardOpen(true);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -177,7 +183,16 @@ export default function OpportunityPage() {
                 
                 <div className="flex items-center gap-3 sm:flex-col sm:items-end">
                   <span className="text-xs text-slate-400">Posted {opp.postedDate}</span>
-                  <button className="text-blue-600 hover:text-blue-800 font-semibold text-sm">View Details</button>
+                  <button 
+                    onClick={() => {
+                      setSelectedOpportunity(opp);
+                      setViewMode(true);
+                      setIsCreateWizardOpen(true);
+                    }}
+                    className="text-blue-600 hover:text-blue-800 font-semibold text-sm cursor-pointer"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             ))
@@ -193,8 +208,14 @@ export default function OpportunityPage() {
 
       <CreateOpportunityWizard 
         isOpen={isCreateWizardOpen} 
-        onClose={() => setIsCreateWizardOpen(false)} 
+        onClose={() => {
+          setIsCreateWizardOpen(false);
+          setSelectedOpportunity(null);
+          setViewMode(false);
+        }} 
         onOpportunityCreated={loadData} 
+        opportunityToView={selectedOpportunity}
+        viewMode={viewMode}
       />
     </div>
   );
