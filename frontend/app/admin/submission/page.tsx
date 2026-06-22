@@ -1,25 +1,98 @@
 "use client";
 
-import React from 'react';
-import { useDashboard } from '@/src/context/DashboardContext';
+import React, { useEffect, useState } from 'react';
+import { submissionService } from '@/src/services/submission.service';
+import { Submission } from '@/src/data/mock-submissions';
+import { ChevronRight } from 'lucide-react';
 
 export default function CapstonePage() {
-  const {
-    capstoneStatus,
-    capstoneSubtasks,
-    handleToggleSubtask,
-    capstoneCommits,
-    isEditingCapstone,
-    setIsEditingCapstone,
-    capstoneRepoLink,
-    setCapstoneRepoLink,
-    capstoneLiveLink,
-    setCapstoneLiveLink,
-    handleSaveCapstone,
-    lintLogs,
-    isLintingActive,
-    runDiagnostics
-  } = useDashboard();
+  const [submission, setSubmission] = useState<Submission | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [isEditingCapstone, setIsEditingCapstone] = useState(false);
+  const [capstoneRepoLink, setCapstoneRepoLink] = useState('');
+  const [capstoneLiveLink, setCapstoneLiveLink] = useState('');
+
+  const [isLintingActive, setIsLintingActive] = useState(false);
+  const [lintLogs, setLintLogs] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await submissionService.getSubmissions();
+        if (data.length > 0) {
+          setSubmission(data[0]); // Just picking the first one for the mock dashboard
+          setCapstoneRepoLink(data[0].repoLink);
+          setCapstoneLiveLink(data[0].liveLink);
+        }
+      } catch (err) {
+        console.error('Failed to load submission', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const handleToggleSubtask = (id: string) => {
+    if (submission) {
+      const updatedSubtasks = submission.subtasks.map(t => 
+        t.id === id ? { ...t, completed: !t.completed } : t
+      );
+      setSubmission({ ...submission, subtasks: updatedSubtasks });
+    }
+  };
+
+  const handleSaveCapstone = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submission) {
+      setSubmission({
+        ...submission,
+        repoLink: capstoneRepoLink,
+        liveLink: capstoneLiveLink
+      });
+      setIsEditingCapstone(false);
+    }
+  };
+
+  const runDiagnostics = () => {
+    setIsLintingActive(true);
+    setLintLogs([]);
+    const logs = [
+      "Initializing Vercel deployment...",
+      "Cloning repository...",
+      "✓ Repository cloned.",
+      "Running npm install...",
+      "✓ Dependencies installed.",
+      "Running type checks...",
+      "✓ TypeScript checks Passed.",
+      "Building client bundle...",
+      "✓ Build successful.",
+      "Deploying to staging environment...",
+      "✓ Deployment complete. Ready for guide review."
+    ];
+    let i = 0;
+    const interval = setInterval(() => {
+      setLintLogs(prev => [...prev, logs[i]]);
+      i++;
+      if (i >= logs.length) {
+        clearInterval(interval);
+        setIsLintingActive(false);
+      }
+    }, 500);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!submission) {
+    return <div className="p-6 text-center text-slate-500">No active submission found.</div>;
+  }
 
   return (
     <div className="space-y-6 animate-slide-in">
@@ -27,9 +100,9 @@ export default function CapstonePage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <span>Curriculum</span>
-            <span>&gt;</span>
-            <span className="text-blue-600 font-extrabold">Projects</span>
+            <span>Execution</span>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-blue-600 font-extrabold">Submissions</span>
           </div>
           <h2 className="text-2xl font-black text-slate-900 mt-2 tracking-tight">Capstone Projects</h2>
           <p className="text-xs text-slate-500 mt-1">
@@ -58,44 +131,8 @@ export default function CapstonePage() {
               </div>
               <div>
                 <span className="text-slate-400 font-bold block uppercase tracking-wider text-[9px]">Submission Status</span>
-                <span className="text-amber-600 font-semibold mt-1 block">{capstoneStatus}</span>
+                <span className="text-amber-600 font-semibold mt-1 block">{submission.status}</span>
               </div>
-            </div>
-          </div>
-
-          {/* Capstone Phase Roadmap */}
-          <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-6 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-3">
-              Capstone Phase Roadmap
-            </h3>
-
-            <div className="relative pl-6 space-y-6 border-l border-slate-200">
-              {[
-                { title: 'Phase 1: Project Outline Proposal', desc: 'Define functional features and database structures.', status: 'completed' },
-                { title: 'Phase 2: UI Wireframes & Mockups', desc: 'Deliver Figma layout designs and theme configurations.', status: 'completed' },
-                { title: 'Phase 3: Frontend Development & State Layouts', desc: 'Build Next.js client pages and state controls.', status: 'active' },
-                { title: 'Phase 4: API Integrations & Database Tests', desc: 'Sync API middlewares and log tables.', status: 'pending' },
-                { title: 'Phase 5: Deployment & Proctored Client Audits', desc: 'Final launch checks and verification reviews.', status: 'pending' },
-              ].map((ph, idx) => (
-                <div key={idx} className="relative">
-                  <span className={`absolute -left-9 top-0.5 h-6 w-6 rounded-lg flex items-center justify-center text-[10px] font-bold border ${ph.status === 'completed'
-                      ? 'bg-emerald-500 border-emerald-600 text-white'
-                      : ph.status === 'active'
-                        ? 'bg-blue-600 border-blue-500 text-white animate-pulse'
-                        : 'bg-slate-100 border-slate-200 text-slate-400'
-                    }`}>
-                    {idx + 1}
-                  </span>
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-xs text-slate-800 flex items-center gap-2">
-                      <span>{ph.title}</span>
-                      {ph.status === 'completed' && <span className="text-[8px] bg-emerald-50 border border-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-sm uppercase">Cleared</span>}
-                      {ph.status === 'active' && <span className="text-[8px] bg-blue-50 border border-blue-100 text-blue-600 px-1.5 py-0.5 rounded-sm uppercase">Active Development</span>}
-                    </h4>
-                    <p className="text-[11px] text-slate-500">{ph.desc}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -106,11 +143,11 @@ export default function CapstonePage() {
                 Phase 3 & 4 Subtask Verification
               </h3>
               <span className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-sm border border-blue-100">
-                {capstoneSubtasks.filter((t: any) => t.completed).length} / {capstoneSubtasks.length} Completed
+                {submission.subtasks.filter((t: any) => t.completed).length} / {submission.subtasks.length} Completed
               </span>
             </div>
             <div className="space-y-3">
-              {capstoneSubtasks.map((task: any) => (
+              {submission.subtasks.map((task: any) => (
                 <div key={task.id} className="flex items-start justify-between gap-4 text-xs">
                   <button
                     onClick={() => handleToggleSubtask(task.id)}
@@ -148,7 +185,7 @@ export default function CapstonePage() {
               Guide Code Review Comments & Commits Log
             </h3>
             <div className="space-y-4">
-              {capstoneCommits.map((item: any, idx: number) => (
+              {submission.commits.map((item: any, idx: number) => (
                 <div key={idx} className="border-l-2 border-blue-500 pl-4 py-1 space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
@@ -208,7 +245,7 @@ export default function CapstonePage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-2 bg-blue-600 rounded-lg hover:bg-blue-700 text-xs font-bold text-white uppercase tracking-wider cursor-pointer"
+                  className="w-full py-2 bg-blue-600 rounded-lg hover:bg-blue-700 text-xs font-bold text-white uppercase tracking-wider cursor-pointer transition-colors"
                 >
                   Submit Project Links
                 </button>

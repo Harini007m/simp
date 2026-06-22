@@ -1,36 +1,129 @@
 "use client";
 
-import React from 'react';
-import { ShieldCheck } from 'lucide-react';
-import { useDashboard } from '@/src/context/DashboardContext';
+import React, { useEffect, useState } from 'react';
+import { ShieldCheck, ChevronRight } from 'lucide-react';
+import { assessmentService } from '@/src/services/assessment.service';
+import { AssessmentResult } from '@/src/data/mock-assessments';
 
 export default function AssessmentPage() {
-  const {
-    showExamHUD,
-    examHUDWarningCount,
-    examHUDSecRemaining,
-    examHUDCompleted,
-    examHUDScore,
-    handleExitExamHUD,
-    mockExamQuestions,
-    examHUDQuestionIndex,
-    setExamHUDQuestionIndex,
-    examHUDAnswers,
-    handleAnswerQuestion,
-    handleSubmitExam,
-    assessmentPreflight,
-    setAssessmentPreflight,
-    pastExamResults,
-    handleStartExam
-  } = useDashboard();
+  const [pastExamResults, setPastExamResults] = useState<AssessmentResult[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // HUD States
+  const [showExamHUD, setShowExamHUD] = useState(false);
+  const [examHUDWarningCount, setExamHUDWarningCount] = useState(0);
+  const [examHUDSecRemaining, setExamHUDSecRemaining] = useState(1200); // 20 mins
+  const [examHUDCompleted, setExamHUDCompleted] = useState(false);
+  const [examHUDScore, setExamHUDScore] = useState(0);
+  const [examHUDQuestionIndex, setExamHUDQuestionIndex] = useState(0);
+  const [examHUDAnswers, setExamHUDAnswers] = useState<Record<number, string>>({});
+  const [assessmentPreflight, setAssessmentPreflight] = useState({
+    camera: false,
+    mic: false,
+    screen: false,
+    network: true
+  });
+
+  const mockExamQuestions = [
+    {
+      question: "Which hook is used to perform side effects in a functional component?",
+      options: ["useState", "useEffect", "useContext", "useReducer"],
+      answer: "useEffect"
+    },
+    {
+      question: "What is the primary purpose of useMemo?",
+      options: ["To memoize a callback function", "To memoize a computed value", "To trigger a re-render", "To access DOM elements"],
+      answer: "To memoize a computed value"
+    },
+    {
+      question: "In Next.js 13+, which folder name signifies a route group?",
+      options: ["[group]", "(group)", "{group}", "<group>"],
+      answer: "(group)"
+    },
+    {
+      question: "How do you pass data deeply into the component tree without prop drilling?",
+      options: ["Context API", "Redux only", "Higher Order Components", "React Router"],
+      answer: "Context API"
+    }
+  ];
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await assessmentService.getAssessmentResults();
+        setPastExamResults(data);
+      } catch (err) {
+        console.error('Failed to load assessment results', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (showExamHUD && !examHUDCompleted && examHUDSecRemaining > 0) {
+      interval = setInterval(() => {
+        setExamHUDSecRemaining(prev => prev - 1);
+      }, 1000);
+    } else if (examHUDSecRemaining === 0 && !examHUDCompleted) {
+      handleSubmitExam();
+    }
+    return () => clearInterval(interval);
+  }, [showExamHUD, examHUDCompleted, examHUDSecRemaining]);
+
+  const handleStartExam = () => {
+    if (assessmentPreflight.camera && assessmentPreflight.mic && assessmentPreflight.screen) {
+      setShowExamHUD(true);
+      setExamHUDSecRemaining(1200);
+      setExamHUDCompleted(false);
+      setExamHUDScore(0);
+      setExamHUDQuestionIndex(0);
+      setExamHUDAnswers({});
+    } else {
+      alert("Please complete the pre-flight checklist first.");
+    }
+  };
+
+  const handleExitExamHUD = () => {
+    setShowExamHUD(false);
+  };
+
+  const handleAnswerQuestion = (option: string) => {
+    setExamHUDAnswers(prev => ({
+      ...prev,
+      [examHUDQuestionIndex]: option
+    }));
+  };
+
+  const handleSubmitExam = () => {
+    let score = 0;
+    mockExamQuestions.forEach((q, idx) => {
+      if (examHUDAnswers[idx] === q.answer) {
+        score += 25; // 4 questions * 25 = 100
+      }
+    });
+    setExamHUDScore(score);
+    setExamHUDCompleted(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <span>Curriculum</span>
-            <span>&gt;</span>
+            <span>Execution</span>
+            <ChevronRight className="h-3 w-3" />
             <span className="text-blue-600 font-extrabold">Assessments</span>
           </div>
           <h2 className="text-2xl font-black text-slate-900 mt-2 tracking-tight">Proctored Examinations</h2>
@@ -79,7 +172,7 @@ export default function AssessmentPage() {
               </div>
               <button
                 onClick={handleExitExamHUD}
-                className="px-6 py-2.5 bg-blue-600 rounded-lg hover:bg-blue-700 text-xs font-bold text-white uppercase tracking-wider"
+                className="px-6 py-2.5 bg-blue-600 rounded-lg hover:bg-blue-700 text-xs font-bold text-white uppercase tracking-wider cursor-pointer transition-colors"
               >
                 Exit Assessment Mode
               </button>
@@ -96,7 +189,7 @@ export default function AssessmentPage() {
                       <button
                         key={idx}
                         onClick={() => setExamHUDQuestionIndex(idx)}
-                        className={`h-9 rounded-lg text-xs font-bold border transition-colors ${isCurrent
+                        className={`h-9 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${isCurrent
                             ? 'bg-blue-600 border-blue-500 text-white font-bold'
                             : isAnswered
                               ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
@@ -125,13 +218,13 @@ export default function AssessmentPage() {
                       <button
                         key={idx}
                         onClick={() => handleAnswerQuestion(option)}
-                        className={`w-full text-left p-4 rounded-lg border transition-all text-xs flex items-center justify-between ${isSelected
+                        className={`w-full text-left p-4 rounded-lg border transition-all text-xs flex items-center justify-between cursor-pointer ${isSelected
                             ? 'bg-blue-50 border-blue-500 text-slate-800 font-medium'
                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100/50'
                           }`}
                       >
                         <span>{option}</span>
-                        <span className={`h-4.5 w-4.5 rounded-full border flex items-center justify-center text-[10px] ${isSelected
+                        <span className={`h-4.5 w-4.5 rounded-full border flex items-center justify-center text-[10px] shrink-0 ${isSelected
                             ? 'bg-blue-600 border-blue-500 text-white'
                             : 'border-slate-300'
                           }`}>
@@ -146,21 +239,21 @@ export default function AssessmentPage() {
                   <button
                     disabled={examHUDQuestionIndex === 0}
                     onClick={() => setExamHUDQuestionIndex(examHUDQuestionIndex - 1)}
-                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none text-xs font-bold text-slate-700 uppercase tracking-wider transition-colors"
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none text-xs font-bold text-slate-700 uppercase tracking-wider transition-colors cursor-pointer"
                   >
                     Previous
                   </button>
                   {examHUDQuestionIndex === mockExamQuestions.length - 1 ? (
                     <button
                       onClick={() => handleSubmitExam()}
-                      className="px-5 py-2 bg-emerald-600 rounded-lg hover:bg-emerald-700 text-xs font-bold text-white uppercase tracking-wider"
+                      className="px-5 py-2 bg-emerald-600 rounded-lg hover:bg-emerald-700 text-xs font-bold text-white uppercase tracking-wider cursor-pointer transition-colors"
                     >
                       Submit Exam
                     </button>
                   ) : (
                     <button
                       onClick={() => setExamHUDQuestionIndex(examHUDQuestionIndex + 1)}
-                      className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 text-xs font-bold text-white uppercase tracking-wider"
+                      className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 text-xs font-bold text-white uppercase tracking-wider cursor-pointer transition-colors"
                     >
                       Next Question
                     </button>
@@ -209,9 +302,9 @@ export default function AssessmentPage() {
                             ...assessmentPreflight,
                             [chk.key]: !isChecked
                           })}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors border ${isChecked
+                          className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors border cursor-pointer ${isChecked
                               ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
-                              : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
+                              : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800 hover:border-slate-300'
                             }`}
                         >
                           {isChecked ? 'Ready ✓' : 'Verify'}
@@ -238,13 +331,19 @@ export default function AssessmentPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 text-slate-600">
-                      {pastExamResults.map((result: any) => (
+                      {pastExamResults.map((result: AssessmentResult) => (
                         <tr key={result.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="py-3 px-4 font-semibold text-slate-800">{result.title}</td>
                           <td className="py-3 px-4 text-slate-500">{result.date}</td>
                           <td className="py-3 px-4 font-bold text-slate-800">{result.score} / 100</td>
                           <td className="py-3 px-4 text-right">
-                            <span className="inline-block bg-emerald-50 border border-emerald-100 text-emerald-600 font-bold px-2 py-0.5 rounded-sm">
+                            <span className={`inline-block border font-bold px-2 py-0.5 rounded-sm ${
+                              result.status === 'Passed' 
+                                ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                                : result.status === 'Failed'
+                                ? 'bg-red-50 border-red-100 text-red-600'
+                                : 'bg-amber-50 border-amber-100 text-amber-600'
+                            }`}>
                               {result.status}
                             </span>
                           </td>
@@ -263,7 +362,7 @@ export default function AssessmentPage() {
                 </h3>
                 <div className="space-y-3 mt-4 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Test Paper:</span>
+                     <span className="text-slate-500">Test Paper:</span>
                     <span className="text-slate-800 font-bold">React Architecture Prep</span>
                   </div>
                   <div className="flex justify-between">
@@ -279,7 +378,7 @@ export default function AssessmentPage() {
 
               <button
                 onClick={handleStartExam}
-                className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white uppercase tracking-wider mt-6"
+                className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-xs font-bold text-white uppercase tracking-wider mt-6 cursor-pointer transition-colors shadow-sm hover:shadow"
               >
                 Launch Assessment HUD
               </button>

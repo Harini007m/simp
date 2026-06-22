@@ -1,21 +1,60 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Filter, Download, User, CalendarDays, Clock, AlertTriangle, Lock, Upload, UploadCloud, CheckCircle2 } from 'lucide-react';
-import { useDashboard } from '@/src/context/DashboardContext';
+import React, { useState, useEffect } from 'react';
+import { Filter, Download, User, CalendarDays, Clock, AlertTriangle, Lock, Upload, UploadCloud, CheckCircle2, ChevronRight } from 'lucide-react';
+import { taskService } from '@/src/services/task.service';
+import { Task } from '@/src/data/mock-tasks';
 
 export default function TasksPage() {
-  const {
-    assignments,
-    uploadedFiles,
-    showToastNotification,
-    handleRemoveFile,
-    handleSimulateBrowse,
-    handleSimulateSubmit
-  } = useDashboard();
-
+  const [assignments, setAssignments] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, string>>({});
   const [assignmentFilter, setAssignmentFilter] = useState<'all' | 'pending' | 'review' | 'completed'>('all');
   const [activeUploadAssignmentId, setActiveUploadAssignmentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await taskService.getTasks();
+        setAssignments(data);
+      } catch (err) {
+        console.error('Failed to load tasks', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const showToastNotification = (msg: string) => {
+    alert(msg);
+  };
+
+  const handleRemoveFile = (id: string) => {
+    const newFiles = { ...uploadedFiles };
+    delete newFiles[id];
+    setUploadedFiles(newFiles);
+  };
+
+  const handleSimulateBrowse = (id: string) => {
+    setUploadedFiles({ ...uploadedFiles, [id]: 'submission_v1_final.zip' });
+  };
+
+  const handleSimulateSubmit = (id: string) => {
+    // Optimistic update
+    setAssignments(assignments.map(a => a.id === id ? { ...a, status: 'review' } : a));
+    setActiveUploadAssignmentId(null);
+    showToastNotification('File uploaded successfully. Task is now under review.');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-slide-in">
@@ -23,8 +62,8 @@ export default function TasksPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <span>Curriculum</span>
-            <span>&gt;</span>
+            <span>Execution</span>
+            <ChevronRight className="h-3 w-3" />
             <span className="text-blue-600 font-extrabold">Assignments</span>
           </div>
           <h2 className="text-2xl font-black text-slate-900 mt-2 tracking-tight">Project Assignments & Tasks</h2>
@@ -59,17 +98,17 @@ export default function TasksPage() {
           { 
             key: 'pending', 
             label: `Pending Submission`, 
-            badge: assignments.filter((a: any) => a.status === 'pending').length 
+            badge: assignments.filter(a => a.status === 'pending').length 
           },
           { 
             key: 'review', 
             label: `Under Review`, 
-            badge: assignments.filter((a: any) => a.status === 'review').length 
+            badge: assignments.filter(a => a.status === 'review').length 
           },
           { 
             key: 'completed', 
             label: `Completed`, 
-            badge: assignments.filter((a: any) => a.status === 'completed').length 
+            badge: assignments.filter(a => a.status === 'completed').length 
           }
         ].map((tab) => {
           const isActive = assignmentFilter === tab.key;
@@ -99,11 +138,11 @@ export default function TasksPage() {
 
       <div className="space-y-6 flex flex-col">
         {assignments
-          .filter((asg: any) => {
+          .filter(asg => {
             if (assignmentFilter === 'all') return true;
             return asg.status === assignmentFilter;
           })
-          .map((asg: any) => {
+          .map(asg => {
             const isOverdue = asg.isOverdue;
             const isLocked = asg.isLocked;
             const hasUploadedFile = uploadedFiles[asg.id];
@@ -120,11 +159,14 @@ export default function TasksPage() {
                       {isOverdue ? (
                         <span className="bg-[#F97316] text-white font-extrabold text-[9px] px-2 py-0.5 rounded-sm uppercase tracking-wide flex items-center gap-1">
                           <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                          OVERDUE - LEVEL 1 ESCALATION ACTIVE
+                          OVERDUE
                         </span>
                       ) : (
-                        <span className="bg-slate-100 text-slate-500 font-extrabold text-[9px] px-2 py-0.5 rounded-sm uppercase tracking-wide">
-                          PENDING
+                        <span className={`font-extrabold text-[9px] px-2 py-0.5 rounded-sm uppercase tracking-wide ${
+                          asg.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 
+                          asg.status === 'review' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {asg.status}
                         </span>
                       )}
                       <span className="text-slate-400 font-medium">• ID: {asg.id}</span>
@@ -134,6 +176,7 @@ export default function TasksPage() {
                     <h3 className="text-base font-bold text-slate-800 tracking-tight leading-snug">
                       {asg.title}
                     </h3>
+                    <p className="text-sm text-slate-500 leading-relaxed">{asg.description}</p>
 
                     {/* Metadata */}
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500 font-medium pt-1">
@@ -151,7 +194,7 @@ export default function TasksPage() {
                               Due Date: {asg.dueDate}
                             </span>
                           </>
-                        ) : asg.id === 'Pr-2026-3Px' ? (
+                        ) : asg.status === 'pending' ? (
                           <>
                             <Clock className="h-3.5 w-3.5 text-amber-500" />
                             <span className="text-amber-500 font-bold">
@@ -174,7 +217,7 @@ export default function TasksPage() {
                       <div className="bg-red-50/70 border border-red-100 rounded-lg p-3.5 mt-4 flex items-start gap-2.5">
                         <AlertTriangle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
                         <span className="text-xs text-red-700 font-medium leading-relaxed">
-                          Alert: This overdue assignment has automatically notified your Reporting Manager. High-priority resolution required to avoid academic credit deduction.
+                          Alert: {asg.alert}
                         </span>
                       </div>
                     )}
@@ -197,23 +240,14 @@ export default function TasksPage() {
                             }
                           }}
                           className={`w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer ${
-                            asg.id === 'PS-2026-W3'
-                              ? 'bg-blue-600 hover:bg-blue-700 text-white animate-pulse'
+                            activeUploadAssignmentId === asg.id
+                              ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
                               : 'bg-white border border-slate-200 hover:bg-slate-50 text-slate-600'
                           }`}
                         >
-                          {asg.id === 'Pr-2026-3Px' && <Upload className="h-3.5 w-3.5" />}
-                          <span>{asg.id === 'PS-2026-W3' ? 'Submit Work Now' : 'Upload Deliverables'}</span>
+                          <Upload className="h-3.5 w-3.5" />
+                          <span>Upload Deliverables</span>
                         </button>
-                        {asg.id === 'PS-2026-W3' && (
-                          <button
-                            onClick={() => showToastNotification("Viewing instruction PDF...")}
-                            className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 hover:underline cursor-pointer"
-                          >
-                            <span>View Instructions</span>
-                            <span className="text-sm">→</span>
-                          </button>
-                        )}
                       </div>
                     ) : asg.status === 'review' ? (
                       <span className="bg-blue-50 border border-blue-100 text-blue-600 font-extrabold text-[10px] px-3 py-1.5 uppercase tracking-wide rounded-sm mt-2 md:mt-0">
