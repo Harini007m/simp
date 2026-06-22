@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Drawer } from '@/components/admin/ui/Drawer';
 import { Stepper } from '@/components/admin/ui/Stepper';
 import { Button } from '@/components/admin/ui/Button';
@@ -9,29 +9,50 @@ import { Card } from '@/components/admin/ui/Card';
 import { Module } from '@/src/data/mock-modules';
 import { moduleService } from '@/src/services/module.service';
 import { permissionService } from '@/src/services/permission.service';
+import { roleService } from '@/src/services/role.service';
+import { Role } from '@/src/data/mock-roles';
 
 interface CreateRoleWizardProps {
   isOpen: boolean;
   onClose: () => void;
+  onRoleCreated?: () => void;
+  roleToEdit?: Role | null;
+  viewMode?: boolean;
 }
 
 const STEPS = ['Role Details', 'Module Assignment', 'Permission Assignment', 'Review & Create'];
 
-export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
+export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, viewMode }: CreateRoleWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [assignedModules, setAssignedModules] = useState<string[]>([]);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [permissionsMap, setPermissionsMap] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  React.useEffect(() => {
+  // Form Fields
+  const [roleName, setRoleName] = useState('');
+  const [roleCode, setRoleCode] = useState('');
+  const [description, setDescription] = useState('');
+  const [roleStatus, setRoleStatus] = useState<'Active' | 'Inactive'>('Active');
+  const [moduleSearch, setModuleSearch] = useState('');
+  const [selectedPermissions, setSelectedPermissions] = useState<Record<string, string[]>>({});
+
+  // Icon upload state
+  const [iconFile, setIconFile] = useState<string | null>(null);
+  const [iconFileName, setIconFileName] = useState<string | null>(null);
+  const iconInputRef = useRef<HTMLInputElement>(null);
+
+  // Track previously assigned modules to default-assign 'View' ONLY when newly checked
+  const prevAssignedRef = useRef<string[]>([]);
+
+  useEffect(() => {
     async function loadData() {
       try {
+        setLoading(true);
         const mods = await moduleService.getModules();
         setModules(mods);
-        setAssignedModules(mods.slice(0, 3).map(m => m.id)); // Pre-assign a few
-        if (mods.length > 0) setExpandedModules([mods[0].id]);
       } catch (err) {
         console.error('Failed to load modules', err);
       } finally {
@@ -43,7 +64,7 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
     }
   }, [isOpen]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchPermissions() {
       const newMap: Record<string, string[]> = {};
       for (const modId of assignedModules) {
@@ -58,7 +79,82 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
     fetchPermissions();
   }, [assignedModules, permissionsMap]);
 
+  // Handle edit vs create loading and cleanup
+  useEffect(() => {
+    if (isOpen) {
+      if (roleToEdit) {
+        setRoleName(roleToEdit.name);
+        setRoleCode(roleToEdit.code);
+        setDescription(roleToEdit.desc);
+        setRoleStatus(roleToEdit.status);
+        setAssignedModules(roleToEdit.moduleIds || []);
+        
+        // Parse permissions mapping from role permissions list (format is "moduleId:permissionName")
+        const parsedPerms: Record<string, string[]> = {};
+        if (roleToEdit.permissions) {
+          roleToEdit.permissions.forEach(permStr => {
+            const parts = permStr.split(':');
+            if (parts.length === 2) {
+              const [modId, action] = parts;
+              const formattedAction = action.charAt(0).toUpperCase() + action.slice(1);
+              if (!parsedPerms[modId]) {
+                parsedPerms[modId] = [];
+              }
+              parsedPerms[modId].push(formattedAction);
+            }
+          });
+        }
+        setSelectedPermissions(parsedPerms);
+        setIconFile(null);
+        setIconFileName(null);
+        
+        if (viewMode) {
+          setCurrentStep(3);
+        } else {
+          setCurrentStep(0);
+        }
+      } else {
+        setRoleName('');
+        setRoleCode('');
+        setDescription('');
+        setRoleStatus('Active');
+        setAssignedModules([]);
+        setSelectedPermissions({});
+        setIconFile(null);
+        setIconFileName(null);
+        setCurrentStep(0);
+      }
+    }
+  }, [isOpen, roleToEdit, viewMode]);
+
+  // Set default View permission for newly assigned modules only
+  useEffect(() => {
+    // Only auto-assign for NEW modules in creation, not edit initialization
+    if (!roleToEdit) {
+      setSelectedPermissions(prev => {
+        const updated = { ...prev };
+        assignedModules.forEach(modId => {
+          if (!prevAssignedRef.current.includes(modId) && !updated[modId]) {
+            updated[modId] = ['View'];
+          }
+        });
+        return updated;
+      });
+    }
+    prevAssignedRef.current = assignedModules;
+  }, [assignedModules, roleToEdit]);
+
   const handleNext = () => {
+    if (currentStep === 0) {
+      if (!roleName.trim() || !roleCode.trim()) {
+        alert('Please fill in Role Name and Role Code.');
+        return;
+      }
+    }
+    if (currentStep === 1 && assignedModules.length === 0) {
+      alert('Please assign at least one module.');
+      return;
+    }
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     }
@@ -71,6 +167,7 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
   };
 
   const toggleModule = (id: string) => {
+    if (viewMode) return;
     setAssignedModules(prev => 
       prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
     );
@@ -82,6 +179,83 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
     );
   };
 
+  const togglePermission = (moduleId: string, perm: string) => {
+    if (viewMode) return;
+    setSelectedPermissions(prev => {
+      const current = prev[moduleId] || [];
+      const updated = current.includes(perm)
+        ? current.filter(p => p !== perm)
+        : [...current, perm];
+      return { ...prev, [moduleId]: updated };
+    });
+  };
+
+  const triggerIconUpload = () => {
+    if (viewMode) return;
+    iconInputRef.current?.click();
+  };
+
+  const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIconFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setIconFile(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCreateRole = async () => {
+    if (!roleName.trim() || !roleCode.trim()) {
+      alert('Please fill in Role Name and Role Code.');
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const flatPermissions: string[] = [];
+      Object.entries(selectedPermissions).forEach(([moduleId, perms]) => {
+        perms.forEach(p => flatPermissions.push(`${moduleId}:${p.toLowerCase()}`));
+      });
+
+      const roleData = {
+        name: roleName.trim(),
+        code: roleCode.trim(),
+        desc: description.trim(),
+        status: roleStatus,
+        moduleIds: assignedModules,
+        permissions: flatPermissions,
+      };
+
+      if (roleToEdit) {
+        await roleService.updateRole(roleToEdit.id, roleData);
+      } else {
+        await roleService.createRole(roleData);
+      }
+
+      if (onRoleCreated) {
+        onRoleCreated();
+      }
+      onClose();
+    } catch (err) {
+      console.error('Failed to save role', err);
+      alert('Error saving role.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filteredModules = modules.filter(m =>
+    m.name.toLowerCase().includes(moduleSearch.toLowerCase())
+  );
+
+  const getDrawerTitle = () => {
+    if (viewMode) return "View Role Details";
+    if (roleToEdit) return "Edit Role";
+    return "Create New Role";
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -89,30 +263,71 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
           <div className="space-y-4 p-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Role Name</label>
-                <input type="text" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="e.g. Student" />
+                <label className="text-sm font-medium text-slate-700">Role Name *</label>
+                <input 
+                  type="text" 
+                  value={roleName}
+                  onChange={e => setRoleName(e.target.value)}
+                  disabled={viewMode}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50" 
+                  placeholder="e.g. Student" 
+                />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Role Code</label>
-                <input type="text" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="e.g. ROLE_STUDENT" />
+                <label className="text-sm font-medium text-slate-700">Role Code *</label>
+                <input 
+                  type="text" 
+                  value={roleCode}
+                  onChange={e => setRoleCode(e.target.value)}
+                  disabled={viewMode}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50" 
+                  placeholder="e.g. ROLE_STUDENT" 
+                />
               </div>
               <div className="col-span-2 space-y-2">
                 <label className="text-sm font-medium text-slate-700">Description</label>
-                <textarea className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" rows={3} placeholder="Brief description of this role's responsibilities" />
+                <textarea 
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  disabled={viewMode}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50" 
+                  rows={3} 
+                  placeholder="Brief description of this role's responsibilities" 
+                />
               </div>
             </div>
             
             <div className="pt-4 space-y-4">
               <label className="text-sm font-medium text-slate-700">Role Icon</label>
-              <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-slate-300 px-6 pt-5 pb-6 hover:bg-slate-50 transition-colors cursor-pointer">
+              <input 
+                type="file" 
+                ref={iconInputRef} 
+                onChange={handleIconChange} 
+                accept="image/*" 
+                className="hidden" 
+              />
+              <div 
+                onClick={triggerIconUpload}
+                className="mt-1 flex justify-center rounded-md border-2 border-dashed border-slate-300 px-6 pt-5 pb-6 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
                 <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-10 w-10 text-slate-400" />
-                  <div className="flex text-sm text-slate-600 justify-center">
-                    <span className="relative rounded-md font-medium text-blue-600 hover:text-blue-500">
-                      Upload SVG or PNG
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500">Suggested size: 64x64px</p>
+                  {iconFile ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <img src={iconFile} alt="Icon Preview" className="h-12 w-12 object-contain border border-slate-200" />
+                      <p className="text-xs font-semibold text-emerald-650">Selected: {iconFileName}</p>
+                      {!viewMode && <span className="text-[10px] text-slate-400">Click to change icon file</span>}
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="mx-auto h-10 w-10 text-slate-400" />
+                      <div className="flex text-sm text-slate-600 justify-center">
+                        <span className="relative rounded-md font-medium text-blue-650 hover:text-blue-500">
+                          Upload SVG or PNG
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500">Suggested size: 64x64px</p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -120,12 +335,28 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
             <div className="pt-4 space-y-2">
               <label className="text-sm font-medium text-slate-700">Status</label>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="status" className="text-blue-600 focus:ring-blue-600" defaultChecked />
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input 
+                    type="radio" 
+                    name="roleStatus" 
+                    checked={roleStatus === 'Active'}
+                    onChange={() => {
+                      if (!viewMode) setRoleStatus('Active');
+                    }}
+                    className="text-blue-600 focus:ring-blue-600" 
+                  />
                   <span className="text-sm font-medium text-slate-900">Active</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="status" className="text-blue-600 focus:ring-blue-600" />
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input 
+                    type="radio" 
+                    name="roleStatus" 
+                    checked={roleStatus === 'Inactive'}
+                    onChange={() => {
+                      if (!viewMode) setRoleStatus('Inactive');
+                    }}
+                    className="text-blue-600 focus:ring-blue-600" 
+                  />
                   <span className="text-sm font-medium text-slate-900">Inactive</span>
                 </label>
               </div>
@@ -142,12 +373,19 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
               </div>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input type="text" placeholder="Search modules..." className="w-56 rounded-md border border-slate-300 pl-8 pr-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <input 
+                  type="text" 
+                  value={moduleSearch}
+                  onChange={e => setModuleSearch(e.target.value)}
+                  disabled={viewMode}
+                  placeholder="Search modules..." 
+                  className="w-56 rounded-md border border-slate-300 pl-8 pr-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50" 
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {modules.map((module) => {
+              {filteredModules.map((module) => {
                 const isSelected = assignedModules.includes(module.id);
                 return (
                   <div 
@@ -157,11 +395,11 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
                       isSelected 
                         ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-600' 
                         : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
-                    }`}
+                    } ${viewMode ? 'pointer-events-none' : ''}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
-                        {isSelected && <CheckCircle2 className="h-3 w-3" />}
+                        {isSelected && <CheckCircle2 className="h-3 w-3 text-white" />}
                       </div>
                       <div>
                         <p className={`text-sm font-semibold ${isSelected ? 'text-blue-900' : 'text-slate-900'}`}>{module.name}</p>
@@ -202,12 +440,21 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
                     {isExpanded && (
                       <div className="p-4 border-t border-slate-200 bg-white">
                         <div className="grid grid-cols-2 gap-3">
-                          {perms.map(perm => (
-                            <label key={perm} className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 cursor-pointer">
-                              <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600" defaultChecked={perm === 'View'} />
-                              <span className="text-sm font-medium text-slate-700">{perm}</span>
-                            </label>
-                          ))}
+                          {perms.map(perm => {
+                            const isChecked = selectedPermissions[moduleId]?.includes(perm) || false;
+                            return (
+                              <label key={perm} className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 cursor-pointer select-none">
+                                <input 
+                                  type="checkbox" 
+                                  checked={isChecked}
+                                  onChange={() => togglePermission(moduleId, perm)}
+                                  disabled={viewMode}
+                                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 disabled:opacity-50" 
+                                />
+                                <span className="text-sm font-medium text-slate-700">{perm}</span>
+                              </label>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -233,20 +480,24 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-slate-500">Role Name</p>
-                    <p className="text-sm font-medium text-slate-900">Student</p>
+                    <p className="text-sm font-medium text-slate-900">{roleName}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500">Role Code</p>
-                    <p className="text-sm font-medium text-slate-900">ROLE_STUDENT</p>
+                    <p className="text-sm font-medium text-slate-900">{roleCode}</p>
                   </div>
                   <div className="col-span-2">
                     <p className="text-xs text-slate-500">Description</p>
-                    <p className="text-sm font-medium text-slate-900">Can access LMS and submit tasks.</p>
+                    <p className="text-sm font-medium text-slate-900">{description || 'No description provided.'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500">Status</p>
-                    <span className="inline-flex items-center rounded-md bg-emerald-100 px-2 py-1 mt-1 text-xs font-medium text-emerald-700">
-                      Active
+                    <span className={`inline-flex items-center rounded-md px-2 py-1 mt-1 text-xs font-medium border ${
+                      roleStatus === 'Active' 
+                        ? 'bg-emerald-100 text-emerald-700 border-emerald-200' 
+                        : 'bg-slate-100 text-slate-700 border-slate-200'
+                    }`}>
+                      {roleStatus}
                     </span>
                   </div>
                 </div>
@@ -261,16 +512,19 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
                 {assignedModules.map(moduleId => {
                   const module = modules.find(m => m.id === moduleId);
                   if (!module) return null;
+                  const perms = selectedPermissions[moduleId] || [];
                   return (
                     <div key={moduleId} className="space-y-2 pb-3 border-b border-slate-100 last:border-0 last:pb-0">
                       <p className="text-sm font-semibold text-slate-900">{module.name}</p>
                       <div className="flex flex-wrap gap-2">
-                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 border border-slate-200">
-                          View
-                        </span>
-                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 border border-slate-200">
-                          Edit
-                        </span>
+                        {perms.map(p => (
+                          <span key={p} className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 border border-slate-200">
+                            {p}
+                          </span>
+                        ))}
+                        {perms.length === 0 && (
+                          <span className="text-xs text-slate-400 italic">No permissions set</span>
+                        )}
                       </div>
                     </div>
                   );
@@ -285,35 +539,51 @@ export function CreateRoleWizard({ isOpen, onClose }: CreateRoleWizardProps) {
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} title="Create New Role">
+    <Drawer isOpen={isOpen} onClose={onClose} title={getDrawerTitle()}>
       <div className="flex flex-col h-[calc(100vh-65px)]">
-        <Stepper steps={STEPS} currentStep={currentStep} />
+        {!viewMode && <Stepper steps={STEPS} currentStep={currentStep} />}
         
         <div className="flex-1 overflow-y-auto bg-white">
           {renderStepContent()}
         </div>
         
         <div className="shrink-0 border-t border-slate-200 p-4 bg-slate-50 flex items-center justify-between">
-          <Button 
-            variant="outline" 
-            onClick={currentStep === 0 ? onClose : handleBack}
-          >
-            {currentStep === 0 ? 'Cancel' : (
-              <>
-                <ChevronLeft className="mr-2 h-4 w-4" /> Back
-              </>
-            )}
-          </Button>
-          
-          <Button 
-            onClick={currentStep === STEPS.length - 1 ? onClose : handleNext}
-          >
-            {currentStep === STEPS.length - 1 ? 'Create Role' : (
-              <>
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
+          {viewMode ? (
+            <div className="w-full flex justify-end">
+              <Button variant="outline" onClick={onClose}>
+                Close
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={currentStep === 0 ? onClose : handleBack}
+                disabled={isSubmitting}
+              >
+                {currentStep === 0 ? 'Cancel' : (
+                  <>
+                    <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                  </>
+                )}
+              </Button>
+              
+              <Button 
+                onClick={currentStep === STEPS.length - 1 ? handleCreateRole : handleNext}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  'Saving...'
+                ) : currentStep === STEPS.length - 1 ? (
+                  roleToEdit ? 'Save Changes' : 'Create Role'
+                ) : (
+                  <>
+                    Next <ChevronRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Drawer>

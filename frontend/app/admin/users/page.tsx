@@ -20,79 +20,146 @@ import {
 
 const columnHelper = createColumnHelper<User>();
 
-const columns = [
-  columnHelper.accessor('name', {
-    header: 'User',
-    cell: info => (
-      <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-700">
-          {info.row.original.avatar}
-        </div>
-        <span className="font-medium text-slate-900">{info.getValue()}</span>
-      </div>
-    ),
-  }),
-  columnHelper.accessor('username', {
-    header: 'Username',
-    cell: info => <span className="text-slate-600">{info.getValue()}</span>,
-  }),
-  columnHelper.accessor('email', {
-    header: 'Email',
-    cell: info => <span className="text-slate-600">{info.getValue()}</span>,
-  }),
-  columnHelper.accessor('roleName', {
-    header: 'Role',
-    cell: info => (
-      <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
-        {info.getValue()}
-      </span>
-    ),
-  }),
-  columnHelper.accessor('status', {
-    header: 'Status',
-    cell: info => (
-      <Badge variant={info.getValue() === 'Active' ? 'success' : 'secondary'}>
-        {info.getValue()}
-      </Badge>
-    ),
-  }),
-  columnHelper.accessor('date', {
-    header: 'Created Date',
-    cell: info => <span className="text-slate-500">{info.getValue()}</span>,
-  }),
-  columnHelper.display({
-    id: 'actions',
-    header: () => <div className="text-right">Actions</div>,
-    cell: () => (
-      <div className="flex items-center justify-end gap-2 text-slate-400">
-        <button className="p-1 hover:text-blue-600 transition-colors" title="View"><Eye className="h-4 w-4" /></button>
-        <button className="p-1 hover:text-blue-600 transition-colors" title="Edit"><Edit className="h-4 w-4" /></button>
-        <button className="p-1 hover:text-amber-600 transition-colors" title="Deactivate"><UserX className="h-4 w-4" /></button>
-        <button className="p-1 hover:text-red-600 transition-colors" title="Delete"><Trash className="h-4 w-4" /></button>
-      </div>
-    ),
-  }),
-];
-
 export default function UsersPage() {
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [viewMode, setViewMode] = useState(false);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const users = await userService.getUsers();
+      setData(users);
+    } catch (err) {
+      console.error('Failed to load users', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadUsers() {
-      try {
-        const users = await userService.getUsers();
-        setData(users);
-      } catch (err) {
-        console.error('Failed to load users', err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadUsers();
   }, []);
+
+  const handleView = (user: User) => {
+    setSelectedUser(user);
+    setViewMode(true);
+    setIsCreateWizardOpen(true);
+  };
+
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+    setViewMode(false);
+    setIsCreateWizardOpen(true);
+  };
+
+  const handleToggleStatus = async (user: User) => {
+    const newStatus = user.status === 'Active' ? 'Inactive' : 'Active';
+    try {
+      await userService.updateUser(user.id, { status: newStatus });
+      loadUsers();
+    } catch (err) {
+      console.error('Failed to toggle status', err);
+      alert('Error updating user status.');
+    }
+  };
+
+  const handleDelete = async (user: User) => {
+    if (window.confirm(`Are you sure you want to delete user "${user.name}"?`)) {
+      try {
+        await userService.deleteUser(user.id);
+        loadUsers();
+      } catch (err) {
+        console.error('Failed to delete user', err);
+        alert('Error deleting user.');
+      }
+    }
+  };
+
+  const columns = [
+    columnHelper.accessor('name', {
+      header: 'User',
+      cell: info => (
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-700">
+            {info.row.original.avatar}
+          </div>
+          <span className="font-medium text-slate-900">{info.getValue()}</span>
+        </div>
+      ),
+    }),
+    columnHelper.accessor('username', {
+      header: 'Username',
+      cell: info => <span className="text-slate-600">{info.getValue()}</span>,
+    }),
+    columnHelper.accessor('email', {
+      header: 'Email',
+      cell: info => <span className="text-slate-600">{info.getValue()}</span>,
+    }),
+    columnHelper.accessor('roleName', {
+      header: 'Role',
+      cell: info => (
+        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+          {info.getValue()}
+        </span>
+      ),
+    }),
+    columnHelper.accessor('status', {
+      header: 'Status',
+      cell: info => (
+        <Badge variant={info.getValue() === 'Active' ? 'success' : 'secondary'}>
+          {info.getValue()}
+        </Badge>
+      ),
+    }),
+    columnHelper.accessor('date', {
+      header: 'Created Date',
+      cell: info => <span className="text-slate-500">{info.getValue()}</span>,
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: () => <div className="text-right">Actions</div>,
+      cell: info => {
+        const user = info.row.original;
+        const isUserActive = user.status === 'Active';
+        return (
+          <div className="flex items-center justify-end gap-2 text-slate-400">
+            <button 
+              onClick={() => handleView(user)} 
+              className="p-1 hover:text-blue-600 transition-colors" 
+              title="View"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={() => handleEdit(user)} 
+              className="p-1 hover:text-blue-600 transition-colors" 
+              title="Edit"
+            >
+              <Edit className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={() => handleToggleStatus(user)} 
+              className={`p-1 transition-colors ${isUserActive ? 'hover:text-amber-600' : 'hover:text-emerald-600'}`} 
+              title={isUserActive ? "Deactivate" : "Activate"}
+            >
+              <UserX className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={() => handleDelete(user)} 
+              className="p-1 hover:text-red-600 transition-colors" 
+              title="Delete"
+            >
+              <Trash className="h-4 w-4" />
+            </button>
+          </div>
+        );
+      },
+    }),
+  ];
 
   const table = useReactTable({
     data,
@@ -113,7 +180,14 @@ export default function UsersPage() {
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Users</h1>
           <p className="text-sm text-slate-500 mt-1">Manage system users, roles, and access.</p>
         </div>
-        <Button onClick={() => setIsCreateWizardOpen(true)} className="w-full sm:w-auto">
+        <Button 
+          onClick={() => {
+            setSelectedUser(null);
+            setViewMode(false);
+            setIsCreateWizardOpen(true);
+          }} 
+          className="w-full sm:w-auto"
+        >
           <Plus className="mr-2 h-4 w-4" /> Create User
         </Button>
       </div>
@@ -210,7 +284,17 @@ export default function UsersPage() {
         </CardContent>
       </Card>
 
-      <CreateUserWizard isOpen={isCreateWizardOpen} onClose={() => setIsCreateWizardOpen(false)} />
+      <CreateUserWizard 
+        isOpen={isCreateWizardOpen} 
+        onClose={() => {
+          setIsCreateWizardOpen(false);
+          setSelectedUser(null);
+          setViewMode(false);
+        }} 
+        onUserCreated={loadUsers}
+        userToEdit={selectedUser}
+        viewMode={viewMode}
+      />
     </div>
   );
 }
