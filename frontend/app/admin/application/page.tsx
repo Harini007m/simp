@@ -6,34 +6,43 @@ import { applicationService } from '@/src/services/application.service';
 import { Application } from '@/src/data/mock-applications';
 import { opportunityService } from '@/src/services/opportunity.service';
 import { Opportunity } from '@/src/data/mock-opportunities';
+import { AddCandidateDrawer } from '@/components/admin/application/AddCandidateDrawer';
+import { ReviewApplicationDrawer } from '@/components/admin/application/ReviewApplicationDrawer';
 
-interface ApplicationWithOpp extends Application {
+export interface ApplicationWithOpp extends Application {
   opportunityData?: Opportunity;
 }
 
 export default function ApplicationPage() {
   const [applications, setApplications] = useState<ApplicationWithOpp[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
+  const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<ApplicationWithOpp | null>(null);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const appData = await applicationService.getApplications();
+      const oppData = await opportunityService.getOpportunities();
+      setOpportunities(oppData);
+      
+      const mergedData = appData.map(app => ({
+        ...app,
+        opportunityData: oppData.find(o => o.id === app.opportunityId)
+      }));
+      
+      setApplications(mergedData);
+    } catch (err) {
+      console.error('Failed to load applications', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const appData = await applicationService.getApplications();
-        const oppData = await opportunityService.getOpportunities();
-        
-        const mergedData = appData.map(app => ({
-          ...app,
-          opportunityData: oppData.find(o => o.id === app.opportunityId)
-        }));
-        
-        setApplications(mergedData);
-      } catch (err) {
-        console.error('Failed to load applications', err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadData();
   }, []);
 
@@ -70,7 +79,10 @@ export default function ApplicationPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer">
+          <button 
+            onClick={() => setIsAddDrawerOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer"
+          >
             <Plus className="h-3.5 w-3.5" />
             <span>Add Candidate</span>
           </button>
@@ -188,7 +200,15 @@ export default function ApplicationPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="text-blue-600 hover:text-blue-800 font-semibold text-sm">Review</button>
+                      <button 
+                        onClick={() => {
+                          setSelectedApplication(app);
+                          setIsReviewDrawerOpen(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 font-semibold text-sm cursor-pointer"
+                      >
+                        Review
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -205,6 +225,23 @@ export default function ApplicationPage() {
           </table>
         </div>
       </div>
+
+      <AddCandidateDrawer 
+        isOpen={isAddDrawerOpen}
+        onClose={() => setIsAddDrawerOpen(false)}
+        onCandidateAdded={loadData}
+        opportunities={opportunities}
+      />
+
+      <ReviewApplicationDrawer 
+        isOpen={isReviewDrawerOpen}
+        onClose={() => {
+          setIsReviewDrawerOpen(false);
+          setSelectedApplication(null);
+        }}
+        onApplicationUpdated={loadData}
+        application={selectedApplication}
+      />
     </div>
   );
 }
