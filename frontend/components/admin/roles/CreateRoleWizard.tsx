@@ -297,68 +297,70 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
               </div>
             </div>
             
-            <div className="pt-4 space-y-4">
-              <label className="text-sm font-medium text-slate-700">Role Icon</label>
-              <input 
-                type="file" 
-                ref={iconInputRef} 
-                onChange={handleIconChange} 
-                accept="image/*" 
-                className="hidden" 
-              />
-              <div 
-                onClick={triggerIconUpload}
-                className="mt-1 flex justify-center rounded-md border-2 border-dashed border-slate-300 px-6 pt-5 pb-6 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
-                <div className="space-y-1 text-center">
-                  {iconFile ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <img src={iconFile} alt="Icon Preview" className="h-12 w-12 object-contain border border-slate-200" />
-                      <p className="text-xs font-semibold text-emerald-650">Selected: {iconFileName}</p>
-                      {!viewMode && <span className="text-[10px] text-slate-400">Click to change icon file</span>}
-                    </div>
-                  ) : (
-                    <>
-                      <Upload className="mx-auto h-10 w-10 text-slate-400" />
-                      <div className="flex text-sm text-slate-600 justify-center">
-                        <span className="relative rounded-md font-medium text-blue-650 hover:text-blue-500">
-                          Upload SVG or PNG
-                        </span>
+            <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              {/* Role Icon Upload */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Role Icon</label>
+                <input 
+                  type="file" 
+                  ref={iconInputRef} 
+                  onChange={handleIconChange} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                <div 
+                  onClick={triggerIconUpload}
+                  className="mt-1 flex justify-center rounded-md border-2 border-dashed border-slate-300 px-4 py-4 hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  <div className="space-y-1 text-center">
+                    {iconFile ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <img src={iconFile} alt="Icon Preview" className="h-10 w-10 object-contain border border-slate-200" />
+                        <p className="text-[10px] font-semibold text-emerald-650 truncate max-w-[150px]">Selected: {iconFileName}</p>
+                        {!viewMode && <span className="text-[9px] text-slate-400">Click to change</span>}
                       </div>
-                      <p className="text-xs text-slate-500">Suggested size: 64x64px</p>
-                    </>
-                  )}
+                    ) : (
+                      <>
+                        <Upload className="mx-auto h-6 w-6 text-slate-400" />
+                        <div className="flex text-xs text-slate-600 justify-center font-medium">
+                          <span className="text-blue-650 hover:text-blue-500">Upload Icon</span>
+                        </div>
+                        <p className="text-[9px] text-slate-400">SVG, PNG up to 10MB</p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="pt-4 space-y-2">
-              <label className="text-sm font-medium text-slate-700">Status</label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input 
-                    type="radio" 
-                    name="roleStatus" 
-                    checked={roleStatus === 'Active'}
-                    onChange={() => {
-                      if (!viewMode) setRoleStatus('Active');
-                    }}
-                    className="text-blue-600 focus:ring-blue-600" 
-                  />
-                  <span className="text-sm font-medium text-slate-900">Active</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input 
-                    type="radio" 
-                    name="roleStatus" 
-                    checked={roleStatus === 'Inactive'}
-                    onChange={() => {
-                      if (!viewMode) setRoleStatus('Inactive');
-                    }}
-                    className="text-blue-600 focus:ring-blue-600" 
-                  />
-                  <span className="text-sm font-medium text-slate-900">Inactive</span>
-                </label>
+              {/* Status Radio Buttons */}
+              <div className="space-y-3 md:pt-4">
+                <label className="text-sm font-medium text-slate-700">Status</label>
+                <div className="flex gap-6 mt-1">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input 
+                      type="radio" 
+                      name="roleStatus" 
+                      checked={roleStatus === 'Active'}
+                      onChange={() => {
+                        if (!viewMode) setRoleStatus('Active');
+                      }}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-600" 
+                    />
+                    <span className="text-sm font-medium text-slate-900">Active</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input 
+                      type="radio" 
+                      name="roleStatus" 
+                      checked={roleStatus === 'Inactive'}
+                      onChange={() => {
+                        if (!viewMode) setRoleStatus('Inactive');
+                      }}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-600" 
+                    />
+                    <span className="text-sm font-medium text-slate-900">Inactive</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FileText, Search, Filter, Plus, ChevronRight, Mail, Phone, Calendar as CalendarIcon, Briefcase } from 'lucide-react';
 import { applicationService } from '@/src/services/application.service';
 import { Application } from '@/src/data/mock-applications';
@@ -8,6 +8,7 @@ import { opportunityService } from '@/src/services/opportunity.service';
 import { Opportunity } from '@/src/data/mock-opportunities';
 import { AddCandidateDrawer } from '@/components/admin/application/AddCandidateDrawer';
 import { ReviewApplicationDrawer } from '@/components/admin/application/ReviewApplicationDrawer';
+import Toast from '@/components/ui/toast';
 
 export interface ApplicationWithOpp extends Application {
   opportunityData?: Opportunity;
@@ -22,9 +23,44 @@ export default function ApplicationPage() {
   const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<ApplicationWithOpp | null>(null);
 
-  const loadData = async () => {
+  const [toastConfig, setToastConfig] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'warning' | 'info';
+  }>({
+    show: false,
+    title: '',
+    message: '',
+    type: 'success'
+  });
+
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showNotification = (
+    title: string,
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'success'
+  ) => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    setToastConfig({
+      show: true,
+      title,
+      message,
+      type
+    });
+    toastTimerRef.current = setTimeout(() => {
+      setToastConfig(prev => ({ ...prev, show: false }));
+    }, 4500);
+  };
+
+  const loadData = async (showLoadingSpinner = false) => {
     try {
-      setLoading(true);
+      if (showLoadingSpinner) {
+        setLoading(true);
+      }
       const appData = await applicationService.getApplications();
       const oppData = await opportunityService.getOpportunities();
       setOpportunities(oppData);
@@ -35,15 +71,28 @@ export default function ApplicationPage() {
       }));
       
       setApplications(mergedData);
+      
+      setSelectedApplication(prev => {
+        if (!prev) return null;
+        const updated = mergedData.find(a => a.id === prev.id);
+        return updated || null;
+      });
     } catch (err) {
       console.error('Failed to load applications', err);
     } finally {
-      setLoading(false);
+      if (showLoadingSpinner) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadData();
+    loadData(true);
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
   }, []);
 
   const filteredApps = applications.filter(app => 
@@ -229,8 +278,9 @@ export default function ApplicationPage() {
       <AddCandidateDrawer 
         isOpen={isAddDrawerOpen}
         onClose={() => setIsAddDrawerOpen(false)}
-        onCandidateAdded={loadData}
+        onCandidateAdded={() => loadData(false)}
         opportunities={opportunities}
+        onShowNotification={showNotification}
       />
 
       <ReviewApplicationDrawer 
@@ -239,9 +289,19 @@ export default function ApplicationPage() {
           setIsReviewDrawerOpen(false);
           setSelectedApplication(null);
         }}
-        onApplicationUpdated={loadData}
+        onApplicationUpdated={() => loadData(false)}
         application={selectedApplication}
+        onShowNotification={showNotification}
       />
+
+      {toastConfig.show && (
+        <Toast
+          title={toastConfig.title}
+          message={toastConfig.message}
+          type={toastConfig.type}
+          onClose={() => setToastConfig(prev => ({ ...prev, show: false }))}
+        />
+      )}
     </div>
   );
 }

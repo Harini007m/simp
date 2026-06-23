@@ -12,13 +12,15 @@ interface AddCandidateDrawerProps {
   onClose: () => void;
   onCandidateAdded: () => void;
   opportunities: Opportunity[];
+  onShowNotification?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 export function AddCandidateDrawer({
   isOpen,
   onClose,
   onCandidateAdded,
-  opportunities
+  opportunities,
+  onShowNotification
 }: AddCandidateDrawerProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -78,11 +80,20 @@ export function AddCandidateDrawer({
         opportunityId: opportunityId,
         status: status
       });
+      if (onShowNotification) {
+        onShowNotification(
+          'Candidate Added',
+          `${name.trim()} has been successfully added to the candidate pipeline.`,
+          'success'
+        );
+      }
       onCandidateAdded();
       onClose();
     } catch (err) {
       console.error('Failed to create candidate application', err);
-      alert('Failed to add candidate. Please try again.');
+      if (onShowNotification) {
+        onShowNotification('Error', 'Failed to add candidate. Please try again.', 'error');
+      }
     } finally {
       setIsSubmitting(false);
     }

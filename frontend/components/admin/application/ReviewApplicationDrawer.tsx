@@ -13,20 +13,28 @@ interface ReviewApplicationDrawerProps {
   onClose: () => void;
   onApplicationUpdated: () => void;
   application: ApplicationWithOpp | null;
+  onShowNotification?: (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 export function ReviewApplicationDrawer({
   isOpen,
   onClose,
   onApplicationUpdated,
-  application
+  application,
+  onShowNotification
 }: ReviewApplicationDrawerProps) {
   const [status, setStatus] = useState<ApplicationWithOpp['status']>('Pending');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [interviewDate, setInterviewDate] = useState('');
+  const [interviewTime, setInterviewTime] = useState('');
 
   useEffect(() => {
     if (isOpen && application) {
       setStatus(application.status);
+      setInterviewDate(application.interviewDate || '');
+      setInterviewTime(application.interviewTime || '');
+      setShowScheduleForm(false);
     }
   }, [isOpen, application]);
 
@@ -35,12 +43,81 @@ export function ReviewApplicationDrawer({
   const handleUpdateStatus = async (newStatus: ApplicationWithOpp['status']) => {
     try {
       setIsSubmitting(true);
-      await applicationService.updateApplicationStatus(application.id, newStatus);
+      const updates: Partial<ApplicationWithOpp> = { status: newStatus };
+      if (newStatus === 'Pending') {
+        updates.interviewDate = '';
+        updates.interviewTime = '';
+      }
+      
+      await applicationService.updateApplication(application.id, updates);
       setStatus(newStatus);
+      
+      if (onShowNotification) {
+        let title = '';
+        let message = '';
+        let type: 'success' | 'error' | 'warning' | 'info' = 'success';
+        
+        switch (newStatus) {
+          case 'Accepted':
+            title = 'Candidate Accepted';
+            message = `${application.candidateName} has been accepted.`;
+            type = 'success';
+            break;
+          case 'Rejected':
+            title = 'Candidate Rejected';
+            message = `${application.candidateName}'s application was marked as rejected.`;
+            type = 'error';
+            break;
+          case 'Pending':
+            title = 'Status Reset';
+            message = `${application.candidateName} is now set back to pending review.`;
+            type = 'info';
+            break;
+          case 'Interview':
+            title = 'Status Set to Interview';
+            message = `${application.candidateName} is now under interviewing status.`;
+            type = 'info';
+            break;
+        }
+        
+        onShowNotification(title, message, type);
+      }
+      
       onApplicationUpdated();
     } catch (err) {
       console.error('Failed to update application status', err);
-      alert('Failed to update status. Please try again.');
+      if (onShowNotification) {
+        onShowNotification('Error', 'Failed to update status. Please try again.', 'error');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmSchedule = async () => {
+    if (!interviewDate || !interviewTime) return;
+    try {
+      setIsSubmitting(true);
+      await applicationService.updateApplication(application.id, {
+        status: 'Interview',
+        interviewDate,
+        interviewTime
+      });
+      setStatus('Interview');
+      if (onShowNotification) {
+        onShowNotification(
+          'Interview Scheduled',
+          `Technical interview with ${application.candidateName} scheduled for ${interviewDate} at ${interviewTime}.`,
+          'success'
+        );
+      }
+      setShowScheduleForm(false);
+      onApplicationUpdated();
+    } catch (err) {
+      console.error('Failed to schedule interview', err);
+      if (onShowNotification) {
+        onShowNotification('Error', 'Failed to schedule interview. Please try again.', 'error');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -103,45 +180,93 @@ export function ReviewApplicationDrawer({
 
           {/* Quick Actions Panel */}
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Quick Actions</h4>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleUpdateStatus('Interview')}
-                disabled={isSubmitting || status === 'Interview'}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 border border-blue-200 hover:border-blue-300 text-blue-600 hover:bg-blue-50 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:pointer-events-none bg-blue-50/20 cursor-pointer"
-              >
-                <CalendarRange className="h-3.5 w-3.5" />
-                <span>Schedule Interview</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleUpdateStatus('Accepted')}
-                disabled={isSubmitting || status === 'Accepted'}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 border border-emerald-200 hover:border-emerald-300 text-emerald-600 hover:bg-emerald-50 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:pointer-events-none bg-emerald-50/20 cursor-pointer"
-              >
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Accept Application</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleUpdateStatus('Rejected')}
-                disabled={isSubmitting || status === 'Rejected'}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 border border-red-200 hover:border-red-300 text-red-600 hover:bg-red-50 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:pointer-events-none bg-red-50/20 cursor-pointer"
-              >
-                <XCircle className="h-3.5 w-3.5" />
-                <span>Reject Candidate</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleUpdateStatus('Pending')}
-                disabled={isSubmitting || status === 'Pending'}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 border border-amber-200 hover:border-amber-300 text-amber-600 hover:bg-amber-50 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:pointer-events-none bg-amber-50/20 cursor-pointer"
-              >
-                <Clock className="h-3.5 w-3.5" />
-                <span>Set Back to Pending</span>
-              </button>
-            </div>
+            <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">
+              {showScheduleForm ? 'Schedule Technical Interview' : 'Quick Actions'}
+            </h4>
+            {showScheduleForm ? (
+              <div className="space-y-4 animate-slide-in">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Interview Date *</label>
+                    <input
+                      type="date"
+                      value={interviewDate}
+                      onChange={(e) => setInterviewDate(e.target.value)}
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Interview Time *</label>
+                    <input
+                      type="time"
+                      value={interviewTime}
+                      onChange={(e) => setInterviewTime(e.target.value)}
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowScheduleForm(false);
+                      setInterviewDate('');
+                      setInterviewTime('');
+                    }}
+                    className="px-3 py-1.5 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmSchedule}
+                    disabled={!interviewDate || !interviewTime || isSubmitting}
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                  >
+                    {isSubmitting ? 'Scheduling...' : 'Confirm Schedule'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleForm(true)}
+                  disabled={isSubmitting}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 border border-blue-200 hover:border-blue-300 text-blue-600 hover:bg-blue-50 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:pointer-events-none bg-blue-50/20 cursor-pointer"
+                >
+                  <CalendarRange className="h-3.5 w-3.5" />
+                  <span>Schedule Interview</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleUpdateStatus('Accepted')}
+                  disabled={isSubmitting || status === 'Accepted'}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 border border-emerald-200 hover:border-emerald-300 text-emerald-600 hover:bg-emerald-50 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:pointer-events-none bg-emerald-50/20 cursor-pointer"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Accept Application</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleUpdateStatus('Rejected')}
+                  disabled={isSubmitting || status === 'Rejected'}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 border border-red-200 hover:border-red-300 text-red-600 hover:bg-red-50 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:pointer-events-none bg-red-50/20 cursor-pointer"
+                >
+                  <XCircle className="h-3.5 w-3.5" />
+                  <span>Reject Candidate</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleUpdateStatus('Pending')}
+                  disabled={isSubmitting || status === 'Pending'}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 border border-amber-200 hover:border-amber-300 text-amber-600 hover:bg-amber-50 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:pointer-events-none bg-amber-50/20 cursor-pointer"
+                >
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>Set Back to Pending</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Contact Details Card */}
@@ -173,6 +298,17 @@ export function ReviewApplicationDrawer({
                     <span>{application.opportunityData?.title || application.opportunityId}</span>
                   </p>
                 </div>
+                {application.interviewDate && (
+                  <div className="md:col-span-2 border-t border-slate-100 pt-3 mt-1 animate-slide-in">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-blue-500" />
+                      <span>Scheduled Interview</span>
+                    </p>
+                    <p className="text-sm font-bold text-blue-600 mt-1.5">
+                      {application.interviewDate} at {application.interviewTime}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </Card>
@@ -239,8 +375,13 @@ export function ReviewApplicationDrawer({
                     <h4 className={`text-xs font-bold ${status === 'Interview' || status === 'Accepted' || status === 'Rejected' ? 'text-slate-800' : 'text-slate-450'}`}>
                       Technical Interview
                     </h4>
+                    {status === 'Interview' && application.interviewDate && (
+                      <p className="text-[10px] text-blue-650 font-bold mt-1">
+                        Scheduled: {application.interviewDate} at {application.interviewTime}
+                      </p>
+                    )}
                     <p className="text-[10px] text-slate-500 mt-0.5">
-                      {status === 'Interview' ? 'Interview scheduled or in progress' : (status === 'Accepted' || status === 'Rejected') ? 'Interview round evaluation finalized' : 'Pending screening pass'}
+                      {status === 'Interview' ? 'Interview scheduled' : (status === 'Accepted' || status === 'Rejected') ? 'Interview round evaluation finalized' : 'Pending screening pass'}
                     </p>
                   </div>
                 </div>

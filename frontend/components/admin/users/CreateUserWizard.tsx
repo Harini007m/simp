@@ -294,63 +294,64 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
               </div>
             </div>
             
-            <div className="pt-4 space-y-4">
-              <label className="text-sm font-medium text-slate-700">Profile Picture</label>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleAvatarChange} 
-                accept="image/*" 
-                className="hidden" 
-              />
-              <div 
-                onClick={triggerFileUpload}
-                className="mt-1 flex justify-center rounded-md border-2 border-dashed border-slate-300 px-6 pt-5 pb-6 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
-                <div className="space-y-1 text-center">
-                  {avatar ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <img src={avatar} alt="Avatar Preview" className="h-16 w-16 rounded-full object-cover border border-slate-200" />
-                      <p className="text-xs font-semibold text-emerald-650">Selected: {avatarName || 'User Avatar'}</p>
-                      {!viewMode && <span className="text-[10px] text-slate-400">Click to change file</span>}
-                    </div>
-                  ) : (
-                    <>
-                      <Upload className="mx-auto h-10 w-10 text-slate-400" />
-                      <div className="flex text-sm text-slate-600 justify-center">
-                        <span className="relative rounded-md font-medium text-blue-650 hover:text-blue-500">
-                          Upload a file
-                        </span>
-                        <p className="pl-1">or drag and drop</p>
+            <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              {/* Profile Picture Upload */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-705 text-slate-700">Profile Picture</label>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleAvatarChange} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                <div 
+                  onClick={triggerFileUpload}
+                  className="mt-1 flex justify-center rounded-md border-2 border-dashed border-slate-300 px-4 py-4 hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  <div className="space-y-1 text-center">
+                    {avatar ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <img src={avatar} alt="Avatar Preview" className="h-12 w-12 rounded-full object-cover border border-slate-200" />
+                        <p className="text-[10px] font-semibold text-emerald-650 truncate max-w-[150px]">Selected: {avatarName || 'User Avatar'}</p>
+                        {!viewMode && <span className="text-[9px] text-slate-400">Click to change</span>}
                       </div>
-                      <p className="text-xs text-slate-500">PNG, JPG, GIF up to 10MB</p>
-                    </>
-                  )}
+                    ) : (
+                      <>
+                        <Upload className="mx-auto h-6 w-6 text-slate-400" />
+                        <div className="flex text-xs text-slate-600 justify-center font-medium">
+                          <span className="text-blue-650 hover:text-blue-500">Upload photo</span>
+                        </div>
+                        <p className="text-[9px] text-slate-400">PNG, JPG up to 10MB</p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="pt-4 space-y-3">
-              <label className="flex items-center gap-3">
-                <input 
-                  type="checkbox" 
-                  checked={sendEmail}
-                  onChange={e => setSendEmail(e.target.checked)}
-                  disabled={viewMode}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 disabled:opacity-50" 
-                />
-                <span className="text-sm text-slate-700">Send Credentials By Email</span>
-              </label>
-              <label className="flex items-center gap-3">
-                <input 
-                  type="checkbox" 
-                  checked={forcePasswordChange}
-                  onChange={e => setForcePasswordChange(e.target.checked)}
-                  disabled={viewMode}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 disabled:opacity-50" 
-                />
-                <span className="text-sm text-slate-700">Force Password Change On First Login</span>
-              </label>
+              {/* Login Preferences */}
+              <div className="space-y-3 md:pt-8">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={sendEmail}
+                    onChange={e => setSendEmail(e.target.checked)}
+                    disabled={viewMode}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 disabled:opacity-50" 
+                  />
+                  <span className="text-sm text-slate-700">Send Credentials By Email</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={forcePasswordChange}
+                    onChange={e => setForcePasswordChange(e.target.checked)}
+                    disabled={viewMode}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 disabled:opacity-50" 
+                  />
+                  <span className="text-sm text-slate-700">Force Password Change on Login</span>
+                </label>
+              </div>
             </div>
           </div>
         );

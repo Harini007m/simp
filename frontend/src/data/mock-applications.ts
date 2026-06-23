@@ -6,6 +6,8 @@ export interface Application {
   phone: string;
   status: 'Pending' | 'Interview' | 'Accepted' | 'Rejected';
   appliedDate: string;
+  interviewDate?: string;
+  interviewTime?: string;
 }
 
 export const MOCK_APPLICATIONS: Application[] = [

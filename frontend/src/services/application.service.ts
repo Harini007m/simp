@@ -27,7 +27,7 @@ export const applicationService = {
     return newApp;
   },
 
-  async updateApplicationStatus(id: string, status: Application['status']): Promise<Application> {
+  async updateApplication(id: string, updates: Partial<Application>): Promise<Application> {
     await new Promise(resolve => setTimeout(resolve, 300));
     const appIndex = MOCK_APPLICATIONS.findIndex(app => app.id === id);
     if (appIndex === -1) {
@@ -35,8 +35,12 @@ export const applicationService = {
     }
     MOCK_APPLICATIONS[appIndex] = {
       ...MOCK_APPLICATIONS[appIndex],
-      status
+      ...updates
     };
     return MOCK_APPLICATIONS[appIndex];
+  },
+
+  async updateApplicationStatus(id: string, status: Application['status']): Promise<Application> {
+    return this.updateApplication(id, { status });
   }
 };
