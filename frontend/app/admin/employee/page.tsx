@@ -14,9 +14,11 @@ import { employeeService } from '@/src/services/employee.service';
 import { Employee, EmployeeDocument, TimelineEvent, EmployeeProject, MOCK_EMPLOYEES } from '@/src/data/mock-employees';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/admin/ui/Drawer';
+import { useRouter } from 'next/navigation';
 
 export default function EmployeeManagementPage() {
   const { user } = useAuth();
+  const router = useRouter();
   
   // App views: dashboard, directory
   const [activeView, setActiveView] = useState<'dashboard' | 'directory'>('dashboard');
@@ -362,6 +364,7 @@ export default function EmployeeManagementPage() {
         });
         setEmployees([...employees, newEmp]);
         showToast(`Successfully onboarded ${newEmp.name} as ${newEmp.designation}`);
+        router.push(`/admin/users?autofill=true&name=${encodeURIComponent(newEmp.name)}&email=${encodeURIComponent(newEmp.email)}&phone=${encodeURIComponent(newEmp.phone)}&redirect=/admin/employee`);
       } else if (type === 'review') {
         const emp = employees.find(e => e.id === targetId);
         if (emp) {

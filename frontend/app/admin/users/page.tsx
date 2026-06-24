@@ -64,9 +64,10 @@ function UsersPageContent() {
   const handleUserCreated = () => {
     loadUsers();
     if (autofillData) {
-      // Clear autofill state and redirect back to application lifecycle overview
+      // Clear autofill state and redirect back to application lifecycle overview or custom redirect url
       setAutofillData(null);
-      router.push('/admin/application');
+      const redirectUrl = searchParams.get('redirect') || '/admin/application';
+      router.push(redirectUrl);
     }
   };
 

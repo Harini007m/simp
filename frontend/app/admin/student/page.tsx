@@ -7,11 +7,14 @@ import { Student } from '@/src/data/mock-students';
 import { userService } from '@/src/services/user.service';
 import { User } from '@/src/data/mock-users';
 
+import { useRouter } from 'next/navigation';
+
 interface StudentWithUser extends Student {
   userData?: User;
 }
 
 export default function StudentPage() {
+  const router = useRouter();
   const [students, setStudents] = useState<StudentWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +77,10 @@ export default function StudentPage() {
             <FileDown className="h-3.5 w-3.5" />
             <span>Export Roster</span>
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer">
+          <button 
+            onClick={() => router.push('/admin/users?autofill=true&redirect=/admin/student')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer"
+          >
             <Plus className="h-3.5 w-3.5" />
             <span>Enroll Student</span>
           </button>
