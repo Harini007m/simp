@@ -5,6 +5,8 @@ import { useAuth } from '@/src/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import SuperAdminDashboard from '@/components/dashboards/SuperAdminDashboard';
 import StudentDashboard from '@/components/dashboards/StudentDashboard';
+import MentorDashboard from '@/components/dashboards/MentorDashboard';
+import CoordinatorDashboard from '@/components/dashboards/CoordinatorDashboard';
 
 export default function DynamicDashboardRouter() {
   const { user, loading } = useAuth();
@@ -18,8 +20,10 @@ export default function DynamicDashboardRouter() {
         return SuperAdminDashboard;
       case 'Student':
         return StudentDashboard;
-      // case 'HR': return HRDashboard;
-      // case 'Mentor': return MentorDashboard;
+      case 'Mentor': 
+        return MentorDashboard;
+      case 'College Coordinator':
+        return CoordinatorDashboard;
       default:
         // Default to student dashboard for now if role not strictly matched
         return StudentDashboard;
