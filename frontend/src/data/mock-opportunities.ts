@@ -7,7 +7,7 @@ export interface Opportunity {
   status: 'Open' | 'Closed' | 'Draft';
   postedDate: string;
   type?: string;
-  internshipType?: 'will paid' | 'pay' | 'free' | 'stipend';
+  internshipType?: 'industrial' | 'corporate' | 'research' | 'free' | 'stipend' | 'will paid';
   amount?: string;
   value?: string;
   description?: string;

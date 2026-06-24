@@ -16,31 +16,12 @@ export const applicationService = {
     return MOCK_APPLICATIONS.filter(app => app.opportunityId === oppId);
   },
 
-  async createApplication(app: Omit<Application, 'id' | 'appliedDate'>): Promise<Application> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newApp: Application = {
-      ...app,
-      id: `app-${Math.random().toString(36).substring(2, 9)}`,
-      appliedDate: new Date().toISOString().split('T')[0]
-    };
-    MOCK_APPLICATIONS.push(newApp);
-    return newApp;
-  },
-
-  async updateApplication(id: string, updates: Partial<Application>): Promise<Application> {
+  async updateApplicationStatus(id: string, newStatus: 'Pending' | 'Interview' | 'Accepted' | 'Rejected'): Promise<Application | undefined> {
     await new Promise(resolve => setTimeout(resolve, 300));
-    const appIndex = MOCK_APPLICATIONS.findIndex(app => app.id === id);
-    if (appIndex === -1) {
-      throw new Error(`Application with ID ${id} not found`);
+    const app = MOCK_APPLICATIONS.find(a => a.id === id);
+    if (app) {
+      app.status = newStatus;
     }
-    MOCK_APPLICATIONS[appIndex] = {
-      ...MOCK_APPLICATIONS[appIndex],
-      ...updates
-    };
-    return MOCK_APPLICATIONS[appIndex];
-  },
-
-  async updateApplicationStatus(id: string, status: Application['status']): Promise<Application> {
-    return this.updateApplication(id, { status });
+    return app;
   }
 };

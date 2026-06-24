@@ -49,7 +49,7 @@ export function Drawer({ isOpen, onClose, title, children }: DrawerProps) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {children}
         </div>
       </div>

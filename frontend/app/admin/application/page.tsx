@@ -4,83 +4,33 @@ import React, { useEffect, useState, useRef } from 'react';
 import { FileText, Search, Filter, Plus, ChevronRight, Mail, Phone, Calendar as CalendarIcon, Briefcase } from 'lucide-react';
 import { applicationService } from '@/src/services/application.service';
 import { Application } from '@/src/data/mock-applications';
-import { opportunityService } from '@/src/services/opportunity.service';
-import { Opportunity } from '@/src/data/mock-opportunities';
-import { AddCandidateDrawer } from '@/components/admin/application/AddCandidateDrawer';
-import { ReviewApplicationDrawer } from '@/components/admin/application/ReviewApplicationDrawer';
-import Toast from '@/components/ui/toast';
-
-export interface ApplicationWithOpp extends Application {
-  opportunityData?: Opportunity;
-}
+import { landingOpportunityService } from '@/src/services/landing-opportunity.service';
+import { Opportunity } from '@/src/data/mock-landing-opportunities';
+import { ReviewApplicationDrawer, ApplicationWithOpp } from '@/components/admin/application/ReviewApplicationDrawer';
 
 export default function ApplicationPage() {
   const [applications, setApplications] = useState<ApplicationWithOpp[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<ApplicationWithOpp | null>(null);
 
-  const [toastConfig, setToastConfig] = useState<{
-    show: boolean;
-    title: string;
-    message: string;
-    type: 'success' | 'error' | 'warning' | 'info';
-  }>({
-    show: false,
-    title: '',
-    message: '',
-    type: 'success'
-  });
-
-  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const showNotification = (
-    title: string,
-    message: string,
-    type: 'success' | 'error' | 'warning' | 'info' = 'success'
-  ) => {
-    if (toastTimerRef.current) {
-      clearTimeout(toastTimerRef.current);
-    }
-    setToastConfig({
-      show: true,
-      title,
-      message,
-      type
-    });
-    toastTimerRef.current = setTimeout(() => {
-      setToastConfig(prev => ({ ...prev, show: false }));
-    }, 4500);
-  };
-
-  const loadData = async (showLoadingSpinner = false) => {
-    try {
-      if (showLoadingSpinner) {
-        setLoading(true);
-      }
-      const appData = await applicationService.getApplications();
-      const oppData = await opportunityService.getOpportunities();
-      setOpportunities(oppData);
-      
-      const mergedData = appData.map(app => ({
-        ...app,
-        opportunityData: oppData.find(o => o.id === app.opportunityId)
-      }));
-      
-      setApplications(mergedData);
-      
-      setSelectedApplication(prev => {
-        if (!prev) return null;
-        const updated = mergedData.find(a => a.id === prev.id);
-        return updated || null;
-      });
-    } catch (err) {
-      console.error('Failed to load applications', err);
-    } finally {
-      if (showLoadingSpinner) {
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const appData = await applicationService.getApplications();
+        const oppData = await landingOpportunityService.getOpportunities();
+        
+        const mergedData = appData.map(app => ({
+          ...app,
+          opportunityData: oppData.find(o => o.id === app.opportunityId)
+        }));
+        
+        setApplications(mergedData);
+      } catch (err) {
+        console.error('Failed to load applications', err);
+      } finally {
         setLoading(false);
       }
     }
@@ -112,7 +62,8 @@ export default function ApplicationPage() {
   }
 
   return (
-    <div className="space-y-6 animate-slide-in">
+    <>
+      <div className="space-y-6 animate-slide-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -258,6 +209,15 @@ export default function ApplicationPage() {
                       >
                         Review
                       </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedApplication(app);
+                          setIsReviewDrawerOpen(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 font-semibold text-sm cursor-pointer"
+                      >
+                        Review
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -274,14 +234,7 @@ export default function ApplicationPage() {
           </table>
         </div>
       </div>
-
-      <AddCandidateDrawer 
-        isOpen={isAddDrawerOpen}
-        onClose={() => setIsAddDrawerOpen(false)}
-        onCandidateAdded={() => loadData(false)}
-        opportunities={opportunities}
-        onShowNotification={showNotification}
-      />
+      </div>
 
       <ReviewApplicationDrawer 
         isOpen={isReviewDrawerOpen}
@@ -289,19 +242,18 @@ export default function ApplicationPage() {
           setIsReviewDrawerOpen(false);
           setSelectedApplication(null);
         }}
-        onApplicationUpdated={() => loadData(false)}
         application={selectedApplication}
-        onShowNotification={showNotification}
+        onApplicationUpdated={() => {
+          applicationService.getApplications().then(async appData => {
+            const oppData = await landingOpportunityService.getOpportunities();
+            const mergedData = appData.map(a => ({
+              ...a,
+              opportunityData: oppData.find(o => o.id === a.opportunityId)
+            }));
+            setApplications(mergedData);
+          });
+        }}
       />
-
-      {toastConfig.show && (
-        <Toast
-          title={toastConfig.title}
-          message={toastConfig.message}
-          type={toastConfig.type}
-          onClose={() => setToastConfig(prev => ({ ...prev, show: false }))}
-        />
-      )}
-    </div>
+    </>
   );
 }

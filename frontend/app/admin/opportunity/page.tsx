@@ -2,18 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { Briefcase, Search, Filter, Plus, ChevronRight, MapPin, Users } from 'lucide-react';
-import { opportunityService } from '@/src/services/opportunity.service';
-import { Opportunity } from '@/src/data/mock-opportunities';
-import { programService } from '@/src/services/program.service';
-import { Program } from '@/src/data/mock-programs';
+import { landingOpportunityService } from '@/src/services/landing-opportunity.service';
+import { Opportunity } from '@/src/data/mock-landing-opportunities';
 import { CreateOpportunityWizard } from '@/components/admin/opportunity/CreateOpportunityWizard';
 
-interface OpportunityWithProgram extends Opportunity {
-  programData?: Program;
-}
-
 export default function OpportunityPage() {
-  const [opportunities, setOpportunities] = useState<OpportunityWithProgram[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
@@ -23,15 +17,8 @@ export default function OpportunityPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const oppData = await opportunityService.getOpportunities();
-      const progData = await programService.getPrograms();
-      
-      const mergedData = oppData.map(opp => ({
-        ...opp,
-        programData: progData.find(p => p.id === opp.programId)
-      }));
-      
-      setOpportunities(mergedData);
+      const oppData = await landingOpportunityService.getOpportunities();
+      setOpportunities(oppData);
     } catch (err) {
       console.error('Failed to load opportunities', err);
     } finally {
@@ -45,11 +32,8 @@ export default function OpportunityPage() {
 
   const filteredOpportunities = opportunities.filter(opp => 
     opp.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    opp.location.toLowerCase().includes(searchTerm.toLowerCase())
+    opp.mode.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const openOpportunities = opportunities.filter(o => o.status === 'Open').length;
-  const totalOpenings = opportunities.filter(o => o.status === 'Open').reduce((acc, curr) => acc + curr.openings, 0);
 
   if (loading) {
     return (
@@ -60,7 +44,8 @@ export default function OpportunityPage() {
   }
 
   return (
-    <div className="space-y-6 animate-slide-in">
+    <>
+      <div className="space-y-6 animate-slide-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -107,8 +92,8 @@ export default function OpportunityPage() {
             <Briefcase className="h-6 w-6" />
           </div>
           <div>
-            <div className="text-2xl font-black text-slate-800">{openOpportunities}</div>
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">Active Postings</div>
+            <div className="text-2xl font-black text-slate-800">{opportunities.filter(o => o.value !== 'free').length}</div>
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">Paid/Stipend Postings</div>
           </div>
         </div>
         
@@ -117,8 +102,8 @@ export default function OpportunityPage() {
             <Users className="h-6 w-6" />
           </div>
           <div>
-            <div className="text-2xl font-black text-slate-800">{totalOpenings}</div>
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">Total Openings</div>
+            <div className="text-2xl font-black text-slate-800">{opportunities.length > 0 ? opportunities.map(o => parseInt(o.seats) || 0).reduce((a, b) => a + b, 0) : 0}</div>
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-0.5">Estimated Openings</div>
           </div>
         </div>
       </div>
@@ -155,34 +140,31 @@ export default function OpportunityPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-bold text-slate-900">{opp.title}</h3>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        opp.status === 'Open' 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                          : opp.status === 'Draft'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : 'bg-slate-100 text-slate-600 border border-slate-200'
-                      }`}>
-                        {opp.status}
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200`}>
+                        {opp.type}
+                      </span>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200`}>
+                        {opp.value}
                       </span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
                       <div className="flex items-center gap-1.5">
                         <MapPin className="h-4 w-4" />
-                        <span>{opp.location}</span>
+                        <span>{opp.mode}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <Users className="h-4 w-4" />
-                        <span>{opp.openings} Openings</span>
+                        <span>{opp.seats}</span>
                       </div>
                       <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                        <span>{opp.programData?.title || opp.programId}</span>
+                        <span>{opp.duration}</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-                  <span className="text-xs text-slate-400">Posted {opp.postedDate}</span>
+                  <span className="text-xs text-slate-400">Starts {opp.startDate}</span>
                   <button 
                     onClick={() => {
                       setSelectedOpportunity(opp);
@@ -205,6 +187,7 @@ export default function OpportunityPage() {
           )}
         </div>
       </div>
+      </div>
 
       <CreateOpportunityWizard 
         isOpen={isCreateWizardOpen} 
@@ -217,6 +200,6 @@ export default function OpportunityPage() {
         opportunityToView={selectedOpportunity}
         viewMode={viewMode}
       />
-    </div>
+    </>
   );
 }

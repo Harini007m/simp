@@ -542,7 +542,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title={getDrawerTitle()}>
-      <div className="flex flex-col h-[calc(100vh-65px)]">
+      <div className="flex flex-col h-full min-h-0">
         {!viewMode && <Stepper steps={STEPS} currentStep={currentStep} />}
         
         <div className="flex-1 overflow-y-auto bg-white">

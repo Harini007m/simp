@@ -10,7 +10,7 @@ export interface Opportunity {
   eligibility: string;
   startDate: string;
   color: string;
-  internshipType?: 'will paid' | 'pay' | 'free' | 'stipend';
+  internshipType?: "free" | "paid" | "stipend" | "industrial" | "corporate" | "research";
   amount?: string;
 }
 
@@ -56,7 +56,7 @@ export const MOCK_LANDING_OPPORTUNITIES: Opportunity[] = [
     eligibility: "M.Tech / B.Tech CS with ML knowledge",
     startDate: "Starts March 2024",
     color: "from-emerald-600/20 to-teal-600/20 border-emerald-500/30 text-emerald-400",
-    internshipType: "will paid",
+    internshipType: "paid",
     amount: "$25/Hour"
   }
 ];
