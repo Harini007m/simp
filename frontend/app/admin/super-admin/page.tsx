@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
+import { AlertTriangle,  
   ShieldAlert, Activity, Settings, List, Users, 
   Database, Server, HardDrive, AlertCircle, CheckCircle
-} from 'lucide-react';
+ } from 'lucide-react';
 import { superAdminService } from '@/src/services/super-admin.service';
 import { SystemSetting, AuditLog, RolePermission } from '@/src/data/mock-super-admin';
 
@@ -35,6 +35,11 @@ export default function SuperAdminPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
+        TODO: Waiting for backend endpoint
+      </div>
+
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
       </div>
     );

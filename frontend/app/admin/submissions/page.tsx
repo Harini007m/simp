@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
+import { AlertTriangle,  
   FolderDown, Search, Filter, Plus, FileText, CheckCircle2, 
   XCircle, Clock, Eye, MessageSquare, GitCommit, Link,
   CheckSquare
-} from 'lucide-react';
+ } from 'lucide-react';
 import { submissionService } from '@/src/services/submission.service';
 import { Submission } from '@/src/data/mock-submissions';
 import { Drawer } from '@/components/admin/ui/Drawer';
@@ -47,6 +47,11 @@ export default function SubmissionsManagementPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
+        TODO: Waiting for backend endpoint
+      </div>
+
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
       </div>
     );

@@ -59,6 +59,11 @@ export default function MyTasksPage() {
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
+        TODO: Waiting for backend endpoint
+      </div>
+
       
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 bg-slate-900 border border-slate-800 text-white rounded-xl shadow-2xl animate-bounce-in">

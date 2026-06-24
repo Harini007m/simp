@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Play, CheckCircle2, Lock, Clock, Calendar, ChevronRight, FileText, Link, File } from 'lucide-react';
+import { AlertTriangle,  BookOpen, Play, CheckCircle2, Lock, Clock, Calendar, ChevronRight, FileText, Link, File  } from 'lucide-react';
 import { lmsService } from '@/src/services/lms.service';
 import { LearningModule, LearningResource } from '@/src/data/mock-learning-modules';
 
@@ -30,6 +30,11 @@ export default function MyLearningPage() {
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
+        TODO: Waiting for backend endpoint
+      </div>
+
       <div className="bg-white border-b border-slate-200 px-6 py-8 shrink-0">
         <h1 className="text-2xl font-bold text-slate-900">My Learning</h1>
         <p className="text-slate-500 mt-1">Continue your learning journey</p>

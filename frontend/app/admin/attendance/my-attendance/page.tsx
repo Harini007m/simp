@@ -103,6 +103,11 @@ export default function MyAttendancePage() {
   if (loading || !status) {
     return (
       <div className="flex h-64 items-center justify-center">
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
+        TODO: Waiting for backend endpoint
+      </div>
+
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
       </div>
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { HardDrive, File, Clock, Search, Filter, Plus, Upload, Download, Eye, Trash, ArrowRight } from 'lucide-react';
+import { AlertTriangle,  HardDrive, File, Clock, Search, Filter, Plus, Upload, Download, Eye, Trash, ArrowRight  } from 'lucide-react';
 import { fileService } from '@/src/services/file.service';
 import { CommonFile } from '@/src/data/mock-common-files';
 import { Drawer } from '@/components/admin/ui/Drawer';
@@ -42,6 +42,11 @@ export default function CommonFilePage() {
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
+        TODO: Waiting for backend endpoint
+      </div>
+
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
         <div>

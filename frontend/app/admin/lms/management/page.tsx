@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { BookOpen, Search, Filter, Plus, File, Eye, Play, Link, FileText, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle,  BookOpen, Search, Filter, Plus, File, Eye, Play, Link, FileText, CheckCircle2  } from 'lucide-react';
 import { lmsService } from '@/src/services/lms.service';
 import { LearningModule, LearningResource } from '@/src/data/mock-learning-modules';
 import { Drawer } from '@/components/admin/ui/Drawer';
@@ -44,6 +44,11 @@ export default function LMSManagementPage() {
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-500" />
+        TODO: Waiting for backend endpoint
+      </div>
+
       <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-xl font-bold text-slate-900">LMS Management</h1>
