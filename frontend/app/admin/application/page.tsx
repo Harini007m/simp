@@ -9,8 +9,8 @@ import {
 } from 'lucide-react';
 import { applicationService } from '@/src/services/application.service';
 import { Application, ApplicationStatus } from '@/src/data/mock-applications';
-import { landingOpportunityService } from '@/src/services/landing-opportunity.service';
-import { Opportunity } from '@/src/data/mock-landing-opportunities';
+import { opportunitiesService } from '@/src/services/opportunities.service';
+import { Opportunity } from '@/src/data/mock-opportunities';
 import { AddCandidateDrawer } from '@/components/admin/application/AddCandidateDrawer';
 import { Drawer } from '@/components/admin/ui/Drawer';
 import { useRouter } from 'next/navigation';
@@ -76,7 +76,7 @@ export default function ApplicationPage() {
     if (showLoader) setLoading(true);
     try {
       const appData = await applicationService.getApplications();
-      const oppData = await landingOpportunityService.getOpportunities();
+      const oppData = await opportunitiesService.getOpportunities();
       setApplications([...appData]);
       setOpportunities(oppData);
     } catch (err) {

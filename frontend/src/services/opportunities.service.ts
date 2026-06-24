@@ -1,11 +1,11 @@
-import { Opportunity, MOCK_LANDING_OPPORTUNITIES } from '../data/mock-landing-opportunities';
+import { Opportunity, MOCK_OPPORTUNITIES } from '../data/mock-opportunities';
 
-class LandingOpportunityService {
+class OpportunitiesService {
   async getOpportunities(): Promise<Opportunity[]> {
     return new Promise((resolve) => {
       // Simulate network delay for realistic loading state
       setTimeout(() => {
-        resolve([...MOCK_LANDING_OPPORTUNITIES]);
+        resolve([...MOCK_OPPORTUNITIES]);
       }, 500);
     });
   }
@@ -13,7 +13,7 @@ class LandingOpportunityService {
   async getOpportunity(id: string): Promise<Opportunity | undefined> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(MOCK_LANDING_OPPORTUNITIES.find(opp => opp.id === id));
+        resolve(MOCK_OPPORTUNITIES.find(opp => opp.id === id));
       }, 300);
     });
   }
@@ -23,14 +23,15 @@ class LandingOpportunityService {
       setTimeout(() => {
         const newOpp: Opportunity = {
           ...opp,
-          id: `opp-l-${Math.random().toString(36).substring(2, 9)}`
+          id: `opp-${Math.random().toString(36).substring(2, 9)}`,
+          status: opp.status || 'Draft',
+          postedDate: opp.postedDate || new Date().toISOString().split('T')[0]
         };
-        MOCK_LANDING_OPPORTUNITIES.push(newOpp);
+        MOCK_OPPORTUNITIES.push(newOpp);
         resolve(newOpp);
       }, 500);
     });
   }
 }
 
-export const landingOpportunityService = new LandingOpportunityService();
-
+export const opportunitiesService = new OpportunitiesService();

@@ -1927,7 +1927,7 @@ export default function EmployeeManagementPage() {
                       <div className="h-44 w-full bg-slate-50 border border-slate-100 rounded-lg p-4 flex flex-col justify-between">
                         <div className="flex justify-between text-[10px] text-slate-400 font-bold border-b border-slate-200 pb-1">
                           <span>Rating (out of 5.0)</span>
-                          <span>Trend Range: 6 Months</span>
+                          <span>Trend Range: {activeProfile.performanceTrend.length} Months</span>
                         </div>
                         
                         <div className="relative flex-1 flex items-end justify-between px-6 pt-6">
@@ -1938,27 +1938,38 @@ export default function EmployeeManagementPage() {
                             <div className="border-b border-dashed border-slate-200 w-full" />
                           </div>
 
-                          <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-                            {/* Path representing rating scores */}
-                            <path 
-                              d="M 5,90 Q 25,60 45,40 T 85,15" 
-                              fill="none" 
-                              stroke="#2563eb" 
-                              strokeWidth="3" 
-                              strokeLinecap="round"
-                            />
-                            <path 
-                              d="M 5,90 Q 25,60 45,40 T 85,15 L 85,100 L 5,100 Z" 
-                              fill="url(#trend-grad)" 
-                              opacity="0.1"
-                            />
-                            <defs>
-                              <linearGradient id="trend-grad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#2563eb" />
-                                <stop offset="100%" stopColor="#ffffff" />
-                              </linearGradient>
-                            </defs>
-                          </svg>
+                          {(() => {
+                            const pts = activeProfile.performanceTrend;
+                            if (pts.length === 0) return null;
+                            const spacingX = 100 / Math.max(1, pts.length - 1);
+                            // Map rating (0-5) to Y (90 to 10)
+                            const getY = (rating: number) => 90 - (rating / 5) * 80;
+                            const pathData = pts.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${i * spacingX},${getY(pt.rating)}`).join(' ');
+                            return (
+                              <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                {/* Path representing rating scores */}
+                                <path 
+                                  d={pathData} 
+                                  fill="none" 
+                                  stroke="#2563eb" 
+                                  strokeWidth="3" 
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                                <path 
+                                  d={`${pathData} L 100,100 L 0,100 Z`} 
+                                  fill="url(#trend-grad)" 
+                                  opacity="0.1"
+                                />
+                                <defs>
+                                  <linearGradient id="trend-grad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#2563eb" />
+                                    <stop offset="100%" stopColor="#ffffff" />
+                                  </linearGradient>
+                                </defs>
+                              </svg>
+                            );
+                          })()}
 
                           {activeProfile.performanceTrend.map((t, idx) => (
                             <div key={idx} className="z-10 flex flex-col items-center">

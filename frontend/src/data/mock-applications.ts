@@ -10,7 +10,18 @@ export type ApplicationStatus =
   | 'Selected'
   | 'Hold'
   | 'Documents Missing'
-  | 'Payment Verification Pending';
+  | 'Payment Verification Pending'
+  | 'DRAFT'
+  | 'WITHDRAWN';
+
+export interface ApplicationDocument {
+  id: string;
+  applicationId: string;
+  type: 'Resume' | 'ID Proof' | 'Certificate' | 'Portfolio';
+  name: string;
+  url: string;
+  uploadedAt: string;
+}
 
 export interface Application {
   id: string;

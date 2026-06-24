@@ -5,7 +5,7 @@ import { Drawer } from '@/components/admin/ui/Drawer';
 import { Button } from '@/components/admin/ui/Button';
 import { Briefcase, User, Mail, Phone } from 'lucide-react';
 import { applicationService } from '@/src/services/application.service';
-import { Opportunity } from '@/src/data/mock-landing-opportunities';
+import { Opportunity } from '@/src/data/mock-opportunities';
 
 interface AddCandidateDrawerProps {
   isOpen: boolean;

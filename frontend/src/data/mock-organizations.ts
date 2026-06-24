@@ -97,7 +97,7 @@ export interface Organization {
   logo: string;
   university: string;
   location: string;
-  partnershipStatus: 'Active' | 'Inactive' | 'Pending Verification' | 'Partnership Expired' | 'Blacklisted';
+  partnershipStatus: 'Active' | 'Inactive' | 'Pending Verification' | 'Pending' | 'Partnership Expired' | 'Blacklisted' | 'Suspended';
   partnershipSince: string;
   
   // Tab 1: Overview Metadata

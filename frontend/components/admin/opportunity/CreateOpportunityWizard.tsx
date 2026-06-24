@@ -6,8 +6,8 @@ import { Stepper } from '@/components/admin/ui/Stepper';
 import { Button } from '@/components/admin/ui/Button';
 import { Card } from '@/components/admin/ui/Card';
 import { ChevronRight, ChevronLeft, Briefcase, Calendar, MapPin, Users, Info, DollarSign } from 'lucide-react';
-import { landingOpportunityService } from '@/src/services/landing-opportunity.service';
-import { Opportunity } from '@/src/data/mock-landing-opportunities';
+import { opportunitiesService } from '@/src/services/opportunities.service';
+import { Opportunity } from '@/src/data/mock-opportunities';
 
 interface CreateOpportunityWizardProps {
   isOpen: boolean;
@@ -133,7 +133,7 @@ export function CreateOpportunityWizard({
     try {
       setIsSubmitting(true);
       
-      await landingOpportunityService.createOpportunity({
+      await opportunitiesService.createOpportunity({
         title: title.trim(),
         type: type.trim(),
         value,

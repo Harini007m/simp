@@ -3,12 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+<<<<<<< HEAD
 import {
   LayoutDashboard, Users, Shield, Menu, X, LayoutGrid, Box,
   Package, FileText, CheckSquare, Award, MonitorPlay, Users as UsersIcon,
   UsersRound, Calendar, PieChart, Briefcase, Network, Settings,
   Building2, GraduationCap, FolderOpen, ChevronDown, ChevronRight
 } from 'lucide-react';
+=======
+import { LayoutDashboard, Users, Shield, Menu, X, LayoutGrid, Box, Package, FileText, CheckSquare, Award, MonitorPlay, Users as UsersIcon, UsersRound, Calendar, PieChart, Briefcase, Network, Settings, Building2, GraduationCap, FolderOpen, Key, Activity, ShieldAlert } from 'lucide-react';
+>>>>>>> 4f895780958276f28da08578c8b02785751be916
 import { userService } from '@/src/services/user.service';
 import { Module } from '@/src/data/mock-modules';
 import { useAuth } from '@/src/context/AuthContext';
@@ -29,14 +33,12 @@ const iconMap: Record<string, any> = {
   student: UsersRound,
   batch: Package,
   allocation: Network,
-  mentor: Award,
   lms: MonitorPlay,
   task: CheckSquare,
   assessment: FileText,
   submission: Package,
   attendance: Calendar,
   performance: PieChart,
-  college_coordinator: Users,
   dashboard: LayoutDashboard,
   common_file: FolderOpen,
   super_admin: Settings,
@@ -132,6 +134,7 @@ export function Sidebar({ isMobileOpen, setMobileOpen }: SidebarProps) {
             </h3>
           </div>
 
+<<<<<<< HEAD
           <div className="space-y-1">
             {modules.map((module) => {
               const IconComponent = iconMap[module.id] || LayoutGrid;
@@ -370,6 +373,90 @@ export function Sidebar({ isMobileOpen, setMobileOpen }: SidebarProps) {
               );
             })}
           </div>
+=======
+          {/* Dynamic Modules Links */}
+          {modules.map((module) => {
+            const IconComponent = iconMap[module.id] || LayoutGrid;
+            
+            // Special case for Identity module which has sub-routes built in our UI
+            if (module.id === 'identity') {
+              return (
+                <div key={module.id} className="space-y-1">
+                  <div className="px-3 py-2 text-sm font-medium text-slate-400 flex items-center gap-x-3">
+                    <IconComponent className="h-5 w-5 shrink-0" />
+                    {module.name}
+                  </div>
+                  <ul className="pl-8 space-y-1 mt-1">
+                    <li>
+                      <Link
+                        href="/admin/users"
+                        className={`group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          pathname === '/admin/users' 
+                            ? 'bg-blue-600/10 text-blue-400' 
+                            : 'hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <Users className={`h-4 w-4 shrink-0 ${pathname === '/admin/users' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
+                        Users
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/admin/roles"
+                        className={`group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          pathname === '/admin/roles' 
+                            ? 'bg-blue-600/10 text-blue-400' 
+                            : 'hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <Shield className={`h-4 w-4 shrink-0 ${pathname === '/admin/roles' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
+                        Roles
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/admin/permissions"
+                        className={`group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          pathname === '/admin/permissions' 
+                            ? 'bg-blue-600/10 text-blue-400' 
+                            : 'hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <Key className={`h-4 w-4 shrink-0 ${pathname === '/admin/permissions' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
+                        Permissions
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/admin/sessions"
+                        className={`group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          pathname === '/admin/sessions' 
+                            ? 'bg-blue-600/10 text-blue-400' 
+                            : 'hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <Activity className={`h-4 w-4 shrink-0 ${pathname === '/admin/sessions' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
+                        Sessions
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/admin/security"
+                        className={`group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          pathname === '/admin/security' 
+                            ? 'bg-blue-600/10 text-blue-400' 
+                            : 'hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <ShieldAlert className={`h-4 w-4 shrink-0 ${pathname === '/admin/security' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
+                        Security Center
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              );
+            }
+>>>>>>> 4f895780958276f28da08578c8b02785751be916
 
         </nav>
 
