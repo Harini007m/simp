@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Shield, Menu, X, LayoutGrid, Box, Package, FileText, CheckSquare, Award, MonitorPlay, Users as UsersIcon, UsersRound, Calendar, PieChart, Briefcase, Network, Settings, Building2, GraduationCap, FolderOpen } from 'lucide-react';
+import { LayoutDashboard, Users, Shield, Menu, X, LayoutGrid, Box, Package, FileText, CheckSquare, Award, MonitorPlay, Users as UsersIcon, UsersRound, Calendar, PieChart, Briefcase, Network, Settings, Building2, GraduationCap, FolderOpen, Key, Activity, ShieldAlert } from 'lucide-react';
 import { userService } from '@/src/services/user.service';
 import { Module } from '@/src/data/mock-modules';
 import { useAuth } from '@/src/context/AuthContext';
@@ -24,14 +24,12 @@ const iconMap: Record<string, any> = {
   student: UsersRound,
   batch: Package,
   allocation: Network,
-  mentor: Award,
   lms: MonitorPlay,
   task: CheckSquare,
   assessment: FileText,
   submission: Package,
   attendance: Calendar,
   performance: PieChart,
-  college_coordinator: Users,
   dashboard: LayoutDashboard,
   common_file: FolderOpen,
   super_admin: Settings,
@@ -146,6 +144,45 @@ export function Sidebar({ isMobileOpen, setMobileOpen }: SidebarProps) {
                       >
                         <Shield className={`h-4 w-4 shrink-0 ${pathname === '/admin/roles' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
                         Roles
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/admin/permissions"
+                        className={`group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          pathname === '/admin/permissions' 
+                            ? 'bg-blue-600/10 text-blue-400' 
+                            : 'hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <Key className={`h-4 w-4 shrink-0 ${pathname === '/admin/permissions' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
+                        Permissions
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/admin/sessions"
+                        className={`group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          pathname === '/admin/sessions' 
+                            ? 'bg-blue-600/10 text-blue-400' 
+                            : 'hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <Activity className={`h-4 w-4 shrink-0 ${pathname === '/admin/sessions' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
+                        Sessions
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/admin/security"
+                        className={`group flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          pathname === '/admin/security' 
+                            ? 'bg-blue-600/10 text-blue-400' 
+                            : 'hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <ShieldAlert className={`h-4 w-4 shrink-0 ${pathname === '/admin/security' ? 'text-blue-400' : 'text-slate-400 group-hover:text-white'}`} />
+                        Security Center
                       </Link>
                     </li>
                   </ul>

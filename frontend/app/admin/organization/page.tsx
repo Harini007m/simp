@@ -1944,6 +1944,8 @@ export default function OrganizationManagementPage() {
                     <option value="Active">Active Partner</option>
                     <option value="Inactive">Inactive</option>
                     <option value="Pending Verification">Pending Verification</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Suspended">Suspended</option>
                     <option value="Partnership Expired">Partnership Term Expired</option>
                     <option value="Blacklisted">Blacklisted Entity</option>
                   </select>

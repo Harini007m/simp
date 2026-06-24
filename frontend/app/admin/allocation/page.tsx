@@ -861,16 +861,69 @@ export default function AllocationManagementPage() {
             <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
               
               {/* Toolbar */}
-              <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between gap-4">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Search students allocations..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  />
+              <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row justify-between gap-4">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Search students allocations..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button 
+                    onClick={() => showToast('Allocation report downloaded.', 'success')}
+                    className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-bold transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export CSV
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <select
+                    value={filterProgram}
+                    onChange={(e) => setFilterProgram(e.target.value)}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-600 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="all">All Programs</option>
+                    {programsList.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  <select
+                    value={filterBatch}
+                    onChange={(e) => setFilterBatch(e.target.value)}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-600 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="all">All Batches</option>
+                    {batchesList.map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                  <select
+                    value={filterMentor}
+                    onChange={(e) => setFilterMentor(e.target.value)}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-600 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="all">All Mentors</option>
+                    {mentorsList.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                  <select
+                    value={filterCollege}
+                    onChange={(e) => setFilterCollege(e.target.value)}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-600 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="all">All Colleges</option>
+                    {collegesList.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-600 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="Allocated">Allocated</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Unallocated">Unallocated</option>
+                  </select>
                 </div>
               </div>
 

@@ -2,8 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { landingOpportunityService } from '@/src/services/landing-opportunity.service';
-import { Opportunity } from '@/src/data/mock-landing-opportunities';
+import { opportunitiesService } from '@/src/services/opportunities.service';
+import { Opportunity } from '@/src/data/mock-opportunities';
 
 export default function LandingPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -13,7 +13,7 @@ export default function LandingPage() {
   useEffect(() => {
     const fetchOpportunities = async () => {
       try {
-        const data = await landingOpportunityService.getOpportunities();
+        const data = await opportunitiesService.getOpportunities();
         setOpportunities(data);
       } catch (error) {
         console.error("Failed to fetch opportunities from service:", error);

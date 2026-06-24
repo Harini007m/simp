@@ -7,6 +7,7 @@ interface DrawerProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full' | string;
 }
 
 export function Drawer({ isOpen, onClose, title, children }: DrawerProps) {
