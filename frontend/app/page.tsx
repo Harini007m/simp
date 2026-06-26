@@ -5,6 +5,110 @@ import Link from 'next/link';
 import { opportunitiesService } from '@/src/services/opportunities.service';
 import { Opportunity } from '@/src/data/mock-opportunities';
 import { Footer } from '@/components/layout/Footer';
+import Image from "next/image";
+import { ChevronDown, ArrowRight } from "lucide-react";
+
+const heroData = {
+  badge: "GLOBAL INTERNSHIP PROGRAMS",
+  headline: "The Pinesphere Commitment to Start With Enterprise Leaders",
+  subtitle:
+    "Pinesphere ERP offers a diverse range of internship programs designed to bridge the gap between academic learning and industrial excellence. Join our global talent ecosystem today.",
+  buttons: {
+    primary: "EXPLORE MORE",
+    
+  },
+};
+
+// --- COMMON COMPONENTS ---
+interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {}
+const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
+  ({ className, children, ...props }, ref) => (
+    <div ref={ref} className={`max-w-[1440px] mx-auto px-6 md:px-12 ${className || ""}`} {...props}>
+      {children}
+    </div>
+  )
+);
+Container.displayName = "Container";
+
+interface SectionProps extends React.HTMLAttributes<HTMLElement> {}
+const Section = React.forwardRef<HTMLElement, SectionProps>(
+  ({ className, children, ...props }, ref) => (
+    <section ref={ref} className={`py-12 md:py-24 lg:py-32 ${className || ""}`} {...props}>
+      {children}
+    </section>
+  )
+);
+Section.displayName = "Section";
+
+
+// --- HERO COMPONENTS ---
+const HeroBadge = () => (
+  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-blue-600 tracking-wide uppercase mb-6 bg-white/50 backdrop-blur-sm">
+    <span className="w-2 h-2 rounded-full bg-blue-500" />
+    {heroData.badge}
+  </div>
+);
+
+const HeroContent = () => (
+  <div className="max-w-2xl">
+    <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1] mb-6">
+      {heroData.headline}
+    </h1>
+    <p className="text-lg text-slate-600 leading-relaxed max-w-xl">
+      {heroData.subtitle}
+    </p>
+  </div>
+);
+
+const HeroButtons = () => {
+  const handleExploreClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const target = document.getElementById('programs');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-4 mt-10 mb-16">
+      <button 
+        onClick={handleExploreClick}
+        className="rounded-xl px-8 py-6 text-sm font-semibold tracking-wide bg-[#1e2336] hover:bg-[#151926] text-white flex items-center gap-2 transition-colors"
+      >
+        {heroData.buttons.primary}
+        <ArrowRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
+const HeroImage = () => (
+  <div className="relative w-full h-[600px] rounded-3xl overflow-hidden shadow-2xl">
+    <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent z-10 mix-blend-overlay rounded-3xl" />
+    <Image src="/images/hero/hero-team.png" alt="Pinesphere enterprise professionals" fill className="object-cover object-center" priority />
+  </div>
+);
+
+const Hero = () => (
+  <Section className="relative overflow-hidden min-h-[calc(100vh-5rem)] flex items-center bg-gradient-to-br from-white to-slate-50 pt-8 md:pt-12 lg:pt-16 pb-20">
+    <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-blue-50/50 to-transparent pointer-events-none" />
+    <Container className="relative z-10 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+        <div className="flex flex-col h-full justify-center">
+          <div>
+            <HeroBadge />
+            <HeroContent />
+            <HeroButtons />
+          </div>
+          
+        </div>
+        <div className="lg:pl-8">
+          <HeroImage />
+        </div>
+      </div>
+    </Container>
+  </Section>
+);
 
 export default function LandingPage() {
   const [opportunities, setOpportunities] = useState<any[]>([]);
@@ -134,85 +238,7 @@ export default function LandingPage() {
           </div>
         </header>
  
-        {/* Hero Section with Diagonal Clip Design and Background Video */}
-        <div className="relative w-full h-[calc(100vh-5rem)] bg-[#050505] overflow-hidden flex flex-col justify-between">
-          
-          {/* Background Video playing behind the black section */}
-          <div className="absolute inset-0 w-full h-full z-0">
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              src="https://pinesphere.com/static/assets/videos/pines_banner2.mp4"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-slate-950/30" />
-          </div>
- 
-          {/* Upper-Left White Background Slant Overlay (Hides video on top left) */}
-          <div 
-            className="absolute inset-0 bg-white z-1 hero-slant"
-          />
- 
-          {/* Vertical lines overlay on the black section (decorations) */}
-          <div className="absolute inset-0 z-5 pointer-events-none">
-            <div className="absolute top-[32%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '20%' }} />
-            <div className="absolute top-[45%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '41%' }} />
-            <div className="absolute top-[28%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '58%' }} />
-            <div className="absolute top-[38%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '77%' }} />
-            <div className="absolute top-[30%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '88%' }} />
-          </div>
- 
-          {/* Content Wrapper */}
-          <div className="relative z-10 w-full h-full max-w-7xl mx-auto pl-4 sm:pl-8 lg:pl-10 pr-6 lg:pr-16 pt-4 pb-12 md:pt-6 md:pb-16 flex flex-col justify-between">
-            
-            {/* Top Text Content (Original text, lies on the white background overlay) */}
-            <div className="text-left mt-2 md:mt-3 max-w-3xl z-10">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-normal tracking-tight text-slate-950 leading-[1.15] mb-6 animate-slide-in">
-                Start Your <br />
-                Internship Journey <br />
-                With Enterprise Leaders
-              </h1>
-              <p className="text-sm sm:text-base leading-relaxed text-slate-600 max-w-xl animate-slide-in font-medium" style={{ animationDelay: '70ms' }}>
-                Pinesphere ERP offers a diverse range of internship programs designed to bridge the gap between academic learning and industrial excellence. Join our global talent ecosystem today.
-              </p>
-            </div>
- 
-            {/* Bottom Slider & Commitment Section (Lies on the black background overlay) */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8 pb-4 z-10">
-              
-              {/* Left Side: 4 Horizontal Slider Indicators */}
-              <div className="flex gap-4 w-60 md:w-80">
-                <div className="h-[2px] bg-white flex-1 transition-all" />
-                <div className="h-[2px] bg-white/20 flex-1 transition-all" />
-                <div className="h-[2px] bg-white/20 flex-1 transition-all" />
-                <div className="h-[2px] bg-white/20 flex-1 transition-all" />
-              </div>
- 
-              {/* Right Side: The Pinesphere Commitment & Explore Action */}
-              <div className="text-left sm:text-right flex flex-col items-start sm:items-end gap-5">
-                <h2 className="text-xl md:text-2xl font-light tracking-wide text-white leading-snug">
-                  The Pinesphere <br className="hidden sm:inline" />
-                  Commitment
-                </h2>
-                <a 
-                  href="#programs" 
-                  onClick={handleExploreClick}
-                  className="inline-flex bg-white hover:bg-slate-100 text-black text-xs font-bold uppercase tracking-[0.25em] py-3.5 px-8 transition-all active:scale-[0.98] rounded-none animate-slide-in"
-                  style={{ animationDelay: '150ms' }}
-                >
-                  Dive Deeper
-                </a>
-              </div>
- 
-            </div>
- 
-          </div>
- 
-        </div>
+        <Hero />
 
         {/* Programs Section */}
         <div ref={programsRef} id="programs" className="mx-auto max-w-7xl px-6 py-24 lg:px-16 scroll-mt-6">
