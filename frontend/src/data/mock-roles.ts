@@ -25,6 +25,7 @@ export const MOCK_ROLES: Role[] = [
     bg: 'bg-emerald-100',
     moduleIds: ['dashboard', 'task', 'assessment', 'attendance', 'performance', 'lms'],
     permissions: [
+      'dashboard.view',
       'task.view', 'task.submit',
       'assessment.view', 'assessment.submit',
       'attendance.view',
@@ -44,6 +45,7 @@ export const MOCK_ROLES: Role[] = [
     bg: 'bg-amber-100',
     moduleIds: ['dashboard', 'student', 'attendance', 'task', 'assessment', 'performance'],
     permissions: [
+      'dashboard.view',
       'student.view',
       'attendance.view', 'attendance.mark',
       'task.view', 'task.review',
@@ -63,6 +65,7 @@ export const MOCK_ROLES: Role[] = [
     bg: 'bg-rose-100',
     moduleIds: ['dashboard', 'employee', 'organization', 'program', 'opportunity', 'application', 'student', 'batch'],
     permissions: [
+      'dashboard.view',
       'employee.view', 'employee.create', 'employee.edit',
       'organization.view', 'organization.create', 'organization.edit',
       'program.view', 'program.create', 'program.edit',
@@ -83,6 +86,7 @@ export const MOCK_ROLES: Role[] = [
     bg: 'bg-violet-100',
     moduleIds: ['dashboard', 'college_coordinator', 'student', 'attendance', 'performance'],
     permissions: [
+      'dashboard.view',
       'college_coordinator.view',
       'student.view',
       'attendance.view',
