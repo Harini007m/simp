@@ -47,10 +47,8 @@ export class ScopeResolver {
     }
 
     // College Coordinator
-    if (user.roleName === 'College Coordinator' || user.roleId === 'role-4') {
-      if (user.collegeId) {
-        scope.collegeIds = [user.collegeId];
-      }
+    if ((user.roleName === 'College Coordinator' || user.roleId === 'role-4') && user.collegeId) {
+      scope.collegeIds = [user.collegeId];
     }
 
     // Mentor
