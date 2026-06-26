@@ -58,6 +58,8 @@ export const MOCK_PERMISSIONS: Permission[] = [
   // Opportunity
   { id: 'opportunity.view', module: 'opportunity', action: 'view', label: 'View Opportunities' },
   { id: 'opportunity.create', module: 'opportunity', action: 'create', label: 'Create Opportunity' },
+  { id: 'opportunity.edit', module: 'opportunity', action: 'edit', label: 'Edit Opportunity' },
+  { id: 'opportunity.delete', module: 'opportunity', action: 'delete', label: 'Delete Opportunity' },
 
   // Application
   { id: 'application.view', module: 'application', action: 'view', label: 'View Applications' },
@@ -132,7 +134,7 @@ export const MOCK_PERMISSIONS_BY_MODULE: Record<string, string[]> = {
   employee: ['View', 'Create', 'Edit', 'Delete'],
   organization: ['View', 'Create', 'Edit'],
   program: ['View', 'Create', 'Edit'],
-  opportunity: ['View', 'Create'],
+  opportunity: ['View', 'Create', 'Edit', 'Delete'],
   application: ['View', 'Review'],
   student: ['View', 'Create', 'Edit'],
   batch: ['View', 'Create', 'Edit'],
