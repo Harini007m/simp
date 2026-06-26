@@ -43,18 +43,20 @@ Section.displayName = "Section";
 
 // --- HERO COMPONENTS ---
 const HeroBadge = () => (
-  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-blue-600 tracking-wide uppercase mb-6 bg-white/50 backdrop-blur-sm">
-    <span className="w-2 h-2 rounded-full bg-blue-500" />
+  <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-bold text-blue-600 tracking-widest uppercase mb-6">
+    <span className="w-4 h-4 rounded-full border-[3px] border-blue-100 flex items-center justify-center">
+      <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+    </span>
     {heroData.badge}
   </div>
 );
 
 const HeroContent = () => (
-  <div className="max-w-2xl">
-    <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1] mb-6">
+  <div className="max-w-[800px]">
+    <h1 className="text-[2.75rem] sm:text-5xl md:text-[4rem] font-extrabold tracking-tight text-slate-950 leading-[1.1] mb-6">
       {heroData.headline}
     </h1>
-    <p className="text-lg text-slate-600 leading-relaxed max-w-xl">
+    <p className="text-base md:text-lg text-slate-500 leading-relaxed max-w-xl">
       {heroData.subtitle}
     </p>
   </div>
@@ -70,41 +72,69 @@ const HeroButtons = () => {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-4 mt-10 mb-16">
+    <div className="flex flex-wrap items-center gap-4 mt-10 mb-12">
       <button 
         onClick={handleExploreClick}
-        className="rounded-xl px-8 py-6 text-sm font-semibold tracking-wide bg-[#1e2336] hover:bg-[#151926] text-white flex items-center gap-2 transition-colors"
+        className="rounded-xl px-8 py-4 text-xs font-bold tracking-widest uppercase bg-[#111827] hover:bg-black text-white flex items-center gap-3 transition-colors shadow-lg shadow-slate-900/20"
       >
-        {heroData.buttons.primary}
+        EXPLORE MORE
         <ArrowRight className="w-4 h-4" />
       </button>
+      <a 
+        href="#programs"
+        onClick={handleExploreClick}
+        className="rounded-xl px-8 py-4 text-xs font-bold tracking-widest uppercase bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 flex items-center gap-3 transition-colors shadow-sm"
+      >
+        DIVE DEEPER
+        <ArrowRight className="w-4 h-4" />
+      </a>
     </div>
   );
 };
 
-const HeroImage = () => (
-  <div className="relative w-full h-[600px] rounded-3xl overflow-hidden shadow-2xl">
-    <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent z-10 mix-blend-overlay rounded-3xl" />
-    <Image src="/images/hero/hero-team.png" alt="Pinesphere enterprise professionals" fill className="object-cover object-center" priority />
+const TrustedBy = () => (
+  <div className="mt-12 sm:mt-16">
+    <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-6">
+      TRUSTED BY LEADING COMPANIES
+    </p>
+    <div className="flex flex-wrap items-center gap-6 sm:gap-10 opacity-60 grayscale">
+      <span className="text-xl font-bold font-sans tracking-tighter text-slate-700">Google</span>
+      <span className="text-lg font-semibold flex items-center gap-1.5 text-slate-700">
+        <span className="grid grid-cols-2 gap-[2px]">
+          <span className="w-2 h-2 bg-slate-700"></span><span className="w-2 h-2 bg-slate-700"></span>
+          <span className="w-2 h-2 bg-slate-700"></span><span className="w-2 h-2 bg-slate-700"></span>
+        </span>
+        Microsoft
+      </span>
+      <span className="text-xl font-bold font-serif tracking-tighter text-slate-700">amazon</span>
+      <span className="text-xl font-bold font-sans text-slate-700">Deloitte.</span>
+      <span className="text-xl font-medium font-sans tracking-tight text-slate-700">Infosys</span>
+    </div>
   </div>
 );
 
 const Hero = () => (
-  <Section className="relative overflow-hidden min-h-[calc(100vh-5rem)] flex items-center bg-gradient-to-br from-white to-slate-50 pt-8 md:pt-12 lg:pt-16 pb-20">
-    <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-blue-50/50 to-transparent pointer-events-none" />
+  <Section className="relative overflow-hidden min-h-[calc(100vh-5rem)] flex items-center bg-white pt-8 md:pt-12 lg:pt-16 pb-20">
+    {/* Full Height Background Image on Right with Fade */}
+    <div className="absolute top-0 right-0 bottom-0 w-full lg:w-[60%] pointer-events-none z-0">
+      <Image 
+        src="/images/hero/hero-team.png" 
+        alt="Pinesphere enterprise professionals" 
+        fill 
+        className="object-cover object-right-top" 
+        priority 
+      />
+      {/* Gradient fade to white on the left */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white via-white/0 to-transparent w-full" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent w-full" />
+    </div>
+
     <Container className="relative z-10 w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-        <div className="flex flex-col h-full justify-center">
-          <div>
-            <HeroBadge />
-            <HeroContent />
-            <HeroButtons />
-          </div>
-          
-        </div>
-        <div className="lg:pl-8">
-          <HeroImage />
-        </div>
+      <div className="w-full lg:w-[65%] xl:w-[60%] flex flex-col justify-center">
+        <HeroBadge />
+        <HeroContent />
+        <HeroButtons />
+        <TrustedBy />
       </div>
     </Container>
   </Section>
