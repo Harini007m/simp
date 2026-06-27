@@ -94,6 +94,15 @@ interface ApplicationState {
     researchInterestStatement: string;
     publicationsAvailable: "Yes" | "No";
     publicationLinks: string;
+    upiApp?: string;
+    upiPaid?: boolean;
+    bankName?: string;
+    utrNumber?: string;
+    transferDate?: string;
+    cardType?: string;
+    last4Digits?: string;
+    authCode?: string;
+    cardPaid?: boolean;
   };
   documents: {
     resume: FileData | null;
@@ -143,6 +152,15 @@ const initialFormState: ApplicationState = {
     researchInterestStatement: "",
     publicationsAvailable: "No",
     publicationLinks: "",
+    upiApp: "",
+    upiPaid: false,
+    bankName: "",
+    utrNumber: "",
+    transferDate: "",
+    cardType: "",
+    last4Digits: "",
+    authCode: "",
+    cardPaid: false,
   },
   documents: {
     resume: null,
@@ -358,8 +376,28 @@ function ApplicationFormContent() {
 
     if (stepIdx === 3) {
       if (internshipType === "paid") {
-        const { feeAcceptance } = formState.internshipSpecificData;
-        if (!feeAcceptance) stepErrors.feeAcceptance = "You must accept the fee guidelines.";
+        const { feeAcceptance, paymentMode, upiApp, upiPaid, bankName, utrNumber, transferDate, cardType, last4Digits, cardPaid } = formState.internshipSpecificData;
+        if (!feeAcceptance) {
+          stepErrors.feeAcceptance = "You must accept the fee guidelines.";
+        }
+        if (!paymentMode) {
+          stepErrors.paymentMode = "Please select a payment mode.";
+        } else if (paymentMode === "UPI") {
+          if (!upiApp) stepErrors.upiApp = "Please select your UPI App.";
+          if (!upiPaid) stepErrors.upiPaid = "Please complete the UPI payment.";
+        } else if (paymentMode === "Bank Transfer") {
+          if (!bankName || !bankName.trim()) stepErrors.bankName = "Bank Name is required.";
+          if (!utrNumber || !/^[A-Za-z0-9]{12,22}$/.test(utrNumber.trim())) {
+            stepErrors.utrNumber = "UTR Number must be between 12 and 22 alphanumeric characters.";
+          }
+          if (!transferDate) stepErrors.transferDate = "Transfer date is required.";
+        } else if (paymentMode === "Credit Card" || paymentMode === "Debit Card") {
+          if (!cardType) stepErrors.cardType = "Please select your card type.";
+          if (!last4Digits || !/^\d{4}$/.test(last4Digits.trim())) {
+            stepErrors.last4Digits = "Please enter the last 4 digits of your card.";
+          }
+          if (!cardPaid) stepErrors.cardPaid = "Please complete the card payment.";
+        }
       } else if (internshipType === "stipend") {
         const { relevantExperience } = formState.internshipSpecificData;
         if (!relevantExperience || relevantExperience.trim().length < 15) {
@@ -569,6 +607,54 @@ function ApplicationFormContent() {
     }
   };
 
+  const [isSimulatingPayment, setIsSimulatingPayment] = useState(false);
+
+  const handleUPISimulation = () => {
+    setIsSimulatingPayment(true);
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.upiPaid;
+      delete next.paymentStatus;
+      return next;
+    });
+    setTimeout(() => {
+      setIsSimulatingPayment(false);
+      const mockTxnId = `UPI-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+      setFormState((prev) => ({
+        ...prev,
+        internshipSpecificData: {
+          ...prev.internshipSpecificData,
+          upiPaid: true,
+          transactionId: mockTxnId,
+        }
+      }));
+    }, 1500);
+  };
+
+  const handleCardSimulation = () => {
+    setIsSimulatingPayment(true);
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.cardPaid;
+      delete next.paymentStatus;
+      return next;
+    });
+    setTimeout(() => {
+      setIsSimulatingPayment(false);
+      const mockTxnId = `CARD-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+      const mockAuthCode = `AUTH-${Math.floor(100000 + Math.random() * 900000)}`;
+      setFormState((prev) => ({
+        ...prev,
+        internshipSpecificData: {
+          ...prev.internshipSpecificData,
+          cardPaid: true,
+          authCode: mockAuthCode,
+          transactionId: mockTxnId,
+        }
+      }));
+    }, 1500);
+  };
+
   const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -582,12 +668,6 @@ function ApplicationFormContent() {
         topRef.current?.scrollIntoView({ behavior: "smooth" });
         return;
       }
-    }
-
-    if (internshipType === "paid") {
-      setIsSubmitting(false);
-      setShowPaymentModal(true);
-      return;
     }
 
     await executeSubmit();
@@ -1349,56 +1429,308 @@ function ApplicationFormContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
-                    <div>
-                      <label htmlFor="paymentMode" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Payment Mode *</label>
-                      <select
-                        id="paymentMode"
-                        name="paymentMode"
-                        required
-                        value={formState.internshipSpecificData.paymentMode}
-                        onBlur={() => handleBlur("paymentMode")}
-                        onChange={(e) => handleInputChange("internshipSpecificData", "paymentMode", e.target.value)}
-                        className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all ${
-                          errors.paymentMode && touched.paymentMode ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
-                        }`}
-                      >
-                        <option value="">Select Mode</option>
-                        <option value="UPI">UPI</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="Debit Card">Debit Card</option>
-                      </select>
-                      {errors.paymentMode && touched.paymentMode && (
-                        <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
-                          <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
-                          {errors.paymentMode}
-                        </p>
-                      )}
+                  <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label htmlFor="paymentMode" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Payment Mode *</label>
+                        <select
+                          id="paymentMode"
+                          name="paymentMode"
+                          required
+                          value={formState.internshipSpecificData.paymentMode}
+                          onBlur={() => handleBlur("paymentMode")}
+                          onChange={(e) => {
+                            const mode = e.target.value;
+                            setFormState((prev) => ({
+                              ...prev,
+                              internshipSpecificData: {
+                                ...prev.internshipSpecificData,
+                                paymentMode: mode,
+                                upiApp: "",
+                                upiPaid: false,
+                                bankName: "",
+                                utrNumber: "",
+                                transferDate: "",
+                                cardType: "",
+                                last4Digits: "",
+                                authCode: "",
+                                cardPaid: false,
+                                transactionId: "",
+                              }
+                            }));
+                            setErrors((prev) => {
+                              const next = { ...prev };
+                              delete next.paymentMode;
+                              delete next.upiApp;
+                              delete next.upiPaid;
+                              delete next.bankName;
+                              delete next.utrNumber;
+                              delete next.transferDate;
+                              delete next.cardType;
+                              delete next.last4Digits;
+                              delete next.cardPaid;
+                              delete next.paymentStatus;
+                              return next;
+                            });
+                          }}
+                          className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all ${
+                            errors.paymentMode && touched.paymentMode ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
+                          }`}
+                        >
+                          <option value="">Select Mode</option>
+                          <option value="UPI">UPI</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                          <option value="Credit Card">Credit Card</option>
+                          <option value="Debit Card">Debit Card</option>
+                        </select>
+                        {errors.paymentMode && touched.paymentMode && (
+                          <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                            <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                            {errors.paymentMode}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Display Amount Due */}
+                      <div className="flex flex-col justify-center bg-slate-50 border border-slate-100 rounded-xl px-5 py-3">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Amount Due</span>
+                        <span className="text-2xl font-black text-slate-800">₹1,500<span className="text-xs font-semibold text-slate-550">.00 INR</span></span>
+                      </div>
                     </div>
 
-                    <div>
-                      <label htmlFor="transactionId" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Transaction ID *</label>
-                      <input
-                        type="text"
-                        id="transactionId"
-                        name="transactionId"
-                        required
-                        placeholder="E.g. TXN987654321"
-                        value={formState.internshipSpecificData.transactionId}
-                        onBlur={() => handleBlur("transactionId")}
-                        onChange={(e) => handleInputChange("internshipSpecificData", "transactionId", e.target.value)}
-                        className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
-                          errors.transactionId && touched.transactionId ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
-                        }`}
-                      />
-                      {errors.transactionId && touched.transactionId && (
-                        <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
-                          <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
-                          {errors.transactionId}
-                        </p>
-                      )}
-                    </div>
+                    {/* UPI DETAILS */}
+                    {formState.internshipSpecificData.paymentMode === "UPI" && (
+                      <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
+                        <div className="max-w-md">
+                          <label htmlFor="upiApp" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Select UPI App *</label>
+                          <select
+                            id="upiApp"
+                            name="upiApp"
+                            value={formState.internshipSpecificData.upiApp}
+                            onChange={(e) => handleInputChange("internshipSpecificData", "upiApp", e.target.value)}
+                            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                          >
+                            <option value="">Choose App</option>
+                            <option value="Google Pay">Google Pay</option>
+                            <option value="PhonePe">PhonePe</option>
+                            <option value="Paytm">Paytm</option>
+                            <option value="BHIM UPI">BHIM UPI</option>
+                            <option value="Other">Other UPI App</option>
+                          </select>
+                          {errors.upiApp && (
+                            <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                              <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                              {errors.upiApp}
+                            </p>
+                          )}
+                        </div>
+
+                        {!formState.internshipSpecificData.upiPaid ? (
+                          <div>
+                            <button
+                              type="button"
+                              disabled={isSimulatingPayment || !formState.internshipSpecificData.upiApp}
+                              onClick={handleUPISimulation}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isSimulatingPayment ? (
+                                <>
+                                  <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Redirecting to UPI App...
+                                </>
+                              ) : (
+                                <>Proceed to UPI App & Pay</>
+                              )}
+                            </button>
+                            {errors.upiPaid && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                                <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                                {errors.upiPaid}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between animate-fade-in">
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">✓</div>
+                              <div>
+                                <p className="text-sm font-bold text-slate-800">Payment Completed via {formState.internshipSpecificData.upiApp}</p>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">Transaction ID: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.transactionId}</span></p>
+                              </div>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-full uppercase tracking-wider">Paid</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* BANK TRANSFER DETAILS */}
+                    {formState.internshipSpecificData.paymentMode === "Bank Transfer" && (
+                      <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div>
+                            <label htmlFor="bankName" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Bank Name *</label>
+                            <input
+                              type="text"
+                              id="bankName"
+                              name="bankName"
+                              placeholder="E.g. State Bank of India"
+                              value={formState.internshipSpecificData.bankName}
+                              onChange={(e) => handleInputChange("internshipSpecificData", "bankName", e.target.value)}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            />
+                            {errors.bankName && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.bankName}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label htmlFor="utrNumber" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">UTR Number *</label>
+                            <input
+                              type="text"
+                              id="utrNumber"
+                              name="utrNumber"
+                              placeholder="12-22 digit alphanumeric UTR"
+                              value={formState.internshipSpecificData.utrNumber}
+                              onChange={(e) => {
+                                const val = e.target.value.toUpperCase();
+                                handleInputChange("internshipSpecificData", "utrNumber", val);
+                                handleInputChange("internshipSpecificData", "transactionId", val);
+                              }}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            />
+                            {errors.utrNumber && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.utrNumber}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label htmlFor="transferDate" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Transfer Date *</label>
+                            <input
+                              type="date"
+                              id="transferDate"
+                              name="transferDate"
+                              value={formState.internshipSpecificData.transferDate}
+                              onChange={(e) => handleInputChange("internshipSpecificData", "transferDate", e.target.value)}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            />
+                            {errors.transferDate && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.transferDate}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* CARD DETAILS */}
+                    {(formState.internshipSpecificData.paymentMode === "Credit Card" || formState.internshipSpecificData.paymentMode === "Debit Card") && (
+                      <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="cardType" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Card Network *</label>
+                            <select
+                              id="cardType"
+                              name="cardType"
+                              value={formState.internshipSpecificData.cardType}
+                              onChange={(e) => handleInputChange("internshipSpecificData", "cardType", e.target.value)}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            >
+                              <option value="">Select Network</option>
+                              <option value="Visa">Visa</option>
+                              <option value="Mastercard">Mastercard</option>
+                              <option value="RuPay">RuPay</option>
+                              <option value="American Express">American Express</option>
+                            </select>
+                            {errors.cardType && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.cardType}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label htmlFor="last4Digits" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Last 4 Digits *</label>
+                            <input
+                              type="text"
+                              id="last4Digits"
+                              name="last4Digits"
+                              maxLength={4}
+                              placeholder="E.g. 4321"
+                              inputMode="numeric"
+                              pattern="[0-9]{4}"
+                              value={formState.internshipSpecificData.last4Digits}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                                handleInputChange("internshipSpecificData", "last4Digits", val);
+                              }}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            />
+                            {errors.last4Digits && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.last4Digits}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {!formState.internshipSpecificData.cardPaid ? (
+                          <div>
+                            <button
+                              type="button"
+                              disabled={isSimulatingPayment || !formState.internshipSpecificData.cardType || formState.internshipSpecificData.last4Digits?.length !== 4}
+                              onClick={handleCardSimulation}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isSimulatingPayment ? (
+                                <>
+                                  <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Authorizing Card...
+                                </>
+                              ) : (
+                                <>Pay with Card</>
+                              )}
+                            </button>
+                            {errors.cardPaid && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                                <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                                {errors.cardPaid}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between animate-fade-in">
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">✓</div>
+                              <div>
+                                <p className="text-sm font-bold text-slate-800">Card Payment Authorized via {formState.internshipSpecificData.cardType} (**** {formState.internshipSpecificData.last4Digits})</p>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5 flex gap-3">
+                                  <span>Auth Code: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.authCode}</span></span>
+                                  <span>Txn ID: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.transactionId}</span></span>
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-full uppercase tracking-wider">Authorized</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1926,7 +2258,36 @@ function ApplicationFormContent() {
                     {internshipType === "corporate" && <div><span className="text-slate-500 italic">Corporate sponsored program requires no additional fields.</span></div>}
                     
                     {internshipType === "paid" && (
-                      <div className="mt-2 text-blue-600 font-semibold italic">Payment will be processed in the next step.</div>
+                      <div className="mt-2 space-y-1.5 bg-slate-50 border border-slate-150 rounded-xl p-3">
+                        <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                          Payment Completed & Verified (₹1,500)
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-650">
+                          <div><span className="text-slate-400">Payment Mode:</span> <span className="font-semibold">{formState.internshipSpecificData.paymentMode}</span></div>
+                          {formState.internshipSpecificData.paymentMode === "UPI" && (
+                            <>
+                              <div><span className="text-slate-400">UPI App:</span> <span className="font-semibold">{formState.internshipSpecificData.upiApp}</span></div>
+                              <div className="col-span-2"><span className="text-slate-400">Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                            </>
+                          )}
+                          {formState.internshipSpecificData.paymentMode === "Bank Transfer" && (
+                            <>
+                              <div><span className="text-slate-400">Bank Name:</span> <span className="font-semibold">{formState.internshipSpecificData.bankName}</span></div>
+                              <div><span className="text-slate-400">Date:</span> <span className="font-semibold">{formState.internshipSpecificData.transferDate}</span></div>
+                              <div className="col-span-2"><span className="text-slate-400">UTR / Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                            </>
+                          )}
+                          {(formState.internshipSpecificData.paymentMode === "Credit Card" || formState.internshipSpecificData.paymentMode === "Debit Card") && (
+                            <>
+                              <div><span className="text-slate-400">Card Network:</span> <span className="font-semibold">{formState.internshipSpecificData.cardType}</span></div>
+                              <div><span className="text-slate-400">Last 4 Digits:</span> <span className="font-semibold">**** {formState.internshipSpecificData.last4Digits}</span></div>
+                              <div><span className="text-slate-400">Auth Code:</span> <span className="font-semibold">{formState.internshipSpecificData.authCode}</span></div>
+                              <div className="col-span-2"><span className="text-slate-400">Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     )}
 
                     {internshipType === "stipend" && (
