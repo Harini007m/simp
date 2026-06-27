@@ -578,7 +578,11 @@ export default function EmployeeManagementPage() {
   }, []);
 
   return (
-    <div className="space-y-6 animate-slide-in select-none">
+    <div className={`space-y-6 select-none ${
+      (activeActionModal?.type === 'edit' || activeActionModal?.type === 'onboard') 
+        ? 'h-[calc(100vh-80px)] overflow-hidden relative' 
+        : 'animate-slide-in'
+    }`}>
       
       {/* Toast Notification Banner */}
       {toast && (
@@ -2127,8 +2131,16 @@ export default function EmployeeManagementPage() {
 
       {/* ------------------ MODALS FOR OPERATIONAL ACTIONS ------------------ */}
       {activeActionModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white border border-slate-200 rounded-xl shadow-2xl max-w-lg w-full overflow-hidden animate-bounce-in">
+        <div className={`z-[100] flex transition-all ${
+          (activeActionModal.type === 'edit' || activeActionModal.type === 'onboard') 
+            ? 'absolute inset-0 bg-white p-0 items-start justify-stretch' 
+            : 'fixed inset-0 bg-slate-900/50 backdrop-blur-sm p-4 items-center justify-center'
+        }`}>
+          <div className={`bg-white overflow-hidden transition-all duration-300 ${
+            (activeActionModal.type === 'edit' || activeActionModal.type === 'onboard') 
+              ? 'max-w-none w-full h-full rounded-none border-none flex flex-col' 
+              : 'border border-slate-200 rounded-xl shadow-2xl max-w-lg w-full animate-bounce-in'
+          }`}>
             
             {/* Modal Header */}
             <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex justify-between items-center">
@@ -2158,7 +2170,14 @@ export default function EmployeeManagementPage() {
             </div>
 
             {/* Modal forms */}
-            <form onSubmit={executeAction} className="p-6 space-y-4 text-xs font-semibold text-slate-700">
+            <form 
+              onSubmit={executeAction} 
+              className={`text-xs font-semibold text-slate-700 flex flex-col min-h-0 ${
+                (activeActionModal.type === 'edit' || activeActionModal.type === 'onboard') 
+                  ? 'p-8 space-y-6 flex-1 h-full justify-between' 
+                  : 'p-6 space-y-4'
+              }`}
+            >
               
               {/* Form 1: Status change */}
               {(activeActionModal.type === 'status' || activeActionModal.type === 'bulkStatus') && (
@@ -2438,219 +2457,215 @@ export default function EmployeeManagementPage() {
 
               {/* Form 8 & 9: Edit Profile & Onboarding wizard (Combined Form Layout) */}
               {(activeActionModal.type === 'edit' || activeActionModal.type === 'onboard') && (
-                <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                <div className="space-y-6 max-w-5xl mx-auto w-full flex-1 flex flex-col justify-start overflow-hidden pt-4">
                   
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-1">
-                    Section 1: Identity & Credentials
+                  {/* Section 1 */}
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-1">
+                      Section 1: Identity & Credentials
+                    </div>
+                    <div className="grid grid-cols-4 gap-3">
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Full Name</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.name}
+                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Email Address</label>
+                        <input 
+                          type="email" 
+                          required
+                          value={editForm.email}
+                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Primary Phone</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.phone}
+                          onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Date of Birth</label>
+                        <input 
+                          type="date" 
+                          required
+                          value={editForm.dob}
+                          onChange={(e) => setEditForm({ ...editForm, dob: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Gender</label>
+                        <select 
+                          value={editForm.gender}
+                          onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Office Location</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.location}
+                          onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Home Address</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.address}
+                          onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Full Name</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.name}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
+                  {/* Section 2 */}
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-1">
+                      Section 2: Professional Details
                     </div>
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Email Address</label>
-                      <input 
-                        type="email" 
-                        required
-                        value={editForm.email}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Primary Phone</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.phone}
-                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Date of Birth</label>
-                      <input 
-                        type="date" 
-                        required
-                        value={editForm.dob}
-                        onChange={(e) => setEditForm({ ...editForm, dob: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Gender</label>
-                      <select 
-                        value={editForm.gender}
-                        onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Office Location</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.location}
-                        onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="block text-slate-500">Home Address</label>
-                    <input 
-                      type="text" 
-                      required
-                      value={editForm.address}
-                      onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                      className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pt-2 pb-1">
-                    Section 2: Professional Details
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Designation Title</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.designation}
-                        onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Employment Type</label>
-                      <select 
-                        value={editForm.employmentType}
-                        onChange={(e) => setEditForm({ ...editForm, employmentType: e.target.value as any })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      >
-                        <option value="Full-time">Full-time</option>
-                        <option value="Part-time">Part-time</option>
-                        <option value="Contract">Contract Scope</option>
-                        <option value="Internship">Internship Training</option>
-                        <option value="Training">Training Cohort</option>
-                      </select>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Designation Title</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.designation}
+                          onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Employment Type</label>
+                        <select 
+                          value={editForm.employmentType}
+                          onChange={(e) => setEditForm({ ...editForm, employmentType: e.target.value as any })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        >
+                          <option value="Full-time">Full-time</option>
+                          <option value="Part-time">Part-time</option>
+                          <option value="Contract">Contract Scope</option>
+                          <option value="Internship">Internship Training</option>
+                          <option value="Training">Training Cohort</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Salary Grade</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.salaryGrade}
+                          onChange={(e) => setEditForm({ ...editForm, salaryGrade: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Salary Band</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.band}
+                          onChange={(e) => setEditForm({ ...editForm, band: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Shift Schedule</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.shift}
+                          onChange={(e) => setEditForm({ ...editForm, shift: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Experience Level</label>
+                        <select 
+                          value={editForm.experienceLevel}
+                          onChange={(e) => setEditForm({ ...editForm, experienceLevel: e.target.value as any })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        >
+                          <option value="Intern">Intern</option>
+                          <option value="Junior">Junior Staff</option>
+                          <option value="Mid">Mid Level</option>
+                          <option value="Senior">Senior Level</option>
+                          <option value="Lead">Lead Level</option>
+                          <option value="Director">Director Level</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Salary Grade</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.salaryGrade}
-                        onChange={(e) => setEditForm({ ...editForm, salaryGrade: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
+                  
+                  {/* Section 3 */}
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-1">
+                      Section 3: Emergency Contact
                     </div>
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Salary Band</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.band}
-                        onChange={(e) => setEditForm({ ...editForm, band: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Shift Schedule</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.shift}
-                        onChange={(e) => setEditForm({ ...editForm, shift: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Experience Level</label>
-                      <select 
-                        value={editForm.experienceLevel}
-                        onChange={(e) => setEditForm({ ...editForm, experienceLevel: e.target.value as any })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      >
-                        <option value="Intern">Intern</option>
-                        <option value="Junior">Junior Staff</option>
-                        <option value="Mid">Mid Level</option>
-                        <option value="Senior">Senior Level</option>
-                        <option value="Lead">Lead Level</option>
-                        <option value="Director">Director Level</option>
-                      </select>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Contact Name</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.emergencyName}
+                          onChange={(e) => setEditForm({ ...editForm, emergencyName: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Relationship</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.emergencyRelation}
+                          onChange={(e) => setEditForm({ ...editForm, emergencyRelation: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-slate-500 text-[10px]">Phone</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={editForm.emergencyPhone}
+                          onChange={(e) => setEditForm({ ...editForm, emergencyPhone: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded bg-white text-xs focus:outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
-
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pt-2 pb-1">
-                    Section 3: Emergency Contact
+                  
+                  {/* Footer button */}
+                  <div className="pt-2">
+                    <button 
+                      type="submit"
+                      className="w-full bg-slate-900 hover:bg-black text-white py-2.5 rounded-lg font-bold shadow transition-all cursor-pointer text-xs"
+                    >
+                      {activeActionModal.type === 'edit' ? 'Save Changes' : 'Confirm Onboard Employee'}
+                    </button>
                   </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Contact Name</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.emergencyName}
-                        onChange={(e) => setEditForm({ ...editForm, emergencyName: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Relationship</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.emergencyRelation}
-                        onChange={(e) => setEditForm({ ...editForm, emergencyRelation: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-slate-500">Phone</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={editForm.emergencyPhone}
-                        onChange={(e) => setEditForm({ ...editForm, emergencyPhone: e.target.value })}
-                        className="w-full p-2 border border-slate-200 rounded bg-white focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <button 
-                    type="submit"
-                    className="w-full bg-slate-900 hover:bg-black text-white py-2.5 rounded-lg font-bold shadow transition-all mt-4 cursor-pointer"
-                  >
-                    {activeActionModal.type === 'edit' ? 'Save Changes' : 'Confirm Onboard Employee'}
-                  </button>
                 </div>
               )}
 
