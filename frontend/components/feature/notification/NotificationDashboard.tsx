@@ -151,15 +151,15 @@ export default function NotificationDashboard() {
   const activeFilterCount = [statusFilter !== 'All', channelFilter !== 'All', priorityFilter !== 'All'].filter(Boolean).length;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 font-premium">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600">
-            <Bell size={24} />
+          <div className="h-12 w-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shadow-sm border border-amber-200/50">
+            <Bell size={24} className="animate-float-3" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Notification Center</h1>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight font-display-premium">Notification Center</h1>
             <p className="text-sm text-slate-500 mt-0.5">Manage and monitor omni-channel notifications.</p>
           </div>
         </div>
@@ -195,8 +195,8 @@ export default function NotificationDashboard() {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-500 font-medium mb-1">{c.title}</p>
-              <h3 className="text-2xl font-bold text-slate-900">{c.value}</h3>
+              <p className="text-sm text-slate-500 font-semibold mb-1 font-display-premium tracking-wide">{c.title}</p>
+              <h3 className="text-2xl font-black text-slate-900 font-display-premium">{c.value}</h3>
             </div>
           ))
         )}
@@ -294,7 +294,7 @@ export default function NotificationDashboard() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50/80 text-xs uppercase text-slate-500 tracking-wider">
+              <thead className="bg-slate-50/80 text-xs uppercase text-slate-500 tracking-wider font-display-premium">
                 <tr>
                   <th className="px-5 py-3.5 font-semibold">Notification</th>
                   <th className="px-5 py-3.5 font-semibold">Channel</th>
@@ -414,14 +414,14 @@ export default function NotificationDashboard() {
           const ch = channelIcons[selected.channel] || channelIcons['In-App Notification'];
           const ChIcon = ch.icon;
           return (
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 font-premium">
               {/* Header */}
               <div className="flex items-center gap-4">
                 <div className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg ${ch.bg}`}>
                   <ChIcon className={`w-7 h-7 ${ch.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-slate-900">{selected.title}</h3>
+                  <h3 className="text-lg font-bold text-slate-900 font-display-premium tracking-tight">{selected.title}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full ${statusColors[selected.status]}`}>
                       {selected.status}

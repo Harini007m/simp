@@ -1,12 +1,32 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Search, Bell, Settings, X, ChevronRight } from 'lucide-react';
+import { Menu, Search, Bell, Settings, X, ChevronRight, Mail, MessageSquare, Smartphone, Inbox, Clock, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/context/AuthContext';
 import { usePermissions } from '@/src/hooks/usePermissions';
 import { NotificationService } from '@/src/services/notification.service';
 import ViewNotificationModal from './notification/ViewNotificationModal';
+
+const channelIcons: Record<string, { icon: any; iconColor: string; bgGradient: string; borderClass: string }> = {
+  Email: { icon: Mail, iconColor: 'text-indigo-600', bgGradient: 'from-indigo-500/10 to-indigo-500/5', borderClass: 'border-indigo-200/40' },
+  SMS: { icon: MessageSquare, iconColor: 'text-teal-650', bgGradient: 'from-teal-500/10 to-teal-500/5', borderClass: 'border-teal-200/40' },
+  WhatsApp: { icon: Smartphone, iconColor: 'text-emerald-650', bgGradient: 'from-emerald-500/10 to-emerald-500/5', borderClass: 'border-emerald-200/40' },
+  'Push Notification': { icon: Bell, iconColor: 'text-amber-600', bgGradient: 'from-amber-500/10 to-orange-500/5', borderClass: 'border-amber-200/40' },
+  'In-App Notification': { icon: Inbox, iconColor: 'text-violet-600', bgGradient: 'from-violet-500/10 to-fuchsia-500/5', borderClass: 'border-violet-200/40' },
+};
+
+function getRelativeTime(timestamp: string) {
+  const diff = Date.now() - new Date(timestamp).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+}
 
 interface TopNavProps {
   setMobileOpen: (open: boolean) => void;
@@ -171,74 +191,111 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
             <button 
               type="button" 
               onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-              className="relative -m-2.5 p-2.5 text-slate-400 hover:text-slate-500 rounded-full hover:bg-slate-100/50 transition-colors"
+              className={`relative p-2.5 rounded-xl border transition-all duration-300 outline-none ${
+                showNotifDropdown 
+                  ? 'bg-slate-900 text-white border-slate-950 shadow-lg shadow-slate-900/20 scale-95' 
+                  : 'text-slate-600 bg-slate-50 hover:bg-white hover:text-indigo-600 border-slate-200/60 hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-500/5'
+              }`}
             >
               <span className="sr-only">View notifications</span>
-              <Bell className="h-5 w-5" aria-hidden="true" />
+              <Bell className={`h-5 w-5 transition-transform duration-300 ${showNotifDropdown ? 'rotate-12 scale-110' : 'group-hover:rotate-12'}`} aria-hidden="true" />
               {notifications.filter(n => !n.readStatus).length > 0 && (
-                <span className="absolute top-1 right-1 h-4 w-4 bg-rose-500 text-[10px] font-black text-white rounded-full flex items-center justify-center border border-white">
-                  {notifications.filter(n => !n.readStatus).length}
+                <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gradient-to-r from-rose-500 to-red-600 border border-white shadow-sm"></span>
                 </span>
               )}
             </button>
 
             {showNotifDropdown && (
-              <div className="absolute right-0 mt-3 z-50 w-80 rounded-2xl bg-white border border-slate-150 shadow-xl overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                  <span className="font-bold text-slate-800 text-sm">Notifications</span>
-                  <span className="text-xxs font-semibold bg-blue-50 text-blue-750 border border-blue-150 px-2 py-0.5 rounded-full">
+              <div className="absolute right-0 mt-3 z-50 w-96 rounded-3xl bg-white/95 backdrop-blur-xl border border-slate-200/60 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-300 font-premium">
+                <div className="px-5 py-4 border-b border-slate-100/80 bg-slate-50/40 flex justify-between items-center">
+                  <span className="font-extrabold text-slate-900 text-sm tracking-tight font-display-premium">Notifications</span>
+                  <span className="text-[10px] font-bold bg-indigo-50 text-indigo-650 border border-indigo-100 px-2.5 py-0.5 rounded-full tracking-wide">
                     {notifications.filter(n => !n.readStatus).length} New
                   </span>
                 </div>
-                <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto custom-scrollbar">
+                <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto custom-scrollbar">
                   {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-slate-400">
+                    <div className="p-8 text-center text-xs text-slate-450">
                       No notifications yet
                     </div>
                   ) : (
-                    notifications.slice(0, 10).map((n) => (
-                      <div 
-                        key={n.id}
-                        onClick={async () => {
-                          setSelectedNotif(n);
-                          setIsModalOpen(true);
-                          setShowNotifDropdown(false);
-                          if (!n.readStatus) {
-                            try {
-                              await NotificationService.markAsRead(n.id);
-                              setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, readStatus: true } : item));
-                            } catch (e) {
-                              console.error(e);
+                    notifications.slice(0, 10).map((n) => {
+                      const ch = channelIcons[n.channel] || channelIcons['In-App Notification'];
+                      const ChIcon = ch.icon;
+                      const isUnread = !n.readStatus;
+                      
+                      return (
+                        <div 
+                          key={n.id}
+                          onClick={async () => {
+                            setSelectedNotif(n);
+                            setIsModalOpen(true);
+                            setShowNotifDropdown(false);
+                            if (!n.readStatus) {
+                              try {
+                                await NotificationService.markAsRead(n.id);
+                                setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, readStatus: true } : item));
+                              } catch (e) {
+                                console.error(e);
+                              }
                             }
-                          }
-                        }}
-                        className={`p-3.5 hover:bg-slate-50 flex items-start gap-2.5 cursor-pointer transition-colors ${
-                          !n.readStatus ? 'bg-blue-50/10' : ''
-                        }`}
-                      >
-                        <div className={`h-2 w-2 rounded-full shrink-0 mt-1.5 ${
-                          !n.readStatus ? 'bg-teal-500' : 'bg-transparent'
-                        }`} />
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-xs truncate ${!n.readStatus ? 'font-bold text-slate-900' : 'text-slate-650'}`}>
-                            {n.title}
-                          </p>
-                          <p className="text-[10px] text-slate-450 truncate mt-0.5">{n.message}</p>
-                          <p className="text-[9px] text-slate-400 mt-1">{new Date(n.createdTime).toLocaleDateString()}</p>
+                          }}
+                          className={`p-4 hover:bg-slate-50/80 flex items-start gap-3.5 cursor-pointer transition-all duration-200 border-l-4 ${
+                            isUnread 
+                              ? 'border-indigo-600 bg-indigo-50/10' 
+                              : 'border-transparent hover:border-slate-200'
+                          }`}
+                        >
+                          <div className="relative shrink-0 mt-0.5">
+                            <div className={`h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${ch.bgGradient} border ${ch.borderClass} shadow-[0_2px_8px_rgba(0,0,0,0.02)] shrink-0`}>
+                              <ChIcon className={`w-4 h-4 ${ch.iconColor}`} />
+                            </div>
+                            {isUnread && (
+                              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-600"></span>
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className={`text-xs truncate font-premium ${isUnread ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                                {n.title}
+                              </p>
+                              <span className="text-[9px] text-slate-400 font-medium shrink-0 flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-slate-350" />
+                                {getRelativeTime(n.createdTime)}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-normal font-medium">{n.message}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100/80 px-1.5 py-0.5 rounded">
+                                {n.module}
+                              </span>
+                              {n.priority === 'Critical' && (
+                                <span className="text-[9px] font-extrabold uppercase tracking-widest text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded flex items-center gap-0.5 animate-pulse">
+                                  <ShieldAlert className="w-2.5 h-2.5" /> CRITICAL
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
-                <div className="p-2 border-t border-slate-100 text-center bg-slate-50/50">
+                <div className="p-3.5 border-t border-slate-100 bg-slate-50/40 text-center">
                   <button 
                     onClick={() => {
                       setShowNotifDropdown(false);
-                      router.push('/feature/self-service');
+                      router.push('/feature/notifications');
                     }}
-                    className="text-xxs font-bold text-teal-650 hover:text-teal-700 hover:underline"
+                    className="w-full text-center text-xs font-bold text-indigo-600 hover:text-indigo-750 transition-all flex items-center justify-center gap-1.5 py-1"
                   >
-                    View All in Self-Service
+                    <span>View All in Notification Center</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

@@ -34,29 +34,43 @@ export default function SuperAdminPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-500" />
-        TODO: Waiting for backend endpoint
-      </div>
+      <div className="flex flex-col h-96 items-center justify-center gap-6 font-premium">
+        <div className="relative group bg-white/60 backdrop-blur-xl border border-amber-200/50 shadow-[0_8px_30px_rgb(251,191,36,0.08)] rounded-2xl p-5 max-w-md w-full flex items-center gap-4 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(251,191,36,0.15)] hover:border-amber-300/60 animate-in fade-in slide-in-from-bottom-4">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl opacity-10 blur-md group-hover:opacity-15 transition-opacity duration-300"></div>
+          <div className="relative h-12 w-12 rounded-xl bg-amber-50 flex items-center justify-center shrink-0 border border-amber-100 shadow-inner">
+            <AlertTriangle className="h-6 w-6 text-amber-600 animate-pulse" />
+          </div>
+          <div className="relative flex-1">
+            <h4 className="text-sm font-bold text-slate-800 font-display-premium tracking-wide">Developer Notice</h4>
+            <p className="text-xs text-amber-800/90 mt-1 font-medium leading-relaxed">TODO: Waiting for backend endpoint</p>
+          </div>
+        </div>
 
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+        <div className="relative flex items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-100 border-t-blue-600 shadow-md"></div>
+          <div className="absolute h-4 w-4 rounded-full bg-blue-100 animate-ping"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
+    <div className="flex flex-col h-full bg-slate-50 font-premium">
       <div className="bg-white border-b border-slate-200 px-6 py-4 shrink-0 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <ShieldAlert className="h-6 w-6 text-blue-600" />
+          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2 font-display-premium tracking-tight">
+            <ShieldAlert className="h-6 w-6 text-blue-600 animate-float-3" />
             Super Admin Portal
           </h1>
           <p className="text-sm text-slate-500 mt-1">System configuration, audit logs, and global security.</p>
         </div>
-        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-100 text-sm font-semibold">
-          <CheckCircle className="h-4 w-4" /> System Healthy
+        <div className="flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 px-3.5 py-1.5 rounded-xl border border-emerald-100/80 text-xs font-bold tracking-wide shadow-sm shadow-emerald-100/10">
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </div>
+          <CheckCircle className="h-4 w-4 text-emerald-600" />
+          <span>System Healthy</span>
         </div>
       </div>
 
