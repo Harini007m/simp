@@ -16,7 +16,8 @@ import {
   AlertTriangle, 
   Building, 
   Check, 
-  ArrowLeft 
+  ArrowLeft,
+  Upload
 } from 'lucide-react';
 
 // Replaced raw SVG paths with Lucide React icons to resolve IDE 'path' parsing errors
@@ -31,6 +32,7 @@ const WarningIcon = ({ className = "h-4 w-4" }) => <AlertTriangle className={cla
 const CorporateIcon = ({ className = "h-4 w-4" }) => <Building className={className} />;
 const SuccessCheckIcon = ({ className = "h-4 w-4" }) => <Check className={className} />;
 const ArrowBackIcon = ({ className = "h-4 w-4" }) => <ArrowLeft className={className} />;
+const UploadIcon = ({ className = "h-4 w-4" }) => <Upload className={className} />;
 
 const getStepIcon = (index: number, className = "h-4 w-4") => {
   switch (index) {
@@ -63,6 +65,7 @@ interface ApplicationState {
     gender: string;
     city: string;
     state: string;
+    photo: FileData | null;
   };
   academicInformation: {
     collegeName: string;
@@ -94,6 +97,7 @@ interface ApplicationState {
   };
   documents: {
     resume: FileData | null;
+    passbook: FileData | null;
   };
   motivation: {
     whyInternship: string;
@@ -110,6 +114,7 @@ const initialFormState: ApplicationState = {
     gender: "",
     city: "",
     state: "",
+    photo: null,
   },
   academicInformation: {
     collegeName: "",
@@ -141,6 +146,7 @@ const initialFormState: ApplicationState = {
   },
   documents: {
     resume: null,
+    passbook: null,
   },
   motivation: {
     whyInternship: "",
@@ -188,9 +194,12 @@ function ApplicationFormContent() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSaved, setIsSaved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const dragRefResume = useRef<HTMLDivElement>(null);
   const dragRefScreenshot = useRef<HTMLDivElement>(null);
+  const dragRefPhoto = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
   // Load draft from localStorage on mount/type change
@@ -217,7 +226,29 @@ function ApplicationFormContent() {
   // Save draft to localStorage on state change
   useEffect(() => {
     if (formState !== initialFormState) {
-      localStorage.setItem(`pinesphere_internship_draft_${internshipType}`, JSON.stringify(formState));
+      // Strip out file data to prevent QuotaExceededError in localStorage
+      const stateToSave = {
+        ...formState,
+        personalInformation: {
+          ...formState.personalInformation,
+          photo: null,
+        },
+        internshipSpecificData: {
+          ...formState.internshipSpecificData,
+          paymentScreenshot: null,
+        },
+        documents: {
+          resume: null,
+          passbook: null,
+        }
+      };
+      
+      try {
+        localStorage.setItem(`pinesphere_internship_draft_${internshipType}`, JSON.stringify(stateToSave));
+      } catch (err) {
+        console.error("Failed to save draft to localStorage", err);
+      }
+      
       setIsSaved(true);
       const timer = setTimeout(() => setIsSaved(false), 1200);
       return () => clearTimeout(timer);
@@ -263,7 +294,7 @@ function ApplicationFormContent() {
     const stepErrors: Record<string, string> = {};
 
     if (stepIdx === 0) {
-      const { firstName, lastName, email, mobileNumber, city, state } = formState.personalInformation;
+      const { firstName, lastName, email, mobileNumber, city, state, photo } = formState.personalInformation;
       if (!firstName || firstName.trim().length < 2) {
         stepErrors.firstName = "First name must be at least 2 characters.";
       }
@@ -285,6 +316,9 @@ function ApplicationFormContent() {
       }
       if (!state || !state.trim()) {
         stepErrors.state = "State is required.";
+      }
+      if (!photo) {
+        stepErrors.photo = "Passport size photo is required.";
       }
     }
 
@@ -324,13 +358,8 @@ function ApplicationFormContent() {
 
     if (stepIdx === 3) {
       if (internshipType === "paid") {
-        const { feeAcceptance, paymentMode, transactionId, paymentScreenshot } = formState.internshipSpecificData;
+        const { feeAcceptance } = formState.internshipSpecificData;
         if (!feeAcceptance) stepErrors.feeAcceptance = "You must accept the fee guidelines.";
-        if (!paymentMode) stepErrors.paymentMode = "Please select a payment mode.";
-        if (!transactionId || transactionId.trim().length < 6) {
-          stepErrors.transactionId = "Transaction ID must be at least 6 characters.";
-        }
-        if (!paymentScreenshot) stepErrors.paymentScreenshot = "Please upload payment receipt screenshot.";
       } else if (internshipType === "stipend") {
         const { relevantExperience } = formState.internshipSpecificData;
         if (!relevantExperience || relevantExperience.trim().length < 15) {
@@ -353,8 +382,11 @@ function ApplicationFormContent() {
     }
 
     if (stepIdx === 4) {
-      const { resume } = formState.documents;
+      const { resume, passbook } = formState.documents;
       if (!resume) stepErrors.resume = "Resume PDF file is required.";
+      if (internshipType === "stipend" && !passbook) {
+        stepErrors.passbook = "Passbook/Bank document is required for stipend processing.";
+      }
     }
 
     if (stepIdx === 5) {
@@ -414,7 +446,7 @@ function ApplicationFormContent() {
   };
 
   // File Upload Helper (converts to base64)
-  const processFile = (file: File, type: "resume" | "screenshot") => {
+  const processFile = (file: File, type: "resume" | "screenshot" | "photo" | "passbook") => {
     const maxResumeSize = 10 * 1024 * 1024; // 10MB
     const maxScreenshotSize = 5 * 1024 * 1024; // 5MB
 
@@ -425,6 +457,26 @@ function ApplicationFormContent() {
       }
       if (file.size > maxResumeSize) {
         setErrors((prev) => ({ ...prev, resume: "Resume size must be under 10MB." }));
+        return;
+      }
+    } else if (type === "photo") {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors((prev) => ({ ...prev, photo: "Only image files (JPEG, PNG, WEBP) are accepted." }));
+        return;
+      }
+      if (file.size > maxScreenshotSize) {
+        setErrors((prev) => ({ ...prev, photo: "Photo size must be under 5MB." }));
+        return;
+      }
+    } else if (type === "passbook") {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors((prev) => ({ ...prev, passbook: "Accepted files: JPEG, PNG, WEBP, or PDF." }));
+        return;
+      }
+      if (file.size > maxScreenshotSize) {
+        setErrors((prev) => ({ ...prev, passbook: "Passbook size must be under 5MB." }));
         return;
       }
     } else {
@@ -458,6 +510,26 @@ function ApplicationFormContent() {
           delete next.resume;
           return next;
         });
+      } else if (type === "photo") {
+        setFormState((prev) => ({
+          ...prev,
+          personalInformation: { ...prev.personalInformation, photo: fileObj }
+        }));
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.photo;
+          return next;
+        });
+      } else if (type === "passbook") {
+        setFormState((prev) => ({
+          ...prev,
+          documents: { ...prev.documents, passbook: fileObj }
+        }));
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.passbook;
+          return next;
+        });
       } else {
         setFormState((prev) => ({
           ...prev,
@@ -473,11 +545,21 @@ function ApplicationFormContent() {
     reader.readAsDataURL(file);
   };
 
-  const removeFile = (type: "resume" | "screenshot") => {
+  const removeFile = (type: "resume" | "screenshot" | "photo" | "passbook") => {
     if (type === "resume") {
       setFormState((prev) => ({
         ...prev,
         documents: { ...prev.documents, resume: null }
+      }));
+    } else if (type === "photo") {
+      setFormState((prev) => ({
+        ...prev,
+        personalInformation: { ...prev.personalInformation, photo: null }
+      }));
+    } else if (type === "passbook") {
+      setFormState((prev) => ({
+        ...prev,
+        documents: { ...prev.documents, passbook: null }
       }));
     } else {
       setFormState((prev) => ({
@@ -502,10 +584,22 @@ function ApplicationFormContent() {
       }
     }
 
+    if (internshipType === "paid") {
+      setIsSubmitting(false);
+      setShowPaymentModal(true);
+      return;
+    }
+
+    await executeSubmit();
+  };
+
+  const executeSubmit = async () => {
+    setIsSubmitting(true);
     try {
       const payload = {
         internshipType,
         personalInformation: {
+          photo: sanitizeFileData(formState.personalInformation.photo),
           firstName: sanitizeText(formState.personalInformation.firstName),
           lastName: sanitizeText(formState.personalInformation.lastName),
           email: sanitizeText(formState.personalInformation.email),
@@ -544,6 +638,7 @@ function ApplicationFormContent() {
         },
         documents: {
           resume: sanitizeFileData(formState.documents.resume),
+          passbook: sanitizeFileData(formState.documents.passbook),
         },
         motivation: {
           whyInternship: sanitizeText(formState.motivation.whyInternship),
@@ -846,6 +941,77 @@ function ApplicationFormContent() {
                     <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
                       <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
                       {errors.state}
+                    </p>
+                  )}
+                </div>
+
+                <div className="sm:col-span-2 mt-2">
+                  <span className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Passport Size Photo *</span>
+                  
+                  {!formState.personalInformation.photo ? (
+                    <div
+                      ref={dragRefPhoto}
+                      onClick={() => document.getElementById('photo-input')?.click()}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        dragRefPhoto.current?.classList.add("border-blue-500", "bg-blue-50/30");
+                      }}
+                      onDragLeave={(e) => {
+                        e.preventDefault();
+                        dragRefPhoto.current?.classList.remove("border-blue-500", "bg-blue-50/30");
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        dragRefPhoto.current?.classList.remove("border-blue-500", "bg-blue-50/30");
+                        const file = e.dataTransfer.files?.[0];
+                        if (file) processFile(file, "photo");
+                      }}
+                      className={`border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center cursor-pointer hover:bg-slate-50/50 hover:border-blue-400 transition-all ${
+                        errors.photo ? "border-rose-450 bg-rose-50/10" : ""
+                      }`}
+                    >
+                      <input
+                        id="photo-input"
+                        name="photo"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) processFile(file, "photo");
+                        }}
+                      />
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-4">
+                        <UploadIcon className="h-7 w-7 text-blue-600" />
+                      </div>
+                      <p className="text-sm font-bold text-slate-800">Drag & Drop or click to upload your Passport Size Photo</p>
+                      <p className="text-xs text-slate-400 mt-1">Accepts JPEG, PNG, WEBP (Max 5MB)</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-xl p-5 shadow-sm">
+                      <div className="h-16 w-16 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center text-blue-600 overflow-hidden shrink-0">
+                        {formState.personalInformation.photo.base64 ? (
+                          <img src={formState.personalInformation.photo.base64} alt="Photo" className="w-full h-full object-cover" />
+                        ) : (
+                          <UserIcon className="h-6 w-6" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-slate-800 truncate">{formState.personalInformation.photo.name}</p>
+                        <p className="text-xs text-slate-400 font-semibold">{(formState.personalInformation.photo.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile("photo")}
+                        className="text-xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3.5 py-2 rounded-xl transition-colors border border-rose-100 shadow-sm"
+                      >
+                        Remove File
+                      </button>
+                    </div>
+                  )}
+                  {errors.photo && (
+                    <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1">
+                      <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" /> {errors.photo}
                     </p>
                   )}
                 </div>
@@ -1544,6 +1710,62 @@ function ApplicationFormContent() {
                   <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1">⚠ {errors.resume}</p>
                 )}
               </div>
+              {internshipType === "stipend" && (
+                <div className="mt-6">
+                  <span className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Passbook / Bank Document (For Stipend) *</span>
+                  
+                  {!formState.documents.passbook ? (
+                    <div
+                      className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                        errors.passbook ? "border-rose-300 bg-rose-50/50" : "border-slate-300 hover:border-blue-400 hover:bg-blue-50/50 bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            processFile(e.target.files[0], "passbook");
+                          }
+                        }}
+                      />
+                      <div className="flex flex-col items-center gap-2 pointer-events-none">
+                        <div className="p-3 bg-white shadow-sm rounded-full">
+                          <UploadIcon className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop Passbook</p>
+                        <p className="text-xs text-slate-400">JPG, PNG, WEBP, PDF up to 5MB</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl mt-2">
+                      <div className="flex items-center gap-3">
+                        <DocumentIcon className="h-6 w-6 text-emerald-600" />
+                        <div>
+                          <p className="text-sm font-semibold text-emerald-900 line-clamp-1">{formState.documents.passbook.name}</p>
+                          <p className="text-xs text-emerald-600">{(formState.documents.passbook.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile("passbook")}
+                        className="p-2 text-rose-500 hover:bg-rose-100 rounded-lg transition-colors"
+                        title="Remove file"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      </button>
+                    </div>
+                  )}
+                  {errors.passbook && (
+                    <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                      <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                      {errors.passbook}
+                    </p>
+                  )}
+                </div>
+              )}
+
             </div>
           )}
 
@@ -1699,11 +1921,7 @@ function ApplicationFormContent() {
                     {internshipType === "corporate" && <div><span className="text-slate-500 italic">Corporate sponsored program requires no additional fields.</span></div>}
                     
                     {internshipType === "paid" && (
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <div><span className="text-slate-400">Payment Mode:</span> <span className="font-semibold text-slate-800">{formState.internshipSpecificData.paymentMode}</span></div>
-                        <div><span className="text-slate-400">Transaction ID:</span> <span className="font-semibold text-slate-800">{formState.internshipSpecificData.transactionId}</span></div>
-                        <div className="col-span-2 mt-1"><span className="text-slate-400">Verification Screenshot:</span> <span className="font-bold text-slate-800 bg-slate-50 px-2 py-1 border rounded">{formState.internshipSpecificData.paymentScreenshot?.name}</span></div>
-                      </div>
+                      <div className="mt-2 text-blue-600 font-semibold italic">Payment will be processed in the next step.</div>
                     )}
 
                     {internshipType === "stipend" && (
@@ -1745,8 +1963,11 @@ function ApplicationFormContent() {
                       Edit Section
                     </button>
                   </div>
-                  <div className="text-xs">
+                  <div className="text-xs space-y-2">
                     <div><span className="text-slate-400">Resume:</span> <span className="font-bold text-slate-800 bg-slate-50 px-3.5 py-1.5 border border-slate-150 rounded inline-block">{formState.documents.resume?.name} ({(formState.documents.resume ? formState.documents.resume.size / 1024 / 1024 : 0).toFixed(2)} MB)</span></div>
+                    {internshipType === "stipend" && (
+                      <div><span className="text-slate-400">Passbook:</span> <span className="font-bold text-slate-800 bg-slate-50 px-3.5 py-1.5 border border-slate-150 rounded inline-block">{formState.documents.passbook?.name} ({(formState.documents.passbook ? formState.documents.passbook.size / 1024 / 1024 : 0).toFixed(2)} MB)</span></div>
+                    )}
                   </div>
                 </div>
 

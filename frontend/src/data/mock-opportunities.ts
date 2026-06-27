@@ -59,7 +59,7 @@ export const MOCK_OPPORTUNITIES: Opportunity[] = [
     id: "opp-l3",
     title: "Data Science Intern",
     type: "Analytics",
-    value: "research",
+    value: "paid",
     description: "Analyze large educational datasets to build predictive models for student performance and drop-out risks.",
     duration: "6 Months",
     mode: "Remote",
