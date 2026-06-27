@@ -1,5 +1,5 @@
 import { HelpdeskAPI } from '../api/helpdesk.api';
-import { Ticket, KnowledgeBaseArticle } from '../types/helpdesk.types';
+import { Ticket, KnowledgeBaseArticle, TicketComment, TicketStatus } from '../types/helpdesk.types';
 
 export class HelpdeskService {
   static async getTickets(): Promise<Ticket[]> {
@@ -19,5 +19,17 @@ export class HelpdeskService {
 
   static async getKnowledgeBase(): Promise<KnowledgeBaseArticle[]> {
     return HelpdeskAPI.getKBArticles();
+  }
+
+  static async createTicket(ticket: Partial<Ticket>): Promise<Ticket> {
+    return HelpdeskAPI.createTicket(ticket);
+  }
+
+  static async addComment(ticketId: string, authorId: string, authorName: string, content: string): Promise<TicketComment> {
+    return HelpdeskAPI.addComment(ticketId, authorId, authorName, content);
+  }
+
+  static async updateTicketStatus(ticketId: string, status: TicketStatus, assigneeId?: string, assigneeName?: string): Promise<Ticket> {
+    return HelpdeskAPI.updateTicketStatus(ticketId, status, assigneeId, assigneeName);
   }
 }
