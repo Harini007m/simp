@@ -4,13 +4,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Drawer } from '@/components/admin/ui/Drawer';
 import { Stepper } from '@/components/admin/ui/Stepper';
 import { Button } from '@/components/admin/ui/Button';
-import { Search, CheckCircle2, ChevronRight, ChevronLeft, Shield, Upload } from 'lucide-react';
+import { Search, CheckCircle2, ChevronRight, ChevronLeft, Shield, Upload, Users } from 'lucide-react';
 import { Card } from '@/components/admin/ui/Card';
 import { Role } from '@/src/data/mock-roles';
 import { Module } from '@/src/data/mock-modules';
 import { roleService } from '@/src/services/role.service';
 import { moduleService } from '@/src/services/module.service';
 import { userService } from '@/src/services/user.service';
+import { employeeService, ExtendedEmployee } from '@/src/services/employee.service';
 import { User } from '@/src/data/mock-users';
 
 interface CreateUserWizardProps {
@@ -35,6 +36,8 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
   
   const [roles, setRoles] = useState<Role[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
+  const [unlinkedEmployees, setUnlinkedEmployees] = useState<ExtendedEmployee[]>([]);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
 
   // Form Fields
   const [fullName, setFullName] = useState('');
@@ -55,12 +58,23 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
   useEffect(() => {
     async function loadData() {
       try {
-        const [loadedRoles, loadedModules] = await Promise.all([
+        const [loadedRoles, loadedModules, loadedEmployees, loadedUsers] = await Promise.all([
           roleService.getRoles(),
-          moduleService.getModules()
+          moduleService.getModules(),
+          employeeService.getEmployees(),
+          userService.getUsers()
         ]);
+        
+        // Filter out employees who already have an account (matching email)
+        const userEmails = new Set(loadedUsers.map(u => u.email.toLowerCase()));
+        const unlinked = loadedEmployees.filter(emp => {
+          const email = (emp.email || emp.official_email || '').toLowerCase();
+          return email && !userEmails.has(email);
+        });
+
         setRoles(loadedRoles);
         setModules(loadedModules);
+        setUnlinkedEmployees(unlinked);
       } catch (err) {
         console.error('Failed to load user wizard data', err);
       }
@@ -76,6 +90,10 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
     if (isOpen) {
       Promise.resolve().then(() => {
         if (!isMounted) return;
+        
+        // Reset selected employee when opening
+        setSelectedEmployeeId('');
+
         if (userToEdit) {
           setFullName(userToEdit.name);
           setUsername(userToEdit.username);
@@ -132,6 +150,35 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
       isMounted = false;
     };
   }, [isOpen, userToEdit, viewMode, autofillData]);
+
+  const handleEmployeeSelect = (empId: string) => {
+    setSelectedEmployeeId(empId);
+    if (!empId) {
+      setFullName('');
+      setUsername('');
+      setEmail('');
+      setPhone('');
+      setSelectedRole(null);
+      return;
+    }
+
+    const emp = unlinkedEmployees.find(e => e.id === empId || e.employee_id === empId);
+    if (emp) {
+      const emailVal = emp.email || emp.official_email || '';
+      setFullName(emp.name);
+      setUsername(emailVal.split('@')[0] || '');
+      setEmail(emailVal);
+      setPhone(emp.phone || '');
+      
+      const designation = emp.designation || emp.roleName || '';
+      if (designation) {
+        const matchingRole = roles.find(r => r.name.toLowerCase() === designation.toLowerCase());
+        if (matchingRole) {
+          setSelectedRole(matchingRole.id);
+        }
+      }
+    }
+  };
 
   // When role changes, update assigned modules to match the role's default modules
   useEffect(() => {
@@ -259,6 +306,42 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
       case 0:
         return (
           <div className="space-y-4 p-6">
+            {!userToEdit && !autofillData && unlinkedEmployees.length > 0 && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2">
+                <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                  <Users className="h-4 w-4 text-blue-600" />
+                  Link to Registered Employee (Autofill)
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={selectedEmployeeId}
+                    onChange={e => handleEmployeeSelect(e.target.value)}
+                    className="flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">-- Select an unlinked employee to autofill form --</option>
+                    {unlinkedEmployees.map(emp => (
+                      <option key={emp.id || emp.employee_id} value={emp.id || emp.employee_id}>
+                        {emp.name} ({emp.designation || emp.roleName}) - {emp.email || emp.official_email}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedEmployeeId && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEmployeeSelect('')}
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Select an employee who has been registered in the database but doesn't have system user credentials yet.
+                </p>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Full Name *</label>

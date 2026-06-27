@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { Card, CardContent } from '@/components/admin/ui/Card';
 import { Button } from '@/components/admin/ui/Button';
 import { Badge } from '@/components/admin/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/admin/ui/Table';
-import { Search, Filter, Plus, Eye, Edit, Trash, UserX } from 'lucide-react';
+import { Search, Filter, Plus, Eye, Edit, Trash, UserX, Users } from 'lucide-react';
 import { CreateUserWizard } from '../../../components/admin/users/CreateUserWizard';
 import { User } from '@/src/data/mock-users';
 import { userService } from '@/src/services/user.service';
+import { employeeService, ExtendedEmployee } from '@/src/services/employee.service';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   createColumnHelper,
@@ -29,6 +30,13 @@ function UsersPageContent() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewMode, setViewMode] = useState(false);
 
+  // Tab and Employee states
+  const [activeTab, setActiveTab] = useState<'accounts' | 'employees'>('accounts');
+  const [employees, setEmployees] = useState<ExtendedEmployee[]>([]);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [empPage, setEmpPage] = useState(0);
+  const empPageSize = 10;
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const [autofillData, setAutofillData] = useState<{ name: string; email: string; phone: string } | null>(null);
@@ -45,8 +53,18 @@ function UsersPageContent() {
     }
   };
 
+  const loadEmployees = async () => {
+    try {
+      const emps = await employeeService.getEmployees();
+      setEmployees(emps);
+    } catch (err) {
+      console.error('Failed to load employees', err);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
+    loadEmployees();
   }, []);
 
   // Listen to autofill query params
@@ -63,6 +81,7 @@ function UsersPageContent() {
 
   const handleUserCreated = () => {
     loadUsers();
+    loadEmployees();
     if (autofillData) {
       // Clear autofill state and redirect back to application lifecycle overview or custom redirect url
       setAutofillData(null);
@@ -70,6 +89,40 @@ function UsersPageContent() {
       router.push(redirectUrl);
     }
   };
+
+  const getLinkedUser = (email: string) => {
+    return data.find(u => u.email.toLowerCase() === email.toLowerCase());
+  };
+
+  const handleCreateUserForEmployee = (employee: ExtendedEmployee) => {
+    setAutofillData({
+      name: employee.name,
+      email: employee.email || employee.official_email,
+      phone: employee.phone || ''
+    });
+    setSelectedUser(null);
+    setViewMode(false);
+    setIsCreateWizardOpen(true);
+  };
+
+  const filteredEmployees = useMemo(() => {
+    return employees.filter(emp => {
+      const search = employeeSearch.toLowerCase();
+      const email = (emp.email || emp.official_email || '').toLowerCase();
+      const designation = (emp.designation || emp.roleName || '').toLowerCase();
+      return (
+        emp.name.toLowerCase().includes(search) ||
+        email.includes(search) ||
+        (emp.phone && emp.phone.includes(search)) ||
+        designation.includes(search)
+      );
+    });
+  }, [employees, employeeSearch]);
+
+  const paginatedEmployees = useMemo(() => {
+    const start = empPage * empPageSize;
+    return filteredEmployees.slice(start, start + empPageSize);
+  }, [filteredEmployees, empPage]);
 
   const handleView = (user: User) => {
     setSelectedUser(user);
@@ -220,97 +273,258 @@ function UsersPageContent() {
         </Button>
       </div>
 
-      <Card>
-        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input 
-              type="text" 
-              value={globalFilter ?? ''}
-              onChange={e => setGlobalFilter(e.target.value)}
-              placeholder="Search users..." 
-              className="w-full rounded-md border border-slate-200 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <Filter className="h-4 w-4" /> Filter
-            </Button>
-          </div>
-        </div>
-        
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">
-                    Loading users...
-                  </TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">
-                    No users found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                table.getRowModel().rows.map(row => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map(cell => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          
-          <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
-            <span>
-              Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
-              {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of{' '}
-              {table.getFilteredRowModel().rows.length} entries
+      <div className="flex border-b border-slate-200">
+        {[
+          { id: 'accounts', label: 'User Accounts', count: data.length },
+          { id: 'employees', label: 'Registered Employees', count: employees.length }
+        ].map(t => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id as any)}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
+              activeTab === t.id 
+                ? 'border-blue-600 text-blue-600 font-semibold' 
+                : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
+            }`}
+          >
+            <span>{t.label}</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+              activeTab === t.id 
+                ? 'bg-blue-100 text-blue-600' 
+                : 'bg-slate-100 text-slate-500'
+            }`}>
+              {t.count}
             </span>
-            <div className="flex gap-1">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                Previous
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                Next
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'accounts' ? (
+        <Card>
+          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input 
+                type="text" 
+                value={globalFilter ?? ''}
+                onChange={e => setGlobalFilter(e.target.value)}
+                placeholder="Search users..." 
+                className="w-full rounded-md border border-slate-200 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" /> Filter
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                      Loading users...
+                    </TableCell>
+                  </TableRow>
+                ) : table.getRowModel().rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                      No users found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+              <span>
+                Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+                {Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length)} of{' '}
+                {table.getFilteredRowModel().rows.length} entries
+              </span>
+              <div className="flex gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  Previous
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input 
+                type="text" 
+                value={employeeSearch}
+                onChange={e => {
+                  setEmployeeSearch(e.target.value);
+                  setEmpPage(0);
+                }}
+                placeholder="Search registered employees..." 
+                className="w-full rounded-md border border-slate-200 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              />
+            </div>
+          </div>
+          
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Designation</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>User Account</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedEmployees.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                      No employees found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedEmployees.map(emp => {
+                    const linkedUser = getLinkedUser(emp.email);
+                    const isLinked = !!linkedUser;
+                    const initials = emp.name
+                      ? emp.name
+                          .split(' ')
+                          .map(n => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : 'EM';
+
+                    return (
+                      <TableRow key={emp.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-700">
+                              {initials}
+                            </div>
+                            <span className="font-medium text-slate-900">{emp.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{emp.designation || emp.roleName}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{emp.email || emp.official_email}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{emp.phone || 'N/A'}</span>
+                        </TableCell>
+                        <TableCell>
+                          {isLinked ? (
+                            <Badge variant="success">
+                              Linked: @{linkedUser.username}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              No Account
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {isLinked ? (
+                            <button
+                              onClick={() => handleView(linkedUser)}
+                              className="p-1 hover:text-blue-600 transition-colors inline-flex items-center justify-center"
+                              title="View User Account"
+                            >
+                              <Eye className="h-4 w-4 text-slate-450 hover:text-blue-600" />
+                            </button>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleCreateUserForEmployee(emp)}
+                              className="inline-flex items-center"
+                            >
+                              <Plus className="mr-1 h-3.5 w-3.5" /> Create User
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+            
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+              <span>
+                Showing {filteredEmployees.length === 0 ? 0 : empPage * empPageSize + 1} to{' '}
+                {Math.min((empPage + 1) * empPageSize, filteredEmployees.length)} of{' '}
+                {filteredEmployees.length} entries
+              </span>
+              <div className="flex gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setEmpPage(prev => Math.max(0, prev - 1))}
+                  disabled={empPage === 0}
+                >
+                  Previous
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setEmpPage(prev => prev + 1)}
+                  disabled={(empPage + 1) * empPageSize >= filteredEmployees.length}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <CreateUserWizard 
         isOpen={isCreateWizardOpen} 
