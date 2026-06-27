@@ -2,113 +2,164 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { API_ENDPOINTS } from '@/src/config';
+import { opportunitiesService } from '@/src/services/opportunities.service';
+import { Opportunity } from '@/src/data/mock-opportunities';
+import { Footer } from '@/components/layout/Footer';
+import Image from "next/image";
+import { useRouter } from 'next/navigation';
+import { ChevronDown, ArrowRight, ShieldCheck } from "lucide-react";
 
-export interface Opportunity {
-  title: string;
-  type: string;
-  value: string;
-  desc: string;
-  duration: string;
-  mode: string;
-  seats: string;
-  eligibility: string;
-  startDate: string;
-  color: string;
-}
+const heroData = {
+  badge: "GLOBAL INTERNSHIP PROGRAMS",
+  headline: "The Pinesphere Commitment to Start With Enterprise Leaders",
+  subtitle:
+    "Pinesphere ERP offers a diverse range of internship programs designed to bridge the gap between academic learning and industrial excellence. Join our global talent ecosystem today.",
+  buttons: {
+    primary: "EXPLORE MORE",
+    
+  },
+};
+
+// --- COMMON COMPONENTS ---
+interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {}
+const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
+  ({ className, children, ...props }, ref) => (
+    <div ref={ref} className={`max-w-[1440px] mx-auto px-6 md:px-12 ${className || ""}`} {...props}>
+      {children}
+    </div>
+  )
+);
+Container.displayName = "Container";
+
+interface SectionProps extends React.HTMLAttributes<HTMLElement> {}
+const Section = React.forwardRef<HTMLElement, SectionProps>(
+  ({ className, children, ...props }, ref) => (
+    <section ref={ref} className={`py-12 md:py-24 lg:py-32 ${className || ""}`} {...props}>
+      {children}
+    </section>
+  )
+);
+Section.displayName = "Section";
+
+
+// --- HERO COMPONENTS ---
+const HeroBadge = () => (
+  <div className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-bold text-blue-600 tracking-widest uppercase mb-6">
+    <span className="w-4 h-4 rounded-full border-[3px] border-blue-100 flex items-center justify-center">
+      <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+    </span>
+    {heroData.badge}
+  </div>
+);
+
+const HeroContent = () => (
+  <div className="max-w-[800px]">
+    <h1 className="text-[2.75rem] sm:text-5xl md:text-[4rem] font-extrabold tracking-tight text-slate-950 leading-[1.1] mb-6">
+      {heroData.headline}
+    </h1>
+    <p className="text-base md:text-lg text-slate-500 leading-relaxed max-w-xl">
+      {heroData.subtitle}
+    </p>
+  </div>
+);
+
+const HeroButtons = () => {
+  const handleExploreClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const target = document.getElementById('programs');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-4 mt-10 mb-12">
+      <button 
+        onClick={handleExploreClick}
+        className="rounded-xl px-8 py-4 text-xs font-bold tracking-widest uppercase bg-[#111827] hover:bg-black text-white flex items-center gap-3 transition-colors shadow-lg shadow-slate-900/20"
+      >
+        EXPLORE MORE
+        <ArrowRight className="w-4 h-4" />
+      </button>
+      {/* <a 
+        href="#programs"
+        onClick={handleExploreClick}
+        className="rounded-xl px-8 py-4 text-xs font-bold tracking-widest uppercase bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 flex items-center gap-3 transition-colors shadow-sm"
+      >
+        DIVE DEEPER
+        <ArrowRight className="w-4 h-4" />
+      </a> */}
+    </div>
+  );
+};
+
+// const TrustedBy = () => (
+  // <div className="mt-12 sm:mt-16">
+    // <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-6">
+      // TRUSTED BY LEADING COMPANIES
+    // </p>
+    // <div className="flex flex-wrap items-center gap-6 sm:gap-10 opacity-60 grayscale">
+      {/* <span className="text-xl font-bold font-sans tracking-tighter text-slate-700">Google</span>
+      <span className="text-lg font-semibold flex items-center gap-1.5 text-slate-700">
+        <span className="grid grid-cols-2 gap-[2px]">
+          <span className="w-2 h-2 bg-slate-700"></span><span className="w-2 h-2 bg-slate-700"></span>
+          <span className="w-2 h-2 bg-slate-700"></span><span className="w-2 h-2 bg-slate-700"></span>
+        </span>
+        Microsoft
+      </span>
+      <span className="text-xl font-bold font-serif tracking-tighter text-slate-700">amazon</span>
+      <span className="text-xl font-bold font-sans text-slate-700">Deloitte.</span>
+      <span className="text-xl font-medium font-sans tracking-tight text-slate-700">Infosys</span> */}
+    {/* </div> */}
+  {/* </div> */}
+// );
+
+const Hero = () => (
+  <Section className="relative overflow-hidden min-h-[calc(100vh-5rem)] flex items-center bg-white pt-8 md:pt-12 lg:pt-16 pb-20">
+    {/* Full Height Background Image on Right with Fade */}
+    <div className="absolute top-0 right-0 bottom-0 w-full lg:w-[60%] pointer-events-none z-0">
+      <Image 
+        src="/images/hero/hero-team.png" 
+        alt="Pinesphere enterprise professionals" 
+        fill 
+        sizes="(max-width: 1024px) 100vw, 60vw"
+        className="object-cover object-right-top" 
+        priority 
+      />
+      {/* Gradient fade to white on the left */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white via-white/0 to-transparent w-full" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent w-full" />
+    </div>
+
+    <Container className="relative z-10 w-full">
+      <div className="w-full lg:w-[65%] xl:w-[60%] flex flex-col justify-center">
+        <HeroBadge />
+        <HeroContent />
+        <HeroButtons />
+        {/* <TrustedBy /> */}
+      </div>
+    </Container>
+  </Section>
+);
 
 export default function LandingPage() {
-  const fallbackOpportunities: Opportunity[] = [
-    { 
-      title: "Free Internship", 
-      type: "Free", 
-      value: "free", 
-      desc: "Build practical skills through guided learning and real-world projects.", 
-      duration: "4 Weeks",
-      mode: "Online",
-      seats: "15 Left",
-      eligibility: "B.E / B.Tech / MCA / BCA",
-      startDate: "July 1, 2026",
-      color: "text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full" 
-    },
-    { 
-      title: "Paid Internship", 
-      type: "Paid", 
-      value: "paid", 
-      desc: "Work on live enterprise projects while earning industry experience and compensation.", 
-      duration: "12 Weeks",
-      mode: "Hybrid",
-      seats: "5 Left",
-      eligibility: "B.E / B.Tech / MCA",
-      startDate: "July 10, 2026",
-      color: "text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-full" 
-    },
-    { 
-      title: "Stipend Internship", 
-      type: "Stipend", 
-      value: "stipend", 
-      desc: "Gain hands-on experience with monthly stipend support.", 
-      duration: "24 Weeks",
-      mode: "Offline",
-      seats: "8 Left",
-      eligibility: "Graduates / Postgraduates",
-      startDate: "July 15, 2026",
-      color: "text-purple-700 bg-purple-50 border border-purple-100 rounded-full" 
-    },
-    { 
-      title: "Corporate Sponsored Internship", 
-      type: "Corporate", 
-      value: "corporate", 
-      desc: "Contribute to enterprise-grade initiatives backed by corporate partners.", 
-      duration: "16 Weeks",
-      mode: "Hybrid",
-      seats: "12 Left",
-      eligibility: "Final Year Students",
-      startDate: "July 20, 2026",
-      color: "text-amber-700 bg-amber-50 border border-amber-100 rounded-full" 
-    },
-    { 
-      title: "Research Internship", 
-      type: "Research", 
-      value: "research", 
-      desc: "Explore advanced research, methodologies, and emerging tech.", 
-      duration: "24 Weeks",
-      mode: "Online",
-      seats: "4 Left",
-      eligibility: "M.Tech / MS / Ph.D Candidates",
-      startDate: "August 1, 2026",
-      color: "text-rose-700 bg-rose-50 border border-rose-100 rounded-full" 
-    },
-    { 
-      title: "Industrial Internship", 
-      type: "Industrial", 
-      value: "industrial", 
-      desc: "Acquire essential industrial engineering and planning experience.", 
-      duration: "8 Weeks",
-      mode: "Offline",
-      seats: "10 Left",
-      eligibility: "B.E / B.Tech / MCA",
-      startDate: "July 5, 2026",
-      color: "text-blue-700 bg-blue-50 border border-blue-100 rounded-full" 
-    },
-  ];
-
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [opportunities, setOpportunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch opportunities from the backend
+  const router = useRouter();
+  const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  // Fetch opportunities from the mock service layer
   useEffect(() => {
     const fetchOpportunities = async () => {
       try {
-        const response = await fetch(API_ENDPOINTS.OPPORTUNITIES);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        setOpportunities(data);
+        const data = await opportunitiesService.getOpportunities();
+        setOpportunities(data as any);
       } catch (error) {
-        console.error("Failed to fetch opportunities from backend, using fallback data:", error);
-        setOpportunities(fallbackOpportunities);
+        console.error("Failed to fetch opportunities from service:", error);
+        setOpportunities([]);
       } finally {
         setLoading(false);
       }
@@ -224,85 +275,7 @@ export default function LandingPage() {
           </div>
         </header>
  
-        {/* Hero Section with Diagonal Clip Design and Background Video */}
-        <div className="relative w-full h-[calc(100vh-5rem)] bg-[#050505] overflow-hidden flex flex-col justify-between">
-          
-          {/* Background Video playing behind the black section */}
-          <div className="absolute inset-0 w-full h-full z-0">
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              src="https://pinesphere.com/static/assets/videos/pines_banner2.mp4"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-slate-950/30" />
-          </div>
- 
-          {/* Upper-Left White Background Slant Overlay (Hides video on top left) */}
-          <div 
-            className="absolute inset-0 bg-white z-1 hero-slant"
-          />
- 
-          {/* Vertical lines overlay on the black section (decorations) */}
-          <div className="absolute inset-0 z-5 pointer-events-none">
-            <div className="absolute top-[32%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '20%' }} />
-            <div className="absolute top-[45%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '41%' }} />
-            <div className="absolute top-[28%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '58%' }} />
-            <div className="absolute top-[38%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '77%' }} />
-            <div className="absolute top-[30%] bottom-0 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent" style={{ left: '88%' }} />
-          </div>
- 
-          {/* Content Wrapper */}
-          <div className="relative z-10 w-full h-full max-w-7xl mx-auto pl-4 sm:pl-8 lg:pl-10 pr-6 lg:pr-16 pt-4 pb-12 md:pt-6 md:pb-16 flex flex-col justify-between">
-            
-            {/* Top Text Content (Original text, lies on the white background overlay) */}
-            <div className="text-left mt-2 md:mt-3 max-w-3xl z-10">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-normal tracking-tight text-slate-950 leading-[1.15] mb-6 animate-slide-in">
-                Start Your <br />
-                Internship Journey <br />
-                With Enterprise Leaders
-              </h1>
-              <p className="text-sm sm:text-base leading-relaxed text-slate-600 max-w-xl animate-slide-in font-medium" style={{ animationDelay: '70ms' }}>
-                Pinesphere ERP offers a diverse range of internship programs designed to bridge the gap between academic learning and industrial excellence. Join our global talent ecosystem today.
-              </p>
-            </div>
- 
-            {/* Bottom Slider & Commitment Section (Lies on the black background overlay) */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-8 pb-4 z-10">
-              
-              {/* Left Side: 4 Horizontal Slider Indicators */}
-              <div className="flex gap-4 w-60 md:w-80">
-                <div className="h-[2px] bg-white flex-1 transition-all" />
-                <div className="h-[2px] bg-white/20 flex-1 transition-all" />
-                <div className="h-[2px] bg-white/20 flex-1 transition-all" />
-                <div className="h-[2px] bg-white/20 flex-1 transition-all" />
-              </div>
- 
-              {/* Right Side: The Pinesphere Commitment & Explore Action */}
-              <div className="text-left sm:text-right flex flex-col items-start sm:items-end gap-5">
-                <h2 className="text-xl md:text-2xl font-light tracking-wide text-white leading-snug">
-                  The Pinesphere <br className="hidden sm:inline" />
-                  Commitment
-                </h2>
-                <a 
-                  href="#programs" 
-                  onClick={handleExploreClick}
-                  className="inline-flex bg-white hover:bg-slate-100 text-black text-xs font-bold uppercase tracking-[0.25em] py-3.5 px-8 transition-all active:scale-[0.98] rounded-none animate-slide-in"
-                  style={{ animationDelay: '150ms' }}
-                >
-                  Dive Deeper
-                </a>
-              </div>
- 
-            </div>
- 
-          </div>
- 
-        </div>
+        <Hero />
 
         {/* Programs Section */}
         <div ref={programsRef} id="programs" className="mx-auto max-w-7xl px-6 py-24 lg:px-16 scroll-mt-6">
@@ -340,7 +313,7 @@ export default function LandingPage() {
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2">{opp.title}</h3>
-                <p className="text-sm text-slate-500 flex-1 leading-relaxed mb-6">{opp.desc}</p>
+                <p className="text-sm text-slate-500 flex-1 leading-relaxed mb-6">{opp.description}</p>
                 
                 <div className="space-y-3 border-t border-slate-100 pt-5 mb-6 text-slate-650 text-sm">
                   <div className="flex items-center gap-3">
@@ -349,6 +322,16 @@ export default function LandingPage() {
                     </svg>
                     <span className="text-slate-400 font-medium">Duration:</span>
                     <span className="font-semibold text-slate-800 ml-auto">{opp.duration}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <svg className="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                    <span className="text-slate-400 font-medium">Internship Type:</span>
+                    <span className="font-semibold text-slate-800 ml-auto capitalize">
+                      {opp.internshipType || 'Free'}
+                    </span>
                   </div>
                   
                   <div className="flex items-center gap-3">
@@ -375,6 +358,8 @@ export default function LandingPage() {
                     <span className="font-semibold text-slate-800 ml-auto">{opp.eligibility}</span>
                   </div>
 
+
+
                   <div className="flex items-center gap-3">
                     <svg className="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -382,54 +367,101 @@ export default function LandingPage() {
                     <span className="text-slate-400 font-medium">Start Date:</span>
                     <span className="font-semibold text-slate-800 ml-auto">{opp.startDate}</span>
                   </div>
+
+                  {opp.internshipType && (
+                    <div className="flex items-center gap-3">
+                      <svg className="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-slate-400 font-medium">Compensation:</span>
+                      <span className="font-semibold text-slate-800 ml-auto">
+                        {opp.internshipType === 'free' ? 'Free / Unpaid' : 
+                         opp.internshipType === 'stipend' ? `Stipend (${opp.amount || 'Yes'})` :
+                         opp.internshipType === 'paid' ? `Paid (${opp.amount || 'Yes'})` : 
+                         opp.internshipType}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <Link 
-                  href={`/apply?type=${opp.value}`} 
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedOpp(opp);
+                    setVerifyModalOpen(true);
+                  }}
                   className="block w-full rounded-xl bg-slate-55 border border-slate-200 py-3.5 text-center text-sm font-semibold text-slate-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all duration-200 active:scale-[0.98]"
                 >
                   Apply Now
-                </Link>
+                </button>
               </div>
             ))}
           </div>
         </div>
       </div>
 
+      {/* DigiLocker Verification Modal */}
+      {verifyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full">
+                <ShieldCheck className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-slate-900 mb-2">
+                Verify with DigiLocker
+              </h3>
+              <p className="text-sm text-center text-slate-500 mb-6">
+                To proceed with your application for <span className="font-semibold text-slate-700">{selectedOpp?.title}</span>, please verify your identity securely.
+              </p>
+              
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setIsVerifying(true);
+                    setTimeout(() => {
+                      setIsVerifying(false);
+                      setVerifyModalOpen(false);
+                      if (selectedOpp) {
+                        router.push(`/apply?type=${selectedOpp.value}`);
+                      }
+                    }, 2000);
+                  }}
+                  disabled={isVerifying}
+                  className="w-full flex items-center justify-center py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isVerifying ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Verifying...
+                    </>
+                  ) : (
+                    "Proceed to Verify"
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    if (!isVerifying) {
+                      setVerifyModalOpen(false);
+                      setSelectedOpp(null);
+                    }
+                  }}
+                  disabled={isVerifying}
+                  className="w-full py-3 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <footer className="w-full border-t border-slate-200/80 bg-white py-12 px-6 lg:px-16 text-slate-500">
-        <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-8 mb-8 text-sm">
-          <div className="md:col-span-6 flex flex-col gap-4">
-            <img src="/logo.png" alt="Pinesphere Logo" className="h-10 w-auto object-contain self-start" />
-            <p className="text-xs leading-relaxed text-slate-400 max-w-sm">
-              We offer technology consulting and digital solutions to global enterprises, enabling transformative scale at speed.
-            </p>
-          </div>
-          <div className="md:col-span-3">
-            <h4 className="font-semibold text-slate-800 mb-3 uppercase tracking-wider text-xs">Navigation</h4>
-            <ul className="space-y-2 text-xs">
-              <li><a href="#programs" onClick={handleExploreClick} className="hover:text-blue-600 transition-colors">Available Programs</a></li>
-              <li><Link href="/login" className="hover:text-blue-600 transition-colors">Entrance Portal</Link></li>
-            </ul>
-          </div>
-          <div className="md:col-span-3">
-            <h4 className="font-semibold text-slate-800 mb-3 uppercase tracking-wider text-xs">Legal</h4>
-            <ul className="space-y-2 text-xs">
-              <li><Link href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#" className="hover:text-blue-600 transition-colors">Terms of Service</Link></li>
-              <li><Link href="#" className="hover:text-blue-600 transition-colors">Contact Support</Link></li>
-            </ul>
-          </div>
-        </div>
-        <div className="mx-auto max-w-7xl border-t border-slate-100 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-bold tracking-wider text-slate-400">
-          <div>© 2026 PINESPHERE ENTERPRISE. ALL RIGHTS RESERVED.</div>
-          <div className="flex gap-6">
-            <Link href="#" className="hover:text-blue-600 transition-colors">PRIVACY POLICY</Link>
-            <Link href="#" className="hover:text-blue-600 transition-colors">TERMS</Link>
-            <Link href="#" className="hover:text-blue-600 transition-colors">SUPPORT</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

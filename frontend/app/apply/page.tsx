@@ -5,72 +5,34 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { API_ENDPOINTS } from '@/src/config';
 
-// SVG Icon Sub-components for professional visual representation
-const UserIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-);
+import { 
+  User, 
+  GraduationCap, 
+  Briefcase, 
+  Target, 
+  FileText, 
+  Edit3, 
+  ClipboardCheck, 
+  AlertTriangle, 
+  Building, 
+  Check, 
+  ArrowLeft,
+  Upload
+} from 'lucide-react';
 
-const AcademicIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-  </svg>
-);
-
-const ProfessionalIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-  </svg>
-);
-
-const SpecificIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-  </svg>
-);
-
-const DocumentIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-  </svg>
-);
-
-const MotivationIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-  </svg>
-);
-
-const ReviewIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-  </svg>
-);
-
-const WarningIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-  </svg>
-);
-
-const CorporateIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-  </svg>
-);
-
-const SuccessCheckIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-  </svg>
-);
-
-const ArrowBackIcon = ({ className = "h-4 w-4" }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-  </svg>
-);
+// Replaced raw SVG paths with Lucide React icons to resolve IDE 'path' parsing errors
+const UserIcon = ({ className = "h-4 w-4" }) => <User className={className} />;
+const AcademicIcon = ({ className = "h-4 w-4" }) => <GraduationCap className={className} />;
+const ProfessionalIcon = ({ className = "h-4 w-4" }) => <Briefcase className={className} />;
+const SpecificIcon = ({ className = "h-4 w-4" }) => <Target className={className} />;
+const DocumentIcon = ({ className = "h-4 w-4" }) => <FileText className={className} />;
+const MotivationIcon = ({ className = "h-4 w-4" }) => <Edit3 className={className} />;
+const ReviewIcon = ({ className = "h-4 w-4" }) => <ClipboardCheck className={className} />;
+const WarningIcon = ({ className = "h-4 w-4" }) => <AlertTriangle className={className} />;
+const CorporateIcon = ({ className = "h-4 w-4" }) => <Building className={className} />;
+const SuccessCheckIcon = ({ className = "h-4 w-4" }) => <Check className={className} />;
+const ArrowBackIcon = ({ className = "h-4 w-4" }) => <ArrowLeft className={className} />;
+const UploadIcon = ({ className = "h-4 w-4" }) => <Upload className={className} />;
 
 const getStepIcon = (index: number, className = "h-4 w-4") => {
   switch (index) {
@@ -103,6 +65,7 @@ interface ApplicationState {
     gender: string;
     city: string;
     state: string;
+    photo: FileData | null;
   };
   academicInformation: {
     collegeName: string;
@@ -131,9 +94,19 @@ interface ApplicationState {
     researchInterestStatement: string;
     publicationsAvailable: "Yes" | "No";
     publicationLinks: string;
+    upiApp?: string;
+    upiPaid?: boolean;
+    bankName?: string;
+    utrNumber?: string;
+    transferDate?: string;
+    cardType?: string;
+    last4Digits?: string;
+    authCode?: string;
+    cardPaid?: boolean;
   };
   documents: {
     resume: FileData | null;
+    passbook: FileData | null;
   };
   motivation: {
     whyInternship: string;
@@ -150,6 +123,7 @@ const initialFormState: ApplicationState = {
     gender: "",
     city: "",
     state: "",
+    photo: null,
   },
   academicInformation: {
     collegeName: "",
@@ -178,9 +152,19 @@ const initialFormState: ApplicationState = {
     researchInterestStatement: "",
     publicationsAvailable: "No",
     publicationLinks: "",
+    upiApp: "",
+    upiPaid: false,
+    bankName: "",
+    utrNumber: "",
+    transferDate: "",
+    cardType: "",
+    last4Digits: "",
+    authCode: "",
+    cardPaid: false,
   },
   documents: {
     resume: null,
+    passbook: null,
   },
   motivation: {
     whyInternship: "",
@@ -197,6 +181,22 @@ const steps = [
   { id: 7, label: "Review & Submit" }
 ];
 
+const toPlainBase64 = (value: string) => {
+  const commaIndex = value.indexOf(',');
+  return commaIndex >= 0 ? value.slice(commaIndex + 1) : value;
+};
+
+const sanitizeFileData = (file: FileData | null): FileData | null => {
+  if (!file) return null;
+
+  return {
+    ...file,
+    base64: toPlainBase64(file.base64),
+  };
+};
+
+const sanitizeText = (value: string) => value.trim();
+
 function ApplicationFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -212,9 +212,12 @@ function ApplicationFormContent() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSaved, setIsSaved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const dragRefResume = useRef<HTMLDivElement>(null);
   const dragRefScreenshot = useRef<HTMLDivElement>(null);
+  const dragRefPhoto = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
   // Load draft from localStorage on mount/type change
@@ -241,7 +244,29 @@ function ApplicationFormContent() {
   // Save draft to localStorage on state change
   useEffect(() => {
     if (formState !== initialFormState) {
-      localStorage.setItem(`pinesphere_internship_draft_${internshipType}`, JSON.stringify(formState));
+      // Strip out file data to prevent QuotaExceededError in localStorage
+      const stateToSave = {
+        ...formState,
+        personalInformation: {
+          ...formState.personalInformation,
+          photo: null,
+        },
+        internshipSpecificData: {
+          ...formState.internshipSpecificData,
+          paymentScreenshot: null,
+        },
+        documents: {
+          resume: null,
+          passbook: null,
+        }
+      };
+      
+      try {
+        localStorage.setItem(`pinesphere_internship_draft_${internshipType}`, JSON.stringify(stateToSave));
+      } catch (err) {
+        console.error("Failed to save draft to localStorage", err);
+      }
+      
       setIsSaved(true);
       const timer = setTimeout(() => setIsSaved(false), 1200);
       return () => clearTimeout(timer);
@@ -249,7 +274,7 @@ function ApplicationFormContent() {
   }, [formState, internshipType]);
 
   // Handle simple input modifications
-  const handleInputChange = (section: keyof ApplicationState, field: string, value: any) => {
+  const handleInputChange = (section: keyof ApplicationState, field: string, value: string | boolean) => {
     setFormState((prev) => ({
       ...prev,
       [section]: {
@@ -287,7 +312,7 @@ function ApplicationFormContent() {
     const stepErrors: Record<string, string> = {};
 
     if (stepIdx === 0) {
-      const { firstName, lastName, email, mobileNumber, city, state } = formState.personalInformation;
+      const { firstName, lastName, email, mobileNumber, city, state, photo } = formState.personalInformation;
       if (!firstName || firstName.trim().length < 2) {
         stepErrors.firstName = "First name must be at least 2 characters.";
       }
@@ -309,6 +334,9 @@ function ApplicationFormContent() {
       }
       if (!state || !state.trim()) {
         stepErrors.state = "State is required.";
+      }
+      if (!photo) {
+        stepErrors.photo = "Passport size photo is required.";
       }
     }
 
@@ -348,13 +376,28 @@ function ApplicationFormContent() {
 
     if (stepIdx === 3) {
       if (internshipType === "paid") {
-        const { feeAcceptance, paymentMode, transactionId, paymentScreenshot } = formState.internshipSpecificData;
-        if (!feeAcceptance) stepErrors.feeAcceptance = "You must accept the fee guidelines.";
-        if (!paymentMode) stepErrors.paymentMode = "Please select a payment mode.";
-        if (!transactionId || transactionId.trim().length < 6) {
-          stepErrors.transactionId = "Transaction ID must be at least 6 characters.";
+        const { feeAcceptance, paymentMode, upiApp, upiPaid, bankName, utrNumber, transferDate, cardType, last4Digits, cardPaid } = formState.internshipSpecificData;
+        if (!feeAcceptance) {
+          stepErrors.feeAcceptance = "You must accept the fee guidelines.";
         }
-        if (!paymentScreenshot) stepErrors.paymentScreenshot = "Please upload payment receipt screenshot.";
+        if (!paymentMode) {
+          stepErrors.paymentMode = "Please select a payment mode.";
+        } else if (paymentMode === "UPI") {
+          if (!upiApp) stepErrors.upiApp = "Please select your UPI App.";
+          if (!upiPaid) stepErrors.upiPaid = "Please complete the UPI payment.";
+        } else if (paymentMode === "Bank Transfer") {
+          if (!bankName || !bankName.trim()) stepErrors.bankName = "Bank Name is required.";
+          if (!utrNumber || !/^[A-Za-z0-9]{12,22}$/.test(utrNumber.trim())) {
+            stepErrors.utrNumber = "UTR Number must be between 12 and 22 alphanumeric characters.";
+          }
+          if (!transferDate) stepErrors.transferDate = "Transfer date is required.";
+        } else if (paymentMode === "Credit Card" || paymentMode === "Debit Card") {
+          if (!cardType) stepErrors.cardType = "Please select your card type.";
+          if (!last4Digits || !/^\d{4}$/.test(last4Digits.trim())) {
+            stepErrors.last4Digits = "Please enter the last 4 digits of your card.";
+          }
+          if (!cardPaid) stepErrors.cardPaid = "Please complete the card payment.";
+        }
       } else if (internshipType === "stipend") {
         const { relevantExperience } = formState.internshipSpecificData;
         if (!relevantExperience || relevantExperience.trim().length < 15) {
@@ -377,8 +420,11 @@ function ApplicationFormContent() {
     }
 
     if (stepIdx === 4) {
-      const { resume } = formState.documents;
+      const { resume, passbook } = formState.documents;
       if (!resume) stepErrors.resume = "Resume PDF file is required.";
+      if (internshipType === "stipend" && !passbook) {
+        stepErrors.passbook = "Passbook/Bank document is required for stipend processing.";
+      }
     }
 
     if (stepIdx === 5) {
@@ -438,7 +484,7 @@ function ApplicationFormContent() {
   };
 
   // File Upload Helper (converts to base64)
-  const processFile = (file: File, type: "resume" | "screenshot") => {
+  const processFile = (file: File, type: "resume" | "screenshot" | "photo" | "passbook") => {
     const maxResumeSize = 10 * 1024 * 1024; // 10MB
     const maxScreenshotSize = 5 * 1024 * 1024; // 5MB
 
@@ -449,6 +495,26 @@ function ApplicationFormContent() {
       }
       if (file.size > maxResumeSize) {
         setErrors((prev) => ({ ...prev, resume: "Resume size must be under 10MB." }));
+        return;
+      }
+    } else if (type === "photo") {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors((prev) => ({ ...prev, photo: "Only image files (JPEG, PNG, WEBP) are accepted." }));
+        return;
+      }
+      if (file.size > maxScreenshotSize) {
+        setErrors((prev) => ({ ...prev, photo: "Photo size must be under 5MB." }));
+        return;
+      }
+    } else if (type === "passbook") {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors((prev) => ({ ...prev, passbook: "Accepted files: JPEG, PNG, WEBP, or PDF." }));
+        return;
+      }
+      if (file.size > maxScreenshotSize) {
+        setErrors((prev) => ({ ...prev, passbook: "Passbook size must be under 5MB." }));
         return;
       }
     } else {
@@ -482,6 +548,26 @@ function ApplicationFormContent() {
           delete next.resume;
           return next;
         });
+      } else if (type === "photo") {
+        setFormState((prev) => ({
+          ...prev,
+          personalInformation: { ...prev.personalInformation, photo: fileObj }
+        }));
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.photo;
+          return next;
+        });
+      } else if (type === "passbook") {
+        setFormState((prev) => ({
+          ...prev,
+          documents: { ...prev.documents, passbook: fileObj }
+        }));
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next.passbook;
+          return next;
+        });
       } else {
         setFormState((prev) => ({
           ...prev,
@@ -497,11 +583,21 @@ function ApplicationFormContent() {
     reader.readAsDataURL(file);
   };
 
-  const removeFile = (type: "resume" | "screenshot") => {
+  const removeFile = (type: "resume" | "screenshot" | "photo" | "passbook") => {
     if (type === "resume") {
       setFormState((prev) => ({
         ...prev,
         documents: { ...prev.documents, resume: null }
+      }));
+    } else if (type === "photo") {
+      setFormState((prev) => ({
+        ...prev,
+        personalInformation: { ...prev.personalInformation, photo: null }
+      }));
+    } else if (type === "passbook") {
+      setFormState((prev) => ({
+        ...prev,
+        documents: { ...prev.documents, passbook: null }
       }));
     } else {
       setFormState((prev) => ({
@@ -509,6 +605,54 @@ function ApplicationFormContent() {
         internshipSpecificData: { ...prev.internshipSpecificData, paymentScreenshot: null }
       }));
     }
+  };
+
+  const [isSimulatingPayment, setIsSimulatingPayment] = useState(false);
+
+  const handleUPISimulation = () => {
+    setIsSimulatingPayment(true);
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.upiPaid;
+      delete next.paymentStatus;
+      return next;
+    });
+    setTimeout(() => {
+      setIsSimulatingPayment(false);
+      const mockTxnId = `UPI-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+      setFormState((prev) => ({
+        ...prev,
+        internshipSpecificData: {
+          ...prev.internshipSpecificData,
+          upiPaid: true,
+          transactionId: mockTxnId,
+        }
+      }));
+    }, 1500);
+  };
+
+  const handleCardSimulation = () => {
+    setIsSimulatingPayment(true);
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.cardPaid;
+      delete next.paymentStatus;
+      return next;
+    });
+    setTimeout(() => {
+      setIsSimulatingPayment(false);
+      const mockTxnId = `CARD-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+      const mockAuthCode = `AUTH-${Math.floor(100000 + Math.random() * 900000)}`;
+      setFormState((prev) => ({
+        ...prev,
+        internshipSpecificData: {
+          ...prev.internshipSpecificData,
+          cardPaid: true,
+          authCode: mockAuthCode,
+          transactionId: mockTxnId,
+        }
+      }));
+    }, 1500);
   };
 
   const handleFinalSubmit = async (e: React.FormEvent) => {
@@ -526,22 +670,91 @@ function ApplicationFormContent() {
       }
     }
 
+    await executeSubmit();
+  };
+
+  const executeSubmit = async () => {
+    setIsSubmitting(true);
     try {
+      const payload = {
+        internshipType,
+        personalInformation: {
+          photo: sanitizeFileData(formState.personalInformation.photo),
+          firstName: sanitizeText(formState.personalInformation.firstName),
+          lastName: sanitizeText(formState.personalInformation.lastName),
+          email: sanitizeText(formState.personalInformation.email),
+          mobileNumber: sanitizeText(formState.personalInformation.mobileNumber),
+          dateOfBirth: sanitizeText(formState.personalInformation.dateOfBirth),
+          gender: sanitizeText(formState.personalInformation.gender),
+          city: sanitizeText(formState.personalInformation.city),
+          state: sanitizeText(formState.personalInformation.state),
+        },
+        academicInformation: {
+          collegeName: sanitizeText(formState.academicInformation.collegeName),
+          department: sanitizeText(formState.academicInformation.department),
+          degree: sanitizeText(formState.academicInformation.degree),
+          currentYear: sanitizeText(formState.academicInformation.currentYear),
+          cgpaPercentage: sanitizeText(formState.academicInformation.cgpaPercentage),
+          graduationYear: sanitizeText(formState.academicInformation.graduationYear),
+        },
+        professionalInformation: {
+          skills: sanitizeText(formState.professionalInformation.skills),
+          githubUrl: sanitizeText(formState.professionalInformation.githubUrl),
+          linkedinUrl: sanitizeText(formState.professionalInformation.linkedinUrl),
+          portfolioUrl: sanitizeText(formState.professionalInformation.portfolioUrl),
+          projectExperience: sanitizeText(formState.professionalInformation.projectExperience),
+        },
+        internshipSpecificData: {
+          ...formState.internshipSpecificData,
+          paymentMode: sanitizeText(formState.internshipSpecificData.paymentMode),
+          transactionId: sanitizeText(formState.internshipSpecificData.transactionId),
+          relevantExperience: sanitizeText(formState.internshipSpecificData.relevantExperience),
+          preferredTechStack: sanitizeText(formState.internshipSpecificData.preferredTechStack),
+          relevantTechnicalExperience: sanitizeText(formState.internshipSpecificData.relevantTechnicalExperience),
+          researchAreaOfInterest: sanitizeText(formState.internshipSpecificData.researchAreaOfInterest),
+          researchInterestStatement: sanitizeText(formState.internshipSpecificData.researchInterestStatement),
+          publicationLinks: sanitizeText(formState.internshipSpecificData.publicationLinks),
+          paymentScreenshot: sanitizeFileData(formState.internshipSpecificData.paymentScreenshot),
+        },
+        documents: {
+          resume: sanitizeFileData(formState.documents.resume),
+          passbook: sanitizeFileData(formState.documents.passbook),
+        },
+        motivation: {
+          whyInternship: sanitizeText(formState.motivation.whyInternship),
+        },
+      };
+
       const response = await fetch(API_ENDPOINTS.APPLY, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
-        body: JSON.stringify({
-          internshipType,
-          ...formState,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit application');
+        const responseText = await response.text();
+        let message = `Failed to submit application (${response.status})`;
+
+        if (responseText) {
+          try {
+            const parsed = JSON.parse(responseText);
+            message = parsed?.detail || parsed?.message || parsed?.error || message;
+          } catch {
+            message = responseText;
+          }
+        }
+
+        throw new Error(message);
       }
 
+      if (formState.personalInformation.photo?.base64) {
+        localStorage.setItem('pinesphere_submitted_photo', formState.personalInformation.photo.base64);
+      }
+      localStorage.setItem('pinesphere_submitted_name', `${formState.personalInformation.firstName} ${formState.personalInformation.lastName}`);
+      localStorage.setItem('pinesphere_submitted_program', internshipType === 'research' ? 'Research Intern' : internshipType === 'paid' ? 'Paid Intern' : 'Free Intern');
       localStorage.removeItem(`pinesphere_internship_draft_${internshipType}`);
       router.push(`/success?type=${internshipType}`);
     } catch (error) {
@@ -813,6 +1026,77 @@ function ApplicationFormContent() {
                     <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
                       <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
                       {errors.state}
+                    </p>
+                  )}
+                </div>
+
+                <div className="sm:col-span-2 mt-2">
+                  <span className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Passport Size Photo *</span>
+                  
+                  {!formState.personalInformation.photo ? (
+                    <div
+                      ref={dragRefPhoto}
+                      onClick={() => document.getElementById('photo-input')?.click()}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        dragRefPhoto.current?.classList.add("border-blue-500", "bg-blue-50/30");
+                      }}
+                      onDragLeave={(e) => {
+                        e.preventDefault();
+                        dragRefPhoto.current?.classList.remove("border-blue-500", "bg-blue-50/30");
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        dragRefPhoto.current?.classList.remove("border-blue-500", "bg-blue-50/30");
+                        const file = e.dataTransfer.files?.[0];
+                        if (file) processFile(file, "photo");
+                      }}
+                      className={`border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center cursor-pointer hover:bg-slate-50/50 hover:border-blue-400 transition-all ${
+                        errors.photo ? "border-rose-450 bg-rose-50/10" : ""
+                      }`}
+                    >
+                      <input
+                        id="photo-input"
+                        name="photo"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) processFile(file, "photo");
+                        }}
+                      />
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-4">
+                        <UploadIcon className="h-7 w-7 text-blue-600" />
+                      </div>
+                      <p className="text-sm font-bold text-slate-800">Drag & Drop or click to upload your Passport Size Photo</p>
+                      <p className="text-xs text-slate-400 mt-1">Accepts JPEG, PNG, WEBP (Max 5MB)</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-xl p-5 shadow-sm">
+                      <div className="h-16 w-16 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center text-blue-600 overflow-hidden shrink-0">
+                        {formState.personalInformation.photo.base64 ? (
+                          <img src={formState.personalInformation.photo.base64} alt="Photo" className="w-full h-full object-cover" />
+                        ) : (
+                          <UserIcon className="h-6 w-6" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold text-slate-800 truncate">{formState.personalInformation.photo.name}</p>
+                        <p className="text-xs text-slate-400 font-semibold">{(formState.personalInformation.photo.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile("photo")}
+                        className="text-xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3.5 py-2 rounded-xl transition-colors border border-rose-100 shadow-sm"
+                      >
+                        Remove File
+                      </button>
+                    </div>
+                  )}
+                  {errors.photo && (
+                    <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1">
+                      <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" /> {errors.photo}
                     </p>
                   )}
                 </div>
@@ -1145,56 +1429,308 @@ function ApplicationFormContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
-                    <div>
-                      <label htmlFor="paymentMode" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Payment Mode *</label>
-                      <select
-                        id="paymentMode"
-                        name="paymentMode"
-                        required
-                        value={formState.internshipSpecificData.paymentMode}
-                        onBlur={() => handleBlur("paymentMode")}
-                        onChange={(e) => handleInputChange("internshipSpecificData", "paymentMode", e.target.value)}
-                        className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all ${
-                          errors.paymentMode && touched.paymentMode ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
-                        }`}
-                      >
-                        <option value="">Select Mode</option>
-                        <option value="UPI">UPI</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="Debit Card">Debit Card</option>
-                      </select>
-                      {errors.paymentMode && touched.paymentMode && (
-                        <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
-                          <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
-                          {errors.paymentMode}
-                        </p>
-                      )}
+                  <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label htmlFor="paymentMode" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Payment Mode *</label>
+                        <select
+                          id="paymentMode"
+                          name="paymentMode"
+                          required
+                          value={formState.internshipSpecificData.paymentMode}
+                          onBlur={() => handleBlur("paymentMode")}
+                          onChange={(e) => {
+                            const mode = e.target.value;
+                            setFormState((prev) => ({
+                              ...prev,
+                              internshipSpecificData: {
+                                ...prev.internshipSpecificData,
+                                paymentMode: mode,
+                                upiApp: "",
+                                upiPaid: false,
+                                bankName: "",
+                                utrNumber: "",
+                                transferDate: "",
+                                cardType: "",
+                                last4Digits: "",
+                                authCode: "",
+                                cardPaid: false,
+                                transactionId: "",
+                              }
+                            }));
+                            setErrors((prev) => {
+                              const next = { ...prev };
+                              delete next.paymentMode;
+                              delete next.upiApp;
+                              delete next.upiPaid;
+                              delete next.bankName;
+                              delete next.utrNumber;
+                              delete next.transferDate;
+                              delete next.cardType;
+                              delete next.last4Digits;
+                              delete next.cardPaid;
+                              delete next.paymentStatus;
+                              return next;
+                            });
+                          }}
+                          className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all ${
+                            errors.paymentMode && touched.paymentMode ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
+                          }`}
+                        >
+                          <option value="">Select Mode</option>
+                          <option value="UPI">UPI</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                          <option value="Credit Card">Credit Card</option>
+                          <option value="Debit Card">Debit Card</option>
+                        </select>
+                        {errors.paymentMode && touched.paymentMode && (
+                          <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                            <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                            {errors.paymentMode}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Display Amount Due */}
+                      <div className="flex flex-col justify-center bg-slate-50 border border-slate-100 rounded-xl px-5 py-3">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Amount Due</span>
+                        <span className="text-2xl font-black text-slate-800">₹1,500<span className="text-xs font-semibold text-slate-550">.00 INR</span></span>
+                      </div>
                     </div>
 
-                    <div>
-                      <label htmlFor="transactionId" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Transaction ID *</label>
-                      <input
-                        type="text"
-                        id="transactionId"
-                        name="transactionId"
-                        required
-                        placeholder="E.g. TXN987654321"
-                        value={formState.internshipSpecificData.transactionId}
-                        onBlur={() => handleBlur("transactionId")}
-                        onChange={(e) => handleInputChange("internshipSpecificData", "transactionId", e.target.value)}
-                        className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
-                          errors.transactionId && touched.transactionId ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
-                        }`}
-                      />
-                      {errors.transactionId && touched.transactionId && (
-                        <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
-                          <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
-                          {errors.transactionId}
-                        </p>
-                      )}
-                    </div>
+                    {/* UPI DETAILS */}
+                    {formState.internshipSpecificData.paymentMode === "UPI" && (
+                      <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
+                        <div className="max-w-md">
+                          <label htmlFor="upiApp" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Select UPI App *</label>
+                          <select
+                            id="upiApp"
+                            name="upiApp"
+                            value={formState.internshipSpecificData.upiApp}
+                            onChange={(e) => handleInputChange("internshipSpecificData", "upiApp", e.target.value)}
+                            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                          >
+                            <option value="">Choose App</option>
+                            <option value="Google Pay">Google Pay</option>
+                            <option value="PhonePe">PhonePe</option>
+                            <option value="Paytm">Paytm</option>
+                            <option value="BHIM UPI">BHIM UPI</option>
+                            <option value="Other">Other UPI App</option>
+                          </select>
+                          {errors.upiApp && (
+                            <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                              <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                              {errors.upiApp}
+                            </p>
+                          )}
+                        </div>
+
+                        {!formState.internshipSpecificData.upiPaid ? (
+                          <div>
+                            <button
+                              type="button"
+                              disabled={isSimulatingPayment || !formState.internshipSpecificData.upiApp}
+                              onClick={handleUPISimulation}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isSimulatingPayment ? (
+                                <>
+                                  <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Redirecting to UPI App...
+                                </>
+                              ) : (
+                                <>Proceed to UPI App & Pay</>
+                              )}
+                            </button>
+                            {errors.upiPaid && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                                <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                                {errors.upiPaid}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between animate-fade-in">
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">✓</div>
+                              <div>
+                                <p className="text-sm font-bold text-slate-800">Payment Completed via {formState.internshipSpecificData.upiApp}</p>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">Transaction ID: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.transactionId}</span></p>
+                              </div>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-full uppercase tracking-wider">Paid</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* BANK TRANSFER DETAILS */}
+                    {formState.internshipSpecificData.paymentMode === "Bank Transfer" && (
+                      <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div>
+                            <label htmlFor="bankName" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Bank Name *</label>
+                            <input
+                              type="text"
+                              id="bankName"
+                              name="bankName"
+                              placeholder="E.g. State Bank of India"
+                              value={formState.internshipSpecificData.bankName}
+                              onChange={(e) => handleInputChange("internshipSpecificData", "bankName", e.target.value)}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            />
+                            {errors.bankName && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.bankName}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label htmlFor="utrNumber" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">UTR Number *</label>
+                            <input
+                              type="text"
+                              id="utrNumber"
+                              name="utrNumber"
+                              placeholder="12-22 digit alphanumeric UTR"
+                              value={formState.internshipSpecificData.utrNumber}
+                              onChange={(e) => {
+                                const val = e.target.value.toUpperCase();
+                                handleInputChange("internshipSpecificData", "utrNumber", val);
+                                handleInputChange("internshipSpecificData", "transactionId", val);
+                              }}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            />
+                            {errors.utrNumber && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.utrNumber}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label htmlFor="transferDate" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Transfer Date *</label>
+                            <input
+                              type="date"
+                              id="transferDate"
+                              name="transferDate"
+                              value={formState.internshipSpecificData.transferDate}
+                              onChange={(e) => handleInputChange("internshipSpecificData", "transferDate", e.target.value)}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            />
+                            {errors.transferDate && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.transferDate}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* CARD DETAILS */}
+                    {(formState.internshipSpecificData.paymentMode === "Credit Card" || formState.internshipSpecificData.paymentMode === "Debit Card") && (
+                      <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="cardType" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Card Network *</label>
+                            <select
+                              id="cardType"
+                              name="cardType"
+                              value={formState.internshipSpecificData.cardType}
+                              onChange={(e) => handleInputChange("internshipSpecificData", "cardType", e.target.value)}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            >
+                              <option value="">Select Network</option>
+                              <option value="Visa">Visa</option>
+                              <option value="Mastercard">Mastercard</option>
+                              <option value="RuPay">RuPay</option>
+                              <option value="American Express">American Express</option>
+                            </select>
+                            {errors.cardType && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.cardType}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label htmlFor="last4Digits" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Last 4 Digits *</label>
+                            <input
+                              type="text"
+                              id="last4Digits"
+                              name="last4Digits"
+                              maxLength={4}
+                              placeholder="E.g. 4321"
+                              inputMode="numeric"
+                              pattern="[0-9]{4}"
+                              value={formState.internshipSpecificData.last4Digits}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                                handleInputChange("internshipSpecificData", "last4Digits", val);
+                              }}
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            />
+                            {errors.last4Digits && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
+                                <WarningIcon className="h-3 w-3 text-rose-500" />
+                                {errors.last4Digits}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {!formState.internshipSpecificData.cardPaid ? (
+                          <div>
+                            <button
+                              type="button"
+                              disabled={isSimulatingPayment || !formState.internshipSpecificData.cardType || formState.internshipSpecificData.last4Digits?.length !== 4}
+                              onClick={handleCardSimulation}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isSimulatingPayment ? (
+                                <>
+                                  <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Authorizing Card...
+                                </>
+                              ) : (
+                                <>Pay with Card</>
+                              )}
+                            </button>
+                            {errors.cardPaid && (
+                              <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                                <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                                {errors.cardPaid}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center justify-between animate-fade-in">
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">✓</div>
+                              <div>
+                                <p className="text-sm font-bold text-slate-800">Card Payment Authorized via {formState.internshipSpecificData.cardType} (**** {formState.internshipSpecificData.last4Digits})</p>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5 flex gap-3">
+                                  <span>Auth Code: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.authCode}</span></span>
+                                  <span>Txn ID: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.transactionId}</span></span>
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-full uppercase tracking-wider">Authorized</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1511,6 +2047,62 @@ function ApplicationFormContent() {
                   <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1">⚠ {errors.resume}</p>
                 )}
               </div>
+              {internshipType === "stipend" && (
+                <div className="mt-6">
+                  <span className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Passbook / Bank Document (For Stipend) *</span>
+                  
+                  {!formState.documents.passbook ? (
+                    <div
+                      className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                        errors.passbook ? "border-rose-300 bg-rose-50/50" : "border-slate-300 hover:border-blue-400 hover:bg-blue-50/50 bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,application/pdf"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            processFile(e.target.files[0], "passbook");
+                          }
+                        }}
+                      />
+                      <div className="flex flex-col items-center gap-2 pointer-events-none">
+                        <div className="p-3 bg-white shadow-sm rounded-full">
+                          <UploadIcon className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop Passbook</p>
+                        <p className="text-xs text-slate-400">JPG, PNG, WEBP, PDF up to 5MB</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl mt-2">
+                      <div className="flex items-center gap-3">
+                        <DocumentIcon className="h-6 w-6 text-emerald-600" />
+                        <div>
+                          <p className="text-sm font-semibold text-emerald-900 line-clamp-1">{formState.documents.passbook.name}</p>
+                          <p className="text-xs text-emerald-600">{(formState.documents.passbook.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile("passbook")}
+                        className="p-2 text-rose-500 hover:bg-rose-100 rounded-lg transition-colors"
+                        title="Remove file"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      </button>
+                    </div>
+                  )}
+                  {errors.passbook && (
+                    <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                      <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                      {errors.passbook}
+                    </p>
+                  )}
+                </div>
+              )}
+
             </div>
           )}
 
@@ -1666,10 +2258,35 @@ function ApplicationFormContent() {
                     {internshipType === "corporate" && <div><span className="text-slate-500 italic">Corporate sponsored program requires no additional fields.</span></div>}
                     
                     {internshipType === "paid" && (
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <div><span className="text-slate-400">Payment Mode:</span> <span className="font-semibold text-slate-800">{formState.internshipSpecificData.paymentMode}</span></div>
-                        <div><span className="text-slate-400">Transaction ID:</span> <span className="font-semibold text-slate-800">{formState.internshipSpecificData.transactionId}</span></div>
-                        <div className="col-span-2 mt-1"><span className="text-slate-400">Verification Screenshot:</span> <span className="font-bold text-slate-800 bg-slate-50 px-2 py-1 border rounded">{formState.internshipSpecificData.paymentScreenshot?.name}</span></div>
+                      <div className="mt-2 space-y-1.5 bg-slate-50 border border-slate-150 rounded-xl p-3">
+                        <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                          Payment Completed & Verified (₹1,500)
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-650">
+                          <div><span className="text-slate-400">Payment Mode:</span> <span className="font-semibold">{formState.internshipSpecificData.paymentMode}</span></div>
+                          {formState.internshipSpecificData.paymentMode === "UPI" && (
+                            <>
+                              <div><span className="text-slate-400">UPI App:</span> <span className="font-semibold">{formState.internshipSpecificData.upiApp}</span></div>
+                              <div className="col-span-2"><span className="text-slate-400">Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                            </>
+                          )}
+                          {formState.internshipSpecificData.paymentMode === "Bank Transfer" && (
+                            <>
+                              <div><span className="text-slate-400">Bank Name:</span> <span className="font-semibold">{formState.internshipSpecificData.bankName}</span></div>
+                              <div><span className="text-slate-400">Date:</span> <span className="font-semibold">{formState.internshipSpecificData.transferDate}</span></div>
+                              <div className="col-span-2"><span className="text-slate-400">UTR / Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                            </>
+                          )}
+                          {(formState.internshipSpecificData.paymentMode === "Credit Card" || formState.internshipSpecificData.paymentMode === "Debit Card") && (
+                            <>
+                              <div><span className="text-slate-400">Card Network:</span> <span className="font-semibold">{formState.internshipSpecificData.cardType}</span></div>
+                              <div><span className="text-slate-400">Last 4 Digits:</span> <span className="font-semibold">**** {formState.internshipSpecificData.last4Digits}</span></div>
+                              <div><span className="text-slate-400">Auth Code:</span> <span className="font-semibold">{formState.internshipSpecificData.authCode}</span></div>
+                              <div className="col-span-2"><span className="text-slate-400">Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     )}
 
@@ -1712,8 +2329,11 @@ function ApplicationFormContent() {
                       Edit Section
                     </button>
                   </div>
-                  <div className="text-xs">
+                  <div className="text-xs space-y-2">
                     <div><span className="text-slate-400">Resume:</span> <span className="font-bold text-slate-800 bg-slate-50 px-3.5 py-1.5 border border-slate-150 rounded inline-block">{formState.documents.resume?.name} ({(formState.documents.resume ? formState.documents.resume.size / 1024 / 1024 : 0).toFixed(2)} MB)</span></div>
+                    {internshipType === "stipend" && (
+                      <div><span className="text-slate-400">Passbook:</span> <span className="font-bold text-slate-800 bg-slate-50 px-3.5 py-1.5 border border-slate-150 rounded inline-block">{formState.documents.passbook?.name} ({(formState.documents.passbook ? formState.documents.passbook.size / 1024 / 1024 : 0).toFixed(2)} MB)</span></div>
+                    )}
                   </div>
                 </div>
 
