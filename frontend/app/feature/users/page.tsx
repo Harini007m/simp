@@ -10,6 +10,8 @@ import { CreateUserWizard } from '../../../components/admin/users/CreateUserWiza
 import { User } from '@/src/data/mock-users';
 import { userService } from '@/src/services/user.service';
 import { employeeService, ExtendedEmployee } from '@/src/services/employee.service';
+import { studentService, ExtendedStudent } from '@/src/services/student.service';
+import { organizationService, ExtendedCollege } from '@/src/services/organization.service';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   createColumnHelper,
@@ -30,11 +32,21 @@ function UsersPageContent() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewMode, setViewMode] = useState(false);
 
-  // Tab and Employee states
-  const [activeTab, setActiveTab] = useState<'accounts' | 'employees'>('accounts');
+  // Tab and Entity states
+  const [activeTab, setActiveTab] = useState<'accounts' | 'employees' | 'students' | 'organizations'>('accounts');
+  
   const [employees, setEmployees] = useState<ExtendedEmployee[]>([]);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [empPage, setEmpPage] = useState(0);
+  
+  const [students, setStudents] = useState<ExtendedStudent[]>([]);
+  const [studentSearch, setStudentSearch] = useState('');
+  const [stuPage, setStuPage] = useState(0);
+  
+  const [organizations, setOrganizations] = useState<ExtendedCollege[]>([]);
+  const [organizationSearch, setOrganizationSearch] = useState('');
+  const [orgPage, setOrgPage] = useState(0);
+  
   const empPageSize = 10;
 
   const searchParams = useSearchParams();
@@ -62,9 +74,29 @@ function UsersPageContent() {
     }
   };
 
+  const loadStudents = async () => {
+    try {
+      const stus = await studentService.getStudents();
+      setStudents(stus);
+    } catch (err) {
+      console.error('Failed to load students', err);
+    }
+  };
+
+  const loadOrganizations = async () => {
+    try {
+      const orgs = await organizationService.getOrganizations();
+      setOrganizations(orgs);
+    } catch (err) {
+      console.error('Failed to load organizations', err);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
     loadEmployees();
+    loadStudents();
+    loadOrganizations();
   }, []);
 
   // Listen to autofill query params
@@ -82,6 +114,8 @@ function UsersPageContent() {
   const handleUserCreated = () => {
     loadUsers();
     loadEmployees();
+    loadStudents();
+    loadOrganizations();
     if (autofillData) {
       // Clear autofill state and redirect back to application lifecycle overview or custom redirect url
       setAutofillData(null);
@@ -99,6 +133,28 @@ function UsersPageContent() {
       name: employee.name,
       email: employee.email || employee.official_email,
       phone: employee.phone || ''
+    });
+    setSelectedUser(null);
+    setViewMode(false);
+    setIsCreateWizardOpen(true);
+  };
+
+  const handleCreateUserForStudent = (student: ExtendedStudent) => {
+    setAutofillData({
+      name: student.name || student.personalInfo?.name || '',
+      email: student.email || student.official_email || student.personalInfo?.email || '',
+      phone: student.phone || student.personalInfo?.phone || ''
+    });
+    setSelectedUser(null);
+    setViewMode(false);
+    setIsCreateWizardOpen(true);
+  };
+
+  const handleCreateUserForOrganization = (org: ExtendedCollege) => {
+    setAutofillData({
+      name: org.name || org.college_name || '',
+      email: org.email || '',
+      phone: org.phone || ''
     });
     setSelectedUser(null);
     setViewMode(false);
@@ -123,6 +179,46 @@ function UsersPageContent() {
     const start = empPage * empPageSize;
     return filteredEmployees.slice(start, start + empPageSize);
   }, [filteredEmployees, empPage]);
+
+  const filteredStudents = useMemo(() => {
+    return students.filter(stu => {
+      const search = studentSearch.toLowerCase();
+      const nameVal = stu.name || stu.personalInfo?.name || '';
+      const emailVal = stu.email || stu.official_email || stu.personalInfo?.email || '';
+      const phoneVal = stu.phone || stu.personalInfo?.phone || '';
+      return (
+        nameVal.toLowerCase().includes(search) ||
+        emailVal.toLowerCase().includes(search) ||
+        phoneVal.includes(search)
+      );
+    });
+  }, [students, studentSearch]);
+
+  const paginatedStudents = useMemo(() => {
+    const start = stuPage * empPageSize;
+    return filteredStudents.slice(start, start + empPageSize);
+  }, [filteredStudents, stuPage]);
+
+  const filteredOrganizations = useMemo(() => {
+    return organizations.filter(org => {
+      const search = organizationSearch.toLowerCase();
+      const nameVal = org.name || org.college_name || '';
+      const emailVal = org.email || '';
+      const phoneVal = org.phone || '';
+      const codeVal = org.code || org.college_code || '';
+      return (
+        nameVal.toLowerCase().includes(search) ||
+        emailVal.toLowerCase().includes(search) ||
+        phoneVal.includes(search) ||
+        codeVal.toLowerCase().includes(search)
+      );
+    });
+  }, [organizations, organizationSearch]);
+
+  const paginatedOrganizations = useMemo(() => {
+    const start = orgPage * empPageSize;
+    return filteredOrganizations.slice(start, start + empPageSize);
+  }, [filteredOrganizations, orgPage]);
 
   const handleView = (user: User) => {
     setSelectedUser(user);
@@ -276,7 +372,9 @@ function UsersPageContent() {
       <div className="flex border-b border-slate-200">
         {[
           { id: 'accounts', label: 'User Accounts', count: data.length },
-          { id: 'employees', label: 'Registered Employees', count: employees.length }
+          { id: 'employees', label: 'Registered Employees', count: employees.length },
+          { id: 'students', label: 'Registered Students', count: students.length },
+          { id: 'organizations', label: 'Registered Organizations', count: organizations.length }
         ].map(t => (
           <button
             key={t.id}
@@ -299,7 +397,7 @@ function UsersPageContent() {
         ))}
       </div>
 
-      {activeTab === 'accounts' ? (
+      {activeTab === 'accounts' && (
         <Card>
           <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="relative flex-1 max-w-md">
@@ -391,7 +489,9 @@ function UsersPageContent() {
             </div>
           </CardContent>
         </Card>
-      ) : (
+      )}
+
+      {activeTab === 'employees' && (
         <Card>
           <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="relative flex-1 max-w-md">
@@ -430,7 +530,8 @@ function UsersPageContent() {
                   </TableRow>
                 ) : (
                   paginatedEmployees.map(emp => {
-                    const linkedUser = getLinkedUser(emp.email);
+                    const emailVal = emp.email || emp.official_email || '';
+                    const linkedUser = getLinkedUser(emailVal);
                     const isLinked = !!linkedUser;
                     const initials = emp.name
                       ? emp.name
@@ -455,7 +556,7 @@ function UsersPageContent() {
                           <span className="text-slate-600">{emp.designation || emp.roleName}</span>
                         </TableCell>
                         <TableCell>
-                          <span className="text-slate-600">{emp.email || emp.official_email}</span>
+                          <span className="text-slate-600">{emailVal}</span>
                         </TableCell>
                         <TableCell>
                           <span className="text-slate-600">{emp.phone || 'N/A'}</span>
@@ -478,7 +579,7 @@ function UsersPageContent() {
                               className="p-1 hover:text-blue-600 transition-colors inline-flex items-center justify-center"
                               title="View User Account"
                             >
-                              <Eye className="h-4 w-4 text-slate-450 hover:text-blue-600" />
+                              <Eye className="h-4 w-4 text-slate-455 hover:text-blue-600" />
                             </button>
                           ) : (
                             <Button 
@@ -517,6 +618,287 @@ function UsersPageContent() {
                   size="sm" 
                   onClick={() => setEmpPage(prev => prev + 1)}
                   disabled={(empPage + 1) * empPageSize >= filteredEmployees.length}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {activeTab === 'students' && (
+        <Card>
+          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input 
+                type="text" 
+                value={studentSearch}
+                onChange={e => {
+                  setStudentSearch(e.target.value);
+                  setStuPage(0);
+                }}
+                placeholder="Search registered students..." 
+                className="w-full rounded-md border border-slate-200 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              />
+            </div>
+          </div>
+          
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Student</TableHead>
+                  <TableHead>College / Department</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>User Account</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedStudents.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                      No students found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedStudents.map(stu => {
+                    const nameVal = stu.name || stu.personalInfo?.name || '';
+                    const emailVal = stu.email || stu.official_email || stu.personalInfo?.email || '';
+                    const phoneVal = stu.phone || stu.personalInfo?.phone || '';
+                    const collegeVal = stu.academicInfo?.college || 'N/A';
+                    const deptVal = stu.academicInfo?.department || '';
+                    const linkedUser = getLinkedUser(emailVal);
+                    const isLinked = !!linkedUser;
+                    const initials = nameVal
+                      ? nameVal
+                          .split(' ')
+                          .map((n: string) => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : 'ST';
+
+                    return (
+                      <TableRow key={stu.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-700">
+                              {initials}
+                            </div>
+                            <span className="font-medium text-slate-900">{nameVal}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">
+                            {collegeVal} {deptVal ? `(${deptVal})` : ''}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{emailVal}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{phoneVal || 'N/A'}</span>
+                        </TableCell>
+                        <TableCell>
+                          {isLinked ? (
+                            <Badge variant="success">
+                              Linked: @{linkedUser.username}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              No Account
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {isLinked ? (
+                            <button
+                              onClick={() => handleView(linkedUser)}
+                              className="p-1 hover:text-blue-600 transition-colors inline-flex items-center justify-center"
+                              title="View User Account"
+                            >
+                              <Eye className="h-4 w-4 text-slate-455 hover:text-blue-600" />
+                            </button>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleCreateUserForStudent(stu)}
+                              className="inline-flex items-center"
+                            >
+                              <Plus className="mr-1 h-3.5 w-3.5" /> Create User
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+            
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+              <span>
+                Showing {filteredStudents.length === 0 ? 0 : stuPage * empPageSize + 1} to{' '}
+                {Math.min((stuPage + 1) * empPageSize, filteredStudents.length)} of{' '}
+                {filteredStudents.length} entries
+              </span>
+              <div className="flex gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setStuPage(prev => Math.max(0, prev - 1))}
+                  disabled={stuPage === 0}
+                >
+                  Previous
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setStuPage(prev => prev + 1)}
+                  disabled={(stuPage + 1) * empPageSize >= filteredStudents.length}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {activeTab === 'organizations' && (
+        <Card>
+          <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input 
+                type="text" 
+                value={organizationSearch}
+                onChange={e => {
+                  setOrganizationSearch(e.target.value);
+                  setOrgPage(0);
+                }}
+                placeholder="Search registered organizations..." 
+                className="w-full rounded-md border border-slate-200 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              />
+            </div>
+          </div>
+          
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Organization</TableHead>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>User Account</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedOrganizations.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                      No organizations found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedOrganizations.map(org => {
+                    const nameVal = org.name || org.college_name || '';
+                    const codeVal = org.code || org.college_code || '';
+                    const emailVal = org.email || '';
+                    const phoneVal = org.phone || '';
+                    const linkedUser = getLinkedUser(emailVal);
+                    const isLinked = !!linkedUser;
+                    const initials = nameVal
+                      ? nameVal
+                          .split(' ')
+                          .map(n => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : 'OR';
+
+                    return (
+                      <TableRow key={org.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-700">
+                              {initials}
+                            </div>
+                            <span className="font-medium text-slate-900">{nameVal}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-650">{codeVal}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{emailVal || 'N/A'}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{phoneVal || 'N/A'}</span>
+                        </TableCell>
+                        <TableCell>
+                          {isLinked ? (
+                            <Badge variant="success">
+                              Linked: @{linkedUser.username}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              No Account
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {isLinked ? (
+                            <button
+                              onClick={() => handleView(linkedUser)}
+                              className="p-1 hover:text-blue-600 transition-colors inline-flex items-center justify-center"
+                              title="View User Account"
+                            >
+                              <Eye className="h-4 w-4 text-slate-455 hover:text-blue-600" />
+                            </button>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleCreateUserForOrganization(org)}
+                              className="inline-flex items-center"
+                            >
+                              <Plus className="mr-1 h-3.5 w-3.5" /> Create User
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+            
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+              <span>
+                Showing {filteredOrganizations.length === 0 ? 0 : orgPage * empPageSize + 1} to{' '}
+                {Math.min((orgPage + 1) * empPageSize, filteredOrganizations.length)} of{' '}
+                {filteredOrganizations.length} entries
+              </span>
+              <div className="flex gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setOrgPage(prev => Math.max(0, prev - 1))}
+                  disabled={orgPage === 0}
+                >
+                  Previous
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setOrgPage(prev => prev + 1)}
+                  disabled={(orgPage + 1) * empPageSize >= filteredOrganizations.length}
                 >
                   Next
                 </Button>

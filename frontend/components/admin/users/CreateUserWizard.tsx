@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Drawer } from '@/components/admin/ui/Drawer';
 import { Stepper } from '@/components/admin/ui/Stepper';
 import { Button } from '@/components/admin/ui/Button';
-import { Search, CheckCircle2, ChevronRight, ChevronLeft, Shield, Upload, Users } from 'lucide-react';
+import { Search, CheckCircle2, ChevronRight, ChevronLeft, Shield, Upload, Users, Sparkles, Key } from 'lucide-react';
 import { Card } from '@/components/admin/ui/Card';
 import { Role } from '@/src/data/mock-roles';
 import { Module } from '@/src/data/mock-modules';
@@ -12,6 +12,8 @@ import { roleService } from '@/src/services/role.service';
 import { moduleService } from '@/src/services/module.service';
 import { userService } from '@/src/services/user.service';
 import { employeeService, ExtendedEmployee } from '@/src/services/employee.service';
+import { studentService, ExtendedStudent } from '@/src/services/student.service';
+import { organizationService, ExtendedCollege } from '@/src/services/organization.service';
 import { User } from '@/src/data/mock-users';
 
 interface CreateUserWizardProps {
@@ -29,6 +31,15 @@ interface CreateUserWizardProps {
 
 const STEPS = ['Basic Information', 'Role Assignment', 'Module Override', 'Review & Create'];
 
+interface AutofillEntity {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  type: 'Employee' | 'Student' | 'Organization';
+  detail: string;
+}
+
 export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, viewMode, autofillData }: CreateUserWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
@@ -36,8 +47,9 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
   
   const [roles, setRoles] = useState<Role[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
-  const [unlinkedEmployees, setUnlinkedEmployees] = useState<ExtendedEmployee[]>([]);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
+  const [unlinkedEntities, setUnlinkedEntities] = useState<AutofillEntity[]>([]);
+  const [selectedEntityId, setSelectedEntityId] = useState<string>('');
+  const [existingUsers, setExistingUsers] = useState<User[]>([]);
 
   // Form Fields
   const [fullName, setFullName] = useState('');
@@ -58,23 +70,64 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
   useEffect(() => {
     async function loadData() {
       try {
-        const [loadedRoles, loadedModules, loadedEmployees, loadedUsers] = await Promise.all([
+        const [loadedRoles, loadedModules, loadedEmployees, loadedStudents, loadedOrganizations, loadedUsers] = await Promise.all([
           roleService.getRoles(),
           moduleService.getModules(),
           employeeService.getEmployees(),
+          studentService.getStudents(),
+          organizationService.getOrganizations(),
           userService.getUsers()
         ]);
         
-        // Filter out employees who already have an account (matching email)
         const userEmails = new Set(loadedUsers.map(u => u.email.toLowerCase()));
-        const unlinked = loadedEmployees.filter(emp => {
+        const entities: AutofillEntity[] = [];
+
+        loadedEmployees.forEach(emp => {
           const email = (emp.email || emp.official_email || '').toLowerCase();
-          return email && !userEmails.has(email);
+          if (email && !userEmails.has(email)) {
+            entities.push({
+              id: `emp-${emp.id || emp.employee_id}`,
+              name: emp.name,
+              email: emp.email || emp.official_email,
+              phone: emp.phone || '',
+              type: 'Employee',
+              detail: emp.designation || emp.roleName || ''
+            });
+          }
+        });
+
+        loadedStudents.forEach(stu => {
+          const email = (stu.email || stu.official_email || stu.personalInfo?.email || '').toLowerCase();
+          if (email && !userEmails.has(email)) {
+            entities.push({
+              id: `stu-${stu.id || stu.student_id}`,
+              name: stu.name || stu.personalInfo?.name || '',
+              email: stu.email || stu.official_email || stu.personalInfo?.email || '',
+              phone: stu.phone || stu.personalInfo?.phone || '',
+              type: 'Student',
+              detail: stu.academicInfo?.college || ''
+            });
+          }
+        });
+
+        loadedOrganizations.forEach(org => {
+          const email = (org.email || '').toLowerCase();
+          if (email && !userEmails.has(email)) {
+            entities.push({
+              id: `org-${org.id || org.college_id}`,
+              name: org.name || org.college_name || '',
+              email: org.email || '',
+              phone: org.phone || '',
+              type: 'Organization',
+              detail: org.code || org.college_code || ''
+            });
+          }
         });
 
         setRoles(loadedRoles);
         setModules(loadedModules);
-        setUnlinkedEmployees(unlinked);
+        setUnlinkedEntities(entities);
+        setExistingUsers(loadedUsers);
       } catch (err) {
         console.error('Failed to load user wizard data', err);
       }
@@ -91,8 +144,8 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
       Promise.resolve().then(() => {
         if (!isMounted) return;
         
-        // Reset selected employee when opening
-        setSelectedEmployeeId('');
+        // Reset selected entity when opening
+        setSelectedEntityId('');
 
         if (userToEdit) {
           setFullName(userToEdit.name);
@@ -121,7 +174,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
           }
         } else if (autofillData) {
           setFullName(autofillData.name);
-          setUsername(autofillData.email.split('@')[0] || '');
+          setUsername('');
           setEmail(autofillData.email);
           setPhone(autofillData.phone);
           setPassword('');
@@ -151,33 +204,76 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
     };
   }, [isOpen, userToEdit, viewMode, autofillData]);
 
-  const handleEmployeeSelect = (empId: string) => {
-    setSelectedEmployeeId(empId);
-    if (!empId) {
+  const handleEntitySelect = (entityId: string) => {
+    setSelectedEntityId(entityId);
+    if (!entityId) {
       setFullName('');
-      setUsername('');
       setEmail('');
       setPhone('');
-      setSelectedRole(null);
       return;
     }
 
-    const emp = unlinkedEmployees.find(e => e.id === empId || e.employee_id === empId);
-    if (emp) {
-      const emailVal = emp.email || emp.official_email || '';
-      setFullName(emp.name);
-      setUsername(emailVal.split('@')[0] || '');
-      setEmail(emailVal);
-      setPhone(emp.phone || '');
+    const entity = unlinkedEntities.find(e => e.id === entityId);
+    if (entity) {
+      setFullName(entity.name);
+      setEmail(entity.email);
+      setPhone(entity.phone);
+    }
+  };
+
+  const generateUsername = () => {
+    if (!fullName.trim()) {
+      alert("Please enter a Full Name first to generate a username.");
+      return;
+    }
+    
+    // Get first word of full name and clean it to alphanumeric only
+    const base = fullName.trim().split(' ')[0].replace(/[^a-zA-Z0-9]/g, '');
+    const cleanBase = base || 'User';
+    
+    let counter = 1;
+    let candidate = '';
+    let isUnique = false;
+    
+    while (!isUnique) {
+      const suffix = String(counter).padStart(3, '0'); // '001', '002', etc.
+      candidate = `${cleanBase}${suffix}`;
       
-      const designation = emp.designation || emp.roleName || '';
-      if (designation) {
-        const matchingRole = roles.find(r => r.name.toLowerCase() === designation.toLowerCase());
-        if (matchingRole) {
-          setSelectedRole(matchingRole.id);
-        }
+      // Check if username already exists
+      const match = existingUsers.some(u => u.username.toLowerCase() === candidate.toLowerCase());
+      if (!match) {
+        isUnique = true;
+      } else {
+        counter++;
       }
     }
+    
+    setUsername(candidate);
+  };
+
+  const generatePassword = () => {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const symbols = '!@#$%^&*';
+    const all = uppercase + lowercase + numbers + symbols;
+    
+    let pass = '';
+    // Ensure at least one of each category for strong password
+    pass += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+    pass += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+    pass += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    pass += symbols.charAt(Math.floor(Math.random() * symbols.length));
+    
+    for (let i = 0; i < 8; i++) {
+      pass += all.charAt(Math.floor(Math.random() * all.length));
+    }
+    
+    // Shuffle the generated characters
+    const shuffled = pass.split('').sort(() => 0.5 - Math.random()).join('');
+    
+    setPassword(shuffled);
+    setConfirmPassword(shuffled);
   };
 
   // When role changes, update assigned modules to match the role's default modules
@@ -306,38 +402,46 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
       case 0:
         return (
           <div className="space-y-4 p-6">
-            {!userToEdit && !autofillData && unlinkedEmployees.length > 0 && (
+            {!userToEdit && !autofillData && unlinkedEntities.length > 0 && (
               <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2">
                 <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                   <Users className="h-4 w-4 text-blue-600" />
-                  Link to Registered Employee (Autofill)
+                  Link to Registered Entity (Autofill)
                 </label>
                 <div className="flex gap-2">
                   <select
-                    value={selectedEmployeeId}
-                    onChange={e => handleEmployeeSelect(e.target.value)}
+                    value={selectedEntityId}
+                    onChange={e => handleEntitySelect(e.target.value)}
                     className="flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
-                    <option value="">-- Select an unlinked employee to autofill form --</option>
-                    {unlinkedEmployees.map(emp => (
-                      <option key={emp.id || emp.employee_id} value={emp.id || emp.employee_id}>
-                        {emp.name} ({emp.designation || emp.roleName}) - {emp.email || emp.official_email}
-                      </option>
-                    ))}
+                    <option value="">-- Select an unlinked employee/student/org to autofill --</option>
+                    {['Employee', 'Student', 'Organization'].map(t => {
+                      const groupEntities = unlinkedEntities.filter(e => e.type === t);
+                      if (groupEntities.length === 0) return null;
+                      return (
+                        <optgroup key={t} label={`${t}s`}>
+                          {groupEntities.map(ent => (
+                            <option key={ent.id} value={ent.id}>
+                              [{t}] {ent.name} ({ent.detail}) - {ent.email}
+                            </option>
+                          ))}
+                        </optgroup>
+                      );
+                    })}
                   </select>
-                  {selectedEmployeeId && (
+                  {selectedEntityId && (
                     <Button 
                       type="button" 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleEmployeeSelect('')}
+                      onClick={() => handleEntitySelect('')}
                     >
                       Clear
                     </Button>
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  Select an employee who has been registered in the database but doesn't have system user credentials yet.
+                  Select an employee, student, or organization registered in the database to autofill Name, Email, and Phone.
                 </p>
               </div>
             )}
@@ -355,14 +459,25 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Username *</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-medium text-slate-700">Username *</label>
+                  {!viewMode && (
+                    <button
+                      type="button"
+                      onClick={generateUsername}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 focus:outline-none"
+                    >
+                      <Sparkles className="h-3 w-3" /> Generate Unique
+                    </button>
+                  )}
+                </div>
                 <input 
                   type="text" 
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50" 
-                  placeholder="johndoe" 
+                  placeholder="johndoe001" 
                 />
               </div>
               <div className="space-y-2">
@@ -388,7 +503,18 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Password *</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-medium text-slate-700">Password *</label>
+                  {!viewMode && (
+                    <button
+                      type="button"
+                      onClick={generatePassword}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 focus:outline-none"
+                    >
+                      <Key className="h-3 w-3" /> Generate Password
+                    </button>
+                  )}
+                </div>
                 <input 
                   type="password" 
                   value={password}
@@ -397,6 +523,11 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50" 
                   placeholder="••••••••" 
                 />
+                {password && password !== '••••••••' && !viewMode && (
+                  <p className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2 py-1 rounded border border-dashed border-slate-200">
+                    Generated: <span className="font-bold text-slate-800 select-all">{password}</span>
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Confirm Password *</label>
