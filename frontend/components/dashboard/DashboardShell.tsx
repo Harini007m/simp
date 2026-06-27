@@ -8,7 +8,10 @@ import { usePermissions } from '@/src/hooks/usePermissions';
 import { WIDGET_REGISTRY, WidgetDefinition } from '@/src/core/dashboard/widget-registry';
 import { 
   ShieldCheck, Activity, Users, FileText, GraduationCap, 
-  Award, Clock, Calendar, BookOpen, CheckSquare 
+  Award, Clock, Calendar, BookOpen, CheckSquare,
+  TrendingUp, DollarSign, Target, PieChart, BarChart2,
+  Bell, MessageSquare, Mail, Building, ShieldAlert,
+  Trophy, LifeBuoy, Gift, Store, CreditCard, Bookmark, Flag, Briefcase
 } from 'lucide-react';
 
 // --- MOCK WIDGET COMPONENTS ---
@@ -144,6 +147,99 @@ const UpcomingTasksWidget = () => (
   </Card>
 );
 
+const WIDGET_ICONS: Record<string, React.ElementType> = {
+  unread_notifications: Bell,
+  todays_events: Calendar,
+  upcoming_interviews: Users,
+  pending_announcements: MessageSquare,
+  unread_messages: Mail,
+  scheduled_notifications: Clock,
+  notification_analytics: BarChart2,
+  communication_activity: Activity,
+  certificates_issued: Award,
+  pending_certificate_approvals: Clock,
+  placement_success_rate: TrendingUp,
+  offer_letters_generated: FileText,
+  students_hired: Briefcase,
+  upcoming_interviews_placement: Calendar,
+  top_hiring_companies: Building,
+  alumni_growth: GraduationCap,
+  verification_requests: ShieldCheck,
+  analytics_overview: PieChart,
+  executive_summary: FileText,
+  attendance_trend: TrendingUp,
+  performance_trend: Activity,
+  revenue_growth: DollarSign,
+  recent_reports: FileText,
+  kpi_summary: Target,
+  open_tickets: LifeBuoy,
+  my_requests: MessageSquare,
+  referral_rewards: Gift,
+  recommended_internships: Briefcase,
+  marketplace_stats: Store,
+  idcard_status: CreditCard,
+  bookmarks: Bookmark,
+  upcoming_tasks_productivity: CheckSquare,
+  placement_growth: TrendingUp,
+  top_performing_colleges: Building,
+  top_performing_programs: Trophy,
+  certificate_analytics: PieChart,
+  student_risk_overview: ShieldAlert,
+  upcoming_milestones: Flag,
+};
+
+const GenericWidget = ({ widget }: { widget: WidgetDefinition }) => {
+  // Generate a consistent seed based on the widget id
+  const seed = widget.widgetId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  let valueStr = "";
+  let trendStr = "";
+  let Icon = WIDGET_ICONS[widget.widgetId] || Activity;
+  let iconColor = "text-slate-400";
+  
+  const nameLower = widget.name.toLowerCase();
+  
+  if (nameLower.includes('revenue') || nameLower.includes('reward')) {
+    const val = (seed * 13 % 900) + 10;
+    valueStr = `$${val}K`;
+    trendStr = `+${(seed % 15) + 2}% from last month`;
+    iconColor = "text-emerald-500";
+  } else if (nameLower.includes('rate') || nameLower.includes('growth') || nameLower.includes('trend')) {
+    const val = (seed * 7 % 80) + 10;
+    valueStr = `${val}%`;
+    trendStr = `Up by ${(seed % 8) + 1}%`;
+    iconColor = "text-blue-500";
+  } else if (nameLower.includes('overview') || nameLower.includes('summary') || nameLower.includes('stats') || nameLower.includes('analytics')) {
+    const val = (seed * 19 % 5000) + 500;
+    valueStr = val.toLocaleString();
+    trendStr = 'Total count across all programs';
+    iconColor = "text-indigo-500";
+  } else if (nameLower.includes('status') || nameLower.includes('health')) {
+    valueStr = seed % 2 === 0 ? 'Optimal' : 'Active';
+    trendStr = 'System running normally';
+    iconColor = "text-emerald-500";
+  } else {
+    // Default count
+    const val = (seed * 11 % 300) + 10;
+    valueStr = val.toString();
+    trendStr = 'Recent active items';
+    iconColor = "text-slate-500";
+  }
+
+  return (
+    <Card className="border-slate-200 bg-white h-full flex flex-col">
+      <div className="p-4 border-b border-slate-100 flex items-center gap-2">
+        <Icon className={`h-5 w-5 ${iconColor}`} />
+        <h3 className="font-bold text-slate-800">{widget.name}</h3>
+      </div>
+      <CardContent className="p-4 flex-1 flex flex-col justify-center">
+        <div className="text-2xl font-black text-slate-900">{valueStr}</div>
+        <p className="text-xs text-slate-500 mt-1">{trendStr}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
 // --- WIDGET RENDERER ---
 
 function renderWidget(widget: WidgetDefinition) {
@@ -158,7 +254,7 @@ function renderWidget(widget: WidgetDefinition) {
     case 'attendance_summary': return <AttendanceSummaryWidget />;
     case 'learning_progress': return <LearningProgressWidget />;
     case 'upcoming_tasks': return <UpcomingTasksWidget />;
-    default: return <div className="p-4 text-slate-400">Unknown Widget: {widget.name}</div>;
+    default: return <GenericWidget widget={widget} />;
   }
 }
 

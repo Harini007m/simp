@@ -6,7 +6,8 @@ import { opportunitiesService } from '@/src/services/opportunities.service';
 import { Opportunity } from '@/src/data/mock-opportunities';
 import { Footer } from '@/components/layout/Footer';
 import Image from "next/image";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import { ChevronDown, ArrowRight, ShieldCheck } from "lucide-react";
 
 const heroData = {
   badge: "GLOBAL INTERNSHIP PROGRAMS",
@@ -144,6 +145,11 @@ const Hero = () => (
 export default function LandingPage() {
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
+  const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Fetch opportunities from the mock service layer
   useEffect(() => {
@@ -378,17 +384,81 @@ export default function LandingPage() {
                   )}
                 </div>
 
-                <Link 
-                  href={`/apply?type=${opp.value}`} 
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedOpp(opp);
+                    setVerifyModalOpen(true);
+                  }}
                   className="block w-full rounded-xl bg-slate-55 border border-slate-200 py-3.5 text-center text-sm font-semibold text-slate-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all duration-200 active:scale-[0.98]"
                 >
                   Apply Now
-                </Link>
+                </button>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* DigiLocker Verification Modal */}
+      {verifyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-50 rounded-full">
+                <ShieldCheck className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-center text-slate-900 mb-2">
+                Verify with DigiLocker
+              </h3>
+              <p className="text-sm text-center text-slate-500 mb-6">
+                To proceed with your application for <span className="font-semibold text-slate-700">{selectedOpp?.title}</span>, please verify your identity securely.
+              </p>
+              
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setIsVerifying(true);
+                    setTimeout(() => {
+                      setIsVerifying(false);
+                      setVerifyModalOpen(false);
+                      if (selectedOpp) {
+                        router.push(`/apply?type=${selectedOpp.value}`);
+                      }
+                    }, 2000);
+                  }}
+                  disabled={isVerifying}
+                  className="w-full flex items-center justify-center py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isVerifying ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Verifying...
+                    </>
+                  ) : (
+                    "Proceed to Verify"
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    if (!isVerifying) {
+                      setVerifyModalOpen(false);
+                      setSelectedOpp(null);
+                    }
+                  }}
+                  disabled={isVerifying}
+                  className="w-full py-3 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <Footer />
