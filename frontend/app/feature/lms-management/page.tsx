@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Plus, Play, FileText, Trash2, Save, CheckCircle2, GripVertical
+  Plus, Play, FileText, Trash2, Save, CheckCircle2, GripVertical, ChevronLeft, Image, FolderOpen, UploadCloud
 } from 'lucide-react';
+import { MOCK_COMMON_FILES } from '../../../src/data/mock-common-files';
 
 interface Submodule {
   id: string;
@@ -77,6 +78,7 @@ const INITIAL_COURSES: CourseItem[] = [
 ];
 
 export default function LMSManagementPage() {
+  const [viewMode, setViewMode] = useState<'list' | 'create'>('list');
   const [courses, setCourses] = useState<CourseItem[]>(INITIAL_COURSES);
   
   // Course creator states
@@ -96,6 +98,7 @@ export default function LMSManagementPage() {
   const [subTitle, setSubTitle] = useState('');
   const [subType, setSubType] = useState<'Video' | 'PDF' | 'Reading' | 'Assignment' | 'Quiz' | 'External Link'>('PDF');
   const [subUrl, setSubUrl] = useState('');
+  const [selectedFileId, setSelectedFileId] = useState('');
 
   // Timer configurations
   const [minReadTime, setMinReadTime] = useState(120);
@@ -154,6 +157,7 @@ export default function LMSManagementPage() {
     setCourseName('');
     setCourseDesc('');
     setModules([]);
+    setViewMode('list');
   };
 
   const handleAddModule = () => {
@@ -238,12 +242,71 @@ export default function LMSManagementPage() {
       )}
 
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-black text-slate-900 tracking-tight">LMS Management</h2>
-        <p className="text-sm text-slate-550 mt-1">Configure pathways, publish course items, and apply player seeking timers.</p>
+      <div className="flex justify-between items-end">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">LMS Management</h2>
+          <p className="text-sm text-slate-550 mt-1">Configure pathways, publish course items, and apply player seeking timers.</p>
+        </div>
+        {viewMode === 'list' && (
+          <button 
+            onClick={() => setViewMode('create')}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-all"
+          >
+            <Plus className="h-4 w-4" />
+            Create Course
+          </button>
+        )}
       </div>
 
+      {viewMode === 'list' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {courses.map((course) => (
+            <div key={course.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div className="h-32 bg-slate-100 relative">
+                {course.thumbnail ? (
+                  <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Image className="h-8 w-8 text-slate-300" />
+                  </div>
+                )}
+                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-slate-700">
+                  {course.modules.length} Modules
+                </div>
+              </div>
+              <div className="p-4 space-y-3">
+                <div>
+                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">
+                    {course.program}
+                  </span>
+                  <h3 className="font-bold text-slate-800 mt-2 line-clamp-1">{course.title}</h3>
+                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">{course.description}</p>
+                </div>
+                <div className="pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500 font-medium">
+                  <span>{course.studentsCompleted} Completions</span>
+                  <span>{course.progressRate}% Avg</span>
+                </div>
+              </div>
+            </div>
+          ))}
+          {courses.length === 0 && (
+            <div className="col-span-full py-12 text-center text-slate-500">
+              <FolderOpen className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+              <p>No courses published yet.</p>
+            </div>
+          )}
+        </div>
+      ) : (
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm max-w-4xl space-y-6">
+        <div className="flex items-center gap-2 mb-2">
+          <button 
+            onClick={() => setViewMode('list')}
+            className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-800"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back to Courses
+          </button>
+        </div>
         <form onSubmit={handleCreateCourse} className="space-y-6">
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -368,14 +431,44 @@ export default function LMSManagementPage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Source URL</label>
-                          <input 
-                            type="text"
-                            value={subUrl}
-                            onChange={(e) => setSubUrl(e.target.value)}
-                            placeholder="e.g. python_loops.pdf"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 outline-none"
-                          />
+                          <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Common File OR URL</label>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={selectedFileId}
+                                onChange={(e) => {
+                                  setSelectedFileId(e.target.value);
+                                  const file = MOCK_COMMON_FILES.find(f => f.file_id === e.target.value);
+                                  if (file) {
+                                    setSubUrl(file.storage_url);
+                                  }
+                                }}
+                                className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 outline-none font-bold"
+                              >
+                                <option value="">-- Select from Common Files --</option>
+                                {MOCK_COMMON_FILES.map(file => (
+                                  <option key={file.file_id} value={file.file_id}>
+                                    {file.file_name} ({file.file_type})
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => triggerToast("Upload Modal Opened")}
+                                className="bg-indigo-50 border border-indigo-200 text-indigo-650 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5"
+                              >
+                                <UploadCloud className="h-3.5 w-3.5" />
+                                Upload
+                              </button>
+                            </div>
+                            <input 
+                              type="text"
+                              value={subUrl}
+                              onChange={(e) => setSubUrl(e.target.value)}
+                              placeholder="Or manually enter URL..."
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800 outline-none"
+                            />
+                          </div>
                         </div>
                       </div>
 
@@ -552,6 +645,7 @@ export default function LMSManagementPage() {
           </div>
         </form>
       </div>
+      )}
 
     </div>
   );

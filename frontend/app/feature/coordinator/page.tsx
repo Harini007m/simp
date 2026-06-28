@@ -6,7 +6,7 @@ import {
   Briefcase, MessageSquare, FileText, Activity, Eye, CheckCircle
 } from 'lucide-react';
 import { coordinatorService } from '@/src/services/coordinator.service';
-import { Coordinator, CollegeReport } from '@/src/data/mock-coordinators';
+import { Coordinator, CollegeReport } from '@/src/types/api/coordinator.types';
 import { Drawer } from '@/components/feature/ui/Drawer';
 
 export default function CoordinatorManagementPage() {
