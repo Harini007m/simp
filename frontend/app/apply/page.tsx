@@ -215,6 +215,30 @@ function ApplicationFormContent() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
+  const [colleges, setColleges] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [degrees, setDegrees] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchAcademicData() {
+      try {
+        const { organizationApi } = await import('@/src/api/organization.api');
+        const { degreeService } = await import('@/src/services/degree.service');
+        const [cols, depts, degs] = await Promise.all([
+          organizationApi.getColleges(),
+          organizationApi.getDepartments(),
+          degreeService.getDegrees()
+        ]);
+        setColleges(cols || []);
+        setDepartments(depts || []);
+        setDegrees(degs || []);
+      } catch (err) {
+        console.error("Failed to load academic data", err);
+      }
+    }
+    fetchAcademicData();
+  }, []);
+
   const dragRefResume = useRef<HTMLDivElement>(null);
   const dragRefScreenshot = useRef<HTMLDivElement>(null);
   const dragRefPhoto = useRef<HTMLDivElement>(null);
@@ -358,7 +382,8 @@ function ApplicationFormContent() {
         stepErrors.graduationYear = "Graduation year is required.";
       } else {
         const year = parseInt(graduationYear);
-        if (isNaN(year) || year < 2020 || year > 2040) {
+        const maxValidYear = new Date().getFullYear() + 10;
+        if (isNaN(year) || year < 1900 || year > maxValidYear) {
           stepErrors.graduationYear = "Please enter a valid year (e.g. 2026).";
         }
       }
@@ -725,44 +750,34 @@ function ApplicationFormContent() {
         },
       };
 
-      const response = await fetch(API_ENDPOINTS.APPLY, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      // removed extra try {
+        const { applicationService } = await import('@/src/services/application.service');
+        const response = await applicationService.createApplication(payload as any);
+        
+        // Mocking delay for UX if API is too fast
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      if (!response.ok) {
-        const responseText = await response.text();
-        let message = `Failed to submit application (${response.status})`;
-
-        if (responseText) {
-          try {
-            const parsed = JSON.parse(responseText);
-            message = parsed?.detail || parsed?.message || parsed?.error || message;
-          } catch {
-            message = responseText;
-          }
+        localStorage.setItem('pinesphere_submitted_photo', formState.personalInformation.photo?.base64 || '');
+        localStorage.setItem('pinesphere_submitted_name', `${formState.personalInformation.firstName} ${formState.personalInformation.lastName}`);
+        localStorage.setItem('pinesphere_submitted_program', internshipType === 'research' ? 'Research Intern' : internshipType === 'paid' ? 'Paid Intern' : 'Free Intern');
+        
+        localStorage.removeItem(`pinesphere_internship_draft_${internshipType}`);
+        
+        router.push(`/success?type=${internshipType}`);
+      } catch (err: any) {
+        console.error("Submission error:", err);
+        let message = `Failed to submit application`;
+        
+        if (err.response && err.response.data) {
+          message = err.response.data.detail || err.response.data.message || err.response.data.error || message;
+        } else if (err.message) {
+          message = err.message;
         }
 
-        throw new Error(message);
+        setErrors((prev) => ({ ...prev, submit: message }));
+        alert(`There was an error submitting your application: ${message}`);
+        setIsSubmitting(false);
       }
-
-      if (formState.personalInformation.photo?.base64) {
-        localStorage.setItem('pinesphere_submitted_photo', formState.personalInformation.photo.base64);
-      }
-      localStorage.setItem('pinesphere_submitted_name', `${formState.personalInformation.firstName} ${formState.personalInformation.lastName}`);
-      localStorage.setItem('pinesphere_submitted_program', internshipType === 'research' ? 'Research Intern' : internshipType === 'paid' ? 'Paid Intern' : 'Free Intern');
-      localStorage.removeItem(`pinesphere_internship_draft_${internshipType}`);
-      router.push(`/success?type=${internshipType}`);
-    } catch (error) {
-      console.error('Submission error:', error);
-      alert('There was an error submitting your application. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -1075,8 +1090,8 @@ function ApplicationFormContent() {
                   ) : (
                     <div className="flex items-center gap-4 bg-slate-50 border border-border rounded-xl p-5 shadow-sm">
                       <div className="h-16 w-16 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center text-blue-600 overflow-hidden shrink-0">
-                        {formState.personalInformation.photo.base64 ? (
-                          <img src={formState.personalInformation.photo.base64} alt="Photo" className="w-full h-full object-cover" />
+                        {formState.personalInformation.photo?.base64 ? (
+                          <img src={formState.personalInformation.photo?.base64} alt="Photo" className="w-full h-full object-cover" />
                         ) : (
                           <UserIcon className="h-6 w-6" />
                         )}
@@ -1115,19 +1130,22 @@ function ApplicationFormContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="sm:col-span-2">
                   <label htmlFor="collegeName" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">College Name *</label>
-                  <input
-                    type="text"
+                  <select
                     id="collegeName"
                     name="collegeName"
                     required
-                    placeholder="E.g. Pinesphere College of Technology"
                     value={formState.academicInformation.collegeName}
                     onBlur={() => handleBlur("collegeName")}
                     onChange={(e) => handleInputChange("academicInformation", "collegeName", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder:text-placeholder text-text-primary transition-all ${
                       errors.collegeName && touched.collegeName ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
-                  />
+                  >
+                    <option value="">Select your college</option>
+                    {colleges.map((c: any) => (
+                      <option key={c.college_id} value={c.college_name}>{c.college_name}</option>
+                    ))}
+                  </select>
                   {errors.collegeName && touched.collegeName && (
                     <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
                       <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
@@ -1138,19 +1156,22 @@ function ApplicationFormContent() {
 
                 <div>
                   <label htmlFor="department" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Department *</label>
-                  <input
-                    type="text"
+                  <select
                     id="department"
                     name="department"
                     required
-                    placeholder="E.g. Computer Science"
                     value={formState.academicInformation.department}
                     onBlur={() => handleBlur("department")}
                     onChange={(e) => handleInputChange("academicInformation", "department", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder:text-placeholder text-text-primary transition-all ${
                       errors.department && touched.department ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
-                  />
+                  >
+                    <option value="">Select your department</option>
+                    {departments.map((d: any) => (
+                      <option key={d.department_id} value={d.department_name}>{d.department_name}</option>
+                    ))}
+                  </select>
                   {errors.department && touched.department && (
                     <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
                       <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
@@ -1161,19 +1182,22 @@ function ApplicationFormContent() {
 
                 <div>
                   <label htmlFor="degree" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Degree *</label>
-                  <input
-                    type="text"
+                  <select
                     id="degree"
                     name="degree"
                     required
-                    placeholder="E.g. B.E. / B.Tech"
                     value={formState.academicInformation.degree}
                     onBlur={() => handleBlur("degree")}
                     onChange={(e) => handleInputChange("academicInformation", "degree", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder:text-placeholder text-text-primary transition-all ${
                       errors.degree && touched.degree ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
-                  />
+                  >
+                    <option value="">Select your degree</option>
+                    {degrees.map((deg: any) => (
+                      <option key={deg.degree_id} value={deg.degree_name}>{deg.degree_name}</option>
+                    ))}
+                  </select>
                   {errors.degree && touched.degree && (
                     <p className="text-xs text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
                       <WarningIcon className="h-3.5 w-3.5 text-rose-500 shrink-0" />
