@@ -1,16 +1,31 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { MOCK_MENTOR_BATCH_MAPPINGS } from '@/src/data/mock-mentor-batch-mappings';
-import { MOCK_BATCH_PERFORMANCE } from '@/src/data/mock-performance';
+import { mentorService } from '@/src/services/mentor.service';
+import { performanceService } from '@/src/services/performance.service';
 import { TrendingUp, Users, CheckCircle, Target, Award, AlertTriangle } from 'lucide-react';
 
 export default function MentorPerformanceView() {
+  const [mappings, setMappings] = React.useState<any[]>([]);
+  const [performances, setPerformances] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    async function loadData() {
+      const [maps, perfs] = await Promise.all([
+        mentorService.getBatchMappings(),
+        performanceService.getBatchPerformances()
+      ]);
+      setMappings(maps);
+      setPerformances(perfs);
+    }
+    loadData();
+  }, []);
+
   const mentorPerformanceData = useMemo(() => {
     const mentorMap = new Map<string, { mentorName: string, batches: any[] }>();
 
-    MOCK_MENTOR_BATCH_MAPPINGS.forEach(mapping => {
-      const perf = MOCK_BATCH_PERFORMANCE.find(p => p.batchId === mapping.batchId);
+    mappings.forEach(mapping => {
+      const perf = performances.find(p => p.batchId === mapping.batchId);
       
       if (!mentorMap.has(mapping.mentorProfileId)) {
         mentorMap.set(mapping.mentorProfileId, {
@@ -26,7 +41,7 @@ export default function MentorPerformanceView() {
     });
 
     return Array.from(mentorMap.values());
-  }, []);
+  }, [mappings, performances]);
 
   const overallAverages = useMemo(() => {
     let totalScore = 0, totalAttendance = 0, totalTaskCompletion = 0, count = 0;
