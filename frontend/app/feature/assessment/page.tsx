@@ -1,331 +1,434 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle,  
-  ClipboardList, Search, Filter, Plus, Calendar, Eye, FileText, Code, CheckCircle, 
-  Users, BarChart2, Activity, Play, Star
- } from 'lucide-react';
-import { assessmentService } from '@/src/services/assessment.service';
-import { Assessment, AssessmentSubmission } from '@/src/data/mock-assessments';
-import { Drawer } from '@/components/feature/ui/Drawer';
+import { 
+  ClipboardList, Users, BarChart2, Activity, Play, Star, AlertTriangle, ShieldCheck, XCircle, CheckCircle
+} from 'lucide-react';
 
-export default function AssessmentManagementPage() {
-  const [activeView, setActiveView] = useState<'dashboard' | 'directory'>('dashboard');
-  const [assessments, setAssessments] = useState<Assessment[]>([]);
-  const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
-  const [submissions, setSubmissions] = useState<AssessmentSubmission[]>([]);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'questions' | 'analytics'>('overview');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
+interface QuestionStat {
+  question: string;
+  correct: boolean;
+  skipped: boolean;
+  marksGained: number;
+}
 
+interface StudentAttempt {
+  studentId: string;
+  studentName: string;
+  attempts: number;
+  score: number;
+  status: 'Completed' | 'In Progress' | 'Missed';
+  passed: boolean;
+  questionAnalysis: {
+    correctCount: number;
+    wrongCount: number;
+    skippedCount: number;
+    negativeMarks: number;
+    detailed: QuestionStat[];
+  };
+}
+
+interface AssessmentItem {
+  id: string;
+  title: string;
+  type: 'MCQ' | 'Coding' | 'File Upload' | 'Mixed';
+  duration: number; // minutes
+  passingMarks: number;
+  negativeMarking: boolean;
+  securitySettings: {
+    secureBrowser: boolean;
+    disableCopy: boolean;
+    disableRightClick: boolean;
+    fullscreenOnly: boolean;
+    disableTabSwitch: boolean;
+    cameraRequired: boolean;
+    microphoneRequired: boolean;
+  };
+  questions: { text: string; options: string[]; answer: string; marks: number }[];
+  attempts: StudentAttempt[];
+}
+
+interface BatchAssessments {
+  id: string;
+  name: string;
+  assessmentsCount: number;
+  completedCount: string;
+  averageScore: number;
+  assessments: AssessmentItem[];
+}
+
+const INITIAL_BATCH_ASSESSMENTS: BatchAssessments[] = [
+  {
+    id: 'batch-ai-2026',
+    name: 'AI Batch 2026',
+    assessmentsCount: 2,
+    completedCount: '38/42',
+    averageScore: 84,
+    assessments: [
+      {
+        id: 'ASM-401',
+        title: 'Python Essentials Quiz',
+        type: 'MCQ',
+        duration: 30,
+        passingMarks: 70,
+        negativeMarking: true,
+        securitySettings: {
+          secureBrowser: true,
+          disableCopy: true,
+          disableRightClick: true,
+          fullscreenOnly: true,
+          disableTabSwitch: true,
+          cameraRequired: true,
+          microphoneRequired: true
+        },
+        questions: [
+          { text: 'Which of the following is an immutable sequence in Python?', options: ['List', 'Tuple', 'Set', 'Dictionary'], answer: 'B', marks: 10 }
+        ],
+        attempts: [
+          {
+            studentId: 'stu-harini',
+            studentName: 'Harini Sundar',
+            attempts: 1,
+            score: 90,
+            status: 'Completed',
+            passed: true,
+            questionAnalysis: {
+              correctCount: 9,
+              wrongCount: 1,
+              skippedCount: 0,
+              negativeMarks: 1,
+              detailed: [
+                { question: 'Q1: Immutable sequences in Python?', correct: true, skipped: false, marksGained: 10 },
+                { question: 'Q2: Global interpreter lock purpose?', correct: true, skipped: false, marksGained: 10 },
+                { question: 'Q3: Lambda expression definition?', correct: false, skipped: false, marksGained: -1 }
+              ]
+            }
+          },
+          {
+            studentId: 'stu-arun',
+            studentName: 'Arun Kumar',
+            attempts: 1,
+            score: 78,
+            status: 'Completed',
+            passed: true,
+            questionAnalysis: {
+              correctCount: 8,
+              wrongCount: 2,
+              skippedCount: 0,
+              negativeMarks: 2,
+              detailed: [
+                { question: 'Q1: Immutable sequences in Python?', correct: true, skipped: false, marksGained: 10 },
+                { question: 'Q2: Global interpreter lock purpose?', correct: false, skipped: false, marksGained: -1 }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        id: 'ASM-402',
+        title: 'AI Fundamentals Exam',
+        type: 'Mixed',
+        duration: 60,
+        passingMarks: 60,
+        negativeMarking: false,
+        securitySettings: {
+          secureBrowser: true,
+          disableCopy: true,
+          disableRightClick: true,
+          fullscreenOnly: true,
+          disableTabSwitch: true,
+          cameraRequired: false,
+          microphoneRequired: false
+        },
+        questions: [],
+        attempts: [
+          {
+            studentId: 'stu-rahul',
+            studentName: 'Rahul Sen',
+            attempts: 1,
+            score: 82,
+            status: 'Completed',
+            passed: true,
+            questionAnalysis: {
+              correctCount: 8,
+              wrongCount: 1,
+              skippedCount: 1,
+              negativeMarks: 0,
+              detailed: []
+            }
+          }
+        ]
+      }
+    ]
+  }
+];
+
+export default function AssessmentDashboardPage() {
+  const [batches, setBatches] = useState<BatchAssessments[]>(INITIAL_BATCH_ASSESSMENTS);
+
+  // Drill-down states
+  const [selectedBatch, setSelectedBatch] = useState<BatchAssessments | null>(null);
+  const [selectedAsm, setSelectedAsm] = useState<AssessmentItem | null>(null);
+  const [selectedAttempt, setSelectedAttempt] = useState<StudentAttempt | null>(null);
+
+  // Sync candidate score records
   useEffect(() => {
-    loadAssessments();
+    const syncSubmissions = () => {
+      if (typeof window !== 'undefined') {
+        const storedStr = localStorage.getItem('pinesphere_quiz_submissions');
+        if (storedStr) {
+          const parsed = JSON.parse(storedStr) as { asmId: string; attempt: StudentAttempt }[];
+          setBatches(prev => prev.map(b => {
+            const updatedAsms = b.assessments.map(a => {
+              const matches = parsed.filter(p => p.asmId === a.id).map(p => p.attempt);
+              if (matches.length > 0) {
+                const merged = [...a.attempts];
+                matches.forEach(newAttempt => {
+                  const idx = merged.findIndex(x => x.studentId === newAttempt.studentId);
+                  if (idx >= 0) {
+                    merged[idx] = { ...merged[idx], ...newAttempt };
+                  } else {
+                    merged.push(newAttempt);
+                  }
+                });
+                return { ...a, attempts: merged };
+              }
+              return a;
+            });
+            return {
+              ...b,
+              assessments: updatedAsms
+            };
+          }));
+        }
+      }
+    };
+    syncSubmissions();
+    window.addEventListener('storage', syncSubmissions);
+    return () => window.removeEventListener('storage', syncSubmissions);
   }, []);
 
-  const loadAssessments = async () => {
-    setLoading(true);
-    const data = await assessmentService.getAssessments();
-    setAssessments(data);
-    setLoading(false);
-  };
-
-  const handleAssessmentClick = async (assessment: Assessment) => {
-    setSelectedAssessment(assessment);
-    const subs = await assessmentService.getSubmissions(assessment.id);
-    setSubmissions(subs);
-    setActiveTab('overview');
-    setIsDrawerOpen(true);
-  };
-
-  const filteredAssessments = assessments.filter(a => a.title.toLowerCase().includes(searchTerm.toLowerCase()));
-
-  // KPIs
-  const activeAssessments = assessments.filter(a => a.status === 'Active').length;
-  const upcomingAssessments = assessments.filter(a => a.status === 'Upcoming').length;
-  const pendingGradingCount = 1; // MOCK
-  const averageScore = 85; // MOCK
-
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-500" />
-        TODO: Waiting for backend endpoint
-      </div>
-
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
-      </div>
-    );
-  }
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'MCQ': return <FileText className="h-4 w-4" />;
-      case 'Coding': return <Code className="h-4 w-4" />;
-      case 'Project': return <Play className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
-    }
-  };
+  const activeCount = batches.reduce((sum, b) => sum + b.assessments.length, 0);
+  const totalSubCount = batches.reduce((sum, b) => sum + b.assessments.reduce((s, a) => s + a.attempts.length, 0), 0);
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
-      <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Assessment Module</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage tests, coding assignments, and projects.</p>
-        </div>
-        <div className="flex gap-2 bg-slate-100 p-1 rounded-lg border border-slate-200">
-          <button 
-            onClick={() => setActiveView('dashboard')}
-            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${activeView === 'dashboard' ? 'bg-white text-slate-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Dashboard
-          </button>
-          <button 
-            onClick={() => setActiveView('directory')}
-            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${activeView === 'directory' ? 'bg-white text-slate-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Directory
-          </button>
-        </div>
+    <div className="space-y-6 animate-slide-in select-none">
+      
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Assessment Dashboard</h2>
+        <p className="text-sm text-slate-500 mt-1">Monitor candidate scores, analyze focus warning flags, and audit individual question stats.</p>
       </div>
 
-      <div className="flex-1 overflow-auto p-6">
-        {activeView === 'dashboard' && (
-          <div className="space-y-6 max-w-7xl mx-auto">
-            {/* KPI Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: 'Active Assessments', val: activeAssessments, icon: Activity, color: 'text-blue-600 bg-blue-50 border-blue-100' },
-                { label: 'Upcoming', val: upcomingAssessments, icon: Calendar, color: 'text-amber-600 bg-amber-50 border-amber-100' },
-                { label: 'Pending Grading', val: pendingGradingCount, icon: ClipboardList, color: 'text-rose-600 bg-rose-50 border-rose-100' },
-                { label: 'Average Score', val: `${averageScore}%`, icon: Star, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' }
-              ].map((kpi, idx) => (
-                <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all duration-200">
-                  <div>
-                    <div className="text-2.5xl font-black text-slate-800 tracking-tight">{kpi.val}</div>
-                    <div className="text-[10px] font-bold text-slate-450 uppercase tracking-wider mt-0.5">{kpi.label}</div>
+      {!selectedBatch ? (
+        <>
+          {/* Metrics Panel */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Exams</span>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">{activeCount}</h3>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Attempts Recorded</span>
+              <h3 className="text-3xl font-black text-emerald-600 mt-1">{totalSubCount}</h3>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pass Rate Avg</span>
+              <h3 className="text-3xl font-black text-indigo-650 mt-1">94%</h3>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-405 uppercase tracking-widest">Class Average</span>
+              <h3 className="text-3xl font-black text-amber-600 mt-1">84%</h3>
+            </div>
+          </div>
+
+          {/* Batch list cards */}
+          <div className="space-y-4">
+            <h3 className="font-bold text-xs text-slate-400 uppercase tracking-widest">Roster Compliance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {batches.map(b => (
+                <div 
+                  key={b.id}
+                  onClick={() => setSelectedBatch(b)}
+                  className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-500 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg flex flex-col justify-between space-y-4"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">COHORT</span>
+                      <h4 className="text-lg font-black text-slate-900 mt-1">{b.name}</h4>
+                    </div>
+                    <span className="bg-indigo-55/15 text-indigo-650 font-black px-3 py-1 rounded-full text-xs">
+                      {b.assessments.length} Active Tests
+                    </span>
                   </div>
-                  <div className={`h-11 w-11 rounded-lg ${kpi.color} border flex items-center justify-center shrink-0`}>
-                    <kpi.icon className="h-5 w-5" />
+
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-500 pt-2 border-t border-slate-50">
+                    <span>Submissions: <strong className="text-slate-800">{b.completedCount}</strong></span>
+                    <span>Average: <strong className="text-indigo-600">{b.averageScore}%</strong></span>
                   </div>
                 </div>
               ))}
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                  <Activity className="h-4 w-4 text-blue-600" />
-                  Upcoming Assessments
-                </h3>
-                <div className="space-y-3 pt-1">
-                  {assessments.filter(a => a.status === 'Upcoming').map((assessment) => (
-                    <div key={assessment.id} className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between">
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-800 leading-tight">{assessment.title}</h4>
-                        <p className="text-xs text-slate-500 mt-1">{assessment.assessmentType} • Batch {assessment.batchId} • Due: {assessment.date}</p>
-                      </div>
-                      <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Upcoming</span>
-                    </div>
-                  ))}
-                  {assessments.filter(a => a.status === 'Upcoming').length === 0 && (
-                    <div className="p-4 text-center text-slate-400 text-sm">No upcoming assessments.</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                  <CheckCircle className="h-4 w-4 text-emerald-600" />
-                  Pending Grading
-                </h3>
-                <div className="space-y-3 pt-1">
-                  <div className="p-4 text-center text-slate-500 text-sm italic border border-dashed border-slate-200 rounded-lg">
-                    1 submission requires manual grading.
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
-        )}
-
-        {activeView === 'directory' && (
-          <div className="bg-white border border-slate-200 rounded-xl shadow-sm max-w-7xl mx-auto flex flex-col h-[calc(100vh-12rem)]">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-4 bg-slate-50/50">
-              <div className="flex items-center gap-2 flex-1 max-w-md">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input 
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search assessments..."
-                    className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                  />
-                </div>
-                <button className="p-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50">
-                  <Filter className="h-4 w-4" />
-                </button>
-              </div>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm">
-                <Plus className="h-4 w-4" /> Create Assessment
+        </>
+      ) : !selectedAsm ? (
+        /* Exams under batch */
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b pb-4">
+            <div>
+              <button 
+                onClick={() => setSelectedBatch(null)} 
+                className="text-xs font-bold text-indigo-600 hover:underline mb-1 block"
+              >
+                ← Back to Cohorts
               </button>
-            </div>
-            <div className="flex-1 overflow-auto">
-              <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200 text-slate-500 font-medium">
-                  <tr>
-                    <th className="px-6 py-3">Assessment Title</th>
-                    <th className="px-6 py-3">Type</th>
-                    <th className="px-6 py-3">Batch</th>
-                    <th className="px-6 py-3">Date</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredAssessments.map(a => (
-                    <tr key={a.id} className="hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => handleAssessmentClick(a)}>
-                      <td className="px-6 py-4 font-medium text-slate-900 flex items-center gap-3">
-                        <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
-                          {getTypeIcon(a.assessmentType)}
-                        </div>
-                        <div>
-                          <div>{a.title}</div>
-                          <div className="text-xs text-slate-500 font-normal">{a.id}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-slate-600">{a.assessmentType}</td>
-                      <td className="px-6 py-4 text-slate-600">{a.batchId}</td>
-                      <td className="px-6 py-4 text-slate-600">{a.date}</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex px-2 py-1 rounded text-xs font-semibold ${
-                          a.status === 'Completed' ? 'bg-slate-100 text-slate-700' :
-                          a.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                        }`}>
-                          {a.status.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-1 text-slate-400 hover:text-blue-600 transition-colors">
-                          <Eye className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <h3 className="text-lg font-black text-slate-900">{selectedBatch.name} Exams</h3>
             </div>
           </div>
-        )}
-      </div>
 
-      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title="Assessment Profile" size="lg">
-        {selectedAssessment && (
-          <div className="flex flex-col h-full bg-slate-50 min-h-0">
-            <div className="bg-white border-b border-slate-200 px-6 py-4 shrink-0">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <ClipboardList className="h-6 w-6" />
+          <div className="grid grid-cols-1 gap-4">
+            {selectedBatch.assessments.map(asm => (
+              <div 
+                key={asm.id}
+                onClick={() => setSelectedAsm(asm)}
+                className="p-5 border border-slate-200 hover:border-indigo-500 hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400">{asm.id}</span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-350" />
+                    <span className="text-[10px] font-bold text-indigo-650 bg-indigo-55/15 px-2 py-0.2 rounded">{asm.type}</span>
                   </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900">{selectedAssessment.title}</h2>
-                    <p className="text-sm text-slate-500">ID: {selectedAssessment.id} • Batch: {selectedAssessment.batchId}</p>
+                  <h4 className="text-base font-black text-slate-900">{asm.title}</h4>
+                  <p className="text-xs text-slate-500">Passing Threshold: {asm.passingMarks}% • Passing Duration: {asm.duration} mins</p>
+                </div>
+
+                <div className="flex items-center gap-6 shrink-0">
+                  <span className="text-xs font-semibold text-slate-500">Attempts recorded: {asm.attempts.length}</span>
+                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
+                    View Roster
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* Candidates list and Question stats reviews */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Candidates */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="border-b pb-3">
+              <button 
+                onClick={() => { setSelectedAsm(null); setSelectedAttempt(null); }} 
+                className="text-[10px] font-bold text-indigo-600 hover:underline block"
+              >
+                ← Back to Exams
+              </button>
+              <h4 className="text-sm font-black text-slate-900 mt-1">{selectedAsm.title}</h4>
+            </div>
+
+            <div className="space-y-2">
+              {selectedAsm.attempts.map(att => (
+                <div 
+                  key={att.studentId}
+                  onClick={() => setSelectedAttempt(att)}
+                  className={`p-3 border rounded-xl cursor-pointer transition-all ${
+                    selectedAttempt?.studentId === att.studentId 
+                      ? 'bg-slate-900 border-slate-850 text-white shadow' 
+                      : 'bg-slate-50 border-slate-200 hover:border-slate-350 text-slate-700'
+                  }`}
+                >
+                  <div className="flex justify-between items-center text-xs font-bold">
+                    <span>{att.studentName}</span>
+                    <span className={`text-[8px] font-black px-2 py-0.5 rounded border ${
+                      att.passed ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'
+                    }`}>
+                      {att.passed ? 'PASS' : 'FAIL'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] mt-2 opacity-85">
+                    <span>Score: {att.score}%</span>
+                    <span>Attempt #{att.attempts}</span>
                   </div>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className={`inline-flex px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
-                    selectedAssessment.status === 'Completed' ? 'bg-slate-100 text-slate-700' :
-                    selectedAssessment.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+              ))}
+              {selectedAsm.attempts.length === 0 && (
+                <p className="text-xs text-slate-550 italic text-center py-12">No submissions recorded.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Report Trace */}
+          <div className="lg:col-span-2 space-y-6">
+            {selectedAttempt ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+                <div className="border-b pb-4 flex justify-between items-start gap-4">
+                  <div>
+                    <span className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-sm uppercase tracking-wider">PAPER COMPLIANCE REPORT</span>
+                    <h3 className="text-lg font-black text-slate-900 mt-2">{selectedAttempt.studentName}</h3>
+                    <p className="text-xs text-slate-500">Grading Score: <strong>{selectedAttempt.score}%</strong></p>
+                  </div>
+                  
+                  <span className={`text-xs font-extrabold px-3 py-1 rounded-xl uppercase ${
+                    selectedAttempt.passed ? 'bg-emerald-55/15 text-emerald-700 border' : 'bg-rose-55/15 text-rose-700 border'
                   }`}>
-                    {selectedAssessment.status}
+                    {selectedAttempt.passed ? 'Passed Exam' : 'Failed'}
                   </span>
                 </div>
-              </div>
-            </div>
 
-            <div className="flex overflow-x-auto border-b border-slate-200 bg-white px-6 shrink-0">
-              {['overview', 'submissions', 'questions', 'analytics'].map(t => (
-                <button
-                  key={t}
-                  onClick={() => setActiveTab(t as any)}
-                  className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === t ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                >
-                  <span className="capitalize">{t}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex-1 p-6 overflow-y-auto">
-              {activeTab === 'overview' && (
-                <div className="space-y-6">
-                  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                    <h3 className="text-sm font-semibold text-slate-900 border-b border-slate-100 pb-2">Configuration</h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Assessment Type</span>
-                        <span className="font-medium text-slate-800">{selectedAssessment.assessmentType}</span>
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Date scheduled</span>
-                        <span className="font-medium text-slate-800">{selectedAssessment.date}</span>
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Marks</span>
-                        <span className="font-medium text-slate-800">{selectedAssessment.totalMarks}</span>
-                      </div>
-                      <div>
-                        <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Passing Marks</span>
-                        <span className="font-medium text-slate-800">{selectedAssessment.passingMarks}</span>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-center">
+                    <span className="block text-xl font-black text-emerald-700">{selectedAttempt.questionAnalysis.correctCount}</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Correct answers</span>
+                  </div>
+                  <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-center">
+                    <span className="block text-xl font-black text-rose-700">{selectedAttempt.questionAnalysis.wrongCount}</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Wrong answers</span>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                    <span className="block text-xl font-black text-slate-700">{selectedAttempt.questionAnalysis.skippedCount}</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Skipped</span>
+                  </div>
+                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center">
+                    <span className="block text-xl font-black text-amber-700">-{selectedAttempt.questionAnalysis.negativeMarks}</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">Negative Penalties</span>
                   </div>
                 </div>
-              )}
 
-              {activeTab === 'submissions' && (
-                <div className="space-y-4">
-                  {submissions.map(s => (
-                    <div key={s.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-full shrink-0">
-                          <Users className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-slate-900">Student: {s.studentId}</div>
-                          <div className="text-xs text-slate-500">
-                            Status: <span className="font-semibold">{s.status}</span> 
-                            {s.score !== undefined && ` • Score: ${s.score}`}
-                          </div>
+                {/* trace questions list */}
+                <div className="space-y-3.5">
+                  <h4 className="font-bold text-xs text-slate-455 uppercase tracking-widest">Question trace detail</h4>
+                  <div className="space-y-2">
+                    {selectedAttempt.questionAnalysis.detailed.map((det, idx) => (
+                      <div key={idx} className="p-3 bg-slate-50 border border-slate-150 rounded-xl flex items-center justify-between text-xs font-semibold">
+                        <span className="text-slate-750 truncate mr-4">{det.question}</span>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                            det.correct ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                            det.skipped ? 'bg-slate-100 text-slate-655 border border-slate-200' :
+                            'bg-rose-50 text-rose-700 border border-rose-150'
+                          }`}>
+                            {det.correct ? 'Correct' : det.skipped ? 'Skipped' : 'Wrong'}
+                          </span>
+                          <span className="font-mono font-bold text-slate-800">
+                            {det.marksGained > 0 ? `+${det.marksGained}` : det.marksGained} marks
+                          </span>
                         </div>
                       </div>
-                      {s.status === 'Pending Grading' && (
-                        <button className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">Grade Now</button>
-                      )}
-                    </div>
-                  ))}
-                  {submissions.length === 0 && <p className="text-sm text-slate-500 text-center">No submissions yet.</p>}
+                    ))}
+                  </div>
                 </div>
-              )}
 
-              {activeTab === 'questions' && (
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center text-slate-500">
-                  Question bank will appear here.
-                </div>
-              )}
-
-              {activeTab === 'analytics' && (
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-center text-slate-500">
-                  Assessment analytics will appear here.
-                </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center text-slate-400 italic shadow-sm">
+                Select a student attempt card from the left panel to review score details and negative marking audits.
+              </div>
+            )}
           </div>
-        )}
-      </Drawer>
+        </div>
+      )}
     </div>
   );
 }
