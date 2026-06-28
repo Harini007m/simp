@@ -766,13 +766,13 @@ function ApplicationFormContent() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start" ref={topRef}>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start font-[family-name:var(--font-work-sans)] text-[var(--foreground)]" ref={topRef}>
       
       {/* LEFT COLUMN: Sticky Step List (checking validation states natively) */}
-      <aside className="hidden lg:block lg:col-span-4 sticky top-24 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-          <h2 className="text-sm font-bold text-slate-900 tracking-wide uppercase">Application Sections</h2>
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-full">
+      <aside className="hidden lg:block lg:col-span-4 sticky top-24 bg-white border border-sky-200/80 rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-sky-100">
+          <h2 className="text-sm font-bold text-text-primary tracking-wide uppercase font-[family-name:var(--font-outfit)]">Application Sections</h2>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-secondary bg-slate-50 px-2.5 py-1 rounded-full">
             <span className={`w-2 h-2 rounded-full ${isSaved ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`}></span>
             {isSaved ? "Saved" : "Auto-saved"}
           </div>
@@ -793,24 +793,24 @@ function ApplicationFormContent() {
                   >
                     <span className={`flex h-8 w-8 items-center justify-center shrink-0 rounded-xl font-semibold text-xs border transition-all ${
                       isActive 
-                        ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20 scale-105" 
+                        ? "bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20 scale-105" 
                         : isDone 
-                          ? "bg-blue-50 text-blue-600 border-blue-150" 
-                          : "bg-slate-50 text-slate-400 border-slate-200 group-hover:bg-slate-100"
+                          ? "bg-sky-50 text-text-secondary border-sky-200" 
+                          : "bg-slate-50 text-text-secondary border-slate-200 group-hover:bg-slate-100"
                     }`}>
                       {isDone ? (
                         <SuccessCheckIcon className="h-4 w-4" />
                       ) : (
-                        getStepIcon(idx, isActive ? "h-4 w-4 text-white" : "h-4 w-4 text-slate-400")
+                        getStepIcon(idx, isActive ? "h-4 w-4 text-white" : "h-4 w-4 text-text-secondary")
                       )}
                     </span>
                     <div className="min-w-0">
                       <p className={`text-sm font-bold transition-all ${
-                        isActive ? "text-slate-950 font-extrabold" : "text-slate-650"
+                        isActive ? "text-text-primary font-extrabold" : "text-text-secondary"
                       }`}>
                         {step.label}
                       </p>
-                      <p className="text-[11px] text-slate-400 font-medium">
+                      <p className="text-[11px] text-text-secondary font-medium">
                         {isActive ? "Currently viewing" : isDone ? "Complete" : "Pending fields"}
                       </p>
                     </div>
@@ -829,9 +829,9 @@ function ApplicationFormContent() {
         <div className="lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
           <div>
             <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Step {currentStep + 1} of {steps.length}</span>
-            <h2 className="text-lg font-bold text-slate-900">{steps[currentStep].label}</h2>
+            <h2 className="text-lg font-bold text-text-primary">{steps[currentStep].label}</h2>
           </div>
-          <div className="text-[10px] text-slate-400 font-bold bg-slate-50 px-2.5 py-1.5 rounded-full flex items-center gap-1.5">
+          <div className="text-[10px] text-text-secondary font-bold bg-slate-50 px-2.5 py-1.5 rounded-full flex items-center gap-1.5">
             <span className={`w-1.5 h-1.5 rounded-full ${isSaved ? "bg-emerald-500" : "bg-slate-300"}`}></span>
             {isSaved ? "SAVING..." : "AUTO-SAVED"}
           </div>
@@ -840,7 +840,7 @@ function ApplicationFormContent() {
         {/* Global horizontal progress line on top of form */}
         <div className="hidden lg:block mb-8">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">Application Progress</span>
+            <span className="text-xs font-bold text-text-secondary tracking-wider uppercase">Application Progress</span>
             <span className="text-xs font-bold text-blue-600">{Math.round((currentStep / (steps.length - 1)) * 100)}% Complete</span>
           </div>
           <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -858,13 +858,13 @@ function ApplicationFormContent() {
           {currentStep === 0 && (
             <div className="animate-slide-in space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-slate-900 mb-1">Personal Information</h3>
-                <p className="text-xs text-slate-400">Please provide your contact and identification details as they appear on your government documents.</p>
+                <h3 className="text-xl font-bold text-text-primary mb-1">Personal Information</h3>
+                <p className="text-xs text-text-secondary">Please provide your contact and identification details as they appear on your government documents.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label htmlFor="firstName" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">First Name *</label>
+                  <label htmlFor="firstName" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">First Name *</label>
                   <input
                     type="text"
                     id="firstName"
@@ -874,7 +874,7 @@ function ApplicationFormContent() {
                     value={formState.personalInformation.firstName}
                     onBlur={() => handleBlur("firstName")}
                     onChange={(e) => handleInputChange("personalInformation", "firstName", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.firstName && touched.firstName ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -887,7 +887,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Last Name *</label>
+                  <label htmlFor="lastName" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Last Name *</label>
                   <input
                     type="text"
                     id="lastName"
@@ -897,7 +897,7 @@ function ApplicationFormContent() {
                     value={formState.personalInformation.lastName}
                     onBlur={() => handleBlur("lastName")}
                     onChange={(e) => handleInputChange("personalInformation", "lastName", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.lastName && touched.lastName ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -910,7 +910,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Email Address *</label>
+                  <label htmlFor="email" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Email Address *</label>
                   <input
                     type="email"
                     id="email"
@@ -920,7 +920,7 @@ function ApplicationFormContent() {
                     value={formState.personalInformation.email}
                     onBlur={() => handleBlur("email")}
                     onChange={(e) => handleInputChange("personalInformation", "email", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.email && touched.email ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -933,7 +933,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="mobileNumber" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Mobile Number *</label>
+                  <label htmlFor="mobileNumber" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Mobile Number *</label>
                   <input
                     type="tel"
                     id="mobileNumber"
@@ -943,7 +943,7 @@ function ApplicationFormContent() {
                     value={formState.personalInformation.mobileNumber}
                     onBlur={() => handleBlur("mobileNumber")}
                     onChange={(e) => handleInputChange("personalInformation", "mobileNumber", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.mobileNumber && touched.mobileNumber ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -956,25 +956,25 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="dateOfBirth" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Date of Birth</label>
+                  <label htmlFor="dateOfBirth" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Date of Birth</label>
                   <input
                     type="date"
                     id="dateOfBirth"
                     name="dateOfBirth"
                     value={formState.personalInformation.dateOfBirth}
                     onChange={(e) => handleInputChange("personalInformation", "dateOfBirth", e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-text-primary transition-all"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="gender" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Gender</label>
+                  <label htmlFor="gender" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Gender</label>
                   <select
                     id="gender"
                     name="gender"
                     value={formState.personalInformation.gender}
                     onChange={(e) => handleInputChange("personalInformation", "gender", e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-text-primary transition-all"
                   >
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
@@ -985,7 +985,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="city" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">City *</label>
+                  <label htmlFor="city" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">City *</label>
                   <input
                     type="text"
                     id="city"
@@ -995,7 +995,7 @@ function ApplicationFormContent() {
                     value={formState.personalInformation.city}
                     onBlur={() => handleBlur("city")}
                     onChange={(e) => handleInputChange("personalInformation", "city", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.city && touched.city ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -1008,7 +1008,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="state" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">State *</label>
+                  <label htmlFor="state" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">State *</label>
                   <input
                     type="text"
                     id="state"
@@ -1018,7 +1018,7 @@ function ApplicationFormContent() {
                     value={formState.personalInformation.state}
                     onBlur={() => handleBlur("state")}
                     onChange={(e) => handleInputChange("personalInformation", "state", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.state && touched.state ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -1031,7 +1031,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div className="sm:col-span-2 mt-2">
-                  <span className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Passport Size Photo *</span>
+                  <span className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Passport Size Photo *</span>
                   
                   {!formState.personalInformation.photo ? (
                     <div
@@ -1069,8 +1069,8 @@ function ApplicationFormContent() {
                       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-4">
                         <UploadIcon className="h-7 w-7 text-blue-600" />
                       </div>
-                      <p className="text-sm font-bold text-slate-800">Drag & Drop or click to upload your Passport Size Photo</p>
-                      <p className="text-xs text-slate-400 mt-1">Accepts JPEG, PNG, WEBP (Max 5MB)</p>
+                      <p className="text-sm font-bold text-text-primary">Drag & Drop or click to upload your Passport Size Photo</p>
+                      <p className="text-xs text-text-secondary mt-1">Accepts JPEG, PNG, WEBP (Max 5MB)</p>
                     </div>
                   ) : (
                     <div className="flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-xl p-5 shadow-sm">
@@ -1082,8 +1082,8 @@ function ApplicationFormContent() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-slate-800 truncate">{formState.personalInformation.photo.name}</p>
-                        <p className="text-xs text-slate-400 font-semibold">{(formState.personalInformation.photo.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p className="text-sm font-bold text-text-primary truncate">{formState.personalInformation.photo.name}</p>
+                        <p className="text-xs text-text-secondary font-semibold">{(formState.personalInformation.photo.size / 1024 / 1024).toFixed(2)} MB</p>
                       </div>
                       <button
                         type="button"
@@ -1108,13 +1108,13 @@ function ApplicationFormContent() {
           {currentStep === 1 && (
             <div className="animate-slide-in space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-slate-900 mb-1">Academic Profile</h3>
-                <p className="text-xs text-slate-400">Share your current academic standings, department, and expected graduation timelines.</p>
+                <h3 className="text-xl font-bold text-text-primary mb-1">Academic Profile</h3>
+                <p className="text-xs text-text-secondary">Share your current academic standings, department, and expected graduation timelines.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="sm:col-span-2">
-                  <label htmlFor="collegeName" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">College Name *</label>
+                  <label htmlFor="collegeName" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">College Name *</label>
                   <input
                     type="text"
                     id="collegeName"
@@ -1124,7 +1124,7 @@ function ApplicationFormContent() {
                     value={formState.academicInformation.collegeName}
                     onBlur={() => handleBlur("collegeName")}
                     onChange={(e) => handleInputChange("academicInformation", "collegeName", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.collegeName && touched.collegeName ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -1137,7 +1137,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="department" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Department *</label>
+                  <label htmlFor="department" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Department *</label>
                   <input
                     type="text"
                     id="department"
@@ -1147,7 +1147,7 @@ function ApplicationFormContent() {
                     value={formState.academicInformation.department}
                     onBlur={() => handleBlur("department")}
                     onChange={(e) => handleInputChange("academicInformation", "department", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.department && touched.department ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -1160,7 +1160,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="degree" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Degree *</label>
+                  <label htmlFor="degree" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Degree *</label>
                   <input
                     type="text"
                     id="degree"
@@ -1170,7 +1170,7 @@ function ApplicationFormContent() {
                     value={formState.academicInformation.degree}
                     onBlur={() => handleBlur("degree")}
                     onChange={(e) => handleInputChange("academicInformation", "degree", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.degree && touched.degree ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -1183,7 +1183,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="currentYear" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Current Year *</label>
+                  <label htmlFor="currentYear" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Current Year *</label>
                   <select
                     id="currentYear"
                     name="currentYear"
@@ -1191,7 +1191,7 @@ function ApplicationFormContent() {
                     value={formState.academicInformation.currentYear}
                     onBlur={() => handleBlur("currentYear")}
                     onChange={(e) => handleInputChange("academicInformation", "currentYear", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-text-primary transition-all ${
                       errors.currentYear && touched.currentYear ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   >
@@ -1212,7 +1212,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="cgpaPercentage" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">CGPA / Percentage *</label>
+                  <label htmlFor="cgpaPercentage" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">CGPA / Percentage *</label>
                   <input
                     type="text"
                     id="cgpaPercentage"
@@ -1222,7 +1222,7 @@ function ApplicationFormContent() {
                     value={formState.academicInformation.cgpaPercentage}
                     onBlur={() => handleBlur("cgpaPercentage")}
                     onChange={(e) => handleInputChange("academicInformation", "cgpaPercentage", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.cgpaPercentage && touched.cgpaPercentage ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -1235,7 +1235,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="graduationYear" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Graduation Year *</label>
+                  <label htmlFor="graduationYear" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Graduation Year *</label>
                   <input
                     type="text"
                     id="graduationYear"
@@ -1245,7 +1245,7 @@ function ApplicationFormContent() {
                     value={formState.academicInformation.graduationYear}
                     onBlur={() => handleBlur("graduationYear")}
                     onChange={(e) => handleInputChange("academicInformation", "graduationYear", e.target.value)}
-                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                    className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.graduationYear && touched.graduationYear ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                     }`}
                   />
@@ -1264,13 +1264,13 @@ function ApplicationFormContent() {
           {currentStep === 2 && (
             <div className="animate-slide-in space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-slate-900 mb-1">Professional Portfolio</h3>
-                <p className="text-xs text-slate-400">Share your skillsets, web profiles, portfolios, and previous building experiences.</p>
+                <h3 className="text-xl font-bold text-text-primary mb-1">Professional Portfolio</h3>
+                <p className="text-xs text-text-secondary">Share your skillsets, web profiles, portfolios, and previous building experiences.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="sm:col-span-2">
-                  <label htmlFor="skills" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Skills (Comma Separated) *</label>
+                  <label htmlFor="skills" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Skills (Comma Separated) *</label>
                   <input
                     type="text"
                     id="skills"
@@ -1293,7 +1293,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="githubUrl" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">GitHub Profile URL</label>
+                  <label htmlFor="githubUrl" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">GitHub Profile URL</label>
                   <input
                     type="url"
                     id="githubUrl"
@@ -1315,7 +1315,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div>
-                  <label htmlFor="linkedinUrl" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">LinkedIn Profile URL</label>
+                  <label htmlFor="linkedinUrl" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">LinkedIn Profile URL</label>
                   <input
                     type="url"
                     id="linkedinUrl"
@@ -1337,7 +1337,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label htmlFor="portfolioUrl" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Portfolio URL</label>
+                  <label htmlFor="portfolioUrl" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Portfolio URL</label>
                   <input
                     type="url"
                     id="portfolioUrl"
@@ -1359,7 +1359,7 @@ function ApplicationFormContent() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label htmlFor="projectExperience" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Project Experience / Description</label>
+                  <label htmlFor="projectExperience" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Project Experience / Description</label>
                   <textarea
                     id="projectExperience"
                     name="projectExperience"
@@ -1367,7 +1367,7 @@ function ApplicationFormContent() {
                     placeholder="Describe some key projects you've built, the tech stacks used, and details of your contributions."
                     value={formState.professionalInformation.projectExperience}
                     onChange={(e) => handleInputChange("professionalInformation", "projectExperience", e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all"
                   ></textarea>
                 </div>
               </div>
@@ -1378,20 +1378,20 @@ function ApplicationFormContent() {
           {currentStep === 3 && (
             <div className="animate-slide-in space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-slate-900 mb-1">Internship Specific Details</h3>
-                <p className="text-xs text-slate-400">Additional information tailored to the selected <strong className="text-blue-600 capitalize">{internshipType}</strong> internship program.</p>
+                <h3 className="text-xl font-bold text-text-primary mb-1">Internship Specific Details</h3>
+                <p className="text-xs text-text-secondary">Additional information tailored to the selected <strong className="text-blue-600 capitalize">{internshipType}</strong> internship program.</p>
               </div>
 
               {/* FREE INTERNSHIP */}
               {internshipType === "free" && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-sm font-semibold text-slate-650 flex items-center justify-center gap-2">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-sm font-semibold text-text-secondary flex items-center justify-center gap-2">
                   <SpecificIcon className="h-5 w-5 text-blue-600" /> Free Internship requires no additional information.
                 </div>
               )}
 
               {/* CORPORATE SPONSORED INTERNSHIP */}
               {internshipType === "corporate" && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-sm font-semibold text-slate-650 flex items-center justify-center gap-2">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-sm font-semibold text-text-secondary flex items-center justify-center gap-2">
                   <CorporateIcon className="h-5 w-5 text-blue-600" /> Corporate Sponsored Internship requires no additional information.
                 </div>
               )}
@@ -1432,7 +1432,7 @@ function ApplicationFormContent() {
                   <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label htmlFor="paymentMode" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Payment Mode *</label>
+                        <label htmlFor="paymentMode" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Payment Mode *</label>
                         <select
                           id="paymentMode"
                           name="paymentMode"
@@ -1473,7 +1473,7 @@ function ApplicationFormContent() {
                               return next;
                             });
                           }}
-                          className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all ${
+                          className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-text-primary transition-all ${
                             errors.paymentMode && touched.paymentMode ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                           }`}
                         >
@@ -1493,8 +1493,8 @@ function ApplicationFormContent() {
 
                       {/* Display Amount Due */}
                       <div className="flex flex-col justify-center bg-slate-50 border border-slate-100 rounded-xl px-5 py-3">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Amount Due</span>
-                        <span className="text-2xl font-black text-slate-800">₹1,500<span className="text-xs font-semibold text-slate-550">.00 INR</span></span>
+                        <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Amount Due</span>
+                        <span className="text-2xl font-black text-text-primary">₹1,500<span className="text-xs font-semibold text-text-secondary">.00 INR</span></span>
                       </div>
                     </div>
 
@@ -1502,13 +1502,13 @@ function ApplicationFormContent() {
                     {formState.internshipSpecificData.paymentMode === "UPI" && (
                       <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
                         <div className="max-w-md">
-                          <label htmlFor="upiApp" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Select UPI App *</label>
+                          <label htmlFor="upiApp" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Select UPI App *</label>
                           <select
                             id="upiApp"
                             name="upiApp"
                             value={formState.internshipSpecificData.upiApp}
                             onChange={(e) => handleInputChange("internshipSpecificData", "upiApp", e.target.value)}
-                            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-text-primary"
                           >
                             <option value="">Choose App</option>
                             <option value="Google Pay">Google Pay</option>
@@ -1557,8 +1557,8 @@ function ApplicationFormContent() {
                             <div className="flex items-center gap-2.5">
                               <div className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">✓</div>
                               <div>
-                                <p className="text-sm font-bold text-slate-800">Payment Completed via {formState.internshipSpecificData.upiApp}</p>
-                                <p className="text-xs text-slate-400 font-medium mt-0.5">Transaction ID: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.transactionId}</span></p>
+                                <p className="text-sm font-bold text-text-primary">Payment Completed via {formState.internshipSpecificData.upiApp}</p>
+                                <p className="text-xs text-text-secondary font-medium mt-0.5">Transaction ID: <span className="font-mono text-text-secondary bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.transactionId}</span></p>
                               </div>
                             </div>
                             <span className="text-xs font-bold text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-full uppercase tracking-wider">Paid</span>
@@ -1572,7 +1572,7 @@ function ApplicationFormContent() {
                       <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div>
-                            <label htmlFor="bankName" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Bank Name *</label>
+                            <label htmlFor="bankName" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Bank Name *</label>
                             <input
                               type="text"
                               id="bankName"
@@ -1580,7 +1580,7 @@ function ApplicationFormContent() {
                               placeholder="E.g. State Bank of India"
                               value={formState.internshipSpecificData.bankName}
                               onChange={(e) => handleInputChange("internshipSpecificData", "bankName", e.target.value)}
-                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-text-primary"
                             />
                             {errors.bankName && (
                               <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
@@ -1591,7 +1591,7 @@ function ApplicationFormContent() {
                           </div>
 
                           <div>
-                            <label htmlFor="utrNumber" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">UTR Number *</label>
+                            <label htmlFor="utrNumber" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">UTR Number *</label>
                             <input
                               type="text"
                               id="utrNumber"
@@ -1603,7 +1603,7 @@ function ApplicationFormContent() {
                                 handleInputChange("internshipSpecificData", "utrNumber", val);
                                 handleInputChange("internshipSpecificData", "transactionId", val);
                               }}
-                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-text-primary"
                             />
                             {errors.utrNumber && (
                               <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
@@ -1614,14 +1614,14 @@ function ApplicationFormContent() {
                           </div>
 
                           <div>
-                            <label htmlFor="transferDate" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Transfer Date *</label>
+                            <label htmlFor="transferDate" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Transfer Date *</label>
                             <input
                               type="date"
                               id="transferDate"
                               name="transferDate"
                               value={formState.internshipSpecificData.transferDate}
                               onChange={(e) => handleInputChange("internshipSpecificData", "transferDate", e.target.value)}
-                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-text-primary"
                             />
                             {errors.transferDate && (
                               <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
@@ -1639,13 +1639,13 @@ function ApplicationFormContent() {
                       <div className="bg-slate-50/50 border border-slate-200/60 rounded-xl p-5 space-y-4 animate-slide-in">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label htmlFor="cardType" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Card Network *</label>
+                            <label htmlFor="cardType" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Card Network *</label>
                             <select
                               id="cardType"
                               name="cardType"
                               value={formState.internshipSpecificData.cardType}
                               onChange={(e) => handleInputChange("internshipSpecificData", "cardType", e.target.value)}
-                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-text-primary"
                             >
                               <option value="">Select Network</option>
                               <option value="Visa">Visa</option>
@@ -1662,7 +1662,7 @@ function ApplicationFormContent() {
                           </div>
 
                           <div>
-                            <label htmlFor="last4Digits" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Last 4 Digits *</label>
+                            <label htmlFor="last4Digits" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Last 4 Digits *</label>
                             <input
                               type="text"
                               id="last4Digits"
@@ -1676,7 +1676,7 @@ function ApplicationFormContent() {
                                 const val = e.target.value.replace(/\D/g, "").slice(0, 4);
                                 handleInputChange("internshipSpecificData", "last4Digits", val);
                               }}
-                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-slate-800"
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none bg-white text-text-primary"
                             />
                             {errors.last4Digits && (
                               <p className="text-xs text-rose-500 font-semibold mt-1 flex items-center gap-1">
@@ -1719,10 +1719,10 @@ function ApplicationFormContent() {
                             <div className="flex items-center gap-2.5">
                               <div className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold">✓</div>
                               <div>
-                                <p className="text-sm font-bold text-slate-800">Card Payment Authorized via {formState.internshipSpecificData.cardType} (**** {formState.internshipSpecificData.last4Digits})</p>
-                                <p className="text-xs text-slate-400 font-medium mt-0.5 flex gap-3">
-                                  <span>Auth Code: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.authCode}</span></span>
-                                  <span>Txn ID: <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.transactionId}</span></span>
+                                <p className="text-sm font-bold text-text-primary">Card Payment Authorized via {formState.internshipSpecificData.cardType} (**** {formState.internshipSpecificData.last4Digits})</p>
+                                <p className="text-xs text-text-secondary font-medium mt-0.5 flex gap-3">
+                                  <span>Auth Code: <span className="font-mono text-text-secondary bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.authCode}</span></span>
+                                  <span>Txn ID: <span className="font-mono text-text-secondary bg-slate-100 px-1.5 py-0.5 rounded">{formState.internshipSpecificData.transactionId}</span></span>
                                 </p>
                               </div>
                             </div>
@@ -1734,7 +1734,7 @@ function ApplicationFormContent() {
                   </div>
 
                   <div>
-                    <span className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Payment Screenshot Receipt *</span>
+                    <span className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Payment Screenshot Receipt *</span>
                     
                     {!formState.internshipSpecificData.paymentScreenshot ? (
                       <div
@@ -1772,8 +1772,8 @@ function ApplicationFormContent() {
                         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 mb-3">
                           <DocumentIcon className="h-6 w-6 text-blue-600" />
                         </div>
-                        <p className="text-sm font-bold text-slate-800">Drag & Drop or Click to upload receipt</p>
-                        <p className="text-xs text-slate-400 mt-1">Accepts images & PDF (Max 5MB)</p>
+                        <p className="text-sm font-bold text-text-primary">Drag & Drop or Click to upload receipt</p>
+                        <p className="text-xs text-text-secondary mt-1">Accepts images & PDF (Max 5MB)</p>
                       </div>
                     ) : (
                       <div className="flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-xl p-4">
@@ -1781,8 +1781,8 @@ function ApplicationFormContent() {
                           {formState.internshipSpecificData.paymentScreenshot.type.includes("pdf") ? "PDF" : "IMG"}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-slate-800 truncate">{formState.internshipSpecificData.paymentScreenshot.name}</p>
-                          <p className="text-xs text-slate-400 font-semibold">{(formState.internshipSpecificData.paymentScreenshot.size / 1024 / 1024).toFixed(2)} MB</p>
+                          <p className="text-sm font-bold text-text-primary truncate">{formState.internshipSpecificData.paymentScreenshot.name}</p>
+                          <p className="text-xs text-text-secondary font-semibold">{(formState.internshipSpecificData.paymentScreenshot.size / 1024 / 1024).toFixed(2)} MB</p>
                         </div>
                         <button
                           type="button"
@@ -1808,7 +1808,7 @@ function ApplicationFormContent() {
               {internshipType === "stipend" && (
                 <div className="space-y-6 animate-slide-in">
                   <div>
-                    <label htmlFor="relevantExperience" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Relevant Experience For This Role *</label>
+                    <label htmlFor="relevantExperience" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Relevant Experience For This Role *</label>
                     <textarea
                       id="relevantExperience"
                       name="relevantExperience"
@@ -1818,7 +1818,7 @@ function ApplicationFormContent() {
                       value={formState.internshipSpecificData.relevantExperience}
                       onBlur={() => handleBlur("relevantExperience")}
                       onChange={(e) => handleInputChange("internshipSpecificData", "relevantExperience", e.target.value)}
-                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.relevantExperience && touched.relevantExperience ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                       }`}
                     ></textarea>
@@ -1836,7 +1836,7 @@ function ApplicationFormContent() {
               {internshipType === "industrial" && (
                 <div className="space-y-6">
                   <div>
-                    <label htmlFor="preferredTechStack" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Preferred Technology Stack *</label>
+                    <label htmlFor="preferredTechStack" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Preferred Technology Stack *</label>
                     <textarea
                       id="preferredTechStack"
                       name="preferredTechStack"
@@ -1846,7 +1846,7 @@ function ApplicationFormContent() {
                       value={formState.internshipSpecificData.preferredTechStack}
                       onBlur={() => handleBlur("preferredTechStack")}
                       onChange={(e) => handleInputChange("internshipSpecificData", "preferredTechStack", e.target.value)}
-                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.preferredTechStack && touched.preferredTechStack ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                       }`}
                     ></textarea>
@@ -1859,7 +1859,7 @@ function ApplicationFormContent() {
                   </div>
 
                   <div>
-                    <label htmlFor="relevantTechnicalExperience" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Relevant Technical Experience *</label>
+                    <label htmlFor="relevantTechnicalExperience" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Relevant Technical Experience *</label>
                     <textarea
                       id="relevantTechnicalExperience"
                       name="relevantTechnicalExperience"
@@ -1869,7 +1869,7 @@ function ApplicationFormContent() {
                       value={formState.internshipSpecificData.relevantTechnicalExperience}
                       onBlur={() => handleBlur("relevantTechnicalExperience")}
                       onChange={(e) => handleInputChange("internshipSpecificData", "relevantTechnicalExperience", e.target.value)}
-                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.relevantTechnicalExperience && touched.relevantTechnicalExperience ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                       }`}
                     ></textarea>
@@ -1887,7 +1887,7 @@ function ApplicationFormContent() {
               {internshipType === "research" && (
                 <div className="space-y-6">
                   <div>
-                    <label htmlFor="researchAreaOfInterest" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Research Area Of Interest *</label>
+                    <label htmlFor="researchAreaOfInterest" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Research Area Of Interest *</label>
                     <input
                       type="text"
                       id="researchAreaOfInterest"
@@ -1897,7 +1897,7 @@ function ApplicationFormContent() {
                       value={formState.internshipSpecificData.researchAreaOfInterest}
                       onBlur={() => handleBlur("researchAreaOfInterest")}
                       onChange={(e) => handleInputChange("internshipSpecificData", "researchAreaOfInterest", e.target.value)}
-                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.researchAreaOfInterest && touched.researchAreaOfInterest ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                       }`}
                     />
@@ -1910,7 +1910,7 @@ function ApplicationFormContent() {
                   </div>
 
                   <div>
-                    <label htmlFor="researchInterestStatement" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Research Interest Statement *</label>
+                    <label htmlFor="researchInterestStatement" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Research Interest Statement *</label>
                     <textarea
                       id="researchInterestStatement"
                       name="researchInterestStatement"
@@ -1920,7 +1920,7 @@ function ApplicationFormContent() {
                       value={formState.internshipSpecificData.researchInterestStatement}
                       onBlur={() => handleBlur("researchInterestStatement")}
                       onChange={(e) => handleInputChange("internshipSpecificData", "researchInterestStatement", e.target.value)}
-                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                      className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.researchInterestStatement && touched.researchInterestStatement ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                       }`}
                     ></textarea>
@@ -1933,13 +1933,13 @@ function ApplicationFormContent() {
                   </div>
 
                   <div>
-                    <label htmlFor="publicationsAvailable" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Publications Available</label>
+                    <label htmlFor="publicationsAvailable" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Publications Available</label>
                     <select
                       id="publicationsAvailable"
                       name="publicationsAvailable"
                       value={formState.internshipSpecificData.publicationsAvailable}
                       onChange={(e) => handleInputChange("internshipSpecificData", "publicationsAvailable", e.target.value as "Yes" | "No")}
-                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-slate-800 transition-all"
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white text-text-primary transition-all"
                     >
                       <option value="No">No</option>
                       <option value="Yes">Yes</option>
@@ -1948,7 +1948,7 @@ function ApplicationFormContent() {
 
                   {formState.internshipSpecificData.publicationsAvailable === "Yes" && (
                     <div className="animate-slide-in">
-                      <label htmlFor="publicationLinks" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Publication Links *</label>
+                      <label htmlFor="publicationLinks" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Publication Links *</label>
                       <textarea
                         id="publicationLinks"
                         name="publicationLinks"
@@ -1979,12 +1979,12 @@ function ApplicationFormContent() {
           {currentStep === 4 && (
             <div className="animate-slide-in space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-slate-900 mb-1">Documents Upload</h3>
-                <p className="text-xs text-slate-400">Upload your academic or professional curriculum vitae. Ensure it contains correct and updated information.</p>
+                <h3 className="text-xl font-bold text-text-primary mb-1">Documents Upload</h3>
+                <p className="text-xs text-text-secondary">Upload your academic or professional curriculum vitae. Ensure it contains correct and updated information.</p>
               </div>
 
               <div>
-                <span className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Resume Upload (PDF Format) *</span>
+                <span className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Resume Upload (PDF Format) *</span>
                 
                 {!formState.documents.resume ? (
                   <div
@@ -2022,8 +2022,8 @@ function ApplicationFormContent() {
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 mb-4">
                       <DocumentIcon className="h-7 w-7 text-blue-600" />
                     </div>
-                    <p className="text-sm font-bold text-slate-800">Drag & Drop or click to upload your Resume</p>
-                    <p className="text-xs text-slate-400 mt-1">Accepts PDF format only (Max 10MB)</p>
+                    <p className="text-sm font-bold text-text-primary">Drag & Drop or click to upload your Resume</p>
+                    <p className="text-xs text-text-secondary mt-1">Accepts PDF format only (Max 10MB)</p>
                   </div>
                 ) : (
                   <div className="flex items-center gap-4 bg-slate-50 border border-slate-200 rounded-xl p-5 shadow-sm">
@@ -2031,8 +2031,8 @@ function ApplicationFormContent() {
                       PDF
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-slate-800 truncate">{formState.documents.resume.name}</p>
-                      <p className="text-xs text-slate-400 font-semibold">{(formState.documents.resume.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <p className="text-sm font-bold text-text-primary truncate">{formState.documents.resume.name}</p>
+                      <p className="text-xs text-text-secondary font-semibold">{(formState.documents.resume.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                     <button
                       type="button"
@@ -2049,7 +2049,7 @@ function ApplicationFormContent() {
               </div>
               {internshipType === "stipend" && (
                 <div className="mt-6">
-                  <span className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Passbook / Bank Document (For Stipend) *</span>
+                  <span className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Passbook / Bank Document (For Stipend) *</span>
                   
                   {!formState.documents.passbook ? (
                     <div
@@ -2071,8 +2071,8 @@ function ApplicationFormContent() {
                         <div className="p-3 bg-white shadow-sm rounded-full">
                           <UploadIcon className="h-6 w-6 text-blue-600" />
                         </div>
-                        <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop Passbook</p>
-                        <p className="text-xs text-slate-400">JPG, PNG, WEBP, PDF up to 5MB</p>
+                        <p className="text-sm font-medium text-text-primary">Click to upload or drag and drop Passbook</p>
+                        <p className="text-xs text-text-secondary">JPG, PNG, WEBP, PDF up to 5MB</p>
                       </div>
                     </div>
                   ) : (
@@ -2110,13 +2110,13 @@ function ApplicationFormContent() {
           {currentStep === 5 && (
             <div className="animate-slide-in space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-slate-900 mb-1">Motivation Statement</h3>
-                <p className="text-xs text-slate-400">Describe why you want this role and how this internship fits into your future career aspirations.</p>
+                <h3 className="text-xl font-bold text-text-primary mb-1">Motivation Statement</h3>
+                <p className="text-xs text-text-secondary">Describe why you want this role and how this internship fits into your future career aspirations.</p>
               </div>
 
               <div>
-                <label htmlFor="whyInternship" className="block text-xs font-bold text-slate-550 mb-2 uppercase tracking-wide">Why do you want this internship? *</label>
-                <span id="why-hint" className="block text-[11px] text-slate-450 mb-2 font-medium">Minimum 100 characters required. Tell us about your passion and alignment.</span>
+                <label htmlFor="whyInternship" className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Why do you want this internship? *</label>
+                <span id="why-hint" className="block text-[11px] text-text-secondary mb-2 font-medium">Minimum 100 characters required. Tell us about your passion and alignment.</span>
                 <textarea
                   id="whyInternship"
                   name="whyInternship"
@@ -2127,7 +2127,7 @@ function ApplicationFormContent() {
                   value={formState.motivation.whyInternship}
                   onBlur={() => handleBlur("whyInternship")}
                   onChange={(e) => handleInputChange("motivation", "whyInternship", e.target.value)}
-                  className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-slate-800 transition-all ${
+                  className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 bg-white placeholder-slate-400 text-text-primary transition-all ${
                     errors.whyInternship && touched.whyInternship ? "border-rose-500 bg-rose-50/20" : "border-slate-300"
                   }`}
                 ></textarea>
@@ -2143,7 +2143,7 @@ function ApplicationFormContent() {
                     ></div>
                   </div>
                   <span className={`text-xs font-bold ${
-                    (formState.motivation.whyInternship?.length || 0) >= 100 ? "text-emerald-600" : "text-slate-400"
+                    (formState.motivation.whyInternship?.length || 0) >= 100 ? "text-emerald-600" : "text-text-secondary"
                   }`}>
                     {formState.motivation.whyInternship?.length || 0} / 100 characters
                   </span>
@@ -2160,8 +2160,8 @@ function ApplicationFormContent() {
           {currentStep === 6 && (
             <div className="animate-slide-in space-y-8">
               <div>
-                <h3 className="text-xl font-bold text-slate-900 mb-1">Verify Application Summary</h3>
-                <p className="text-xs text-slate-400">Review all information details carefully. You can directly edit any section before submitting your application.</p>
+                <h3 className="text-xl font-bold text-text-primary mb-1">Verify Application Summary</h3>
+                <p className="text-xs text-text-secondary">Review all information details carefully. You can directly edit any section before submitting your application.</p>
               </div>
 
               <div className="space-y-6">
@@ -2169,7 +2169,7 @@ function ApplicationFormContent() {
                 {/* Personal Information */}
                 <div className="border border-slate-200 rounded-2xl p-5 relative">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
                       <UserIcon className="h-5 w-5 text-blue-600" /> Personal Information
                     </h4>
                     <button 
@@ -2181,19 +2181,19 @@ function ApplicationFormContent() {
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                    <div><span className="text-slate-400">Name:</span> <span className="font-semibold text-slate-800">{formState.personalInformation.firstName} {formState.personalInformation.lastName}</span></div>
-                    <div><span className="text-slate-400">Email:</span> <span className="font-semibold text-slate-800">{formState.personalInformation.email}</span></div>
-                    <div><span className="text-slate-400">Mobile:</span> <span className="font-semibold text-slate-800">{formState.personalInformation.mobileNumber}</span></div>
-                    <div><span className="text-slate-400">DOB:</span> <span className="font-semibold text-slate-800">{formState.personalInformation.dateOfBirth || "N/A"}</span></div>
-                    <div><span className="text-slate-400">Gender:</span> <span className="font-semibold text-slate-800">{formState.personalInformation.gender || "N/A"}</span></div>
-                    <div><span className="text-slate-400">Location:</span> <span className="font-semibold text-slate-800">{formState.personalInformation.city}, {formState.personalInformation.state}</span></div>
+                    <div><span className="text-text-secondary">Name:</span> <span className="font-semibold text-text-primary">{formState.personalInformation.firstName} {formState.personalInformation.lastName}</span></div>
+                    <div><span className="text-text-secondary">Email:</span> <span className="font-semibold text-text-primary">{formState.personalInformation.email}</span></div>
+                    <div><span className="text-text-secondary">Mobile:</span> <span className="font-semibold text-text-primary">{formState.personalInformation.mobileNumber}</span></div>
+                    <div><span className="text-text-secondary">DOB:</span> <span className="font-semibold text-text-primary">{formState.personalInformation.dateOfBirth || "N/A"}</span></div>
+                    <div><span className="text-text-secondary">Gender:</span> <span className="font-semibold text-text-primary">{formState.personalInformation.gender || "N/A"}</span></div>
+                    <div><span className="text-text-secondary">Location:</span> <span className="font-semibold text-text-primary">{formState.personalInformation.city}, {formState.personalInformation.state}</span></div>
                   </div>
                 </div>
 
                 {/* Academic Information */}
                 <div className="border border-slate-200 rounded-2xl p-5 relative">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
                       <AcademicIcon className="h-5 w-5 text-blue-600" /> Academic Profile
                     </h4>
                     <button 
@@ -2205,19 +2205,19 @@ function ApplicationFormContent() {
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                    <div className="col-span-2"><span className="text-slate-400">College:</span> <span className="font-semibold text-slate-800">{formState.academicInformation.collegeName}</span></div>
-                    <div><span className="text-slate-400">Department:</span> <span className="font-semibold text-slate-800">{formState.academicInformation.department}</span></div>
-                    <div><span className="text-slate-400">Degree:</span> <span className="font-semibold text-slate-800">{formState.academicInformation.degree}</span></div>
-                    <div><span className="text-slate-400">Current Year:</span> <span className="font-semibold text-slate-800">{formState.academicInformation.currentYear}</span></div>
-                    <div><span className="text-slate-400">CGPA / %:</span> <span className="font-semibold text-slate-800">{formState.academicInformation.cgpaPercentage}</span></div>
-                    <div><span className="text-slate-400">Graduation Year:</span> <span className="font-semibold text-slate-800">{formState.academicInformation.graduationYear}</span></div>
+                    <div className="col-span-2"><span className="text-text-secondary">College:</span> <span className="font-semibold text-text-primary">{formState.academicInformation.collegeName}</span></div>
+                    <div><span className="text-text-secondary">Department:</span> <span className="font-semibold text-text-primary">{formState.academicInformation.department}</span></div>
+                    <div><span className="text-text-secondary">Degree:</span> <span className="font-semibold text-text-primary">{formState.academicInformation.degree}</span></div>
+                    <div><span className="text-text-secondary">Current Year:</span> <span className="font-semibold text-text-primary">{formState.academicInformation.currentYear}</span></div>
+                    <div><span className="text-text-secondary">CGPA / %:</span> <span className="font-semibold text-text-primary">{formState.academicInformation.cgpaPercentage}</span></div>
+                    <div><span className="text-text-secondary">Graduation Year:</span> <span className="font-semibold text-text-primary">{formState.academicInformation.graduationYear}</span></div>
                   </div>
                 </div>
 
                 {/* Professional Information */}
                 <div className="border border-slate-200 rounded-2xl p-5 relative">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
                       <ProfessionalIcon className="h-5 w-5 text-blue-600" /> Professional Details
                     </h4>
                     <button 
@@ -2229,18 +2229,18 @@ function ApplicationFormContent() {
                     </button>
                   </div>
                   <div className="space-y-2 text-xs">
-                    <div><span className="text-slate-400">Skills:</span> <span className="font-semibold text-slate-800">{formState.professionalInformation.skills}</span></div>
-                    {formState.professionalInformation.githubUrl && <div><span className="text-slate-400">GitHub:</span> <a href={formState.professionalInformation.githubUrl} target="_blank" className="font-semibold text-blue-600 hover:underline">{formState.professionalInformation.githubUrl}</a></div>}
-                    {formState.professionalInformation.linkedinUrl && <div><span className="text-slate-400">LinkedIn:</span> <a href={formState.professionalInformation.linkedinUrl} target="_blank" className="font-semibold text-blue-600 hover:underline">{formState.professionalInformation.linkedinUrl}</a></div>}
-                    {formState.professionalInformation.portfolioUrl && <div><span className="text-slate-400">Portfolio:</span> <a href={formState.professionalInformation.portfolioUrl} target="_blank" className="font-semibold text-blue-600 hover:underline">{formState.professionalInformation.portfolioUrl}</a></div>}
-                    {formState.professionalInformation.projectExperience && <div><span className="text-slate-400">Project Info:</span> <p className="font-medium text-slate-700 mt-1 whitespace-pre-wrap">{formState.professionalInformation.projectExperience}</p></div>}
+                    <div><span className="text-text-secondary">Skills:</span> <span className="font-semibold text-text-primary">{formState.professionalInformation.skills}</span></div>
+                    {formState.professionalInformation.githubUrl && <div><span className="text-text-secondary">GitHub:</span> <a href={formState.professionalInformation.githubUrl} target="_blank" className="font-semibold text-blue-600 hover:underline">{formState.professionalInformation.githubUrl}</a></div>}
+                    {formState.professionalInformation.linkedinUrl && <div><span className="text-text-secondary">LinkedIn:</span> <a href={formState.professionalInformation.linkedinUrl} target="_blank" className="font-semibold text-blue-600 hover:underline">{formState.professionalInformation.linkedinUrl}</a></div>}
+                    {formState.professionalInformation.portfolioUrl && <div><span className="text-text-secondary">Portfolio:</span> <a href={formState.professionalInformation.portfolioUrl} target="_blank" className="font-semibold text-blue-600 hover:underline">{formState.professionalInformation.portfolioUrl}</a></div>}
+                    {formState.professionalInformation.projectExperience && <div><span className="text-text-secondary">Project Info:</span> <p className="font-medium text-text-primary mt-1 whitespace-pre-wrap">{formState.professionalInformation.projectExperience}</p></div>}
                   </div>
                 </div>
 
                 {/* Internship Specific Information */}
                 <div className="border border-slate-200 rounded-2xl p-5 relative">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
                       <SpecificIcon className="h-5 w-5 text-blue-600" /> Internship Specifics
                     </h4>
                     <button 
@@ -2252,38 +2252,38 @@ function ApplicationFormContent() {
                     </button>
                   </div>
                   <div className="text-xs space-y-2">
-                    <div><span className="text-slate-400">Internship Selected:</span> <span className="font-bold text-blue-600 capitalize">{internshipType} Internship</span></div>
+                    <div><span className="text-text-secondary">Internship Selected:</span> <span className="font-bold text-blue-600 capitalize">{internshipType} Internship</span></div>
                     
-                    {internshipType === "free" && <div><span className="text-slate-500 italic">Free Internship requires no additional fields.</span></div>}
-                    {internshipType === "corporate" && <div><span className="text-slate-500 italic">Corporate sponsored program requires no additional fields.</span></div>}
+                    {internshipType === "free" && <div><span className="text-text-secondary italic">Free Internship requires no additional fields.</span></div>}
+                    {internshipType === "corporate" && <div><span className="text-text-secondary italic">Corporate sponsored program requires no additional fields.</span></div>}
                     
                     {internshipType === "paid" && (
                       <div className="mt-2 space-y-1.5 bg-slate-50 border border-slate-150 rounded-xl p-3">
-                        <p className="font-bold text-slate-800 flex items-center gap-1.5">
+                        <p className="font-bold text-text-primary flex items-center gap-1.5">
                           <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
                           Payment Completed & Verified (₹1,500)
                         </p>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-650">
-                          <div><span className="text-slate-400">Payment Mode:</span> <span className="font-semibold">{formState.internshipSpecificData.paymentMode}</span></div>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-text-secondary">
+                          <div><span className="text-text-secondary">Payment Mode:</span> <span className="font-semibold">{formState.internshipSpecificData.paymentMode}</span></div>
                           {formState.internshipSpecificData.paymentMode === "UPI" && (
                             <>
-                              <div><span className="text-slate-400">UPI App:</span> <span className="font-semibold">{formState.internshipSpecificData.upiApp}</span></div>
-                              <div className="col-span-2"><span className="text-slate-400">Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                              <div><span className="text-text-secondary">UPI App:</span> <span className="font-semibold">{formState.internshipSpecificData.upiApp}</span></div>
+                              <div className="col-span-2"><span className="text-text-secondary">Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
                             </>
                           )}
                           {formState.internshipSpecificData.paymentMode === "Bank Transfer" && (
                             <>
-                              <div><span className="text-slate-400">Bank Name:</span> <span className="font-semibold">{formState.internshipSpecificData.bankName}</span></div>
-                              <div><span className="text-slate-400">Date:</span> <span className="font-semibold">{formState.internshipSpecificData.transferDate}</span></div>
-                              <div className="col-span-2"><span className="text-slate-400">UTR / Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                              <div><span className="text-text-secondary">Bank Name:</span> <span className="font-semibold">{formState.internshipSpecificData.bankName}</span></div>
+                              <div><span className="text-text-secondary">Date:</span> <span className="font-semibold">{formState.internshipSpecificData.transferDate}</span></div>
+                              <div className="col-span-2"><span className="text-text-secondary">UTR / Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
                             </>
                           )}
                           {(formState.internshipSpecificData.paymentMode === "Credit Card" || formState.internshipSpecificData.paymentMode === "Debit Card") && (
                             <>
-                              <div><span className="text-slate-400">Card Network:</span> <span className="font-semibold">{formState.internshipSpecificData.cardType}</span></div>
-                              <div><span className="text-slate-400">Last 4 Digits:</span> <span className="font-semibold">**** {formState.internshipSpecificData.last4Digits}</span></div>
-                              <div><span className="text-slate-400">Auth Code:</span> <span className="font-semibold">{formState.internshipSpecificData.authCode}</span></div>
-                              <div className="col-span-2"><span className="text-slate-400">Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
+                              <div><span className="text-text-secondary">Card Network:</span> <span className="font-semibold">{formState.internshipSpecificData.cardType}</span></div>
+                              <div><span className="text-text-secondary">Last 4 Digits:</span> <span className="font-semibold">**** {formState.internshipSpecificData.last4Digits}</span></div>
+                              <div><span className="text-text-secondary">Auth Code:</span> <span className="font-semibold">{formState.internshipSpecificData.authCode}</span></div>
+                              <div className="col-span-2"><span className="text-text-secondary">Transaction ID:</span> <span className="font-mono bg-slate-100 px-1 rounded">{formState.internshipSpecificData.transactionId}</span></div>
                             </>
                           )}
                         </div>
@@ -2292,24 +2292,24 @@ function ApplicationFormContent() {
 
                     {internshipType === "stipend" && (
                       <div>
-                        <span className="text-slate-400">Relevant Experience:</span>
-                        <p className="font-medium text-slate-700 mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.relevantExperience}</p>
+                        <span className="text-text-secondary">Relevant Experience:</span>
+                        <p className="font-medium text-text-primary mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.relevantExperience}</p>
                       </div>
                     )}
 
                     {internshipType === "industrial" && (
                       <div className="space-y-2">
-                        <div><span className="text-slate-400">Preferred Stack:</span> <p className="font-semibold text-slate-800 mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.preferredTechStack}</p></div>
-                        <div><span className="text-slate-400">Technical experience:</span> <p className="font-medium text-slate-700 mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.relevantTechnicalExperience}</p></div>
+                        <div><span className="text-text-secondary">Preferred Stack:</span> <p className="font-semibold text-text-primary mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.preferredTechStack}</p></div>
+                        <div><span className="text-text-secondary">Technical experience:</span> <p className="font-medium text-text-primary mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.relevantTechnicalExperience}</p></div>
                       </div>
                     )}
 
                     {internshipType === "research" && (
                       <div className="space-y-2">
-                        <div><span className="text-slate-400">Research Area of Interest:</span> <span className="font-semibold text-slate-800">{formState.internshipSpecificData.researchAreaOfInterest}</span></div>
-                        <div><span className="text-slate-400">Interest statement:</span> <p className="font-medium text-slate-700 mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.researchInterestStatement}</p></div>
-                        <div><span className="text-slate-400">Publications Available:</span> <span className="font-semibold text-slate-800">{formState.internshipSpecificData.publicationsAvailable}</span></div>
-                        {formState.internshipSpecificData.publicationsAvailable === "Yes" && <div><span className="text-slate-400">Publications links:</span> <p className="font-medium text-slate-700 mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.publicationLinks}</p></div>}
+                        <div><span className="text-text-secondary">Research Area of Interest:</span> <span className="font-semibold text-text-primary">{formState.internshipSpecificData.researchAreaOfInterest}</span></div>
+                        <div><span className="text-text-secondary">Interest statement:</span> <p className="font-medium text-text-primary mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.researchInterestStatement}</p></div>
+                        <div><span className="text-text-secondary">Publications Available:</span> <span className="font-semibold text-text-primary">{formState.internshipSpecificData.publicationsAvailable}</span></div>
+                        {formState.internshipSpecificData.publicationsAvailable === "Yes" && <div><span className="text-text-secondary">Publications links:</span> <p className="font-medium text-text-primary mt-1 whitespace-pre-wrap">{formState.internshipSpecificData.publicationLinks}</p></div>}
                       </div>
                     )}
                   </div>
@@ -2318,7 +2318,7 @@ function ApplicationFormContent() {
                 {/* Documents */}
                 <div className="border border-slate-200 rounded-2xl p-5 relative">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
                       <DocumentIcon className="h-5 w-5 text-blue-600" /> Documents Attached
                     </h4>
                     <button 
@@ -2330,9 +2330,9 @@ function ApplicationFormContent() {
                     </button>
                   </div>
                   <div className="text-xs space-y-2">
-                    <div><span className="text-slate-400">Resume:</span> <span className="font-bold text-slate-800 bg-slate-50 px-3.5 py-1.5 border border-slate-150 rounded inline-block">{formState.documents.resume?.name} ({(formState.documents.resume ? formState.documents.resume.size / 1024 / 1024 : 0).toFixed(2)} MB)</span></div>
+                    <div><span className="text-text-secondary">Resume:</span> <span className="font-bold text-text-primary bg-slate-50 px-3.5 py-1.5 border border-slate-150 rounded inline-block">{formState.documents.resume?.name} ({(formState.documents.resume ? formState.documents.resume.size / 1024 / 1024 : 0).toFixed(2)} MB)</span></div>
                     {internshipType === "stipend" && (
-                      <div><span className="text-slate-400">Passbook:</span> <span className="font-bold text-slate-800 bg-slate-50 px-3.5 py-1.5 border border-slate-150 rounded inline-block">{formState.documents.passbook?.name} ({(formState.documents.passbook ? formState.documents.passbook.size / 1024 / 1024 : 0).toFixed(2)} MB)</span></div>
+                      <div><span className="text-text-secondary">Passbook:</span> <span className="font-bold text-text-primary bg-slate-50 px-3.5 py-1.5 border border-slate-150 rounded inline-block">{formState.documents.passbook?.name} ({(formState.documents.passbook ? formState.documents.passbook.size / 1024 / 1024 : 0).toFixed(2)} MB)</span></div>
                     )}
                   </div>
                 </div>
@@ -2340,7 +2340,7 @@ function ApplicationFormContent() {
                 {/* Motivation */}
                 <div className="border border-slate-200 rounded-2xl p-5 relative">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
                       <MotivationIcon className="h-5 w-5 text-blue-600" /> Motivation Statement
                     </h4>
                     <button 
@@ -2352,7 +2352,7 @@ function ApplicationFormContent() {
                     </button>
                   </div>
                   <div className="text-xs">
-                    <p className="font-medium text-slate-700 whitespace-pre-wrap leading-relaxed">{formState.motivation.whyInternship}</p>
+                    <p className="font-medium text-text-primary whitespace-pre-wrap leading-relaxed">{formState.motivation.whyInternship}</p>
                   </div>
                 </div>
 
@@ -2366,7 +2366,7 @@ function ApplicationFormContent() {
               type="button"
               onClick={handlePrev}
               disabled={currentStep === 0}
-              className={`rounded-xl border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-650 hover:bg-slate-55 transition-all ${
+              className={`rounded-xl border border-slate-300 px-6 py-3 text-sm font-semibold text-text-secondary hover:bg-slate-55 transition-all ${
                 currentStep === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
             >
@@ -2411,14 +2411,14 @@ function ApplicationFormContent() {
 
 export default function ApplicationPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans flex flex-col justify-between text-slate-800">
+    <div className="min-h-screen bg-[#f8fafc] font-sans flex flex-col justify-between text-text-primary">
       <div>
         {/* Navigation Header */}
         <header className="h-16 w-full bg-white flex items-center justify-between px-6 lg:px-16 border-b border-slate-100 sticky top-0 z-40 backdrop-blur-md bg-white/90">
           <Link href="/" className="flex items-center">
             <img src="/logo.png" alt="Pinesphere Logo" className="h-13.5 w-auto object-contain transition-transform hover:scale-[1.02]" />
           </Link>
-          <Link href="/" className="text-xs font-bold uppercase tracking-wider text-slate-650 hover:text-blue-600 transition-colors flex items-center gap-1.5">
+          <Link href="/" className="text-xs font-bold uppercase tracking-wider text-text-secondary hover:text-blue-600 transition-colors flex items-center gap-1.5">
             <ArrowBackIcon className="h-4 w-4" /> Return to Homepage
           </Link>
         </header>
@@ -2426,18 +2426,18 @@ export default function ApplicationPage() {
         {/* Main Content */}
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-16">
           <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">Apply for Internship</h1>
-            <p className="text-sm text-slate-500">Submit your customized application to begin your internship journey with Pinesphere.</p>
+            <h1 className="text-3xl font-extrabold text-text-primary mb-2 tracking-tight">Apply for Internship</h1>
+            <p className="text-sm text-text-secondary">Submit your customized application to begin your internship journey with Pinesphere.</p>
           </div>
 
-          <Suspense fallback={<div className="p-8 text-center text-slate-500 bg-white border border-slate-200 rounded-2xl">Loading application portal details...</div>}>
+          <Suspense fallback={<div className="p-8 text-center text-text-secondary bg-white border border-slate-200 rounded-2xl">Loading application portal details...</div>}>
             <ApplicationFormContent />
           </Suspense>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="w-full border-t border-slate-150 bg-white py-6 px-8 lg:px-24 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-bold tracking-wider text-slate-450">
+      <footer className="w-full border-t border-slate-150 bg-white py-6 px-8 lg:px-24 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-bold tracking-wider text-text-secondary">
         <div>© 2026 PINESPHERE ENTERPRISE. BUILT FOR SCALE.</div>
         <div className="flex gap-6">
           <Link href="#" className="hover:text-blue-650 transition-colors">PRIVACY POLICY</Link>
