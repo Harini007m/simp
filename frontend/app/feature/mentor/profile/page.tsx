@@ -5,6 +5,8 @@ import { Search, Filter, User, Eye, Plus, Clock, Briefcase } from 'lucide-react'
 import { mentorService } from '@/src/services/mentor.service';
 import { MentorProfile } from '@/src/data/mock-mentors';
 import { Drawer } from '@/components/feature/ui/Drawer';
+import BatchMappingView from './BatchMappingView';
+import MentorPerformanceView from './MentorPerformanceView';
 
 import { employeeService } from '@/src/services/employee.service';
 export default function MentorProfilePage() {
@@ -13,6 +15,7 @@ export default function MentorProfilePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<'profiles' | 'batch-mapping' | 'performance'>('profiles');
   
   // Creation States
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -106,15 +109,42 @@ export default function MentorProfilePage() {
           <h1 className="text-xl font-bold text-slate-900">Mentor Profile</h1>
           <p className="text-sm text-slate-500 mt-1">Manage mentor-specific profiles linked to employees with role MENTOR.</p>
         </div>
-        <button 
-          onClick={() => setIsCreateOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm"
-        >
-          <Plus className="h-4 w-4" /> Create Profile
-        </button>
+        <div className="flex gap-2">
+          <div className="bg-slate-100 p-1 rounded-lg flex items-center gap-1 shadow-inner border border-slate-200 mr-2">
+            <button 
+              onClick={() => setActiveView('profiles')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeView === 'profiles' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              Profiles
+            </button>
+            <button 
+              onClick={() => setActiveView('batch-mapping')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeView === 'batch-mapping' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              Batch Mapping
+            </button>
+            <button 
+              onClick={() => setActiveView('performance')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeView === 'performance' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              Performance
+            </button>
+          </div>
+          <button 
+            onClick={() => setIsCreateOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2 shadow-sm"
+          >
+            <Plus className="h-4 w-4" /> Create Profile
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto p-6">
+        {activeView === 'batch-mapping' ? (
+          <BatchMappingView />
+        ) : activeView === 'performance' ? (
+          <MentorPerformanceView />
+        ) : (
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm max-w-7xl mx-auto flex flex-col h-[calc(100vh-12rem)]">
           <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-4 bg-slate-50/50">
             <div className="flex items-center gap-2 flex-1 max-w-md">
@@ -200,6 +230,7 @@ export default function MentorProfilePage() {
             </table>
           </div>
         </div>
+        )}
       </div>
 
       <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title="Mentor Profile Details" size="lg">

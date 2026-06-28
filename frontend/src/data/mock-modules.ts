@@ -1,11 +1,4 @@
-export interface Module {
-  id: string;
-  code: string;
-  name: string;
-  route: string;
-  active: boolean;
-  desc?: string;
-}
+import { Module } from '../types/api/module.types';
 
 export const MOCK_MODULES: Module[] = [
   { id: 'dashboard', code: 'DASHBOARD', name: 'Dashboard', route: '/feature', active: true, desc: 'General system dashboards' },
@@ -28,24 +21,26 @@ export const MOCK_MODULES: Module[] = [
 
   // Flattened Mentor
   { id: 'mentor', code: 'MENTOR', name: 'Mentor Profile', route: '/feature/mentor/profile', active: true },
-  { id: 'assignment', code: 'ASSIGN', name: 'Mentor Assignment', route: '/feature/assignment', active: true },
-  { id: 'batch_mapping', code: 'BMAP', name: 'Batch Mapping', route: '/feature/batch-mapping', active: true },
 
   // Flattened LMS
   { id: 'lms', code: 'LMS', name: 'LMS Dashboard', route: '/feature/lms', active: true },
+  { id: 'lms_management', code: 'LMS_MGMT', name: 'LMS Management', route: '/feature/lms-management', active: true },
   { id: 'my_learning', code: 'MLEARN', name: 'My Learning', route: '/feature/my-learning', active: true },
 
   // Flattened Attendance
   { id: 'attendance', code: 'ATTEND', name: 'Attendance Dashboard', route: '/feature/attendance', active: true },
+  { id: 'attendance_management', code: 'ATTEND_MGMT', name: 'Attendance Management', route: '/feature/attendance-management', active: true },
   { id: 'my_attendance', code: 'MATTEND', name: 'My Attendance', route: '/feature/my-attendance', active: true },
 
   // Flattened Task
   { id: 'task', code: 'TASK', name: 'Task Dashboard', route: '/feature/task', active: true },
-  { id: 'management', code: 'MGMT', name: 'Task Management', route: '/feature/management', active: true },
+  { id: 'task_management', code: 'TASK_MGMT', name: 'Task Management', route: '/feature/task-management', active: true },
   { id: 'my_tasks', code: 'MTASK', name: 'My Tasks', route: '/feature/my-tasks', active: true },
 
   // Flattened Assessment
-  { id: 'assessment', code: 'ASSESS', name: 'Assessment', route: '/feature/assessment', active: true },
+  { id: 'assessment', code: 'ASSESS', name: 'Assessment Dashboard', route: '/feature/assessment', active: true },
+  { id: 'assessment_management', code: 'ASSESS_MGMT', name: 'Assessment Management', route: '/feature/assessment-management', active: true },
+  { id: 'my_assessments', code: 'MASSESS', name: 'My Assessments', route: '/feature/my-assessments', active: true },
 
   // Phase 5: Certification & Placement
   { id: 'certificate', code: 'CERT', name: 'Certificate Management', route: '/feature/certificates', active: true },

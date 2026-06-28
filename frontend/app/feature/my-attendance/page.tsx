@@ -3,15 +3,40 @@
 import React, { useEffect, useState } from 'react';
 import { 
   ChevronRight, Calendar, UserCheck, Clock, AlertTriangle, 
-  CheckCircle2, Compass, Play, ShieldCheck, MapPin
+  CheckCircle2, MapPin, FileText, Send, ArrowRight, ShieldCheck, CalendarDays
 } from 'lucide-react';
-import { attendanceService } from '@/src/services/attendance.service';
-import { AttendanceLog, AttendanceStatus } from '@/src/data/mock-attendance';
+import { leaveService } from '../../../src/services/leave.service';
+import { LeaveRequest } from '../../../src/types/leave.types';
+
+interface AttendanceLog {
+  id: string;
+  date: string;
+  clockIn: string;
+  clockOut: string;
+  duration: string;
+  status: 'Present' | 'Absent' | 'Late';
+}
+
+interface LocalAppeal {
+  id: string;
+  studentId: string;
+  studentName: string;
+  batchId: string;
+  batchName: string;
+  date: string;
+  oldStatus: 'Absent' | 'Late';
+  newStatus: 'Present';
+  reason: string;
+  attachment: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+}
 
 export default function MyAttendancePage() {
   const [attendanceLogs, setAttendanceLogs] = useState<AttendanceLog[]>([]);
-  const [status, setStatus] = useState<AttendanceStatus | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [complianceRate, setComplianceRate] = useState(88);
+  const [presentDays, setPresentDays] = useState(15);
+  const [absentDays, setAbsentDays] = useState(2);
+  const [lateDays, setLateDays] = useState(1);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Simulated checkin states
@@ -19,24 +44,46 @@ export default function MyAttendancePage() {
   const [clockInTime, setClockInTime] = useState<string | null>(null);
   const [clockOutTime, setClockOutTime] = useState<string | null>(null);
 
+  // Appeal form states
+  const [appealDate, setAppealDate] = useState('2026-06-08');
+  const [appealReason, setAppealReason] = useState('');
+  const [appealStatus, setAppealStatus] = useState<'Absent' | 'Late'>('Absent');
+  const [appealFile, setAppealFile] = useState<string>('');
+  const [myAppeals, setMyAppeals] = useState<LocalAppeal[]>([]);
+
+  // Leave form states
+  const [leaveType, setLeaveType] = useState<'Medical' | 'Casual' | 'Emergency' | 'OD' | 'WFH'>('Casual');
+  const [leaveStartDate, setLeaveStartDate] = useState('');
+  const [leaveEndDate, setLeaveEndDate] = useState('');
+  const [leaveReason, setLeaveReason] = useState('');
+  const [myLeaves, setMyLeaves] = useState<LeaveRequest[]>([]);
+
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [logsData, statusData] = await Promise.all([
-          attendanceService.getAttendanceLogs(),
-          attendanceService.getAttendanceStatus()
-        ]);
-        setAttendanceLogs(logsData);
-        setStatus(statusData);
-        setIsCheckedIn(statusData.isCheckedIn);
-        setClockInTime(statusData.clockInTime);
-      } catch (err) {
-        console.error('Failed to load attendance data', err);
-      } finally {
-        setLoading(false);
+    // Load initial logs
+    const initialLogs: AttendanceLog[] = [
+      { id: 'att-1', date: '2026-06-15', clockIn: '08:55 AM', clockOut: '05:05 PM', duration: '8h 10m', status: 'Present' },
+      { id: 'att-2', date: '2026-06-12', clockIn: '08:50 AM', clockOut: '05:15 PM', duration: '8h 25m', status: 'Present' },
+      { id: 'att-3', date: '2026-06-11', clockIn: '08:58 AM', clockOut: '05:10 PM', duration: '8h 12m', status: 'Present' },
+      { id: 'att-4', date: '2026-06-10', clockIn: '09:00 AM', clockOut: '05:00 PM', duration: '8h 00m', status: 'Present' },
+      { id: 'att-5', date: '2026-06-09', clockIn: '09:30 AM', clockOut: '05:05 PM', duration: '7h 35m', status: 'Late' },
+      { id: 'att-6', date: '2026-06-08', clockIn: '-', clockOut: '-', duration: '-', status: 'Absent' },
+    ];
+    setAttendanceLogs(initialLogs);
+
+    // Sync appeals from local storage
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('pinesphere_attendance_appeals');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setMyAppeals(parsed.filter((a: LocalAppeal) => a.studentId === 'stu-12')); // filter for student Ananya Desai
       }
     }
-    loadData();
+
+    const fetchLeaves = async () => {
+      const all = await leaveService.getAllLeaves();
+      setMyLeaves(all.filter(l => l.userId === 'user-1')); // mock user ID for current user
+    };
+    fetchLeaves();
   }, []);
 
   const triggerToast = (msg: string) => {
@@ -50,27 +97,18 @@ export default function MyAttendancePage() {
     setClockInTime(timeNow);
     setClockOutTime(null);
     triggerToast(`Checked in successfully at ${timeNow}. Session active.`);
-    
-    // Add log optimistically
+
+    const todayDate = new Date().toISOString().split('T')[0];
     const newLog: AttendanceLog = {
       id: `att-${Date.now().toString().slice(-3)}`,
-      studentId: 'stu-1',
-      date: new Date().toISOString().split('T')[0],
+      date: todayDate,
       clockIn: timeNow,
       clockOut: '-',
       duration: 'Ongoing',
       status: 'Present'
     };
     setAttendanceLogs(prev => [newLog, ...prev]);
-
-    if (status) {
-      setStatus({
-        ...status,
-        isCheckedIn: true,
-        clockInTime: timeNow,
-        presentDays: status.presentDays + 1
-      });
-    }
+    setPresentDays(prev => prev + 1);
   };
 
   const handleCheckOut = () => {
@@ -79,45 +117,90 @@ export default function MyAttendancePage() {
     setClockOutTime(timeNow);
     triggerToast(`Checked out successfully at ${timeNow}. Session closed.`);
 
-    // Update first log optimistically
     setAttendanceLogs(prev => {
       if (prev.length === 0) return prev;
       const updated = [...prev];
       updated[0] = {
         ...updated[0],
         clockOut: timeNow,
-        duration: '8h 0m'
+        duration: '8h 00m'
       };
       return updated;
     });
-
-    if (status) {
-      setStatus({
-        ...status,
-        isCheckedIn: false,
-        clockInTime: null
-      });
-    }
   };
 
-  if (loading || !status) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-      <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-6 font-medium flex items-center gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-500" />
-        TODO: Waiting for backend endpoint
-      </div>
+  const handleSimulateAttachment = () => {
+    const mockFileNames = ['internet_isp_outage.pdf', 'doctor_note_june8.pdf', 'travel_train_delay.png'];
+    const randFile = mockFileNames[Math.floor(Math.random() * mockFileNames.length)];
+    setAppealFile(randFile);
+    triggerToast(`Attached simulated file: ${randFile}`);
+  };
 
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
-      </div>
-    );
-  }
+  const handleSubmitAppeal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!appealReason) {
+      triggerToast("Please provide a reason for the appeal.");
+      return;
+    }
+    if (!appealFile) {
+      triggerToast("Please attach a verification document/screenshot.");
+      return;
+    }
 
-  const { presentDays, absentDays, leaveDays, averageAttendance } = status;
+    const newAppeal: LocalAppeal = {
+      id: `app-custom-${Date.now().toString().slice(-4)}`,
+      studentId: 'stu-12',
+      studentName: 'Ananya Desai',
+      batchId: 'batch-ai-2026',
+      batchName: 'AI Batch 2026',
+      date: appealDate,
+      oldStatus: appealStatus,
+      newStatus: 'Present',
+      reason: appealReason,
+      attachment: appealFile,
+      status: 'Pending'
+    };
+
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      const existingStr = localStorage.getItem('pinesphere_attendance_appeals') || '[]';
+      const existing = JSON.parse(existingStr);
+      const updatedAppeals = [newAppeal, ...existing];
+      localStorage.setItem('pinesphere_attendance_appeals', JSON.stringify(updatedAppeals));
+      setMyAppeals(updatedAppeals.filter((a: LocalAppeal) => a.studentId === 'stu-12'));
+    }
+
+    triggerToast("Correction appeal submitted to mentor dashboard!");
+    setAppealReason('');
+    setAppealFile('');
+  };
+
+  const handleApplyLeave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leaveStartDate || !leaveEndDate || !leaveReason) {
+      triggerToast("Please fill all required leave fields.");
+      return;
+    }
+    const newLeave = await leaveService.applyLeave({
+      userId: 'user-1',
+      userName: 'Ananya Desai',
+      role: 'Student',
+      leaveType,
+      startDate: new Date(leaveStartDate).toISOString(),
+      endDate: new Date(leaveEndDate).toISOString(),
+      reason: leaveReason,
+      status: 'Pending',
+      appliedOn: new Date().toISOString(),
+    });
+    setMyLeaves(prev => [newLeave, ...prev]);
+    triggerToast("Leave application submitted successfully!");
+    setLeaveReason('');
+    setLeaveStartDate('');
+    setLeaveEndDate('');
+  };
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
-      
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 bg-slate-900 border border-slate-800 text-white rounded-xl shadow-2xl animate-bounce-in">
           <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
@@ -133,51 +216,50 @@ export default function MyAttendancePage() {
             <ChevronRight className="h-3 w-3" />
             <span className="text-blue-600 font-extrabold text-[10px]">My Attendance</span>
           </div>
-          <h2 className="text-2xl font-black text-slate-900 mt-2 tracking-tight">My Attendance & Logs</h2>
+          <h2 className="text-2xl font-black text-slate-900 mt-2 tracking-tight">My Attendance Portal</h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Check-in to daily sessions, track active logging status, review monthly calendar sheets, and verify academic metrics.
+            Check-in daily, review attendance compliance statistics, and appeal incorrect records.
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
         {/* Live checkin card */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6">
           <div>
-            <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-sm">
-              GPS GEOLOCATION
+            <span className="text-[9px] font-bold text-blue-650 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-sm uppercase tracking-widest">
+              GPS GEOLOCATION GATEWAY
             </span>
-            <h3 className="text-base font-bold text-slate-900 mt-3.5">Student Check-In Gate</h3>
+            <h3 className="text-base font-black text-slate-850 mt-3.5">Clock-in Roster</h3>
             <p className="text-xs text-slate-500 leading-relaxed mt-1">
-              Clock-in to log present status for your assigned cohort daily class. Keep checkin duration window above 8 hours.
+              Record present status for your cohort class today. Ensure active connectivity.
             </p>
           </div>
 
           <div className="py-4 border-y border-slate-100 space-y-2.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-slate-400 font-semibold">Today's Date:</span>
-              <span className="text-slate-700 font-bold">{new Date().toISOString().split('T')[0]}</span>
+            <div className="flex justify-between text-xs font-semibold">
+              <span className="text-slate-400">Date:</span>
+              <span className="text-slate-800">{new Date().toISOString().split('T')[0]}</span>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-slate-400 font-semibold">Checked-In Time:</span>
-              <span className="text-slate-700 font-bold">{clockInTime || 'Not checked in'}</span>
+            <div className="flex justify-between text-xs font-semibold">
+              <span className="text-slate-400">Checked-In:</span>
+              <span className="text-slate-800">{clockInTime || 'Not checked in'}</span>
             </div>
             {clockOutTime && (
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400 font-semibold">Checked-Out Time:</span>
-                <span className="text-slate-700 font-bold">{clockOutTime}</span>
+              <div className="flex justify-between text-xs font-semibold">
+                <span className="text-slate-400">Checked-Out:</span>
+                <span className="text-slate-800">{clockOutTime}</span>
               </div>
             )}
-            <div className="flex justify-between text-xs">
-              <span className="text-slate-400 font-semibold">Sign-in Status:</span>
+            <div className="flex justify-between text-xs font-semibold">
+              <span className="text-slate-400">Status:</span>
               {isCheckedIn ? (
                 <span className="text-emerald-600 font-bold flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Session Active</span>
                 </span>
               ) : (
-                <span className="text-slate-455 font-bold">Checked Out</span>
+                <span className="text-slate-450 font-bold">Checked Out</span>
               )}
             </div>
           </div>
@@ -186,14 +268,14 @@ export default function MyAttendancePage() {
             {isCheckedIn ? (
               <button
                 onClick={handleCheckOut}
-                className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer text-center"
+                className="w-full py-3 bg-rose-600 hover:bg-rose-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer text-center shadow-lg shadow-rose-500/10"
               >
                 Check Out Session
               </button>
             ) : (
               <button
                 onClick={handleCheckIn}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer text-center flex items-center justify-center gap-2"
+                className="w-full py-3 bg-blue-650 hover:bg-blue-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer text-center flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10"
               >
                 <MapPin className="h-3.5 w-3.5" />
                 <span>Check In Daily</span>
@@ -204,7 +286,7 @@ export default function MyAttendancePage() {
 
         {/* Circular Compliance Meter */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between shadow-sm space-y-6">
-          <h3 className="font-bold text-xs text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3">
+          <h3 className="font-bold text-xs text-slate-450 uppercase tracking-widest border-b border-slate-100 pb-3">
             Graduation Compliance Meter
           </h3>
 
@@ -212,15 +294,15 @@ export default function MyAttendancePage() {
             <div className="relative h-28 w-28 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90">
                 <circle cx="56" cy="56" r="46" strokeWidth="8" stroke="#f1f5f9" fill="transparent" />
-                <circle cx="56" cy="56" r="46" strokeWidth="8" stroke="#2563eb" fill="transparent" strokeDasharray="289" strokeDashoffset={289 * (1 - (averageAttendance / 100))} />
+                <circle cx="56" cy="56" r="46" strokeWidth="8" stroke="#2563eb" fill="transparent" strokeDasharray="289" strokeDashoffset={289 * (1 - (complianceRate / 100))} />
               </svg>
               <div className="absolute flex flex-col items-center">
-                <span className="text-xl font-black text-slate-800">{averageAttendance}%</span>
+                <span className="text-xl font-black text-slate-800">{complianceRate}%</span>
                 <span className="text-[8px] text-slate-400 font-bold uppercase">Present Rate</span>
               </div>
             </div>
 
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2 text-xs font-semibold">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 bg-blue-600 rounded" />
                 <span className="text-slate-500"><strong className="text-slate-800">{presentDays}</strong> Present Days</span>
@@ -230,20 +312,20 @@ export default function MyAttendancePage() {
                 <span className="text-slate-500"><strong className="text-slate-800">{absentDays}</strong> Absent Days</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 bg-slate-350 rounded" />
-                <span className="text-slate-500"><strong className="text-slate-800">{leaveDays}</strong> Leaves Mapped</span>
+                <span className="h-2.5 w-2.5 bg-amber-500 rounded" />
+                <span className="text-slate-500"><strong className="text-slate-800">{lateDays}</strong> Late Days</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 p-3.5 border border-slate-100 rounded-xl text-[10px] text-slate-550 leading-relaxed">
-            💡 Minimum threshold to complete guide evaluations is <strong>85%</strong>.
+          <div className="bg-slate-50 p-3.5 border border-slate-150 rounded-xl text-[10px] text-slate-550 leading-relaxed">
+            💡 Minimum threshold to complete academic internship programs is <strong>85%</strong>.
           </div>
         </div>
 
         {/* June 2026 Interactive Calendar */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm h-fit">
-          <h3 className="font-bold text-xs text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3">
+          <h3 className="font-bold text-xs text-slate-450 uppercase tracking-widest border-b border-slate-100 pb-3">
             June 2026 Monthly Sheet
           </h3>
           
@@ -258,9 +340,10 @@ export default function MyAttendancePage() {
               if (day <= 15) {
                 if (day === 7 || day === 14) bg = 'bg-slate-100/50 border border-slate-200/60 rounded text-slate-400';
                 else if (day === 8) bg = 'bg-rose-50 text-rose-600 border border-rose-100 rounded font-bold';
+                else if (day === 9) bg = 'bg-amber-50 text-amber-600 border border-amber-100 rounded font-bold';
                 else bg = 'bg-emerald-50 text-emerald-600 border border-emerald-100 rounded font-bold';
               } else if (day === 16) {
-                bg = isCheckedIn ? 'bg-blue-600 text-white font-bold rounded shadow-sm' : 'bg-blue-50 border border-blue-300 text-blue-600 animate-pulse rounded font-bold';
+                bg = isCheckedIn ? 'bg-blue-600 text-white font-bold rounded shadow-sm animate-pulse' : 'bg-blue-50 border border-blue-300 text-blue-600 rounded font-bold';
               }
               return (
                 <div key={day} className={`h-8 flex items-center justify-center text-xs font-semibold ${bg}`}>
@@ -270,12 +353,218 @@ export default function MyAttendancePage() {
             })}
           </div>
         </div>
+      </div>
 
+      {/* Appeal Form and Appeals Log */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Raise Appeal */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="font-bold text-xs text-slate-450 uppercase tracking-widest border-b border-slate-100 pb-3 flex items-center gap-2">
+            <ShieldCheck className="h-4.5 w-4.5 text-indigo-500" />
+            <span>Raise Attendance Correction Appeal</span>
+          </h3>
+
+          <form onSubmit={handleSubmitAppeal} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-450 uppercase mb-1.5">Select Date</label>
+                <input 
+                  type="date"
+                  value={appealDate}
+                  onChange={(e) => setAppealDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Registered Status</label>
+                <select 
+                  value={appealStatus} 
+                  onChange={(e) => setAppealStatus(e.target.value as any)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 outline-none cursor-pointer"
+                >
+                  <option value="Absent">Absent</option>
+                  <option value="Late">Late</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Reason for correction</label>
+              <textarea 
+                rows={3}
+                required
+                value={appealReason}
+                onChange={(e) => setAppealReason(e.target.value)}
+                placeholder="Explain the correction context (e.g. ISP failure, medical letter advance notice, etc.)"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 outline-none resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Attachment Evidence</label>
+              <div 
+                onClick={handleSimulateAttachment}
+                className="border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-xl p-4 bg-slate-50/50 flex flex-col items-center justify-center text-center cursor-pointer transition-colors"
+              >
+                <FileText className="h-6 w-6 text-slate-400 mb-1" />
+                <span className="text-[10px] font-bold text-slate-600">Simulate Document Attachment</span>
+                <span className="text-[8px] text-slate-400 font-semibold mt-0.5">Click to simulate attaching certificate/letter</span>
+                {appealFile && (
+                  <span className="mt-2 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded">
+                    📎 {appealFile}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <button 
+              type="submit"
+              className="w-full py-3 bg-blue-650 hover:bg-blue-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5"
+            >
+              <Send className="h-3 w-3" /> Submit Correction Appeal
+            </button>
+          </form>
+        </div>
+
+        {/* Appeal History */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="font-bold text-xs text-slate-455 uppercase tracking-widest border-b border-slate-100 pb-3">
+            My Correction Log
+          </h3>
+
+          <div className="space-y-3 overflow-y-auto max-h-[360px] pr-1 custom-scrollbar">
+            {myAppeals.map(a => (
+              <div key={a.id} className="p-4 border border-slate-100 rounded-xl space-y-2 hover:border-slate-300 transition-all bg-slate-50/20">
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="font-bold text-slate-400">Date: {a.date}</span>
+                  <span className={`font-extrabold uppercase px-2 py-0.5 rounded border text-[9px] ${
+                    a.status === 'Pending' ? 'bg-amber-50 border-amber-100 text-amber-600' :
+                    a.status === 'Approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                    'bg-rose-50 border-rose-100 text-rose-600'
+                  }`}>
+                    {a.status}
+                  </span>
+                </div>
+                <div className="text-xs font-semibold text-slate-700 leading-snug">
+                  Appeal: <span className="bg-rose-50 border border-rose-100 text-rose-600 font-extrabold px-1 rounded text-[9px]">{a.oldStatus}</span> → <span className="bg-emerald-50 border border-emerald-100 text-emerald-600 font-extrabold px-1 rounded text-[9px]">{a.newStatus}</span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-snug">"{a.reason}"</p>
+                <div className="text-[9px] font-bold text-slate-400 flex items-center gap-1">
+                  📎 File: <span className="text-indigo-650">{a.attachment}</span>
+                </div>
+              </div>
+            ))}
+            {myAppeals.length === 0 && (
+              <p className="text-xs text-slate-400 italic text-center py-12">No correction appeals submitted yet.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Leave Application Form and Leave History */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Apply for Leave */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="font-bold text-xs text-slate-450 uppercase tracking-widest border-b border-slate-100 pb-3 flex items-center gap-2">
+            <CalendarDays className="h-4.5 w-4.5 text-blue-500" />
+            <span>Apply for Leave</span>
+          </h3>
+
+          <form onSubmit={handleApplyLeave} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-450 uppercase mb-1.5">Start Date</label>
+                <input 
+                  type="date"
+                  required
+                  value={leaveStartDate}
+                  onChange={(e) => setLeaveStartDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-450 uppercase mb-1.5">End Date</label>
+                <input 
+                  type="date"
+                  required
+                  value={leaveEndDate}
+                  onChange={(e) => setLeaveEndDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Leave Type</label>
+              <select 
+                value={leaveType} 
+                onChange={(e) => setLeaveType(e.target.value as any)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 outline-none cursor-pointer"
+              >
+                <option value="Casual">Casual Leave</option>
+                <option value="Medical">Medical Leave</option>
+                <option value="Emergency">Emergency Leave</option>
+                <option value="OD">On Duty (OD)</option>
+                <option value="WFH">Work from Home (WFH)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Reason for leave</label>
+              <textarea 
+                rows={3}
+                required
+                value={leaveReason}
+                onChange={(e) => setLeaveReason(e.target.value)}
+                placeholder="Explain why you are applying for leave..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 outline-none resize-none"
+              />
+            </div>
+
+            <button 
+              type="submit"
+              className="w-full py-3 bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-lg shadow-slate-900/10 flex items-center justify-center gap-1.5"
+            >
+              <FileText className="h-3 w-3" /> Submit Leave Request
+            </button>
+          </form>
+        </div>
+
+        {/* My Leave History */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <h3 className="font-bold text-xs text-slate-455 uppercase tracking-widest border-b border-slate-100 pb-3">
+            My Leave History
+          </h3>
+
+          <div className="space-y-3 overflow-y-auto max-h-[360px] pr-1 custom-scrollbar">
+            {myLeaves.map(l => (
+              <div key={l.id} className="p-4 border border-slate-100 rounded-xl space-y-2 hover:border-slate-300 transition-all bg-slate-50/20">
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="font-bold text-slate-400">Date: {l.startDate.split('T')[0]} to {l.endDate.split('T')[0]}</span>
+                  <span className={`font-extrabold uppercase px-2 py-0.5 rounded border text-[9px] ${
+                    l.status === 'Pending' ? 'bg-amber-50 border-amber-100 text-amber-600' :
+                    l.status === 'Approved' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                    'bg-rose-50 border-rose-100 text-rose-600'
+                  }`}>
+                    {l.status}
+                  </span>
+                </div>
+                <div className="text-xs font-semibold text-slate-700 leading-snug flex items-center justify-between">
+                  <span>Type: <span className="bg-blue-50 border border-blue-100 text-blue-600 font-extrabold px-1 rounded text-[9px]">{l.leaveType}</span></span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-snug">"{l.reason}"</p>
+              </div>
+            ))}
+            {myLeaves.length === 0 && (
+              <p className="text-xs text-slate-400 italic text-center py-12">No leaves applied yet.</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Historical logs table */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
-        <h3 className="font-bold text-xs text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-3">
+        <h3 className="font-bold text-xs text-slate-450 uppercase tracking-widest border-b border-slate-100 pb-3">
           Historical Check-In Signatures
         </h3>
         <div className="overflow-x-auto">
@@ -299,8 +588,10 @@ export default function MyAttendancePage() {
                   <td className="py-3 px-4 text-right">
                     <span className={`inline-block border font-bold px-2 py-0.5 rounded-sm ${
                       log.status === 'Present' 
-                        ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
-                        : 'bg-rose-50 border-rose-100 text-rose-600'
+                        ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                      log.status === 'Absent'
+                        ? 'bg-rose-50 border-rose-100 text-rose-600'
+                        : 'bg-amber-50 border-amber-100 text-amber-600'
                     }`}>
                       {log.status}
                     </span>
@@ -311,7 +602,6 @@ export default function MyAttendancePage() {
           </table>
         </div>
       </div>
-
     </div>
   );
 }

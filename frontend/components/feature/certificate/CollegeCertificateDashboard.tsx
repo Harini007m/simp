@@ -35,7 +35,7 @@ function generateVerificationHash(cert: Certificate): string {
 export default function CollegeCertificateDashboard() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCollege, setSelectedCollege] = useState<string>('');
+  const [selectedCollege, setSelectedCollege] = useState<string>('Stanford University'); // Mock logged in college
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedStudent, setExpandedStudent] = useState<string | null>(null);
 
@@ -143,34 +143,10 @@ export default function CollegeCertificateDashboard() {
         </button>
       </div>
 
-      {/* ── College Selector ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 block">
-          Select College / Institution
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-          {colleges.map(college => (
-            <button
-              key={college}
-              onClick={() => { setSelectedCollege(college); setSearchQuery(''); setExpandedStudent(null); }}
-              className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors duration-200 cursor-pointer border text-left flex items-center gap-2 ${
-                selectedCollege === college
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-400 hover:bg-slate-100'
-              }`}
-            >
-              <Building className="w-4 h-4 shrink-0" />
-              <span className="truncate">{college}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* ── Dashboard Content ── */}
-      {selectedCollege ? (
-        <>
-          {/* KPI Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <>
+        {/* KPI Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: 'Issued Certificates', value: totalIssued, icon: Award, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
               { label: 'Unique Students', value: uniqueStudents, icon: Users, iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
@@ -319,16 +295,6 @@ export default function CollegeCertificateDashboard() {
             </div>
           )}
         </>
-      ) : (
-        /* Empty state */
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-16 text-center">
-          <Building className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="font-bold text-slate-800 text-lg">Select a College to Begin</h3>
-          <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">
-            Choose a college or institution above to view student certificates and verify their authenticity.
-          </p>
-        </div>
-      )}
 
       {/* ══════════ Verification Drawer ══════════ */}
       <Drawer
@@ -420,17 +386,17 @@ export default function CollegeCertificateDashboard() {
                     </div>
                   </div>
                 </div>
-              ) : verificationResult.status === 'Revoked' ? (
+              ) : verificationResult?.status === 'Revoked' ? (
                 <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-5 text-center">
                   <AlertTriangle className="h-10 w-10 text-rose-500 mx-auto mb-2" />
                   <h4 className="text-base font-bold text-rose-900">Certificate Revoked</h4>
-                  <p className="text-sm text-rose-700 mt-1">{verificationResult.message}</p>
+                  <p className="text-sm text-rose-700 mt-1">{verificationResult?.message}</p>
                 </div>
               ) : (
                 <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 text-center">
                   <XCircle className="h-10 w-10 text-slate-400 mx-auto mb-2" />
                   <h4 className="text-base font-bold text-slate-900">Invalid Certificate</h4>
-                  <p className="text-sm text-slate-600 mt-1">{verificationResult.message}</p>
+                  <p className="text-sm text-slate-600 mt-1">{verificationResult?.message}</p>
                 </div>
               )}
             </div>

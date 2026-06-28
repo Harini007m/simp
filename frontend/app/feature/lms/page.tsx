@@ -1,108 +1,278 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  BookOpen, FolderOpen, Percent, Users, ChevronRight, 
-  TrendingUp, ArrowUpRight, GraduationCap, Clock
+  BookOpen, Play, FileText, Award, ChevronRight
 } from 'lucide-react';
 
+interface Submodule {
+  id: string;
+  title: string;
+  type: 'Video' | 'PDF' | 'Reading' | 'Assignment' | 'Quiz' | 'External Link';
+  url: string;
+  minReadingTime?: number;
+  videoDuration?: number;
+}
+
+interface Module {
+  id: string;
+  title: string;
+  description: string;
+  submodules: Submodule[];
+}
+
+interface CourseItem {
+  id: string;
+  title: string;
+  program: string;
+  description: string;
+  thumbnail: string;
+  progressRate: number;
+  studentsCompleted: number;
+  modules: Module[];
+}
+
+interface BatchLms {
+  id: string;
+  name: string;
+  coursesCount: number;
+  resourcesCount: number;
+  completedRate: number;
+  courses: CourseItem[];
+}
+
+const INITIAL_BATCH_LMS: BatchLms[] = [
+  {
+    id: 'batch-ai-2026',
+    name: 'AI Batch 2026',
+    coursesCount: 2,
+    resourcesCount: 58,
+    completedRate: 81,
+    courses: [
+      {
+        id: 'CRS-501',
+        title: 'Python Programming Basics',
+        program: 'Software Engineering',
+        description: 'Master core Python variables, flow control, tuples, dictionaries, and functional patterns.',
+        thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&auto=format&fit=crop',
+        progressRate: 92,
+        studentsCompleted: 38,
+        modules: [
+          {
+            id: 'MOD-501-1',
+            title: 'Module 1: Introduction',
+            description: 'Introduction to standard interpreter setups and scripting.',
+            submodules: [
+              {
+                id: 'SUB-501-1-1',
+                title: 'Python Notes Specification',
+                type: 'PDF',
+                url: 'python_basics_notes.pdf',
+                minReadingTime: 120
+              },
+              {
+                id: 'SUB-501-1-2',
+                title: 'Installing Python & First Script',
+                type: 'Video',
+                url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                videoDuration: 600
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'CRS-502',
+        title: 'AI Fundamentals & Neural Networks',
+        program: 'Artificial Intelligence',
+        description: 'Explore machine learning layers, convolutional layers, perceptrons, and backpropagation calculations.',
+        thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=500&auto=format&fit=crop',
+        progressRate: 75,
+        studentsCompleted: 28,
+        modules: []
+      }
+    ]
+  }
+];
+
 export default function LMSDashboardPage() {
-  const [stats, setStats] = useState({
-    totalCourses: 15,
-    totalResources: 340,
-    courseCompletion: 78,
-    activeLearners: 124
-  });
+  const [batches, setBatches] = useState<BatchLms[]>(INITIAL_BATCH_LMS);
+
+  // Drill-down states
+  const [selectedBatch, setSelectedBatch] = useState<BatchLms | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('pinesphere_courses');
+      if (stored) {
+        setBatches(prev => prev.map(b => {
+          if (b.id === 'batch-ai-2026') {
+            return {
+              ...b,
+              courses: JSON.parse(stored)
+            };
+          }
+          return b;
+        }));
+      }
+    }
+  }, []);
+
+  const totalCourses = batches.reduce((sum, b) => sum + b.courses.length, 0);
+  const totalResources = batches.reduce((sum, b) => sum + b.resourcesCount, 0);
+  const avgCompletionRate = 81;
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-            <span>Learning Pathway</span>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-blue-600 font-extrabold text-[10px]">Dashboard</span>
-          </div>
-          <h2 className="text-2xl font-black text-slate-900 mt-2 tracking-tight">LMS Dashboard</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Overview of technical curriculum progression, uploaded files, and active intern cohorts metrics.
-          </p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">LMS Dashboard</h2>
+        <p className="text-sm text-slate-500 mt-1">Audit learning paths progress, view curriculum completion stats, and verify certificates.</p>
       </div>
 
-      {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Courses', val: stats.totalCourses, icon: BookOpen, color: 'text-blue-600 bg-blue-50 border-blue-100' },
-          { label: 'Total Resources', val: stats.totalResources, icon: FolderOpen, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
-          { label: 'Course Completion', val: `${stats.courseCompletion}%`, icon: Percent, color: 'text-purple-600 bg-purple-50 border-purple-100' },
-          { label: 'Active Learners', val: stats.activeLearners, icon: Users, color: 'text-amber-600 bg-amber-50 border-amber-100' }
-        ].map((kpi, idx) => (
-          <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center justify-between group hover:border-blue-500 transition-all duration-200">
-            <div>
-              <div className="text-2.5xl font-black text-slate-800 tracking-tight">{kpi.val}</div>
-              <div className="text-[10px] font-bold text-slate-450 uppercase tracking-wider mt-0.5">{kpi.label}</div>
+      {!selectedBatch ? (
+        <>
+          {/* Metrics Panel */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Courses</span>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">{totalCourses}</h3>
             </div>
-            <div className={`h-11 w-11 rounded-lg ${kpi.color} border flex items-center justify-center shrink-0`}>
-              <kpi.icon className="h-5 w-5" />
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Resources Count</span>
+              <h3 className="text-3xl font-black text-emerald-600 mt-1">{totalResources}</h3>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Completion Rate</span>
+              <h3 className="text-3xl font-black text-indigo-650 mt-1">{avgCompletionRate}%</h3>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-slate-405 uppercase tracking-widest">Certificates Issued</span>
+                <h3 className="text-3xl font-black text-amber-600 mt-1">42</h3>
+              </div>
+              <Award className="h-9 w-9 text-amber-500 shrink-0" />
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Analytics details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Progression charts */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 border-b border-slate-100 pb-2">
-            <TrendingUp className="h-4.5 w-4.5 text-blue-600" />
-            Category-wise completion rates
-          </h3>
-          <div className="space-y-4 pt-1">
-            {[
-              { category: 'Frontend UI Development', rate: 88, color: 'bg-blue-600' },
-              { category: 'Backend Systems & Microservices', rate: 74, color: 'bg-emerald-600' },
-              { category: 'Cloud Infrastructure & DevOps', rate: 65, color: 'bg-purple-600' }
-            ].map((item, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-slate-700">
-                  <span>{item.category}</span>
-                  <span>{item.rate}% Completion Rate</span>
+          {/* Batch list cards */}
+          <div className="space-y-4">
+            <h3 className="font-bold text-xs text-slate-400 uppercase tracking-widest">Curriculum Progress by Batch</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {batches.map(b => (
+                <div 
+                  key={b.id}
+                  onClick={() => setSelectedBatch(b)}
+                  className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-500 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg flex flex-col justify-between space-y-4"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">COHORT</span>
+                      <h4 className="text-lg font-black text-slate-900 mt-1">{b.name}</h4>
+                    </div>
+                    <span className="bg-indigo-55/15 text-indigo-650 font-black px-3 py-1 rounded-full text-xs">
+                      {b.courses.length} Tracks
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs font-bold text-slate-500 pt-2 border-t border-slate-50">
+                    <span>Resources Count: <strong className="text-slate-800">{b.resourcesCount}</strong></span>
+                    <span>Completed Rate: <strong className="text-indigo-600">{b.completedRate}%</strong></span>
+                  </div>
                 </div>
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: `${item.rate}%` }} />
+              ))}
+            </div>
+          </div>
+        </>
+      ) : !selectedCourse ? (
+        /* Courses inside Batch */
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b pb-4">
+            <div>
+              <button 
+                onClick={() => setSelectedBatch(null)} 
+                className="text-xs font-bold text-indigo-600 hover:underline mb-1 block"
+              >
+                ← Back to Cohorts
+              </button>
+              <h3 className="text-lg font-black text-slate-900">{selectedBatch.name} Tracks</h3>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {selectedBatch.courses.map(crs => (
+              <div 
+                key={crs.id}
+                onClick={() => setSelectedCourse(crs)}
+                className="p-5 border border-slate-200 hover:border-indigo-500 hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
+                <div className="flex items-start gap-4">
+                  <img src={crs.thumbnail} alt={crs.title} className="h-16 w-24 rounded-lg object-cover bg-slate-100 border shrink-0" />
+                  <div className="space-y-1.5">
+                    <h4 className="text-base font-black text-slate-900">{crs.title}</h4>
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{crs.description}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-6 shrink-0 text-xs font-bold text-slate-500">
+                  <div className="text-right">
+                    <span>Completion: <strong className="text-indigo-600">{crs.progressRate}%</strong></span>
+                  </div>
+                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
+                    View Modules
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Quick statistics checklist */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-          <h3 className="text-xs font-bold text-slate-450 uppercase tracking-widest flex items-center gap-1.5 border-b border-slate-100 pb-2">
-            <GraduationCap className="h-4.5 w-4.5 text-blue-600" />
-            Storage Pool Metrics
-          </h3>
-          <div className="space-y-3.5 pt-1 text-xs">
-            <div className="flex justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
-              <span className="text-slate-500 font-semibold">Total Video Hours:</span>
-              <strong className="text-slate-800">120 hrs</strong>
-            </div>
-            <div className="flex justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
-              <span className="text-slate-500 font-semibold">PDF Files Attached:</span>
-              <strong className="text-slate-800">185 files</strong>
-            </div>
-            <div className="flex justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
-              <span className="text-slate-500 font-semibold">Allocated Storage:</span>
-              <strong className="text-blue-600 font-bold">14.5 GB / 50 GB</strong>
+      ) : (
+        /* Syllabus modules */
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b pb-5">
+            <div>
+              <button 
+                onClick={() => setSelectedCourse(null)} 
+                className="text-xs font-bold text-indigo-650 hover:underline mb-1 block"
+              >
+                ← Back to Curriculum Tracks
+              </button>
+              <h3 className="text-lg font-black text-slate-900">{selectedCourse.title}</h3>
             </div>
           </div>
-        </div>
 
-      </div>
+          <div className="space-y-6 max-w-4xl">
+            {selectedCourse.modules.map(mod => (
+              <div key={mod.id} className="border border-slate-150 rounded-2xl overflow-hidden shadow-sm bg-slate-50/20">
+                <div className="bg-slate-50 px-5 py-3 border-b flex justify-between items-center text-xs font-bold text-slate-800">
+                  <span>{mod.title}</span>
+                  <span className="text-[10px] text-slate-400">{mod.submodules.length} Assets</span>
+                </div>
+                
+                <div className="divide-y divide-slate-100 bg-white">
+                  {mod.submodules.map(sub => (
+                    <div key={sub.id} className="p-4 flex items-center justify-between text-xs hover:bg-slate-50/40">
+                      <div className="flex items-center gap-3 font-semibold text-slate-700">
+                        {sub.type === 'Video' ? (
+                          <Play className="h-4.5 w-4.5 text-rose-500" />
+                        ) : (
+                          <FileText className="h-4.5 w-4.5 text-blue-500" />
+                        )}
+                        <span>{sub.title}</span>
+                      </div>
+                      <span className="bg-indigo-50 border border-indigo-100 text-indigo-650 font-bold px-2 py-0.5 rounded text-[9px] uppercase">
+                        Active
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
     </div>
   );

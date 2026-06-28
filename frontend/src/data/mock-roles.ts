@@ -1,16 +1,4 @@
-export interface Role {
-  id: string;
-  name: string;
-  code: string;
-  desc: string;
-  status: 'Active' | 'Inactive';
-  modulesCount: number;
-  usersCount: number;
-  color: string;
-  bg: string;
-  moduleIds: string[];
-  permissions: string[];
-}
+import { Role } from '../types/api/role.types';
 
 export const MOCK_ROLES: Role[] = [
   {
@@ -23,14 +11,14 @@ export const MOCK_ROLES: Role[] = [
     usersCount: 245,
     color: 'text-emerald-600',
     bg: 'bg-emerald-100',
-    moduleIds: ['dashboard', 'task', 'assessment', 'attendance', 'performance', 'lms', 'leave', 'wallet', 'notification', 'announcement', 'communication', 'calendar', 'certificate', 'placement', 'alumni', 'analytics', 'reports', 'helpdesk', 'marketplace', 'referral', 'idcard', 'selfservice', 'productivity'],
+    moduleIds: ['dashboard', 'task', 'assessment', 'attendance', 'performance', 'lms', 'leave', 'wallet', 'notification', 'announcement', 'communication', 'calendar', 'certificate', 'placement', 'alumni', 'analytics', 'reports', 'helpdesk', 'marketplace', 'referral', 'idcard', 'selfservice', 'productivity', 'my_learning', 'my_attendance', 'my_tasks', 'my_assessments'],
     permissions: [
       'dashboard.view',
-      'task.view', 'task.submit',
-      'assessment.view', 'assessment.submit',
-      'attendance.view',
+      'task.view', 'task.submit', 'my_tasks.view',
+      'assessment.view', 'assessment.submit', 'my_assessments.view',
+      'attendance.view', 'my_attendance.view',
       'performance.view',
-      'lms.view',
+      'lms.view', 'my_learning.view',
       'leave.view', 'leave.create',
       'wallet.view',
       'notification.view', 'announcement.view', 'communication.view', 'communication.create', 'calendar.view',
@@ -54,13 +42,14 @@ export const MOCK_ROLES: Role[] = [
     usersCount: 34,
     color: 'text-amber-600',
     bg: 'bg-amber-100',
-    moduleIds: ['dashboard', 'student', 'attendance', 'task', 'assessment', 'performance', 'leave', 'wallet', 'notification', 'announcement', 'communication', 'calendar', 'certificate', 'placement', 'alumni', 'analytics', 'reports', 'helpdesk', 'idcard', 'selfservice', 'productivity'],
+    moduleIds: ['dashboard', 'student', 'attendance', 'attendance_management', 'task', 'task_management', 'assessment', 'assessment_management', 'performance', 'lms', 'lms_management', 'leave', 'wallet', 'notification', 'announcement', 'communication', 'calendar', 'certificate', 'placement', 'alumni', 'analytics', 'reports', 'helpdesk', 'idcard', 'selfservice', 'productivity'],
     permissions: [
       'dashboard.view',
       'student.view',
       'attendance.view', 'attendance.mark',
-      'task.view', 'task.review',
-      'assessment.view', 'assessment.evaluate',
+      'task.view', 'task.review', 'task.create',
+      'assessment.view', 'assessment.evaluate', 'assessment.create',
+      'lms.view', 'lms.create',
       'performance.view',
       'leave.view', 'leave.create',
       'wallet.view',
@@ -157,7 +146,7 @@ export const MOCK_ROLES: Role[] = [
     moduleIds: [
       'identity', 'employee', 'organization', 'program', 'opportunity',
       'application', 'student', 'batch', 'allocation', 'mentor',
-      'lms', 'task', 'assessment', 'submission', 'attendance',
+      'lms', 'lms_management', 'task', 'task_management', 'assessment', 'assessment_management', 'submission', 'attendance', 'attendance_management',
       'performance', 'college_coordinator', 'dashboard', 'common_file', 'super_admin',
       'reporting_manager', 'leave', 'activity', 'escalation',
       'payment', 'fee', 'billing', 'wallet', 'finance', 'finance_analytics',
