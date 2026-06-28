@@ -28,8 +28,6 @@ export const MOCK_MODULES: Module[] = [
 
   // Flattened Mentor
   { id: 'mentor', code: 'MENTOR', name: 'Mentor Profile', route: '/feature/mentor/profile', active: true },
-  { id: 'assignment', code: 'ASSIGN', name: 'Mentor Assignment', route: '/feature/assignment', active: true },
-  { id: 'batch_mapping', code: 'BMAP', name: 'Batch Mapping', route: '/feature/batch-mapping', active: true },
 
   // Flattened LMS
   { id: 'lms', code: 'LMS', name: 'LMS Dashboard', route: '/feature/lms', active: true },

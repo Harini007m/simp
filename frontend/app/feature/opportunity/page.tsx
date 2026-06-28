@@ -15,6 +15,8 @@ import { applicationService } from '@/src/services/application.service';
 import { Application } from '@/src/data/mock-applications';
 import { openingMentorsService } from '@/src/services/opening-mentors.service';
 import { OpeningMentor } from '@/src/data/mock-opening-mentors';
+import { mentorService } from '@/src/services/mentor.service';
+import { MentorProfile } from '@/src/data/mock-mentors';
 
 type TabType = 'dashboard' | 'directory';
 type DrawerTabType = 'overview' | 'mentors' | 'applications' | 'analytics' | 'timeline';
@@ -32,6 +34,11 @@ export default function OpportunityPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState<DrawerTabType>('overview');
   const [opportunityMentors, setOpportunityMentors] = useState<OpeningMentor[]>([]);
+  
+  // Assign Mentor State
+  const [isAssignMentorOpen, setIsAssignMentorOpen] = useState(false);
+  const [availableMentors, setAvailableMentors] = useState<MentorProfile[]>([]);
+  const [assignForm, setAssignForm] = useState({ mentorId: '', role: 'Lead Mentor', workload: 10 });
 
   const loadData = async () => {
     try {
@@ -62,11 +69,38 @@ export default function OpportunityPage() {
     }
   };
 
-  const openDrawer = (opp: Opportunity) => {
+  const openDrawer = async (opp: Opportunity) => {
     setSelectedOpportunity(opp);
     setDrawerTab('overview');
     loadMentorsForOpp(opp.id);
     setIsDrawerOpen(true);
+    setIsAssignMentorOpen(false);
+    try {
+      const mentors = await mentorService.getMentorProfiles();
+      setAvailableMentors(mentors);
+    } catch (err) {
+      console.error('Failed to load mentor profiles', err);
+    }
+  };
+
+  const handleAssignMentor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedOpportunity || !assignForm.mentorId) return;
+
+    try {
+      await openingMentorsService.assignMentor({
+        opportunityId: selectedOpportunity.id,
+        mentorId: assignForm.mentorId,
+        role: assignForm.role as any,
+        workload: Number(assignForm.workload),
+      });
+
+      await loadMentorsForOpp(selectedOpportunity.id);
+      setIsAssignMentorOpen(false);
+      setAssignForm({ mentorId: '', role: 'Lead Mentor', workload: 10 });
+    } catch (err) {
+      console.error('Failed to assign mentor', err);
+    }
   };
 
   // KPIs
@@ -401,10 +435,74 @@ export default function OpportunityPage() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
                     <h4 className="text-sm font-semibold text-slate-900">Assigned Mentors</h4>
-                    <button className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100">
-                      + Assign Mentor
-                    </button>
+                    {!isAssignMentorOpen && (
+                      <button 
+                        onClick={() => setIsAssignMentorOpen(true)}
+                        className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100"
+                      >
+                        + Assign Mentor
+                      </button>
+                    )}
                   </div>
+                  
+                  {isAssignMentorOpen && (
+                    <form onSubmit={handleAssignMentor} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Assign New Mentor</h5>
+                        <button type="button" onClick={() => setIsAssignMentorOpen(false)} className="text-slate-400 hover:text-slate-600">
+                          <XCircle className="h-4 w-4" />
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-500">Select Mentor *</label>
+                          <select 
+                            required
+                            value={assignForm.mentorId}
+                            onChange={(e) => setAssignForm({...assignForm, mentorId: e.target.value})}
+                            className="w-full text-sm p-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+                          >
+                            <option value="">-- Choose Mentor --</option>
+                            {availableMentors.map(m => (
+                              <option key={m.mentor_profile_id} value={m.mentor_profile_id}>
+                                {m.employeeName} ({m.employee_id})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-500">Role</label>
+                          <select 
+                            required
+                            value={assignForm.role}
+                            onChange={(e) => setAssignForm({...assignForm, role: e.target.value})}
+                            className="w-full text-sm p-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+                          >
+                            <option value="Lead Mentor">Lead Mentor</option>
+                            <option value="Co-Mentor">Co-Mentor</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1 md:col-span-2">
+                          <label className="text-xs font-semibold text-slate-500">Workload (Max Students)</label>
+                          <input 
+                            type="number"
+                            required
+                            min={1}
+                            value={assignForm.workload}
+                            onChange={(e) => setAssignForm({...assignForm, workload: Number(e.target.value)})}
+                            className="w-full text-sm p-2 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end pt-2">
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 shadow-sm">
+                          Confirm Assignment
+                        </button>
+                      </div>
+                    </form>
+                  )}
                   
                   {opportunityMentors.length > 0 ? (
                     <div className="space-y-3">

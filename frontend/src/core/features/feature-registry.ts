@@ -41,8 +41,6 @@ export const FEATURE_REGISTRY: FeatureDefinition[] = [
 
   // Mentor
   { moduleId: 'mentor', featureId: 'mentor_profile', permissionKey: 'mentor.view', displayName: 'Mentor Profile', navigationLabel: 'Mentor Profile', route: '/feature/mentor/profile', icon: User },
-  { moduleId: 'assignment', featureId: 'assignment_main', permissionKey: 'assignment.view', displayName: 'Mentor Assignment', navigationLabel: 'Mentor Assignment', route: '/feature/assignment', icon: UserPlus },
-  { moduleId: 'batch_mapping', featureId: 'batch_mapping_main', permissionKey: 'batch_mapping.view', displayName: 'Batch Mapping', navigationLabel: 'Mentor Batch Mapping', route: '/feature/batch-mapping', icon: Map },
 
   // LMS
   { moduleId: 'lms', featureId: 'lms_dashboard', permissionKey: 'lms.view', displayName: 'LMS Dashboard', navigationLabel: 'LMS Dashboard', route: '/feature/lms', icon: MonitorPlay },

@@ -8,10 +8,13 @@ import { AlertTriangle,
  } from 'lucide-react';
 import { submissionService } from '@/src/services/submission.service';
 import { Submission } from '@/src/data/mock-submissions';
+import { studentService, ExtendedStudent } from '@/src/services/student.service';
 import { Drawer } from '@/components/feature/ui/Drawer';
 
 export default function SubmissionsManagementPage() {
-  const [activeView, setActiveView] = useState<'dashboard' | 'directory'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'directory' | 'batches'>('dashboard');
+  const [students, setStudents] = useState<ExtendedStudent[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -25,8 +28,12 @@ export default function SubmissionsManagementPage() {
 
   const loadSubmissions = async () => {
     setLoading(true);
-    const data = await submissionService.getSubmissions();
-    setSubmissions(data);
+    const [subData, stuData] = await Promise.all([
+      submissionService.getSubmissions(),
+      studentService.getStudents()
+    ]);
+    setSubmissions(subData);
+    setStudents(stuData);
     setLoading(false);
   };
 
@@ -37,6 +44,31 @@ export default function SubmissionsManagementPage() {
   };
 
   const filteredSubmissions = submissions.filter(s => s.studentId.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  // Batch Grouping
+  const batchMap = new Map<string, { students: ExtendedStudent[], submissions: Submission[] }>();
+  
+  students.forEach(stu => {
+    const batchName = stu.batch?.name || stu.internshipInfo?.batchName || 'Unassigned';
+    if (!batchMap.has(batchName)) {
+      batchMap.set(batchName, { students: [], submissions: [] });
+    }
+    batchMap.get(batchName)!.students.push(stu);
+  });
+
+  submissions.forEach(sub => {
+    const stu = students.find(s => s.id === sub.studentId || s.student_id === sub.studentId);
+    const batchName = stu?.batch?.name || stu?.internshipInfo?.batchName || 'Unassigned';
+    if (!batchMap.has(batchName)) {
+      batchMap.set(batchName, { students: [], submissions: [] });
+    }
+    batchMap.get(batchName)!.submissions.push(sub);
+  });
+
+  const batches = Array.from(batchMap.entries()).map(([name, data]) => ({
+    name,
+    ...data
+  })).filter(b => b.submissions.length > 0 || b.students.length > 0);
 
   // KPIs
   const totalSubmissions = submissions.length;
@@ -76,6 +108,12 @@ export default function SubmissionsManagementPage() {
             className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${activeView === 'directory' ? 'bg-white text-slate-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
           >
             Directory
+          </button>
+          <button 
+            onClick={() => { setActiveView('batches'); setSelectedBatch(null); }}
+            className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${activeView === 'batches' ? 'bg-white text-slate-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Batches
           </button>
         </div>
       </div>
@@ -183,6 +221,103 @@ export default function SubmissionsManagementPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {activeView === 'batches' && (
+          <div className="space-y-6 max-w-7xl mx-auto">
+            {!selectedBatch ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {batches.map(b => (
+                  <div key={b.name} onClick={() => setSelectedBatch(b.name)} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
+                        <FolderDown className="h-6 w-6" />
+                      </div>
+                      <span className="text-sm font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full">{b.students.length} Students</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">{b.name}</h3>
+                    <p className="text-sm text-slate-500">{b.submissions.length} Submissions</p>
+                  </div>
+                ))}
+                {batches.length === 0 && (
+                  <div className="col-span-full p-12 text-center text-slate-500 bg-white rounded-xl border border-slate-200">
+                    No batches found.
+                  </div>
+                )}
+              </div>
+            ) : (() => {
+              const batch = batches.find(b => b.name === selectedBatch);
+              if (!batch) return null;
+              
+              return (
+                <div className="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col h-[calc(100vh-12rem)]">
+                  <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-4 bg-slate-50/50">
+                    <div className="flex items-center gap-4">
+                      <button onClick={() => setSelectedBatch(null)} className="text-sm font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                        &larr; Back
+                      </button>
+                      <h2 className="text-lg font-bold text-slate-900">{batch.name} Students</h2>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200 text-slate-500 font-medium">
+                        <tr>
+                          <th className="px-6 py-3">Student Name</th>
+                          <th className="px-6 py-3">Student ID</th>
+                          <th className="px-6 py-3">Submissions</th>
+                          <th className="px-6 py-3">Status</th>
+                          <th className="px-6 py-3"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {batch.students.map(stu => {
+                          const stuSubmissions = batch.submissions.filter(s => s.studentId === stu.id || s.studentId === stu.student_id);
+                          return (
+                            <tr key={stu.id || stu.student_id} className="hover:bg-blue-50/50 transition-colors">
+                              <td className="px-6 py-4 font-medium text-slate-900">{stu.name || 'Unknown'}</td>
+                              <td className="px-6 py-4 text-slate-600">{stu.student_id || stu.id}</td>
+                              <td className="px-6 py-4">
+                                {stuSubmissions.length > 0 ? (
+                                  <div className="flex flex-col gap-1">
+                                    {stuSubmissions.map(sub => (
+                                      <div key={sub.id} className="flex items-center gap-2 cursor-pointer hover:text-blue-600" onClick={() => handleSubmissionClick(sub)}>
+                                        <FileText className="h-3 w-3 text-slate-400" />
+                                        <span className="text-xs font-medium">{sub.taskId || sub.assessmentId || sub.id}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-slate-400 italic">No submissions</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4">
+                                {stuSubmissions.length > 0 ? (
+                                  <span className={`inline-flex px-2 py-1 rounded text-xs font-semibold ${
+                                    stuSubmissions[0].status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700' :
+                                    stuSubmissions[0].status === 'REJECTED' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'
+                                  }`}>
+                                    {stuSubmissions[0].status}
+                                  </span>
+                                ) : '-'}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                {stuSubmissions.length > 0 && (
+                                  <button onClick={() => handleSubmissionClick(stuSubmissions[0])} className="p-1 text-slate-400 hover:text-blue-600 transition-colors">
+                                    <Eye className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
