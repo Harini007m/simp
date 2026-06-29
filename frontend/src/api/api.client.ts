@@ -9,15 +9,32 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
+// // Request Interceptor
+// apiClient.interceptors.request.use(
+//   (config: InternalAxiosRequestConfig) => {
+//     // Immediately reject to simulate offline backend and remove latency
+//     return Promise.reject(new axios.Cancel("Backend connection disabled"));
+//   },
+//   (error: AxiosError) => {
+//     return Promise.reject(error);
+//   }
+// );
 // Request Interceptor
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Immediately reject to simulate offline backend and remove latency
-    return Promise.reject(new axios.Cancel("Backend connection disabled"));
+    // Add auth token if available
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("access_token")
+        : null;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
   },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  }
+  (error: AxiosError) => Promise.reject(error)
 );
 
 // Response Interceptor
