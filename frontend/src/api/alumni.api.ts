@@ -1,18 +1,16 @@
 import { AlumniProfile } from '../types/alumni.types';
-import { MOCK_ALUMNI } from '../data/mock-alumni';
-
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 export const AlumniApi = {
   getAlumni: async (): Promise<AlumniProfile[]> => {
     await delay(500);
-    return MOCK_ALUMNI;
+    throw new Error('Backend implementation pending or failed');
   },
 
   createAlumni: async (alumni: Partial<AlumniProfile>): Promise<AlumniProfile> => {
     const newAlumni: AlumniProfile = {
-      id: `alumni_${MOCK_ALUMNI.length + 1}`,
-      studentId: alumni.studentId || `std_alumni_${MOCK_ALUMNI.length + 1}`,
+      id: `alumni_${([] as any[]).length + 1}`,
+      studentId: alumni.studentId || `std_alumni_${([] as any[]).length + 1}`,
       name: alumni.name || 'New Alumni',
       email: alumni.email || 'alumni@example.com',
       phone: alumni.phone || '1234567890',
@@ -27,7 +25,7 @@ export const AlumniApi = {
       referralsProvided: 0,
       lastUpdated: new Date().toISOString(),
       careerHistory: [{
-        id: `cp_${MOCK_ALUMNI.length + 1}_1`,
+        id: `cp_${([] as any[]).length + 1}_1`,
         companyName: alumni.currentCompany || 'Self-Employed',
         designation: alumni.currentDesignation || 'Software Engineer',
         location: 'Bangalore',
@@ -35,7 +33,7 @@ export const AlumniApi = {
         isCurrent: true
       }]
     };
-    MOCK_ALUMNI.unshift(newAlumni);
+    ([] as any[]).unshift(newAlumni);
     return newAlumni;
   }
 };

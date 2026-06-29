@@ -61,7 +61,7 @@ export default function AssessmentManagementPage() {
   };
 
   useEffect(() => {
-    const newQuestions = Array.from({ length: questionCount }).map((_, i) => {
+    const newQuestions = Array.from({ length: questionCount }).map((_: any, i: any) => {
       const existing = questions[i];
       return existing || {
         text: `Question ${i + 1}`,
@@ -112,11 +112,11 @@ export default function AssessmentManagementPage() {
   };
 
   const updateQuestionText = (index: number, val: string) => {
-    setQuestions(prev => prev.map((q, idx) => idx === index ? { ...q, text: val } : q));
+    setQuestions((prev: any) => prev.map((q: any, idx: any) => idx === index ? { ...q, text: val } : q));
   };
 
   const updateQuestionOption = (qIndex: number, oIndex: number, val: string) => {
-    setQuestions(prev => prev.map((q, idx) => {
+    setQuestions((prev: any) => prev.map((q: any, idx: any) => {
       if (idx === qIndex) {
         const newOptions = [...q.options];
         newOptions[oIndex] = val;
@@ -127,7 +127,7 @@ export default function AssessmentManagementPage() {
   };
 
   const updateQuestionAnswer = (index: number, val: string) => {
-    setQuestions(prev => prev.map((q, idx) => idx === index ? { ...q, answer: val } : q));
+    setQuestions((prev: any) => prev.map((q: any, idx: any) => idx === index ? { ...q, answer: val } : q));
   };
 
   return (
@@ -153,7 +153,7 @@ export default function AssessmentManagementPage() {
               <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Target Batch</label>
               <select 
                 value={targetBatchId}
-                onChange={(e) => setTargetBatchId(e.target.value)}
+                onChange={(e: any) => setTargetBatchId(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none cursor-pointer font-bold"
               >
                 <option value="batch-ai-2026">AI Batch 2026</option>
@@ -163,7 +163,7 @@ export default function AssessmentManagementPage() {
               <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Exam Type</label>
               <select 
                 value={asmType}
-                onChange={(e) => setAsmType(e.target.value as any)}
+                onChange={(e: any) => setAsmType(e.target.value as any)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none cursor-pointer font-bold"
               >
                 <option value="MCQ">MCQ Test</option>
@@ -179,7 +179,7 @@ export default function AssessmentManagementPage() {
                 min={50}
                 max={100}
                 value={asmPassingMarks}
-                onChange={(e) => setAsmPassingMarks(parseInt(e.target.value) || 70)}
+                onChange={(e: any) => setAsmPassingMarks(parseInt(e.target.value) || 70)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none font-bold"
               />
             </div>
@@ -192,7 +192,7 @@ export default function AssessmentManagementPage() {
                 type="text"
                 required
                 value={asmTitle}
-                onChange={(e) => setAsmTitle(e.target.value)}
+                onChange={(e: any) => setAsmTitle(e.target.value)}
                 placeholder="e.g. Python OOP Challenge"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none"
               />
@@ -203,7 +203,7 @@ export default function AssessmentManagementPage() {
                 type="number"
                 min={5}
                 value={asmDuration}
-                onChange={(e) => setAsmDuration(parseInt(e.target.value) || 30)}
+                onChange={(e: any) => setAsmDuration(parseInt(e.target.value) || 30)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none font-bold"
               />
             </div>
@@ -213,7 +213,7 @@ export default function AssessmentManagementPage() {
                 type="number"
                 min={1}
                 value={asmAttempts}
-                onChange={(e) => setAsmAttempts(parseInt(e.target.value) || 1)}
+                onChange={(e: any) => setAsmAttempts(parseInt(e.target.value) || 1)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none font-bold"
               />
             </div>
@@ -224,7 +224,7 @@ export default function AssessmentManagementPage() {
               type="checkbox"
               id="negMarking"
               checked={asmNegativeMarking}
-              onChange={(e) => setAsmNegativeMarking(e.target.checked)}
+              onChange={(e: any) => setAsmNegativeMarking(e.target.checked)}
               className="h-4 w-4 text-indigo-650 rounded border-border cursor-pointer"
             />
             <label htmlFor="negMarking" className="text-xs font-bold text-label cursor-pointer select-none">
@@ -244,7 +244,7 @@ export default function AssessmentManagementPage() {
                 { label: 'Strict Focus Block', active: secTabSwitch, setter: setSecTabSwitch },
                 { label: 'Camera Monitoring', active: secCamera, setter: setSecCamera },
                 { label: 'Microphone Tracking', active: secMic, setter: setSecMic },
-              ].map((sec, idx) => (
+              ].map((sec: any, idx: any) => (
                 <div 
                   key={idx}
                   onClick={() => sec.setter(!sec.active)}
@@ -273,7 +273,7 @@ export default function AssessmentManagementPage() {
                 <label className="block text-[10px] font-bold text-slate-455 uppercase tracking-wider">MCQ Questionnaire Builder</label>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-text-secondary">Total Questions:</span>
-                  {[10, 20, 30, 40].map((num) => (
+                  {[10, 20, 30, 40].map((num: any) => (
                     <button
                       key={num}
                       type="button"
@@ -292,7 +292,7 @@ export default function AssessmentManagementPage() {
 
               {/* Rows */}
               <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
-                {questions.map((q, qIdx) => (
+                {questions.map((q: any, qIdx: any) => (
                   <div key={qIdx} className="p-4 border border-border rounded-xl bg-slate-50/50 space-y-3">
                     <div className="flex justify-between items-center text-xs font-bold text-text-secondary">
                       <span>Question {qIdx + 1}</span>
@@ -303,20 +303,20 @@ export default function AssessmentManagementPage() {
                       type="text"
                       required
                       value={q.text}
-                      onChange={(e) => updateQuestionText(qIdx, e.target.value)}
+                      onChange={(e: any) => updateQuestionText(qIdx, e.target.value)}
                       placeholder="Enter question text here..."
                       className="w-full bg-white border border-border rounded-lg px-3 py-2 text-xs text-text-primary outline-none focus:border-primary"
                     />
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {q.options.map((opt, oIdx) => (
+                      {q.options.map((opt: any, oIdx: any) => (
                         <div key={oIdx} className="flex items-center gap-2">
                           <span className="text-[10px] font-bold text-text-secondary uppercase">{String.fromCharCode(65 + oIdx)}</span>
                           <input 
                             type="text"
                             required
                             value={opt}
-                            onChange={(e) => updateQuestionOption(qIdx, oIdx, e.target.value)}
+                            onChange={(e: any) => updateQuestionOption(qIdx, oIdx, e.target.value)}
                             className="w-full bg-white border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none"
                           />
                         </div>
@@ -328,7 +328,7 @@ export default function AssessmentManagementPage() {
                         <span className="font-bold text-text-secondary">Correct Option:</span>
                         <select 
                           value={q.answer}
-                          onChange={(e) => updateQuestionAnswer(qIdx, e.target.value)}
+                          onChange={(e: any) => updateQuestionAnswer(qIdx, e.target.value)}
                           className="bg-white border border-border rounded px-2 py-1 text-xs text-slate-705 cursor-pointer outline-none font-bold"
                         >
                           <option value="A">A</option>

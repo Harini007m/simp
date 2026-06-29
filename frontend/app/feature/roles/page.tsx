@@ -5,7 +5,6 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/feature/
 import { Button } from '@/components/feature/ui/Button';
 import { Search, Plus, Shield, Users, Edit, Trash, Eye } from 'lucide-react';
 import { CreateRoleWizard } from '../../../components/feature/roles/CreateRoleWizard';
-import { Role } from '@/src/data/mock-roles';
 import { roleService } from '@/src/services/role.service';
 
 export default function RolesPage() {
@@ -95,7 +94,7 @@ export default function RolesPage() {
             No roles found.
           </div>
         ) : (
-          roles.map((role) => (
+          roles.map((role: any) => (
             <Card key={role.id} className="flex flex-col hover:shadow-md transition-shadow bg-white">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">

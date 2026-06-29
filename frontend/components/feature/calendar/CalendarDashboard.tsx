@@ -76,7 +76,7 @@ export default function CalendarDashboard() {
     try {
       const startISO = new Date(`${eventDate}T${startTime}`).toISOString();
       const endISO = new Date(`${eventDate}T${endTime}`).toISOString();
-      const participants = participantsText.split(',').map(p => p.trim()).filter(p => p !== '');
+      const participants = participantsText.split(',').map((p: any) => p.trim()).filter((p: any) => p !== '');
 
       await CalendarService.createEvent({
         title,
@@ -142,7 +142,7 @@ export default function CalendarDashboard() {
 
   const getEventsForDay = (date: Date) => {
     const formatted = date.toISOString().split('T')[0];
-    return events.filter(e => e.startTime.startsWith(formatted));
+    return events.filter((e: any) => e.startTime.startsWith(formatted));
   };
 
   const getTypeStyle = (type: string) => {
@@ -222,7 +222,7 @@ export default function CalendarDashboard() {
                 <Loader2 className="w-8 h-8 animate-spin text-text-secondary" />
               </div>
             ) : (
-              gridDays.map(({ date, isCurrentMonth }, idx) => {
+              gridDays.map(({ date, isCurrentMonth }, idx: any) => {
                 const dayEvents = getEventsForDay(date);
                 const isToday = new Date().toDateString() === date.toDateString();
                 
@@ -244,10 +244,10 @@ export default function CalendarDashboard() {
 
                     {/* Events indicators */}
                     <div className="flex flex-col gap-1 mt-1 flex-1 overflow-hidden max-h-[60px]">
-                      {dayEvents.slice(0, 2).map(evt => (
+                      {dayEvents.slice(0, 2).map((evt: any) => (
                         <div 
                           key={evt.id} 
-                          onClick={(e) => {
+                          onClick={(e: any) => {
                             e.stopPropagation();
                             setSelectedEvent(evt);
                           }}
@@ -287,7 +287,7 @@ export default function CalendarDashboard() {
                 No events scheduled for today.
               </div>
             ) : (
-              todaysEvents.map(event => (
+              todaysEvents.map((event: any) => (
                 <div key={event.id} className="relative pl-5 pb-5 border-l-2 border-border last:border-0 last:pb-0">
                   <div className={`absolute -left-[6.5px] top-0 h-3 w-3 rounded-full border-2 border-white ${
                     event.type === 'Interview' ? 'bg-indigo-600' :
@@ -324,7 +324,7 @@ export default function CalendarDashboard() {
                           href={event.meetingLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(e: any) => e.stopPropagation()}
                           className="flex items-center gap-1.5 text-indigo-650 font-bold hover:underline"
                         >
                           <Video className="h-3.5 w-3.5 shrink-0" /> Join Google Meet
@@ -360,7 +360,7 @@ export default function CalendarDashboard() {
               type="text"
               required
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e: any) => setTitle(e.target.value)}
               placeholder="e.g., Technical Interview - Phase 2"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
             />
@@ -371,7 +371,7 @@ export default function CalendarDashboard() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Event Type</label>
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as EventType)}
+                onChange={(e: any) => setType(e.target.value as EventType)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="Meeting">Meeting</option>
@@ -388,7 +388,7 @@ export default function CalendarDashboard() {
                 type="date"
                 required
                 value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
+                onChange={(e: any) => setEventDate(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
               />
             </div>
@@ -401,7 +401,7 @@ export default function CalendarDashboard() {
                 type="time"
                 required
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={(e: any) => setStartTime(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-slate-850"
               />
             </div>
@@ -411,7 +411,7 @@ export default function CalendarDashboard() {
                 type="time"
                 required
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                onChange={(e: any) => setEndTime(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-slate-850"
               />
             </div>
@@ -421,7 +421,7 @@ export default function CalendarDashboard() {
             <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Event Description</label>
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e: any) => setDescription(e.target.value)}
               placeholder="Provide event description and agenda..."
               className="w-full h-20 bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary resize-none"
             />
@@ -433,7 +433,7 @@ export default function CalendarDashboard() {
               <input
                 type="text"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={(e: any) => setLocation(e.target.value)}
                 placeholder="e.g., Conference Room A"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-slate-805"
               />
@@ -443,7 +443,7 @@ export default function CalendarDashboard() {
               <input
                 type="url"
                 value={meetingLink}
-                onChange={(e) => setMeetingLink(e.target.value)}
+                onChange={(e: any) => setMeetingLink(e.target.value)}
                 placeholder="e.g., https://meet.google.com/abc"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-slate-805"
               />
@@ -455,7 +455,7 @@ export default function CalendarDashboard() {
             <input
               type="text"
               value={participantsText}
-              onChange={(e) => setParticipantsText(e.target.value)}
+              onChange={(e: any) => setParticipantsText(e.target.value)}
               placeholder="e.g., harin@pinesphere.com, mentor@pinesphere.com"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
             />
@@ -555,7 +555,7 @@ export default function CalendarDashboard() {
             <div className="space-y-3 pt-3.5 border-t border-border">
               <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">Invitees ({selectedEvent.participants.length})</span>
               <div className="flex flex-wrap gap-1.5">
-                {selectedEvent.participants.map(p => (
+                {selectedEvent.participants.map((p: any) => (
                   <span key={p} className="bg-slate-100 border border-border px-2.5 py-1 rounded-xl text-xs font-semibold text-text-secondary">
                     {p}
                   </span>

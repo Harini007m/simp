@@ -5,7 +5,7 @@ import { Drawer } from '@/components/feature/ui/Drawer';
 import { Button } from '@/components/feature/ui/Button';
 import { Briefcase, User, Mail, Phone } from 'lucide-react';
 import { applicationService } from '@/src/services/application.service';
-import { Opportunity } from '@/src/data/mock-opportunities';
+import { Opportunity } from '../../../src/types/api/opportunity.types';
 
 interface AddCandidateDrawerProps {
   isOpen: boolean;
@@ -125,9 +125,9 @@ export function AddCandidateDrawer({
             <input
               type="text"
               value={name}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 setName(e.target.value);
-                if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
+                if (errors.name) setErrors((prev: any) => ({ ...prev, name: '' }));
               }}
               placeholder="e.g. John Doe"
               className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
@@ -148,9 +148,9 @@ export function AddCandidateDrawer({
             <input
               type="email"
               value={email}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 setEmail(e.target.value);
-                if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+                if (errors.email) setErrors((prev: any) => ({ ...prev, email: '' }));
               }}
               placeholder="e.g. john.doe@example.com"
               className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
@@ -171,9 +171,9 @@ export function AddCandidateDrawer({
             <input
               type="tel"
               value={phone}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 setPhone(e.target.value);
-                if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+                if (errors.phone) setErrors((prev: any) => ({ ...prev, phone: '' }));
               }}
               placeholder="e.g. +1 (555) 019-2834"
               className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
@@ -193,9 +193,9 @@ export function AddCandidateDrawer({
             </label>
             <select
               value={opportunityId}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 setOpportunityId(e.target.value);
-                if (errors.opportunityId) setErrors((prev) => ({ ...prev, opportunityId: '' }));
+                if (errors.opportunityId) setErrors((prev: any) => ({ ...prev, opportunityId: '' }));
               }}
               className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all bg-white ${
                 errors.opportunityId
@@ -204,7 +204,7 @@ export function AddCandidateDrawer({
               }`}
             >
               <option value="">Select Opportunity</option>
-              {opportunities.map((opp) => (
+              {opportunities.map((opp: any) => (
                 <option key={opp.id} value={opp.id}>
                   {opp.title} ({opp.mode})
                 </option>
@@ -220,7 +220,7 @@ export function AddCandidateDrawer({
             <label className="text-sm font-bold text-label">Initial Pipeline Status</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as 'Pending' | 'Interview' | 'Accepted' | 'Rejected')}
+              onChange={(e: any) => setStatus(e.target.value as 'Pending' | 'Interview' | 'Accepted' | 'Rejected')}
               className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary transition-all bg-white"
             >
               <option value="Pending">Pending Review</option>

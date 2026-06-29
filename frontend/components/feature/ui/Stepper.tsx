@@ -19,7 +19,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
           style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
         />
 
-        {steps.map((step, index) => {
+        {steps.map((step: any, index: any) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
 

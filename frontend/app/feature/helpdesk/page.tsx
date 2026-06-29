@@ -113,7 +113,7 @@ export default function HelpdeskPage() {
       );
 
       // Update selected ticket in state
-      setSelectedTicket(prev => {
+      setSelectedTicket((prev: any) => {
         if (!prev) return null;
         return {
           ...prev,
@@ -206,7 +206,7 @@ export default function HelpdeskPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {tickets.map((ticket) => (
+              {tickets.map((ticket: any) => (
                 <tr 
                   key={ticket.id} 
                   onClick={() => handleOpenTicket(ticket)}
@@ -244,7 +244,7 @@ export default function HelpdeskPage() {
                       <span>{new Date(ticket.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-5 py-4 text-right" onClick={(e: any) => e.stopPropagation()}>
                     <button 
                       onClick={() => handleOpenTicket(ticket)}
                       className="text-indigo-650 hover:text-indigo-800 font-bold text-xs flex items-center gap-1 ml-auto bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl transition-all cursor-pointer"
@@ -283,7 +283,7 @@ export default function HelpdeskPage() {
               type="text"
               required
               value={newTicketTitle}
-              onChange={(e) => setNewTicketTitle(e.target.value)}
+              onChange={(e: any) => setNewTicketTitle(e.target.value)}
               placeholder="e.g., Unable to submit attendance sheet"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
             />
@@ -294,7 +294,7 @@ export default function HelpdeskPage() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Category</label>
               <select
                 value={newTicketCategory}
-                onChange={(e) => setNewTicketCategory(e.target.value as TicketCategory)}
+                onChange={(e: any) => setNewTicketCategory(e.target.value as TicketCategory)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="Technical Issue">Technical Issue</option>
@@ -313,7 +313,7 @@ export default function HelpdeskPage() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Priority</label>
               <select
                 value={newTicketPriority}
-                onChange={(e) => setNewTicketPriority(e.target.value as TicketPriority)}
+                onChange={(e: any) => setNewTicketPriority(e.target.value as TicketPriority)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="Low">Low</option>
@@ -329,7 +329,7 @@ export default function HelpdeskPage() {
             <textarea
               required
               value={newTicketDescription}
-              onChange={(e) => setNewTicketDescription(e.target.value)}
+              onChange={(e: any) => setNewTicketDescription(e.target.value)}
               placeholder="Describe your issue or request in detail. Include error codes if any..."
               className="w-full flex-grow min-h-[160px] bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400 resize-none"
             />
@@ -420,7 +420,7 @@ export default function HelpdeskPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase">Set Status</label>
                       <select
                         value={mgmtStatus}
-                        onChange={(e) => setMgmtStatus(e.target.value as TicketStatus)}
+                        onChange={(e: any) => setMgmtStatus(e.target.value as TicketStatus)}
                         className="w-full bg-white border border-border rounded-xl px-3 py-2 text-xs font-bold text-text-primary cursor-pointer"
                       >
                         <option value="Open">Open</option>
@@ -436,7 +436,7 @@ export default function HelpdeskPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase">Assignee</label>
                       <select
                         value={mgmtAssigneeId}
-                        onChange={(e) => setMgmtAssigneeId(e.target.value)}
+                        onChange={(e: any) => setMgmtAssigneeId(e.target.value)}
                         className="w-full bg-white border border-border rounded-xl px-3 py-2 text-xs font-bold text-text-primary cursor-pointer"
                       >
                         <option value="">Unassigned</option>
@@ -467,10 +467,10 @@ export default function HelpdeskPage() {
                 <h4 className="text-xs font-bold text-text-secondary uppercase tracking-wider">Replies & Updates ({selectedTicket.comments?.length || 0})</h4>
                 
                 <div className="space-y-3.5">
-                  {selectedTicket.comments?.map((comment) => (
+                  {selectedTicket.comments?.map((comment: any) => (
                     <div key={comment.id} className="flex gap-3">
                       <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-text-secondary text-xs font-bold shrink-0">
-                        {comment.authorName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        {comment.authorName.split(' ').map((n: any) => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 bg-slate-50/50 rounded-2xl px-4 py-3 border border-border">
                         <div className="flex items-center justify-between gap-2 mb-1.5">
@@ -497,7 +497,7 @@ export default function HelpdeskPage() {
                   type="text"
                   required
                   value={newCommentText}
-                  onChange={(e) => setNewCommentText(e.target.value)}
+                  onChange={(e: any) => setNewCommentText(e.target.value)}
                   placeholder="Type your message / update..."
                   className="flex-grow bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-primary font-medium text-text-primary placeholder-slate-400"
                 />

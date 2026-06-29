@@ -7,7 +7,7 @@ import { Button } from '@/components/feature/ui/Button';
 import { Card } from '@/components/feature/ui/Card';
 import { ChevronRight, ChevronLeft, Briefcase, Calendar, MapPin, Users, Info, DollarSign } from 'lucide-react';
 import { opportunitiesService } from '@/src/services/opportunities.service';
-import { Opportunity } from '@/src/data/mock-opportunities';
+import { Opportunity } from '../../../src/types/api/opportunity.types';
 
 interface CreateOpportunityWizardProps {
   isOpen: boolean;
@@ -121,7 +121,7 @@ export function CreateOpportunityWizard({
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev: any) => prev - 1);
     }
   };
 
@@ -168,9 +168,9 @@ export function CreateOpportunityWizard({
               <input
                 type="text"
                 value={title}
-                onChange={e => {
+                onChange={(e: any) => {
                   setTitle(e.target.value);
-                  if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
+                  if (errors.title) setErrors((prev: any) => ({ ...prev, title: '' }));
                 }}
                 className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
                   errors.title 
@@ -188,9 +188,9 @@ export function CreateOpportunityWizard({
                 <input
                   type="text"
                   value={type}
-                  onChange={e => {
+                  onChange={(e: any) => {
                     setType(e.target.value);
-                    if (errors.type) setErrors(prev => ({ ...prev, type: '' }));
+                    if (errors.type) setErrors((prev: any) => ({ ...prev, type: '' }));
                   }}
                   className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
                     errors.type 
@@ -206,7 +206,7 @@ export function CreateOpportunityWizard({
                 <label className="text-sm font-bold text-label">Value Category *</label>
                 <select
                   value={value}
-                  onChange={e => setValue(e.target.value as any)}
+                  onChange={(e: any) => setValue(e.target.value as any)}
                   className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary transition-all bg-white"
                 >
                   <option value="free">Free</option>
@@ -225,9 +225,9 @@ export function CreateOpportunityWizard({
                 <input
                   type="text"
                   value={mode}
-                  onChange={e => {
+                  onChange={(e: any) => {
                     setMode(e.target.value);
-                    if (errors.mode) setErrors(prev => ({ ...prev, mode: '' }));
+                    if (errors.mode) setErrors((prev: any) => ({ ...prev, mode: '' }));
                   }}
                   className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
                     errors.mode 
@@ -244,9 +244,9 @@ export function CreateOpportunityWizard({
                 <input
                   type="text"
                   value={seats}
-                  onChange={e => {
+                  onChange={(e: any) => {
                     setSeats(e.target.value);
-                    if (errors.seats) setErrors(prev => ({ ...prev, seats: '' }));
+                    if (errors.seats) setErrors((prev: any) => ({ ...prev, seats: '' }));
                   }}
                   className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
                     errors.seats 
@@ -264,7 +264,7 @@ export function CreateOpportunityWizard({
                 <label className="text-sm font-bold text-label">Internship Type</label>
                 <select
                   value={internshipType}
-                  onChange={e => {
+                  onChange={(e: any) => {
                     setInternshipType(e.target.value as any);
                   }}
                   className="w-full rounded-lg border border-border px-3 py-2 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
@@ -282,9 +282,9 @@ export function CreateOpportunityWizard({
                 <label className="text-sm font-bold text-label">Amount Type</label>
                 <select
                   value={amountType}
-                  onChange={e => {
+                  onChange={(e: any) => {
                     setAmountType(e.target.value);
-                    if (errors.amount) setErrors(prev => ({ ...prev, amount: '' }));
+                    if (errors.amount) setErrors((prev: any) => ({ ...prev, amount: '' }));
                   }}
                   className="w-full rounded-lg border border-border px-3 py-2 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
                 >
@@ -303,9 +303,9 @@ export function CreateOpportunityWizard({
                     <input
                       type="text"
                       value={amount}
-                      onChange={e => {
+                      onChange={(e: any) => {
                         setAmount(e.target.value);
-                        if (errors.amount) setErrors(prev => ({ ...prev, amount: '' }));
+                        if (errors.amount) setErrors((prev: any) => ({ ...prev, amount: '' }));
                       }}
                       className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
                         errors.amount 
@@ -326,9 +326,9 @@ export function CreateOpportunityWizard({
                 <input
                   type="text"
                   value={duration}
-                  onChange={e => {
+                  onChange={(e: any) => {
                     setDuration(e.target.value);
-                    if (errors.duration) setErrors(prev => ({ ...prev, duration: '' }));
+                    if (errors.duration) setErrors((prev: any) => ({ ...prev, duration: '' }));
                   }}
                   className={`w-full rounded-lg border px-3 py-2 text-xs focus:outline-none focus:ring-1 transition-all ${
                     errors.duration 
@@ -345,9 +345,9 @@ export function CreateOpportunityWizard({
                 <input
                   type="text"
                   value={startDate}
-                  onChange={e => {
+                  onChange={(e: any) => {
                     setStartDate(e.target.value);
-                    if (errors.startDate) setErrors(prev => ({ ...prev, startDate: '' }));
+                    if (errors.startDate) setErrors((prev: any) => ({ ...prev, startDate: '' }));
                   }}
                   className={`w-full rounded-lg border px-3 py-2 text-xs focus:outline-none focus:ring-1 transition-all ${
                     errors.startDate 
@@ -364,9 +364,9 @@ export function CreateOpportunityWizard({
               <input
                 type="text"
                 value={eligibility}
-                onChange={e => {
+                onChange={(e: any) => {
                   setEligibility(e.target.value);
-                  if (errors.eligibility) setErrors(prev => ({ ...prev, eligibility: '' }));
+                  if (errors.eligibility) setErrors((prev: any) => ({ ...prev, eligibility: '' }));
                 }}
                 className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
                   errors.eligibility 
@@ -382,10 +382,10 @@ export function CreateOpportunityWizard({
               <label className="text-sm font-bold text-label">Card Color Theme *</label>
               <select
                 value={color}
-                onChange={e => setColor(e.target.value)}
+                onChange={(e: any) => setColor(e.target.value)}
                 className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary transition-all bg-white"
               >
-                {COLOR_THEMES.map(theme => (
+                {COLOR_THEMES.map((theme: any) => (
                   <option key={theme.value} value={theme.value}>
                     {theme.name}
                   </option>
@@ -398,9 +398,9 @@ export function CreateOpportunityWizard({
                 <label className="text-xs font-bold text-label">Job Description *</label>
                 <textarea
                   value={description}
-                  onChange={e => {
+                  onChange={(e: any) => {
                     setDescription(e.target.value);
-                    if (errors.description) setErrors(prev => ({ ...prev, description: '' }));
+                    if (errors.description) setErrors((prev: any) => ({ ...prev, description: '' }));
                   }}
                   rows={2}
                   className={`w-full rounded-lg border px-3 py-2 text-xs focus:outline-none focus:ring-1 transition-all ${
@@ -478,7 +478,7 @@ export function CreateOpportunityWizard({
                   </div>
                   <div>
                     <p className="text-xs font-bold text-text-secondary uppercase tracking-wide">Theme Color</p>
-                    <p className="text-xs font-semibold mt-1 text-text-secondary truncate max-w-xs">{COLOR_THEMES.find(t => t.value === color)?.name || 'Custom'}</p>
+                    <p className="text-xs font-semibold mt-1 text-text-secondary truncate max-w-xs">{COLOR_THEMES.find((t: any) => t.value === color)?.name || 'Custom'}</p>
                   </div>
                 </div>
 

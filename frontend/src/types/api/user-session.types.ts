@@ -1,0 +1,1 @@
+export interface UserSession { id: string; userId: string; [key: string]: any; }

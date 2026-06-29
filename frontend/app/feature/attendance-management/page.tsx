@@ -61,7 +61,7 @@ export default function AttendanceManagementPage() {
         setStudents(parsed.students);
         setIsLocked(parsed.isLocked);
       } else {
-        setStudents(INITIAL_STUDENTS.map(s => ({ ...s, status: null })));
+        setStudents(INITIAL_STUDENTS.map((s: any) => ({ ...s, status: null })));
         setIsLocked(false);
       }
 
@@ -76,7 +76,7 @@ export default function AttendanceManagementPage() {
       triggerToast("Roster is locked! Unlock or contact Super Admin to make changes.");
       return;
     }
-    setStudents(prev => prev.map(s => s.id === studentId ? { ...s, status } : s));
+    setStudents((prev: any) => prev.map((s: any) => s.id === studentId ? { ...s, status } : s));
   };
 
   const handleSaveDraft = () => {
@@ -97,7 +97,7 @@ export default function AttendanceManagementPage() {
   };
 
   const handleApproveAppeal = (appealId: string) => {
-    const updatedAppeals = appeals.map(app => {
+    const updatedAppeals = appeals.map((app: any) => {
       if (app.id === appealId) {
         const audit = app.auditLog || [];
         return {
@@ -117,7 +117,7 @@ export default function AttendanceManagementPage() {
     }
 
     // Apply the correction to local attendance grid
-    const targetAppeal = appeals.find(a => a.id === appealId);
+    const targetAppeal = appeals.find((a: any) => a.id === appealId);
     if (targetAppeal) {
       const targetDate = targetAppeal.date;
       const targetStatus = targetAppeal.status as 'Present' | 'Absent' | 'Late';
@@ -139,7 +139,7 @@ export default function AttendanceManagementPage() {
   };
 
   const handleRejectAppeal = (appealId: string) => {
-    const updatedAppeals = appeals.map(app => {
+    const updatedAppeals = appeals.map((app: any) => {
       if (app.id === appealId) {
         const audit = app.auditLog || [];
         return {
@@ -183,7 +183,7 @@ export default function AttendanceManagementPage() {
             <div className="flex items-center gap-3">
               <select 
                 value={selectedBatchId} 
-                onChange={(e) => setSelectedBatchId(e.target.value)}
+                onChange={(e: any) => setSelectedBatchId(e.target.value)}
                 className="bg-slate-50 border border-border rounded-xl px-4 py-2 text-xs font-bold text-text-primary outline-none cursor-pointer"
               >
                 <option value="batch-ai-2026">AI Batch 2026</option>
@@ -191,7 +191,7 @@ export default function AttendanceManagementPage() {
               <input 
                 type="date" 
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e: any) => setSelectedDate(e.target.value)}
                 className="bg-slate-50 border border-border rounded-xl px-4 py-2 text-xs font-bold text-text-primary outline-none cursor-pointer"
               />
             </div>
@@ -211,7 +211,7 @@ export default function AttendanceManagementPage() {
 
           {/* Student marking rows */}
           <div className="space-y-3">
-            {students.map((student) => (
+            {students.map((student: any) => (
               <div 
                 key={student.id} 
                 className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-border bg-slate-50/20 rounded-xl gap-4"
@@ -227,7 +227,7 @@ export default function AttendanceManagementPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  {(['Present', 'Absent', 'Late'] as const).map((st) => {
+                  {(['Present', 'Absent', 'Late'] as const).map((st: any) => {
                     const isActive = student.status === st;
                     return (
                       <button
@@ -275,7 +275,7 @@ export default function AttendanceManagementPage() {
           <h3 className="font-bold text-xs text-slate-455 uppercase tracking-widest border-b border-border pb-3">Correction Appeals</h3>
 
           <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar">
-            {appeals.map((app) => (
+            {appeals.map((app: any) => (
               <div key={app.id} className="p-4 bg-slate-50 border border-border rounded-xl space-y-3">
                 <div className="flex justify-between items-start">
                   <div>

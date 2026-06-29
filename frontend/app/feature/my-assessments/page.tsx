@@ -102,14 +102,14 @@ export default function MyAssessmentsPage() {
         if (storedStr) {
           const parsed = JSON.parse(storedStr) as { batchId: string; assessment: any }[];
           const filtered = parsed
-            .filter(x => x.batchId === 'batch-ai-2026')
-            .map(x => ({
+            .filter((x: any) => x.batchId === 'batch-ai-2026')
+            .map((x: any) => ({
               ...x.assessment,
               status: 'Active' as const
             }));
           
-          filtered.forEach(cq => {
-            if (!combined.some(t => t.id === cq.id)) {
+          filtered.forEach((cq: any) => {
+            if (!combined.some((t: any) => t.id === cq.id)) {
               combined.push(cq);
             }
           });
@@ -119,8 +119,8 @@ export default function MyAssessmentsPage() {
         const submissionsStr = localStorage.getItem('pinesphere_quiz_submissions');
         if (submissionsStr) {
           const parsed = JSON.parse(submissionsStr) as { asmId: string; attempt: any }[];
-          combined = combined.map(q => {
-            const match = parsed.find(x => x.asmId === q.id && x.attempt.studentId === 'stu-12');
+          combined = combined.map((q: any) => {
+            const match = parsed.find((x: any) => x.asmId === q.id && x.attempt.studentId === 'stu-12');
             if (match) {
               return {
                 ...q,
@@ -146,7 +146,7 @@ export default function MyAssessmentsPage() {
     let timerInterval: any;
     if (isExamActive && examTimer > 0) {
       timerInterval = setInterval(() => {
-        setExamTimer(prev => {
+        setExamTimer((prev: any) => {
           if (prev <= 1) {
             clearInterval(timerInterval);
             handleAutoSubmit("Time is up!");
@@ -210,11 +210,11 @@ export default function MyAssessmentsPage() {
 
     // Apply strict browser locks
     if (quiz.securitySettings.disableCopy) {
-      document.oncopy = (e) => e.preventDefault();
-      document.oncut = (e) => e.preventDefault();
+      document.oncopy = (e: any) => e.preventDefault();
+      document.oncut = (e: any) => e.preventDefault();
     }
     if (quiz.securitySettings.disableRightClick) {
-      document.oncontextmenu = (e) => e.preventDefault();
+      document.oncontextmenu = (e: any) => e.preventDefault();
     }
   };
 
@@ -231,7 +231,7 @@ export default function MyAssessmentsPage() {
     if (selectedQuiz) {
       let correct = 0;
       let wrong = 0;
-      selectedQuiz.questions.forEach((q, idx) => {
+      selectedQuiz.questions.forEach((q: any, idx: any) => {
         const studentAns = selectedAnswers[idx];
         if (studentAns === q.answer) {
           correct++;
@@ -258,7 +258,7 @@ export default function MyAssessmentsPage() {
           wrongCount: wrong,
           skippedCount: selectedQuiz.questions.length - (correct + wrong),
           negativeMarks: penalty,
-          detailed: selectedQuiz.questions.map((q, idx) => ({
+          detailed: selectedQuiz.questions.map((q: any, idx: any) => ({
             question: q.text,
             correct: selectedAnswers[idx] === q.answer,
             skipped: !selectedAnswers[idx],
@@ -275,7 +275,7 @@ export default function MyAssessmentsPage() {
         localStorage.setItem('pinesphere_quiz_submissions', JSON.stringify(stored));
       }
 
-      setQuizzes(prev => prev.map(q => q.id === selectedQuiz.id ? { ...q, status: 'Completed', score, passed: isPassed } : q));
+      setQuizzes((prev: any) => prev.map((q: any) => q.id === selectedQuiz.id ? { ...q, status: 'Completed', score, passed: isPassed } : q));
     }
 
     alert(`Quiz Submitted! ${reason}\nScore: ${score}%`);
@@ -333,7 +333,7 @@ export default function MyAssessmentsPage() {
               </h3>
 
               <div className="space-y-3">
-                {quizzes.filter(q => q.status === 'Active').map(q => (
+                {quizzes.filter((q: any) => q.status === 'Active').map((q: any) => (
                   <div key={q.id} className="p-4 border border-border bg-slate-50/20 rounded-xl space-y-3 hover:border-secondary transition-all">
                     <div className="flex justify-between items-center text-xs font-bold">
                       <span className="text-text-primary">{q.title}</span>
@@ -353,7 +353,7 @@ export default function MyAssessmentsPage() {
                     </button>
                   </div>
                 ))}
-                {quizzes.filter(q => q.status === 'Active').length === 0 && (
+                {quizzes.filter((q: any) => q.status === 'Active').length === 0 && (
                   <p className="text-xs text-text-secondary italic text-center py-8">No exams active currently.</p>
                 )}
               </div>
@@ -368,7 +368,7 @@ export default function MyAssessmentsPage() {
                 </h3>
 
                 <div className="space-y-3 max-h-[160px] overflow-y-auto custom-scrollbar">
-                  {quizzes.filter(q => q.status === 'Completed').map(q => (
+                  {quizzes.filter((q: any) => q.status === 'Completed').map((q: any) => (
                     <div key={q.id} className="p-3 border border-border bg-slate-50/30 rounded-xl flex items-center justify-between text-xs font-semibold">
                       <div>
                         <span className="block font-bold text-text-primary">{q.title}</span>
@@ -380,7 +380,7 @@ export default function MyAssessmentsPage() {
                       </div>
                     </div>
                   ))}
-                  {quizzes.filter(q => q.status === 'Completed').length === 0 && (
+                  {quizzes.filter((q: any) => q.status === 'Completed').length === 0 && (
                     <p className="text-xs text-text-secondary italic text-center py-6">No completed tests yet.</p>
                   )}
                 </div>
@@ -393,7 +393,7 @@ export default function MyAssessmentsPage() {
                 </h3>
 
                 <div className="space-y-2.5">
-                  {quizzes.filter(q => q.status === 'Upcoming').map(q => (
+                  {quizzes.filter((q: any) => q.status === 'Upcoming').map((q: any) => (
                     <div key={q.id} className="p-3 bg-slate-50 border border-border rounded-xl flex items-center justify-between text-xs">
                       <div>
                         <span className="block font-bold text-text-primary">{q.title}</span>
@@ -402,7 +402,7 @@ export default function MyAssessmentsPage() {
                       <span className="bg-slate-200 text-slate-655 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Locked</span>
                     </div>
                   ))}
-                  {quizzes.filter(q => q.status === 'Upcoming').length === 0 && (
+                  {quizzes.filter((q: any) => q.status === 'Upcoming').length === 0 && (
                     <p className="text-xs text-text-secondary italic text-center py-4">No upcoming tests.</p>
                   )}
                 </div>
@@ -471,7 +471,7 @@ export default function MyAssessmentsPage() {
                 <span className="block text-[9px] font-bold text-text-secondary uppercase tracking-widest border-b border-[#334155] pb-2">Questions map</span>
                 
                 <div className="grid grid-cols-4 gap-2">
-                  {selectedQuiz?.questions.map((_, idx) => (
+                  {selectedQuiz?.questions.map((_: any, idx: any) => (
                     <button
                       key={idx}
                       onClick={() => setCurrentQuestionIdx(idx)}
@@ -506,14 +506,14 @@ export default function MyAssessmentsPage() {
 
                 {/* Options list */}
                 <div className="grid grid-cols-1 gap-3.5 pt-2">
-                  {selectedQuiz?.questions[currentQuestionIdx]?.options.map((opt, oIdx) => {
+                  {selectedQuiz?.questions[currentQuestionIdx]?.options.map((opt: any, oIdx: any) => {
                     const optionChar = String.fromCharCode(65 + oIdx);
                     const isSelected = selectedAnswers[currentQuestionIdx] === optionChar;
 
                     return (
                       <button
                         key={oIdx}
-                        onClick={() => setSelectedAnswers(prev => ({ ...prev, [currentQuestionIdx]: optionChar }))}
+                        onClick={() => setSelectedAnswers((prev: any) => ({ ...prev, [currentQuestionIdx]: optionChar }))}
                         className={`p-4 rounded-xl border text-left text-xs font-semibold transition-all flex items-center gap-3.5 cursor-pointer ${
                           isSelected 
                             ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg' 
@@ -538,7 +538,7 @@ export default function MyAssessmentsPage() {
               <div className="flex justify-between items-center pt-6 border-t border-[#334155] mt-6">
                 <button
                   disabled={currentQuestionIdx === 0}
-                  onClick={() => setCurrentQuestionIdx(prev => prev - 1)}
+                  onClick={() => setCurrentQuestionIdx((prev: any) => prev - 1)}
                   className="px-5 py-2.5 bg-[#151c2c] border border-[#334155] hover:bg-[#1a2336] text-slate-300 font-bold text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Previous
@@ -546,7 +546,7 @@ export default function MyAssessmentsPage() {
 
                 {currentQuestionIdx < (selectedQuiz?.questions.length || 0) - 1 ? (
                   <button
-                    onClick={() => setCurrentQuestionIdx(prev => prev + 1)}
+                    onClick={() => setCurrentQuestionIdx((prev: any) => prev + 1)}
                     className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
                   >
                     Next Question

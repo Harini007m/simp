@@ -34,3 +34,4 @@ export interface BatchStudentResponse {
   assigned_at: string;
   assigned_by: string;
 }
+export interface Batch { id: string; name: string; [key: string]: any; }

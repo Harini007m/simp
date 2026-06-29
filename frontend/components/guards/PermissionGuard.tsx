@@ -39,7 +39,7 @@ export function PermissionGuard({ permission, fallback = 'hide', children }: Per
       return (
         <>
           <div
-            onClick={(e) => {
+            onClick={(e: any) => {
               e.preventDefault();
               e.stopPropagation();
               setShowModal(true);

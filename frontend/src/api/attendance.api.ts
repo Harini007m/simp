@@ -1,5 +1,6 @@
 import { apiClient } from './api.client';
 import { AttendanceSession, AttendanceRecord, AttendanceStatus } from '../types/api/attendance.types';
+import { AttendanceLog } from "../types/api/attendance.types";
 
 export const attendanceApi = {
   getSessions: async (): Promise<AttendanceSession[]> => {
@@ -24,5 +25,13 @@ export const attendanceApi = {
 
   markAttendance: async (sessionId: string, studentId: string, status: string): Promise<void> => {
     await apiClient.post(`/api/v1/attendance/sessions/${sessionId}/mark`, { studentId, status });
-  }
+  },
+    async getAttendanceLogs(): Promise<AttendanceLog[]> {
+        const response = await apiClient.get('/attendance');
+        return response.data;
+    },
+    async getAttendanceStatus(): Promise<AttendanceStatus> {
+        const response = await apiClient.get('/attendance');
+        return response.data;
+    }
 };

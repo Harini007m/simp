@@ -64,7 +64,7 @@ export default function ReportCenterPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {templates.map(tpl => (
+        {templates.map((tpl: any) => (
           <div key={tpl.id} className="bg-white p-5 rounded-xl border border-border shadow-sm flex flex-col">
             <div className="flex items-center gap-2 text-text-secondary mb-3">
               <FileText className="w-4 h-4" />
@@ -99,7 +99,7 @@ export default function ReportCenterPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {reports.map((report) => (
+              {reports.map((report: any) => (
                 <tr key={report.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3 font-medium text-text-primary">{report.name}</td>
                   <td className="px-4 py-3">

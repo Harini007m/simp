@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, Plus, Package, Link2, Users } from 'lucide-react';
 import { mentorService } from '@/src/services/mentor.service';
-import { MentorBatchMapping } from '@/src/data/mock-mentor-batch-mappings';
 
 export default function MentorBatchMappingPage() {
   const [mappings, setMappings] = useState<MentorBatchMapping[]>([]);
@@ -12,13 +11,13 @@ export default function MentorBatchMappingPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    mentorService.getBatchMappings().then(data => {
+    mentorService.getBatchMappings().then((data: any) => {
       setMappings(data);
       setLoading(false);
     });
   }, []);
 
-  const filtered = mappings.filter(m => {
+  const filtered = mappings.filter((m: any) => {
     const q = searchTerm.toLowerCase();
     const matchesSearch =
       m.mentorName.toLowerCase().includes(q) ||
@@ -29,7 +28,7 @@ export default function MentorBatchMappingPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const activeMappings = mappings.filter(m => m.status === 'Active').length;
+  const activeMappings = mappings.filter((m: any) => m.status === 'Active').length;
 
   if (loading) {
     return (
@@ -77,7 +76,7 @@ export default function MentorBatchMappingPage() {
             </div>
             <div>
               <p className="text-xs font-bold text-text-secondary uppercase">Unique Mentors</p>
-              <p className="text-2xl font-black text-text-primary">{new Set(mappings.map(m => m.mentorProfileId)).size}</p>
+              <p className="text-2xl font-black text-text-primary">{new Set(mappings.map((m: any) => m.mentorProfileId)).size}</p>
             </div>
           </div>
         </div>
@@ -89,14 +88,14 @@ export default function MentorBatchMappingPage() {
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e: any) => setSearchTerm(e.target.value)}
                 placeholder="Search batch, mentor, program..."
                 className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e: any) => setFilterStatus(e.target.value)}
               className="px-3 py-2 border border-border rounded-lg text-sm text-text-secondary focus:outline-none focus:border-primary"
             >
               <option value="all">All Statuses</option>
@@ -111,7 +110,7 @@ export default function MentorBatchMappingPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {filtered.map(m => {
+          {filtered.map((m: any) => {
             const utilPct = m.batchCapacity > 0 ? Math.round((m.studentCount / m.batchCapacity) * 100) : 0;
             return (
               <div key={m.id} className="bg-white border border-border rounded-xl p-5 shadow-sm hover:border-secondary transition-colors">

@@ -33,7 +33,7 @@ export default function InboxView() {
     fetchConversations();
   }, []);
 
-  const fetchConversations = async (selectFirst = true) => {
+  const fetchConversations = async (selectFirst: any = true) => {
     setLoading(true);
     try {
       const data = await CommunicationService.getConversations('u1');
@@ -55,7 +55,7 @@ export default function InboxView() {
 
     setIsSubmitting(true);
     try {
-      const userObj = mockUsers.find(u => u.id === selectedUserId);
+      const userObj = mockUsers.find((u: any) => u.id === selectedUserId);
       const participants = [
         { id: 'u1', name: 'Current User', role: 'Student' }
       ];
@@ -102,9 +102,9 @@ export default function InboxView() {
   };
 
   // Filter conversations based on participant names or discussion group names
-  const filteredConversations = conversations.filter(conv => {
+  const filteredConversations = conversations.filter((conv: any) => {
     const name = conv.type === 'One-to-One' 
-      ? conv.participants.find(p => p.id !== 'u1')?.name 
+      ? conv.participants.find((p: any) => p.id !== 'u1')?.name 
       : conv.name;
     return name?.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -134,7 +134,7 @@ export default function InboxView() {
               type="text" 
               placeholder="Search conversations..." 
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: any) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-50 border border-border rounded-xl pl-9 pr-4 py-2.5 text-xs focus:outline-none focus:border-primary font-medium text-text-primary transition-all placeholder-slate-400"
             />
           </div>
@@ -148,9 +148,9 @@ export default function InboxView() {
             </div>
           ) : (
             <div className="divide-y divide-border bg-white">
-              {filteredConversations.map(conv => {
+              {filteredConversations.map((conv: any) => {
                 const titleName = conv.type === 'One-to-One' 
-                  ? conv.participants.find(p => p.id !== 'u1')?.name 
+                  ? conv.participants.find((p: any) => p.id !== 'u1')?.name 
                   : conv.name;
                 const lastMsgText = conv.lastMessage?.content || 'Empty conversation thread';
                 
@@ -254,7 +254,7 @@ export default function InboxView() {
                 type="text"
                 required
                 value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
+                onChange={(e: any) => setGroupName(e.target.value)}
                 placeholder="e.g., FSD Placement Batch 1"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
               />
@@ -264,10 +264,10 @@ export default function InboxView() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Select Recipient</label>
               <select
                 value={selectedUserId}
-                onChange={(e) => setSelectedUserId(e.target.value)}
+                onChange={(e: any) => setSelectedUserId(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
-                {mockUsers.map(u => (
+                {mockUsers.map((u: any) => (
                   <option key={u.id} value={u.id}>{u.name}</option>
                 ))}
               </select>
@@ -279,7 +279,7 @@ export default function InboxView() {
             <textarea
               required
               value={initialMessage}
-              onChange={(e) => setInitialMessage(e.target.value)}
+              onChange={(e: any) => setInitialMessage(e.target.value)}
               placeholder="Type your initial welcoming message here..."
               className="w-full flex-1 bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary resize-none"
             />

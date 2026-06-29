@@ -10,11 +10,11 @@ import {
   PlusSquare, ArrowRight, Layers, Sliders, ShieldAlert, ArrowLeftRight
 } from 'lucide-react';
 import { allocationService } from '@/src/services/allocation.service';
-import { Allocation, AllocationTimelineEvent } from '@/src/data/mock-allocations';
+import { Allocation, AllocationTimelineEvent } from '../../../src/types/api/allocation.types';
 import { studentService } from '@/src/services/student.service';
-import { Student } from '@/src/data/mock-students';
+import { Student } from '../../../src/types/api/student.types';
 import { batchService } from '@/src/services/batch.service';
-import { Batch } from '@/src/data/mock-batches';
+import { Batch } from '../../../src/types/api/batch.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 
@@ -130,14 +130,14 @@ export default function AllocationManagementPage() {
   }, []);
 
   // Filters mapping lists
-  const programsList = useMemo(() => Array.from(new Set(allocations.map(a => a.programName))), [allocations]);
-  const batchesList = useMemo(() => Array.from(new Set(allocations.map(a => a.batchName).filter(Boolean))), [allocations]);
-  const mentorsList = useMemo(() => Array.from(new Set(allocations.map(a => a.mentorName).filter(Boolean))), [allocations]);
-  const collegesList = useMemo(() => Array.from(new Set(allocations.map(a => a.collegeName))), [allocations]);
+  const programsList = useMemo(() => Array.from(new Set(allocations.map((a: any) => a.programName))), [allocations]);
+  const batchesList = useMemo(() => Array.from(new Set(allocations.map((a: any) => a.batchName).filter(Boolean))), [allocations]);
+  const mentorsList = useMemo(() => Array.from(new Set(allocations.map((a: any) => a.mentorName).filter(Boolean))), [allocations]);
+  const collegesList = useMemo(() => Array.from(new Set(allocations.map((a: any) => a.collegeName))), [allocations]);
 
   // Main filtered lists based on global searches and filters
   const filteredAllocations = useMemo(() => {
-    return allocations.filter(a => {
+    return allocations.filter((a: any) => {
       const q = searchTerm.toLowerCase();
       const matchesSearch = 
         a.studentName.toLowerCase().includes(q) ||
@@ -159,8 +159,8 @@ export default function AllocationManagementPage() {
 
   // Unallocated students calculation
   const unallocatedStudents = useMemo(() => {
-    return students.filter(s => {
-      const isAllocated = allocations.some(a => a.studentId === s.id && a.status === 'Allocated');
+    return students.filter((s: any) => {
+      const isAllocated = allocations.some((a: any) => a.studentId === s.id && a.status === 'Allocated');
       return !isAllocated;
     });
   }, [students, allocations]);
@@ -169,7 +169,7 @@ export default function AllocationManagementPage() {
   const detectedConflicts = useMemo(() => {
     const list: { id: string; studentName: string; type: string; severity: 'High' | 'Medium'; desc: string }[] = [];
     
-    allocations.forEach(a => {
+    allocations.forEach((a: any) => {
       if (a.status === 'Allocated') {
         // Conflict 1: Student without batch
         if (!a.batchId || a.batchId === '') {
@@ -195,7 +195,7 @@ export default function AllocationManagementPage() {
     });
 
     // Conflict 3: Batch without mentor
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       if (b.status === 'Active' && (!b.mentor.name || b.mentor.name === '')) {
         list.push({
           id: `conf-bm-${b.id}`,
@@ -220,7 +220,7 @@ export default function AllocationManagementPage() {
 
     // Conflict 5: Mentor overloaded (students > Max)
     const mentorCounts: Record<string, number> = {};
-    allocations.forEach(a => {
+    allocations.forEach((a: any) => {
       if (a.status === 'Allocated' && a.mentorName) {
         mentorCounts[a.mentorName] = (mentorCounts[a.mentorName] || 0) + 1;
       }
@@ -243,18 +243,18 @@ export default function AllocationManagementPage() {
   // Executive KPI summary calculations
   const dashboardStats = useMemo(() => {
     const total = allocations.length;
-    const active = allocations.filter(a => a.status === 'Allocated').length;
+    const active = allocations.filter((a: any) => a.status === 'Allocated').length;
     const unallocated = unallocatedStudents.length;
     
     let totalCap = 0;
     let usedCap = 0;
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       totalCap += b.capacity;
       usedCap += b.students.length;
     });
     const availBatchCap = totalCap - usedCap;
 
-    const uniqueMentors = new Set(batches.map(b => b.mentor.name).filter(Boolean)).size;
+    const uniqueMentors = new Set(batches.map((b: any) => b.mentor.name).filter(Boolean)).size;
     const conflictsCount = detectedConflicts.length;
     const utilizationRate = totalCap > 0 ? Math.round((usedCap / totalCap) * 100) : 0;
 
@@ -264,7 +264,7 @@ export default function AllocationManagementPage() {
   // Visual graph calculations
   const studentStatusCounts = useMemo(() => {
     const counts = { Allocated: 0, Pending: 0, Waitlisted: 0, Reassigned: 0, Dropped: 0 };
-    allocations.forEach(a => {
+    allocations.forEach((a: any) => {
       if (counts[a.status] !== undefined) counts[a.status]++;
     });
     return counts;
@@ -274,12 +274,12 @@ export default function AllocationManagementPage() {
     // Map mentors load percentage
     const stats = { Available: 0, 'Partially Utilized': 0, 'Fully Utilized': 0, Overloaded: 0 };
     const mentorMap: Record<string, number> = {};
-    allocations.forEach(a => {
+    allocations.forEach((a: any) => {
       if (a.status === 'Allocated' && a.mentorName) {
         mentorMap[a.mentorName] = (mentorMap[a.mentorName] || 0) + 1;
       }
     });
-    Object.values(mentorMap).forEach(count => {
+    Object.values(mentorMap).forEach((count: any) => {
       if (count === 0) stats['Available']++;
       else if (count <= 15) stats['Partially Utilized']++;
       else if (count <= 35) stats['Fully Utilized']++;
@@ -291,7 +291,7 @@ export default function AllocationManagementPage() {
   const programAllocationStats = useMemo(() => {
     const stats = { 'With Students': 0, 'Without Students': 0, 'Without Mentors': 0, 'Fully Allocated': 0 };
     // MOCK programs metrics
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       if (b.students.length > 0) stats['With Students']++;
       else stats['Without Students']++;
       if (!b.mentor.name) stats['Without Mentors']++;
@@ -303,7 +303,7 @@ export default function AllocationManagementPage() {
   const capacityAlloc = useMemo(() => {
     let totalCap = 0;
     let usedCap = 0;
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       totalCap += b.capacity;
       usedCap += b.students.length;
     });
@@ -317,7 +317,7 @@ export default function AllocationManagementPage() {
   const mentorWorkloads = useMemo(() => {
     const mentorMap: Record<string, { name: string; students: number; batchesCount: number }> = {};
     
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       if (b.mentor.name) {
         if (!mentorMap[b.mentor.name]) {
           mentorMap[b.mentor.name] = { name: b.mentor.name, students: 0, batchesCount: 0 };
@@ -326,7 +326,7 @@ export default function AllocationManagementPage() {
       }
     });
 
-    allocations.forEach(a => {
+    allocations.forEach((a: any) => {
       if (a.status === 'Allocated' && a.mentorName) {
         if (!mentorMap[a.mentorName]) {
           mentorMap[a.mentorName] = { name: a.mentorName, students: 0, batchesCount: 0 };
@@ -342,8 +342,8 @@ export default function AllocationManagementPage() {
   // Activity Feed
   const activityFeed = useMemo(() => {
     const feed: { studentName: string; date: string; title: string; desc: string; type: string }[] = [];
-    allocations.forEach(a => {
-      a.timeline.forEach(evt => {
+    allocations.forEach((a: any) => {
+      a.timeline.forEach((evt: any) => {
         feed.push({
           studentName: a.studentName,
           date: evt.date,
@@ -353,17 +353,17 @@ export default function AllocationManagementPage() {
         });
       });
     });
-    return feed.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 7);
+    return feed.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 7);
   }, [allocations]);
 
   // Drag and Drop simulation assignment handler
   const handleDragDropAllocate = async (studentId: string, batchId: string) => {
-    const student = students.find(s => s.id === studentId);
-    const batch = batches.find(b => b.id === batchId);
+    const student = students.find((s: any) => s.id === studentId);
+    const batch = batches.find((b: any) => b.id === batchId);
     if (!student || !batch) return;
 
     // Check if allocation already exists
-    const existing = allocations.find(a => a.studentId === studentId);
+    const existing = allocations.find((a: any) => a.studentId === studentId);
     if (existing) {
       const updated = await allocationService.updateAllocation(existing.id, {
         batchId: batch.id,
@@ -410,8 +410,8 @@ export default function AllocationManagementPage() {
   // Submit handlers
   const handleCreateAllocation = async (e: React.FormEvent) => {
     e.preventDefault();
-    const student = students.find(s => s.id === allocForm.studentId);
-    const batch = batches.find(b => b.id === allocForm.batchId);
+    const student = students.find((s: any) => s.id === allocForm.studentId);
+    const batch = batches.find((b: any) => b.id === allocForm.batchId);
     if (!student) return;
 
     const created = await allocationService.createAllocation({
@@ -443,7 +443,7 @@ export default function AllocationManagementPage() {
     if (!activeActionModal?.allocId) return;
 
     const targetId = activeActionModal.allocId;
-    const original = allocations.find(a => a.id === targetId);
+    const original = allocations.find((a: any) => a.id === targetId);
     if (!original) return;
 
     const updated = await allocationService.updateAllocation(targetId, {
@@ -451,7 +451,7 @@ export default function AllocationManagementPage() {
     });
 
     if (updated) {
-      setAllocations(allocations.map(a => a.id === targetId ? updated : a));
+      setAllocations(allocations.map((a: any) => a.id === targetId ? updated : a));
       if (selectedAllocation?.id === targetId) {
         setSelectedAllocation(updated);
       }
@@ -471,7 +471,7 @@ export default function AllocationManagementPage() {
       const programName = bulkVal === 'prog-1' ? 'Summer Software Engineering Internship' : bulkVal === 'prog-2' ? 'Data Science Boot Camp' : 'Research Program (Quantum Theory)';
       updates = { programId: bulkVal, programName };
     } else if (activeActionModal?.type === 'assignBatch') {
-      const batch = batches.find(b => b.id === bulkVal);
+      const batch = batches.find((b: any) => b.id === bulkVal);
       updates = { batchId: bulkVal, batchName: batch?.name || 'TBA' };
     } else if (activeActionModal?.type === 'assignMentor') {
       const mentorName = bulkVal === 'emp-2' ? 'Bob Johnson' : bulkVal === 'emp-3' ? 'Diana Prince' : 'Charlie Davis';
@@ -480,7 +480,7 @@ export default function AllocationManagementPage() {
 
     const updated = await allocationService.updateAllocation(targetId, updates);
     if (updated) {
-      setAllocations(allocations.map(a => a.id === targetId ? updated : a));
+      setAllocations(allocations.map((a: any) => a.id === targetId ? updated : a));
       setSelectedAllocation(updated);
       showToast('Updated relationship assignment mapping');
       setActiveActionModal(null);
@@ -491,7 +491,7 @@ export default function AllocationManagementPage() {
   // Multi-row Selection
   const handleToggleSelectRow = (id: string) => {
     if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter(item => item !== id));
+      setSelectedIds(selectedIds.filter((item: any) => item !== id));
     } else {
       setSelectedIds([...selectedIds, id]);
     }
@@ -501,7 +501,7 @@ export default function AllocationManagementPage() {
     if (selectedIds.length === filteredAllocations.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredAllocations.map(a => a.id));
+      setSelectedIds(filteredAllocations.map((a: any) => a.id));
     }
   };
 
@@ -521,7 +521,7 @@ export default function AllocationManagementPage() {
         fields.programId = bulkVal;
         fields.programName = bulkVal === 'prog-1' ? 'Summer Software Engineering Internship' : 'Data Science Boot Camp';
       } else if (bulkVal.startsWith('batch-')) {
-        const b = batches.find(item => item.id === bulkVal);
+        const b = batches.find((item: any) => item.id === bulkVal);
         fields.batchId = bulkVal;
         fields.batchName = b?.name || 'TBA';
       } else if (bulkVal.startsWith('emp-')) {
@@ -587,7 +587,7 @@ export default function AllocationManagementPage() {
             { id: 'conflicts', label: 'Conflict Resolution', icon: ShieldAlert, badge: dashboardStats.conflictsCount },
             { id: 'rules', label: 'Relational Rules Engine', icon: Sliders },
             { id: 'timeline', label: 'Operational History', icon: Activity }
-          ].map(tab => (
+          ].map((tab: any) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
@@ -690,7 +690,7 @@ export default function AllocationManagementPage() {
                   { label: 'Assigned Mentors', count: dashboardStats.uniqueMentors, icon: Shield, color: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
                   { label: 'Active Conflicts', count: dashboardStats.conflictsCount, icon: ShieldAlert, color: 'text-rose-600 bg-rose-50 border-rose-100', clickable: true, tabKey: 'conflicts' },
                   { label: 'Overall Utilization Rate', count: `${dashboardStats.utilizationRate}%`, icon: Layers, color: 'text-pink-600 bg-pink-50 border-pink-100' }
-                ].map((kpi, idx) => (
+                ].map((kpi: any, idx: any) => (
                   <div 
                     key={idx}
                     onClick={() => kpi.clickable && setActiveTab(kpi.tabKey as any)}
@@ -717,7 +717,7 @@ export default function AllocationManagementPage() {
                     Student Allocation status
                   </h3>
                   <div className="space-y-2">
-                    {Object.entries(studentStatusCounts).map(([status, count], index) => {
+                    {Object.entries(studentStatusCounts).map(([status, count], index: any) => {
                       const pct = Math.round((count / allocations.length) * 100) || 0;
                       return (
                         <div key={index} className="space-y-1">
@@ -741,8 +741,8 @@ export default function AllocationManagementPage() {
                     Mentor Utilization splits
                   </h3>
                   <div className="space-y-2">
-                    {Object.entries(mentorUtilStats).map(([status, count], index) => {
-                      const total = Object.values(mentorUtilStats).reduce((a, b) => a + b, 0);
+                    {Object.entries(mentorUtilStats).map(([status, count], index: any) => {
+                      const total = Object.values(mentorUtilStats).reduce((a: any, b: any) => a + b, 0);
                       const pct = Math.round((count / total) * 100) || 0;
                       return (
                         <div key={index} className="space-y-1">
@@ -766,8 +766,8 @@ export default function AllocationManagementPage() {
                     Program Allocation indices
                   </h3>
                   <div className="space-y-2">
-                    {Object.entries(programAllocationStats).map(([status, count], index) => {
-                      const total = Object.values(programAllocationStats).reduce((a, b) => a + b, 0);
+                    {Object.entries(programAllocationStats).map(([status, count], index: any) => {
+                      const total = Object.values(programAllocationStats).reduce((a: any, b: any) => a + b, 0);
                       const pct = Math.round((count / total) * 100) || 0;
                       return (
                         <div key={index} className="space-y-1">
@@ -804,7 +804,7 @@ export default function AllocationManagementPage() {
                       <span>Unallocated Candidates List</span>
                       <span className="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">{unallocatedStudents.length} Students</span>
                     </div>
-                    {unallocatedStudents.map(s => (
+                    {unallocatedStudents.map((s: any) => (
                       <div 
                         key={s.id}
                         className="bg-white border border-border rounded-lg p-2.5 shadow-xs flex items-center justify-between text-xs font-semibold text-text-primary hover:border-secondary cursor-grab"
@@ -828,7 +828,7 @@ export default function AllocationManagementPage() {
                   {/* Active Cohorts list */}
                   <div className="border border-border bg-slate-50 p-4 rounded-xl space-y-3 max-h-[300px] overflow-y-auto">
                     <div className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Target Active Cohorts</div>
-                    {batches.map(b => {
+                    {batches.map((b: any) => {
                       const utilPct = Math.round((b.students.length / b.capacity) * 100) || 0;
                       return (
                         <div 
@@ -869,7 +869,7 @@ export default function AllocationManagementPage() {
                       type="text" 
                       placeholder="Search students allocations..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e: any) => setSearchTerm(e.target.value)}
                       className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
@@ -884,39 +884,39 @@ export default function AllocationManagementPage() {
                 <div className="flex flex-wrap gap-2">
                   <select
                     value={filterProgram}
-                    onChange={(e) => setFilterProgram(e.target.value)}
+                    onChange={(e: any) => setFilterProgram(e.target.value)}
                     className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Programs</option>
-                    {programsList.map(p => <option key={p} value={p}>{p}</option>)}
+                    {programsList.map((p: any) => <option key={p} value={p}>{p}</option>)}
                   </select>
                   <select
                     value={filterBatch}
-                    onChange={(e) => setFilterBatch(e.target.value)}
+                    onChange={(e: any) => setFilterBatch(e.target.value)}
                     className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Batches</option>
-                    {batchesList.map(b => <option key={b} value={b}>{b}</option>)}
+                    {batchesList.map((b: any) => <option key={b} value={b}>{b}</option>)}
                   </select>
                   <select
                     value={filterMentor}
-                    onChange={(e) => setFilterMentor(e.target.value)}
+                    onChange={(e: any) => setFilterMentor(e.target.value)}
                     className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Mentors</option>
-                    {mentorsList.map(m => <option key={m} value={m}>{m}</option>)}
+                    {mentorsList.map((m: any) => <option key={m} value={m}>{m}</option>)}
                   </select>
                   <select
                     value={filterCollege}
-                    onChange={(e) => setFilterCollege(e.target.value)}
+                    onChange={(e: any) => setFilterCollege(e.target.value)}
                     className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Colleges</option>
-                    {collegesList.map(c => <option key={c} value={c}>{c}</option>)}
+                    {collegesList.map((c: any) => <option key={c} value={c}>{c}</option>)}
                   </select>
                   <select
                     value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    onChange={(e: any) => setFilterStatus(e.target.value)}
                     className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Statuses</option>
@@ -944,7 +944,7 @@ export default function AllocationManagementPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border font-medium">
-                    {filteredAllocations.map(a => (
+                    {filteredAllocations.map((a: any) => (
                       <tr 
                         key={a.id}
                         className={`hover:bg-slate-50/50 cursor-pointer ${selectedAllocation?.id === a.id ? 'bg-blue-50/30' : ''}`}
@@ -972,7 +972,7 @@ export default function AllocationManagementPage() {
                         <td className="px-4 py-3 text-right">
                           <div className="flex gap-1 justify-end">
                             <button
-                              onClick={(e) => {
+                              onClick={(e: any) => {
                                 e.stopPropagation();
                                 setAllocForm({ ...allocForm, status: a.status });
                                 setActiveActionModal({ type: 'edit', allocId: a.id });
@@ -995,7 +995,7 @@ export default function AllocationManagementPage() {
           {/* TAB 3: BATCH ALLOCATION */}
           {activeTab === 'batches' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {batches.map(b => {
+              {batches.map((b: any) => {
                 const utilPct = Math.round((b.students.length / b.capacity) * 100) || 0;
                 return (
                   <div key={b.id} className="bg-white border border-border rounded-xl p-5 shadow-xs flex flex-col justify-between gap-4">
@@ -1029,7 +1029,7 @@ export default function AllocationManagementPage() {
                     <div className="flex gap-2 pt-2 border-t border-border justify-end">
                       <button 
                         onClick={() => {
-                          setSelectedAllocation(allocations.find(a => a.batchId === b.id) || null);
+                          setSelectedAllocation(allocations.find((a: any) => a.batchId === b.id) || null);
                           setActiveTab('students');
                           showToast(`Opening roster for ${b.name}`);
                         }}
@@ -1051,7 +1051,7 @@ export default function AllocationManagementPage() {
               <h4 className="text-xs font-black uppercase text-text-secondary">Mentor Workloads & Capacity Monitoring</h4>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {mentorWorkloads.map((mentor, index) => {
+                {mentorWorkloads.map((mentor: any, index: any) => {
                   const targetLimit = 45;
                   const utilPct = Math.round((mentor.students / targetLimit) * 100);
                   const isOverload = mentor.students > targetLimit;
@@ -1112,8 +1112,8 @@ export default function AllocationManagementPage() {
               <h4 className="text-xs font-black uppercase text-text-secondary">Programs Relational Mapping</h4>
               
               <div className="space-y-3">
-                {batches.map(b => {
-                  const cohortStudents = allocations.filter(a => a.batchId === b.id && a.status === 'Allocated');
+                {batches.map((b: any) => {
+                  const cohortStudents = allocations.filter((a: any) => a.batchId === b.id && a.status === 'Allocated');
                   return (
                     <div key={b.id} className="bg-slate-50 border border-border rounded-lg p-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs font-semibold text-text-primary">
                       <div>
@@ -1148,9 +1148,9 @@ export default function AllocationManagementPage() {
               <h4 className="text-xs font-black uppercase text-text-secondary">Academic Partners Allocation index</h4>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {collegesList.map((college, idx) => {
-                  const collegeAllocs = allocations.filter(a => a.collegeName === college && a.status === 'Allocated');
-                  const uniqueProgs = new Set(collegeAllocs.map(a => a.programId)).size;
+                {collegesList.map((college: any, idx: any) => {
+                  const collegeAllocs = allocations.filter((a: any) => a.collegeName === college && a.status === 'Allocated');
+                  const uniqueProgs = new Set(collegeAllocs.map((a: any) => a.programId)).size;
                   
                   return (
                     <div key={idx} className="bg-slate-50 border border-border rounded-lg p-4 space-y-3">
@@ -1170,7 +1170,7 @@ export default function AllocationManagementPage() {
                         </div>
                         <div className="bg-white border border-border p-2 rounded">
                           <span className="text-text-secondary text-[8px] uppercase block">Active Batches</span>
-                          <span className="text-text-primary font-extrabold text-sm">{collegeAllocs.map(a => a.batchId).filter(Boolean).length}</span>
+                          <span className="text-text-primary font-extrabold text-sm">{collegeAllocs.map((a: any) => a.batchId).filter(Boolean).length}</span>
                         </div>
                       </div>
                     </div>
@@ -1196,11 +1196,11 @@ export default function AllocationManagementPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Active Allocations:</span>
-                    <span className="text-emerald-600 font-extrabold">{allocations.filter(a => a.status === 'Allocated').length}</span>
+                    <span className="text-emerald-600 font-extrabold">{allocations.filter((a: any) => a.status === 'Allocated').length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Waitlisted:</span>
-                    <span className="text-amber-600 font-extrabold">{allocations.filter(a => a.status === 'Waitlisted').length}</span>
+                    <span className="text-amber-600 font-extrabold">{allocations.filter((a: any) => a.status === 'Waitlisted').length}</span>
                   </div>
                 </div>
 
@@ -1209,7 +1209,7 @@ export default function AllocationManagementPage() {
                   <h5 className="font-black text-text-secondary uppercase text-[9.5px]">Mentor Capacity limits</h5>
                   <div className="flex justify-between">
                     <span>Active Coaches:</span>
-                    <span className="text-text-primary font-extrabold">{batches.map(b => b.mentor.name).filter(Boolean).length}</span>
+                    <span className="text-text-primary font-extrabold">{batches.map((b: any) => b.mentor.name).filter(Boolean).length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Load balanced Max:</span>
@@ -1243,7 +1243,7 @@ export default function AllocationManagementPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Active Enrollments:</span>
-                    <span className="text-text-primary font-extrabold">{allocations.filter(a => a.status === 'Allocated').length}</span>
+                    <span className="text-text-primary font-extrabold">{allocations.filter((a: any) => a.status === 'Allocated').length}</span>
                   </div>
                 </div>
 
@@ -1259,10 +1259,10 @@ export default function AllocationManagementPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Unallocated Students', count: unallocatedStudents.length, severity: 'High', color: 'text-amber-700 bg-amber-50 border-amber-200' },
-                  { label: 'Missing Cohort Batch', count: allocations.filter(a => a.status === 'Allocated' && (!a.batchId || a.batchId === '')).length, severity: 'High', color: 'text-rose-700 bg-rose-50 border-rose-200' },
-                  { label: 'Missing Primary Coach', count: allocations.filter(a => a.status === 'Allocated' && (!a.mentorId || a.mentorId === '')).length, severity: 'High', color: 'text-rose-700 bg-rose-50 border-rose-200' },
-                  { label: 'Coach Overloads (45+)', count: detectedConflicts.filter(c => c.type === 'Mentor Over Capacity').length, severity: 'Medium', color: 'text-orange-700 bg-orange-50 border-orange-200' }
-                ].map((card, idx) => (
+                  { label: 'Missing Cohort Batch', count: allocations.filter((a: any) => a.status === 'Allocated' && (!a.batchId || a.batchId === '')).length, severity: 'High', color: 'text-rose-700 bg-rose-50 border-rose-200' },
+                  { label: 'Missing Primary Coach', count: allocations.filter((a: any) => a.status === 'Allocated' && (!a.mentorId || a.mentorId === '')).length, severity: 'High', color: 'text-rose-700 bg-rose-50 border-rose-200' },
+                  { label: 'Coach Overloads (45+)', count: detectedConflicts.filter((c: any) => c.type === 'Mentor Over Capacity').length, severity: 'Medium', color: 'text-orange-700 bg-orange-50 border-orange-200' }
+                ].map((card: any, idx: any) => (
                   <div key={idx} className={`p-4 rounded-xl border ${card.color} font-semibold text-xs`}>
                     <div className="text-2xl font-black">{card.count}</div>
                     <div className="text-[10px] font-bold uppercase tracking-wider mt-0.5">{card.label}</div>
@@ -1279,7 +1279,7 @@ export default function AllocationManagementPage() {
                 
                 {detectedConflicts.length > 0 ? (
                   <div className="space-y-3">
-                    {detectedConflicts.map(c => (
+                    {detectedConflicts.map((c: any) => (
                       <div key={c.id} className="bg-slate-50 border border-border p-3 rounded-lg flex items-center justify-between text-xs font-semibold text-text-primary gap-4">
                         <div>
                           <div className="flex items-center gap-2">
@@ -1323,7 +1323,7 @@ export default function AllocationManagementPage() {
                   <input 
                     type="number"
                     value={rules.maxStudentsPerMentor}
-                    onChange={e => setRules({ ...rules, maxStudentsPerMentor: Number(e.target.value) })}
+                    onChange={(e: any) => setRules({ ...rules, maxStudentsPerMentor: Number(e.target.value) })}
                     className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-bold text-text-primary"
                   />
                 </div>
@@ -1332,7 +1332,7 @@ export default function AllocationManagementPage() {
                   <input 
                     type="number"
                     value={rules.maxBatchCapacity}
-                    onChange={e => setRules({ ...rules, maxBatchCapacity: Number(e.target.value) })}
+                    onChange={(e: any) => setRules({ ...rules, maxBatchCapacity: Number(e.target.value) })}
                     className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-bold text-text-primary"
                   />
                 </div>
@@ -1341,7 +1341,7 @@ export default function AllocationManagementPage() {
                   <input 
                     type="text"
                     value={rules.eligibilityRule}
-                    onChange={e => setRules({ ...rules, eligibilityRule: e.target.value })}
+                    onChange={(e: any) => setRules({ ...rules, eligibilityRule: e.target.value })}
                     className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-bold text-text-primary"
                   />
                 </div>
@@ -1350,7 +1350,7 @@ export default function AllocationManagementPage() {
                   <input 
                     type="text"
                     value={rules.collegeRestrictions}
-                    onChange={e => setRules({ ...rules, collegeRestrictions: e.target.value })}
+                    onChange={(e: any) => setRules({ ...rules, collegeRestrictions: e.target.value })}
                     className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-bold text-text-primary"
                   />
                 </div>
@@ -1382,7 +1382,7 @@ export default function AllocationManagementPage() {
               <h4 className="text-xs font-black uppercase text-text-secondary">Change logs Timeline</h4>
               
               <div className="relative border-l border-border ml-2 space-y-4.5 pl-4 pt-1 max-h-[450px] overflow-y-auto">
-                {allocations.flatMap(a => a.timeline.map(t => ({ studentName: a.studentName, ...t }))).map((evt, idx) => (
+                {allocations.flatMap((a: any) => a.timeline.map((t: any) => ({ studentName: a.studentName, ...t }))).map((evt: any, idx: any) => (
                   <div key={idx} className="relative text-xs">
                     <div className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-slate-400 border border-white" />
                     <div className="text-[9.5px] font-bold text-text-secondary">{evt.date}</div>
@@ -1500,7 +1500,7 @@ export default function AllocationManagementPage() {
             <div className="space-y-3.5 border-t border-border pt-4">
               <div className="text-[10px] font-black uppercase text-text-secondary">Allocation Logs</div>
               <div className="relative border-l border-border ml-2 space-y-3 pl-3.5">
-                {selectedAllocation.timeline.map((evt, idx) => (
+                {selectedAllocation.timeline.map((evt: any, idx: any) => (
                   <div key={idx} className="relative text-[10.5px]">
                     <div className="absolute -left-[18.5px] top-1 h-1.5 w-1.5 rounded-full bg-slate-400 border border-white" />
                     <div className="text-[8.5px] font-bold text-text-secondary">{evt.date}</div>
@@ -1553,11 +1553,11 @@ export default function AllocationManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Select Target Student *</label>
                     <select
                       value={allocForm.studentId}
-                      onChange={e => setAllocForm({ ...allocForm, studentId: e.target.value })}
+                      onChange={(e: any) => setAllocForm({ ...allocForm, studentId: e.target.value })}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="">-- Choose Candidate --</option>
-                      {students.map(s => <option key={s.id} value={s.id}>{s.personalInfo.name} ({s.internId} | CGPA: {s.academicInfo.cgpa})</option>)}
+                      {students.map((s: any) => <option key={s.id} value={s.id}>{s.personalInfo.name} ({s.internId} | CGPA: {s.academicInfo.cgpa})</option>)}
                     </select>
                   </div>
 
@@ -1565,11 +1565,11 @@ export default function AllocationManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Select Target Batch Cohort *</label>
                     <select
                       value={allocForm.batchId}
-                      onChange={e => setAllocForm({ ...allocForm, batchId: e.target.value })}
+                      onChange={(e: any) => setAllocForm({ ...allocForm, batchId: e.target.value })}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="">-- Choose Batch --</option>
-                      {batches.map(b => <option key={b.id} value={b.id}>{b.name} (Code: {b.code} | Coach: {b.mentor.name || 'Unassigned'})</option>)}
+                      {batches.map((b: any) => <option key={b.id} value={b.id}>{b.name} (Code: {b.code} | Coach: {b.mentor.name || 'Unassigned'})</option>)}
                     </select>
                   </div>
                 </div>
@@ -1582,7 +1582,7 @@ export default function AllocationManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Shift Relational Status *</label>
                     <select
                       value={allocForm.status}
-                      onChange={e => setAllocForm({ ...allocForm, status: e.target.value as any })}
+                      onChange={(e: any) => setAllocForm({ ...allocForm, status: e.target.value as any })}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="Allocated">Allocated</option>
@@ -1602,7 +1602,7 @@ export default function AllocationManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Map Internship Program *</label>
                     <select
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="prog-1">Summer Software Engineering Internship</option>
@@ -1620,11 +1620,11 @@ export default function AllocationManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Map Cohort Batch *</label>
                     <select
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="">-- Choose Cohort --</option>
-                      {batches.map(b => <option key={b.id} value={b.id}>{b.name} ({b.code})</option>)}
+                      {batches.map((b: any) => <option key={b.id} value={b.id}>{b.name} ({b.code})</option>)}
                     </select>
                   </div>
                 </div>
@@ -1637,7 +1637,7 @@ export default function AllocationManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Map primary coaching facilitator *</label>
                     <select
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="emp-2">Bob Johnson (Technical Engineering)</option>

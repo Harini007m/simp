@@ -38,13 +38,13 @@ export default function CoordinatorManagementPage() {
     setIsDrawerOpen(true);
   };
 
-  const filteredCoordinators = coordinators.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredCoordinators = coordinators.filter((c: any) => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // KPIs
   const totalCoordinators = coordinators.length;
-  const totalAssignedStudents = coordinators.reduce((acc, c) => acc + c.assignedStudentsCount, 0);
-  const totalActiveBatches = coordinators.reduce((acc, c) => acc + c.activeBatchesCount, 0);
-  const totalPlacements = coordinators.reduce((acc, c) => acc + c.placementsCount, 0);
+  const totalAssignedStudents = coordinators.reduce((acc: any, c: any) => acc + c.assignedStudentsCount, 0);
+  const totalActiveBatches = coordinators.reduce((acc: any, c: any) => acc + c.activeBatchesCount, 0);
+  const totalPlacements = coordinators.reduce((acc: any, c: any) => acc + c.placementsCount, 0);
 
   if (loading) {
     return (
@@ -87,7 +87,7 @@ export default function CoordinatorManagementPage() {
                 { label: 'Assigned Students', val: totalAssignedStudents, icon: Users, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
                 { label: 'Active Batches', val: totalActiveBatches, icon: BookOpen, color: 'text-purple-600 bg-purple-50 border-purple-100' },
                 { label: 'Placements Secured', val: totalPlacements, icon: Briefcase, color: 'text-amber-600 bg-amber-50 border-amber-100' }
-              ].map((kpi, idx) => (
+              ].map((kpi: any, idx: any) => (
                 <div key={idx} className="bg-white border border-border rounded-xl p-5 shadow-sm flex items-center justify-between group hover:border-secondary transition-all duration-200">
                   <div>
                     <div className="text-2.5xl font-black text-text-primary tracking-tight">{kpi.val}</div>
@@ -103,7 +103,7 @@ export default function CoordinatorManagementPage() {
             <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-4">
               <h3 className="text-lg font-bold text-text-primary">Top Performing Colleges</h3>
               <div className="space-y-3">
-                {coordinators.map((c) => (
+                {coordinators.map((c: any) => (
                   <div key={c.id} className="p-4 bg-slate-50 border border-border rounded-xl flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleCoordinatorClick(c)}>
                     <div className="flex items-center gap-4">
                       <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
@@ -140,7 +140,7 @@ export default function CoordinatorManagementPage() {
                   <input 
                     type="text"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: any) => setSearchTerm(e.target.value)}
                     placeholder="Search by name..."
                     className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
@@ -167,7 +167,7 @@ export default function CoordinatorManagementPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredCoordinators.map(c => (
+                  {filteredCoordinators.map((c: any) => (
                     <tr key={c.id} className="hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => handleCoordinatorClick(c)}>
                       <td className="px-6 py-4 font-medium text-text-primary flex items-center gap-3">
                         <Building2 className="h-4 w-4 text-blue-500" />
@@ -226,7 +226,7 @@ export default function CoordinatorManagementPage() {
             </div>
 
             <div className="flex overflow-x-auto border-b border-border bg-white px-6 shrink-0">
-              {['overview', 'students', 'reports', 'communication'].map(t => (
+              {['overview', 'students', 'reports', 'communication'].map((t: any) => (
                 <button
                   key={t}
                   onClick={() => setActiveTab(t as any)}
@@ -267,7 +267,7 @@ export default function CoordinatorManagementPage() {
                       <Plus className="h-4 w-4" /> Upload Report
                     </button>
                   </div>
-                  {reports.map(r => (
+                  {reports.map((r: any) => (
                     <div key={r.id} className="bg-white p-4 rounded-xl border border-border shadow-sm flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-50 text-blue-600 rounded-lg shrink-0">

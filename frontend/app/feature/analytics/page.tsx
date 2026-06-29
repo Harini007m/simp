@@ -75,7 +75,7 @@ function AttendanceTrendChart({ data }: { data: AnalyticsDataPoint[] }) {
           </defs>
 
           {/* Gridlines */}
-          {[70, 80, 90, 100].map((val) => {
+          {[70, 80, 90, 100].map((val: any) => {
             const y = getY(val);
             return (
               <g key={val}>
@@ -222,7 +222,7 @@ export default function AnalyticsDashboardPage() {
             <Calendar className="w-3.5 h-3.5 text-text-secondary ml-1" />
             <select
               value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
+              onChange={(e: any) => setDateFilter(e.target.value)}
               className="bg-transparent font-bold text-text-primary focus:outline-none cursor-pointer pr-1"
             >
               <option value="30d">Last 30 Days</option>
@@ -338,7 +338,7 @@ export default function AnalyticsDashboardPage() {
             Top Performing Programs
           </h2>
           <div className="space-y-4 pt-1">
-            {programs.map(program => (
+            {programs.map((program: any) => (
               <div key={program.id} className="space-y-1.5">
                 <div className="flex justify-between text-xs font-semibold">
                   <span className="text-text-primary">{program.name}</span>

@@ -157,7 +157,7 @@ export default function KPIManagementPage() {
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {kpis.map(kpi => {
+        {kpis.map((kpi: any) => {
           const progress = (kpi.currentValue / kpi.targetValue) * 100;
           return (
             <div 
@@ -238,7 +238,7 @@ export default function KPIManagementPage() {
               type="text"
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e: any) => setName(e.target.value)}
               placeholder="e.g., Active Placement Rate"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
             />
@@ -249,7 +249,7 @@ export default function KPIManagementPage() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Category</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e: any) => setCategory(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="Attendance">Attendance</option>
@@ -266,7 +266,7 @@ export default function KPIManagementPage() {
                 type="text"
                 required
                 value={unit}
-                onChange={(e) => setUnit(e.target.value)}
+                onChange={(e: any) => setUnit(e.target.value)}
                 placeholder="e.g., %, M, Students"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
               />
@@ -281,7 +281,7 @@ export default function KPIManagementPage() {
                 step="any"
                 required
                 value={currentValue}
-                onChange={(e) => setCurrentValue(parseFloat(e.target.value) || 0)}
+                onChange={(e: any) => setCurrentValue(parseFloat(e.target.value) || 0)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-mono font-bold text-text-primary"
               />
             </div>
@@ -292,7 +292,7 @@ export default function KPIManagementPage() {
                 step="any"
                 required
                 value={targetValue}
-                onChange={(e) => setTargetValue(parseFloat(e.target.value) || 100)}
+                onChange={(e: any) => setTargetValue(parseFloat(e.target.value) || 100)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-mono font-bold text-text-primary"
               />
             </div>
@@ -303,7 +303,7 @@ export default function KPIManagementPage() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Initial Status</label>
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
+                onChange={(e: any) => setStatus(e.target.value as any)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="on_track">On Track (Green)</option>
@@ -315,7 +315,7 @@ export default function KPIManagementPage() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Trend Direction</label>
               <select
                 value={trend}
-                onChange={(e) => setTrend(e.target.value as any)}
+                onChange={(e: any) => setTrend(e.target.value as any)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="up">Trending Up (Positive)</option>
@@ -332,7 +332,7 @@ export default function KPIManagementPage() {
               step="any"
               required
               value={trendPercentage}
-              onChange={(e) => setTrendPercentage(parseFloat(e.target.value) || 0)}
+              onChange={(e: any) => setTrendPercentage(parseFloat(e.target.value) || 0)}
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary font-medium text-text-primary"
             />
           </div>
@@ -384,7 +384,7 @@ export default function KPIManagementPage() {
                   step="any"
                   required
                   value={editCurrentValue}
-                  onChange={(e) => setEditCurrentValue(parseFloat(e.target.value) || 0)}
+                  onChange={(e: any) => setEditCurrentValue(parseFloat(e.target.value) || 0)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-mono font-bold text-text-primary"
                 />
               </div>
@@ -395,7 +395,7 @@ export default function KPIManagementPage() {
                   step="any"
                   required
                   value={editTargetValue}
-                  onChange={(e) => setEditTargetValue(parseFloat(e.target.value) || 0)}
+                  onChange={(e: any) => setEditTargetValue(parseFloat(e.target.value) || 0)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-mono font-bold text-text-primary"
                 />
               </div>
@@ -406,7 +406,7 @@ export default function KPIManagementPage() {
                 <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">KPI Status</label>
                 <select
                   value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value as any)}
+                  onChange={(e: any) => setEditStatus(e.target.value as any)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
                 >
                   <option value="on_track">On Track (Green)</option>
@@ -418,7 +418,7 @@ export default function KPIManagementPage() {
                 <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Trend Direction</label>
                 <select
                   value={editTrend}
-                  onChange={(e) => setEditTrend(e.target.value as any)}
+                  onChange={(e: any) => setEditTrend(e.target.value as any)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
                 >
                   <option value="up">Trending Up</option>
@@ -435,7 +435,7 @@ export default function KPIManagementPage() {
                 step="any"
                 required
                 value={editTrendPercentage}
-                onChange={(e) => setEditTrendPercentage(parseFloat(e.target.value) || 0)}
+                onChange={(e: any) => setEditTrendPercentage(parseFloat(e.target.value) || 0)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary font-medium text-slate-850"
               />
             </div>

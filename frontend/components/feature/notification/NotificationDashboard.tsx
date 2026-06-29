@@ -27,7 +27,7 @@ function SkeletonCard() {
 function SkeletonTable() {
   return (
     <div className="animate-pulse">
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 8 }).map((_: any, i: any) => (
         <div key={i} className="flex gap-4 px-5 py-4 border-b border-border">
           <div className="h-4 w-32 bg-slate-200 rounded" />
           <div className="h-4 w-20 bg-slate-200 rounded" />
@@ -91,7 +91,7 @@ export default function NotificationDashboard() {
     setLoading(true);
     try {
       const data = await NotificationService.getNotifications();
-      setNotifications(data.sort((a, b) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime()));
+      setNotifications(data.sort((a: any, b: any) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime()));
     } catch (e) {
       console.error(e);
     } finally {
@@ -102,15 +102,15 @@ export default function NotificationDashboard() {
   useEffect(() => { loadData(); }, []);
 
   const stats = useMemo(() => {
-    const unread = notifications.filter(n => !n.readStatus).length;
-    const delivered = notifications.filter(n => n.status === 'Delivered' || n.status === 'Read').length;
-    const read = notifications.filter(n => n.readStatus).length;
-    const failed = notifications.filter(n => n.status === 'Failed').length;
+    const unread = notifications.filter((n: any) => !n.readStatus).length;
+    const delivered = notifications.filter((n: any) => n.status === 'Delivered' || n.status === 'Read').length;
+    const read = notifications.filter((n: any) => n.readStatus).length;
+    const failed = notifications.filter((n: any) => n.status === 'Failed').length;
     return { unread, delivered, read, failed };
   }, [notifications]);
 
   const filtered = useMemo(() => {
-    return notifications.filter(n => {
+    return notifications.filter((n: any) => {
       const matchSearch = !search || n.title.toLowerCase().includes(search.toLowerCase()) || n.message.toLowerCase().includes(search.toLowerCase()) || n.recipient.toLowerCase().includes(search.toLowerCase());
       const matchStatus = statusFilter === 'All' || n.status === statusFilter;
       const matchChannel = channelFilter === 'All' || n.channel === channelFilter;
@@ -130,7 +130,7 @@ export default function NotificationDashboard() {
     if (!n.readStatus) {
       try {
         await NotificationService.markAsRead(n.id);
-        setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, readStatus: true, status: 'Read' } : item));
+        setNotifications((prev: any) => prev.map((item: any) => item.id === n.id ? { ...item, readStatus: true, status: 'Read' } : item));
       } catch (e) {
         console.error(e);
       }
@@ -175,9 +175,9 @@ export default function NotificationDashboard() {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+          Array.from({ length: 4 }).map((_: any, i: any) => <SkeletonCard key={i} />)
         ) : (
-          statCards.map((c, i) => (
+          statCards.map((c: any, i: any) => (
             <div key={i} className="bg-white/80 backdrop-blur-xl border border-white/40 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer" onClick={() => {
               if (c.title === 'Unread') { setStatusFilter('All'); /* unread is cross-status */ }
               else if (c.title === 'Delivered') setStatusFilter('Delivered');
@@ -213,7 +213,7 @@ export default function NotificationDashboard() {
                 type="text"
                 placeholder="Search by title, message, or recipient..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e: any) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 text-sm border border-border rounded-xl bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary transition-all outline-none"
               />
               {search && (
@@ -235,7 +235,7 @@ export default function NotificationDashboard() {
             {/* Status pills */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Status</span>
-              {statusOptions.map(opt => (
+              {statusOptions.map((opt: any) => (
                 <button
                   key={opt}
                   onClick={() => setStatusFilter(opt)}
@@ -254,10 +254,10 @@ export default function NotificationDashboard() {
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Channel</span>
               <select
                 value={channelFilter}
-                onChange={e => setChannelFilter(e.target.value as ChannelFilter)}
+                onChange={(e: any) => setChannelFilter(e.target.value as ChannelFilter)}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-slate-50 text-text-secondary outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               >
-                {channelOptions.map(opt => (
+                {channelOptions.map((opt: any) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
@@ -265,7 +265,7 @@ export default function NotificationDashboard() {
             {/* Priority pills */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Priority</span>
-              {priorityOptions.map(opt => (
+              {priorityOptions.map((opt: any) => (
                 <button
                   key={opt}
                   onClick={() => setPriorityFilter(opt)}
@@ -306,7 +306,7 @@ export default function NotificationDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-text-secondary">
-                {paginated.map(n => {
+                {paginated.map((n: any) => {
                   const ch = channelIcons[n.channel] || channelIcons['In-App Notification'];
                   const ChIcon = ch.icon;
                   return (
@@ -334,7 +334,7 @@ export default function NotificationDashboard() {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2">
                           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-[10px] font-bold">
-                            {n.recipient.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                            {n.recipient.split(' ').map((w: any) => w[0]).join('').slice(0, 2)}
                           </div>
                           <div>
                             <p className="text-xs font-semibold text-text-primary">{n.recipient}</p>
@@ -360,7 +360,7 @@ export default function NotificationDashboard() {
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <button
-                          onClick={e => { e.stopPropagation(); handleView(n); }}
+                          onClick={(e: any) => { e.stopPropagation(); handleView(n); }}
                           className="text-indigo-600 hover:text-indigo-800 font-medium text-xs flex items-center gap-1 ml-auto"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -382,11 +382,11 @@ export default function NotificationDashboard() {
               Showing {((page - 1) * PAGE_SIZE) + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
             </span>
             <div className="flex items-center gap-1">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+              <button onClick={() => setPage((p: any) => Math.max(1, p - 1))} disabled={page === 1}
                 className="h-8 w-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-slate-100 disabled:opacity-30 transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+              {Array.from({ length: Math.min(5, totalPages) }).map((_: any, i: any) => {
                 let p: number;
                 if (totalPages <= 5) p = i + 1;
                 else if (page <= 3) p = i + 1;
@@ -399,7 +399,7 @@ export default function NotificationDashboard() {
                   </button>
                 );
               })}
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+              <button onClick={() => setPage((p: any) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
                 className="h-8 w-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-slate-100 disabled:opacity-30 transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>

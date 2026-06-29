@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Drawer } from '@/components/feature/ui/Drawer';
-import { Application, ApplicationStatus } from '@/src/data/mock-applications';
-import { Opportunity } from '@/src/data/mock-opportunities';
+import { Application, ApplicationStatus } from '../../../src/types/api/application.types';
+import { Opportunity } from '../../../src/types/api/opportunity.types';
 import { applicationService } from '@/src/services/application.service';
 import { Mail, Phone, Calendar as CalendarIcon, Briefcase, User, CheckCircle2, XCircle, Clock, FileText, Activity, Download, ExternalLink } from 'lucide-react';
 
@@ -77,7 +77,7 @@ export function ReviewApplicationDrawer({ isOpen, onClose, application, onApplic
         
         {/* Tabs Header */}
         <div className="flex overflow-x-auto border-b border-border px-6 bg-white shrink-0">
-          {tabs.map(t => (
+          {tabs.map((t: any) => (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id as TabType)}
@@ -116,7 +116,7 @@ export function ReviewApplicationDrawer({ isOpen, onClose, application, onApplic
           {/* Documents Tab */}
           {activeTab === 'documents' && (
             <div className="space-y-4 animate-in fade-in duration-300">
-              {['Resume', 'ID Proof', 'Certificates'].map((doc, idx) => (
+              {['Resume', 'ID Proof', 'Certificates'].map((doc: any, idx: any) => (
                 <div key={idx} className="bg-white p-4 rounded-xl border border-border flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
@@ -180,7 +180,7 @@ export function ReviewApplicationDrawer({ isOpen, onClose, application, onApplic
                 { title: 'Application Submitted', date: application.appliedDate, desc: 'Candidate submitted the application.', icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-100' },
                 { title: 'Under Review', date: application.appliedDate, desc: 'Application is being reviewed by HR.', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-100' },
                 { title: 'Status Updated', date: application.appliedDate, desc: `Application status changed to ${application.status}.`, icon: Activity, color: 'text-blue-500', bg: 'bg-blue-100' },
-              ].map((event, idx) => (
+              ].map((event: any, idx: any) => (
                 <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active py-4">
                   <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-100 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
                     <event.icon className={`h-4 w-4 ${event.color}`} />

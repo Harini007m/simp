@@ -81,7 +81,7 @@ export default function MyAttendancePage() {
 
     const fetchLeaves = async () => {
       const all = await leaveService.getAllLeaves();
-      setMyLeaves(all.filter(l => l.userId === 'user-1')); // mock user ID for current user
+      setMyLeaves(all.filter((l: any) => l.userId === 'user-1')); // mock user ID for current user
     };
     fetchLeaves();
   }, []);
@@ -107,8 +107,8 @@ export default function MyAttendancePage() {
       duration: 'Ongoing',
       status: 'Present'
     };
-    setAttendanceLogs(prev => [newLog, ...prev]);
-    setPresentDays(prev => prev + 1);
+    setAttendanceLogs((prev: any) => [newLog, ...prev]);
+    setPresentDays((prev: any) => prev + 1);
   };
 
   const handleCheckOut = () => {
@@ -117,7 +117,7 @@ export default function MyAttendancePage() {
     setClockOutTime(timeNow);
     triggerToast(`Checked out successfully at ${timeNow}. Session closed.`);
 
-    setAttendanceLogs(prev => {
+    setAttendanceLogs((prev: any) => {
       if (prev.length === 0) return prev;
       const updated = [...prev];
       updated[0] = {
@@ -192,7 +192,7 @@ export default function MyAttendancePage() {
       status: 'Pending',
       appliedOn: new Date().toISOString(),
     });
-    setMyLeaves(prev => [newLeave, ...prev]);
+    setMyLeaves((prev: any) => [newLeave, ...prev]);
     triggerToast("Leave application submitted successfully!");
     setLeaveReason('');
     setLeaveStartDate('');
@@ -334,7 +334,7 @@ export default function MyAttendancePage() {
           </div>
 
           <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: 30 }).map((_, i) => {
+            {Array.from({ length: 30 }).map((_: any, i: any) => {
               const day = i + 1;
               let bg = 'bg-slate-50 border border-border rounded text-text-secondary';
               if (day <= 15) {
@@ -371,7 +371,7 @@ export default function MyAttendancePage() {
                 <input 
                   type="date"
                   value={appealDate}
-                  onChange={(e) => setAppealDate(e.target.value)}
+                  onChange={(e: any) => setAppealDate(e.target.value)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2 text-xs text-text-primary outline-none"
                 />
               </div>
@@ -379,7 +379,7 @@ export default function MyAttendancePage() {
                 <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Registered Status</label>
                 <select 
                   value={appealStatus} 
-                  onChange={(e) => setAppealStatus(e.target.value as any)}
+                  onChange={(e: any) => setAppealStatus(e.target.value as any)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2 text-xs text-text-primary outline-none cursor-pointer"
                 >
                   <option value="Absent">Absent</option>
@@ -394,7 +394,7 @@ export default function MyAttendancePage() {
                 rows={3}
                 required
                 value={appealReason}
-                onChange={(e) => setAppealReason(e.target.value)}
+                onChange={(e: any) => setAppealReason(e.target.value)}
                 placeholder="Explain the correction context (e.g. ISP failure, medical letter advance notice, etc.)"
                 className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2.5 text-xs text-text-primary outline-none resize-none"
               />
@@ -433,7 +433,7 @@ export default function MyAttendancePage() {
           </h3>
 
           <div className="space-y-3 overflow-y-auto max-h-[360px] pr-1 custom-scrollbar">
-            {myAppeals.map(a => (
+            {myAppeals.map((a: any) => (
               <div key={a.id} className="p-4 border border-border rounded-xl space-y-2 hover:border-secondary transition-all bg-slate-50/20">
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="font-bold text-text-secondary">Date: {a.date}</span>
@@ -478,7 +478,7 @@ export default function MyAttendancePage() {
                   type="date"
                   required
                   value={leaveStartDate}
-                  onChange={(e) => setLeaveStartDate(e.target.value)}
+                  onChange={(e: any) => setLeaveStartDate(e.target.value)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2 text-xs text-text-primary outline-none"
                 />
               </div>
@@ -488,7 +488,7 @@ export default function MyAttendancePage() {
                   type="date"
                   required
                   value={leaveEndDate}
-                  onChange={(e) => setLeaveEndDate(e.target.value)}
+                  onChange={(e: any) => setLeaveEndDate(e.target.value)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2 text-xs text-text-primary outline-none"
                 />
               </div>
@@ -498,7 +498,7 @@ export default function MyAttendancePage() {
               <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Leave Type</label>
               <select 
                 value={leaveType} 
-                onChange={(e) => setLeaveType(e.target.value as any)}
+                onChange={(e: any) => setLeaveType(e.target.value as any)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2 text-xs text-text-primary outline-none cursor-pointer"
               >
                 <option value="Casual">Casual Leave</option>
@@ -515,7 +515,7 @@ export default function MyAttendancePage() {
                 rows={3}
                 required
                 value={leaveReason}
-                onChange={(e) => setLeaveReason(e.target.value)}
+                onChange={(e: any) => setLeaveReason(e.target.value)}
                 placeholder="Explain why you are applying for leave..."
                 className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2.5 text-xs text-text-primary outline-none resize-none"
               />
@@ -537,7 +537,7 @@ export default function MyAttendancePage() {
           </h3>
 
           <div className="space-y-3 overflow-y-auto max-h-[360px] pr-1 custom-scrollbar">
-            {myLeaves.map(l => (
+            {myLeaves.map((l: any) => (
               <div key={l.id} className="p-4 border border-border rounded-xl space-y-2 hover:border-secondary transition-all bg-slate-50/20">
                 <div className="flex justify-between items-center text-[10px]">
                   <span className="font-bold text-text-secondary">Date: {l.startDate.split('T')[0]} to {l.endDate.split('T')[0]}</span>
@@ -579,7 +579,7 @@ export default function MyAttendancePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-slate-655 select-text">
-              {attendanceLogs.map((log) => (
+              {attendanceLogs.map((log: any) => (
                 <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="py-3 px-4 font-semibold text-text-primary">{log.date}</td>
                   <td className="py-3 px-4">{log.clockIn}</td>

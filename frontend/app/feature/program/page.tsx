@@ -10,9 +10,9 @@ import {
   RefreshCw, CheckSquare, MessageSquare, BookOpen, FileDown
 } from 'lucide-react';
 import { programService } from '@/src/services/program.service';
-import { Program, CurriculumModule, ProgramEnrollment, ProgramMentor, ProgramTimelineEvent, ProgramMetadata } from '@/src/data/mock-programs';
+import { Program, CurriculumModule, ProgramEnrollment, ProgramMentor, ProgramTimelineEvent, ProgramMetadata } from '../../../src/types/api/program.types';
 import { organizationService } from '@/src/services/organization.service';
-import { Organization } from '@/src/data/mock-organizations';
+import { Organization } from '../../../src/types/api/organization.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
@@ -106,9 +106,9 @@ export default function ProgramManagementPage() {
       const progData = await programService.getPrograms();
       const orgData = await organizationService.getOrganizations();
       
-      const mergedData = progData.map(prog => ({
+      const mergedData = progData.map((prog: any) => ({
         ...prog,
-        organizationData: orgData.find(o => o.id === prog.organizationId)
+        organizationData: orgData.find((o: any) => o.id === prog.organizationId)
       }));
       
       setPrograms(mergedData);
@@ -128,7 +128,7 @@ export default function ProgramManagementPage() {
   // Sync activeProfile state from main array
   useEffect(() => {
     if (activeProfile) {
-      const refreshed = programs.find(p => p.id === activeProfile.id);
+      const refreshed = programs.find((p: any) => p.id === activeProfile.id);
       if (refreshed) {
         setActiveProfile(refreshed);
       }
@@ -149,13 +149,13 @@ export default function ProgramManagementPage() {
 
   // Filtered programs calculation
   const filteredPrograms = useMemo(() => {
-    return programs.filter(prog => {
+    return programs.filter((prog: any) => {
       const matchesSearch = 
         prog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prog.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prog.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prog.metadata.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prog.mentors.some(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        prog.mentors.some((m: any) => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
         
       const matchesType = filterType === 'all' ? true : prog.type === filterType;
       const matchesStatus = filterStatus === 'all' ? true : prog.status === filterStatus;
@@ -173,18 +173,18 @@ export default function ProgramManagementPage() {
   // Strategic KPI indicators
   const kpiStats = useMemo(() => {
     const total = programs.length;
-    const active = programs.filter(p => p.status === 'Active').length;
-    const completed = programs.filter(p => p.status === 'Completed').length;
-    const upcoming = programs.filter(p => p.status === 'Upcoming' || p.status === 'Open Enrollment').length;
+    const active = programs.filter((p: any) => p.status === 'Active').length;
+    const completed = programs.filter((p: any) => p.status === 'Completed').length;
+    const upcoming = programs.filter((p: any) => p.status === 'Upcoming' || p.status === 'Open Enrollment').length;
     
     let studentsCount = 0;
     const mentorsSet = new Set<string>();
     let totalCompletion = 0;
     let completedCount = 0;
     
-    programs.forEach(p => {
+    programs.forEach((p: any) => {
       studentsCount += p.studentsEnrolled;
-      p.mentors.forEach(m => mentorsSet.add(m.id));
+      p.mentors.forEach((m: any) => mentorsSet.add(m.id));
       if (p.status === 'Completed' || p.status === 'Active') {
         totalCompletion += p.completionRate;
         completedCount++;
@@ -200,8 +200,8 @@ export default function ProgramManagementPage() {
   // Combined Activities Feed
   const recentActivities = useMemo(() => {
     const events: { progId: string; progTitle: string; event: ProgramTimelineEvent }[] = [];
-    programs.forEach(prog => {
-      prog.timeline.forEach(t => {
+    programs.forEach((prog: any) => {
+      prog.timeline.forEach((t: any) => {
         events.push({
           progId: prog.id,
           progTitle: prog.title,
@@ -210,13 +210,13 @@ export default function ProgramManagementPage() {
       });
     });
     return events
-      .sort((a, b) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime())
+      .sort((a: any, b: any) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime())
       .slice(0, 10);
   }, [programs]);
 
   // Leaders rankings for the dashboard
   const performanceLeaderboard = useMemo(() => {
-    return [...programs].sort((a, b) => {
+    return [...programs].sort((a: any, b: any) => {
       if (performanceMetric === 'completion') {
         return b.completionRate - a.completionRate;
       } else if (performanceMetric === 'attendance') {
@@ -232,8 +232,8 @@ export default function ProgramManagementPage() {
   // Mentor performance aggregated summary
   const mentorContributions = useMemo(() => {
     const mentorsMap: Record<string, ProgramMentor & { progTitles: string[] }> = {};
-    programs.forEach(prog => {
-      prog.mentors.forEach(m => {
+    programs.forEach((prog: any) => {
+      prog.mentors.forEach((m: any) => {
         if (!mentorsMap[m.id]) {
           mentorsMap[m.id] = { ...m, progTitles: [prog.title] };
         } else {
@@ -251,7 +251,7 @@ export default function ProgramManagementPage() {
   // Program Type distribution (Paid/Free/Stipend/Industrial/Research/Corporate)
   const typeStats = useMemo(() => {
     const counts: Record<string, number> = {};
-    programs.forEach(p => {
+    programs.forEach((p: any) => {
       counts[p.type] = (counts[p.type] || 0) + 1;
     });
     return counts;
@@ -328,9 +328,9 @@ export default function ProgramManagementPage() {
           });
           const refreshed = {
             ...updated,
-            organizationData: organizations.find(o => o.id === updated.organizationId)
+            organizationData: organizations.find((o: any) => o.id === updated.organizationId)
           };
-          setPrograms(programs.map(p => p.id === targetId ? refreshed : p));
+          setPrograms(programs.map((p: any) => p.id === targetId ? refreshed : p));
           showToast(`Updated program status of ${updated.title} to ${statusInput}`);
         }
       } else if (type === 'mentor') {
@@ -338,7 +338,7 @@ export default function ProgramManagementPage() {
         if (updated) {
           const mentorName = mentorInput === 'emp-2' ? 'Bob Johnson' : mentorInput === 'emp-3' ? 'Diana Prince' : 'Charlie Davis';
           const mentors = [...updated.mentors];
-          const hasMentor = mentors.some(m => m.id === mentorInput);
+          const hasMentor = mentors.some((m: any) => m.id === mentorInput);
           if (!hasMentor) {
             mentors.push({
               id: mentorInput,
@@ -365,9 +365,9 @@ export default function ProgramManagementPage() {
             });
             const refreshed = {
               ...updatedProg,
-              organizationData: organizations.find(o => o.id === updatedProg.organizationId)
+              organizationData: organizations.find((o: any) => o.id === updatedProg.organizationId)
             };
-            setPrograms(programs.map(p => p.id === targetId ? refreshed : p));
+            setPrograms(programs.map((p: any) => p.id === targetId ? refreshed : p));
             showToast(`Mapped ${mentorName} as program mentor.`);
           }
         }
@@ -376,11 +376,11 @@ export default function ProgramManagementPage() {
         if (updated) {
           const newModule: CurriculumModule = {
             name: moduleForm.name,
-            topics: moduleForm.topicsString.split(',').map(s => s.trim()).filter(Boolean),
-            learningOutcomes: moduleForm.outcomesString.split(',').map(s => s.trim()).filter(Boolean),
-            assessments: moduleForm.assessmentsString.split(',').map(s => s.trim()).filter(Boolean),
-            assignments: moduleForm.assignmentsString.split(',').map(s => s.trim()).filter(Boolean),
-            projects: moduleForm.projectsString.split(',').map(s => s.trim()).filter(Boolean)
+            topics: moduleForm.topicsString.split(',').map((s: any) => s.trim()).filter(Boolean),
+            learningOutcomes: moduleForm.outcomesString.split(',').map((s: any) => s.trim()).filter(Boolean),
+            assessments: moduleForm.assessmentsString.split(',').map((s: any) => s.trim()).filter(Boolean),
+            assignments: moduleForm.assignmentsString.split(',').map((s: any) => s.trim()).filter(Boolean),
+            projects: moduleForm.projectsString.split(',').map((s: any) => s.trim()).filter(Boolean)
           };
           const curriculum = [...updated.curriculum, newModule];
           const updatedProg = await programService.updateProgram(targetId!, { curriculum });
@@ -393,9 +393,9 @@ export default function ProgramManagementPage() {
             });
             const refreshed = {
               ...updatedProg,
-              organizationData: organizations.find(o => o.id === updatedProg.organizationId)
+              organizationData: organizations.find((o: any) => o.id === updatedProg.organizationId)
             };
-            setPrograms(programs.map(p => p.id === targetId ? refreshed : p));
+            setPrograms(programs.map((p: any) => p.id === targetId ? refreshed : p));
             showToast(`Added curriculum module ${moduleForm.name}`);
           }
         }
@@ -413,18 +413,18 @@ export default function ProgramManagementPage() {
             category: programForm.category,
             level: programForm.level,
             domain: programForm.domain,
-            tags: programForm.tagsString.split(',').map(s => s.trim()).filter(Boolean),
-            techStack: programForm.techStackString.split(',').map(s => s.trim()).filter(Boolean),
-            skills: programForm.skillsString.split(',').map(s => s.trim()).filter(Boolean),
+            tags: programForm.tagsString.split(',').map((s: any) => s.trim()).filter(Boolean),
+            techStack: programForm.techStackString.split(',').map((s: any) => s.trim()).filter(Boolean),
+            skills: programForm.skillsString.split(',').map((s: any) => s.trim()).filter(Boolean),
             certType: programForm.certType
           }
         });
         if (updated) {
           const refreshed = {
             ...updated,
-            organizationData: organizations.find(o => o.id === updated.organizationId)
+            organizationData: organizations.find((o: any) => o.id === updated.organizationId)
           };
-          setPrograms(programs.map(p => p.id === targetId ? refreshed : p));
+          setPrograms(programs.map((p: any) => p.id === targetId ? refreshed : p));
           showToast(`Updated program details for ${updated.title}`);
         }
       } else if (type === 'onboard') {
@@ -439,12 +439,12 @@ export default function ProgramManagementPage() {
         } as any);
         const refreshed = {
           ...newProg,
-          organizationData: organizations.find(o => o.id === newProg.organizationId)
+          organizationData: organizations.find((o: any) => o.id === newProg.organizationId)
         };
         setPrograms([...programs, refreshed]);
         showToast(`Successfully onboarded program cohort: ${newProg.title}`);
       } else if (type === 'notify') {
-        showToast(`System notification dispatched to cohort enrollments of ${programs.find(p => p.id === targetId)?.title}: "${notifyMsg}"`, 'info');
+        showToast(`System notification dispatched to cohort enrollments of ${programs.find((p: any) => p.id === targetId)?.title}: "${notifyMsg}"`, 'info');
       }
     } catch (err) {
       console.error(err);
@@ -460,7 +460,7 @@ export default function ProgramManagementPage() {
     try {
       if (type === 'status') {
         await programService.bulkUpdateStatus(selectedIds, statusInput);
-        setPrograms(programs.map(prog => 
+        setPrograms(programs.map((prog: any) => 
           selectedIds.includes(prog.id) 
             ? { ...prog, status: statusInput, timeline: [
                 { date: new Date().toISOString().split('T')[0], title: 'Bulk Status Update', description: `Program status bulk-transitioned to ${statusInput}`, type: 'update' },
@@ -472,9 +472,9 @@ export default function ProgramManagementPage() {
       } else if (type === 'mentor') {
         await programService.bulkAssignMentor(selectedIds, mentorInput);
         const mentorName = mentorInput === 'emp-2' ? 'Bob Johnson' : mentorInput === 'emp-3' ? 'Diana Prince' : 'Charlie Davis';
-        setPrograms(programs.map(prog => {
+        setPrograms(programs.map((prog: any) => {
           if (selectedIds.includes(prog.id)) {
-            const hasMentor = prog.mentors.some(m => m.id === mentorInput);
+            const hasMentor = prog.mentors.some((m: any) => m.id === mentorInput);
             const list = [...prog.mentors];
             if (!hasMentor) {
               list.push({
@@ -517,28 +517,28 @@ export default function ProgramManagementPage() {
 
   // Toggle checkbox selectors
   const toggleSelect = (id: string) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    setSelectedIds((prev: any) => 
+      prev.includes(id) ? prev.filter((x: any) => x !== id) : [...prev, id]
     );
   };
 
   const toggleSelectAll = () => {
-    const filteredIds = filteredPrograms.map(p => p.id);
-    const allSelected = filteredIds.every(id => selectedIds.includes(id));
+    const filteredIds = filteredPrograms.map((p: any) => p.id);
+    const allSelected = filteredIds.every((id: any) => selectedIds.includes(id));
     if (allSelected) {
-      setSelectedIds(prev => prev.filter(id => !filteredIds.includes(id)));
+      setSelectedIds((prev: any) => prev.filter((id: any) => !filteredIds.includes(id)));
     } else {
-      setSelectedIds(prev => Array.from(new Set([...prev, ...filteredIds])));
+      setSelectedIds((prev: any) => Array.from(new Set([...prev, ...filteredIds])));
     }
   };
 
   // Student enrollment approval mutations
   const handleEnrollmentStatus = async (progId: string, studentId: string, newStatus: 'Approved' | 'Rejected') => {
-    const prog = programs.find(p => p.id === progId);
+    const prog = programs.find((p: any) => p.id === progId);
     if (!prog) return;
 
     const enrolls = [...prog.enrollments];
-    const idx = enrolls.findIndex(e => e.id === studentId);
+    const idx = enrolls.findIndex((e: any) => e.id === studentId);
     if (idx !== -1) {
       enrolls[idx] = {
         ...enrolls[idx],
@@ -557,9 +557,9 @@ export default function ProgramManagementPage() {
         });
         const refreshed = {
           ...updated,
-          organizationData: organizations.find(o => o.id === updated.organizationId)
+          organizationData: organizations.find((o: any) => o.id === updated.organizationId)
         };
-        setPrograms(programs.map(p => p.id === progId ? refreshed : p));
+        setPrograms(programs.map((p: any) => p.id === progId ? refreshed : p));
         showToast(`Enrollment status updated to ${newStatus}`);
       }
     } catch (err) {
@@ -569,7 +569,7 @@ export default function ProgramManagementPage() {
 
   // Generate certificate single trigger
   const handleGenerateCertificate = async (progId: string, studentName: string) => {
-    const prog = programs.find(p => p.id === progId);
+    const prog = programs.find((p: any) => p.id === progId);
     if (!prog) return;
 
     const list = [...prog.certifications.list, {
@@ -597,9 +597,9 @@ export default function ProgramManagementPage() {
         });
         const refreshed = {
           ...updated,
-          organizationData: organizations.find(o => o.id === updated.organizationId)
+          organizationData: organizations.find((o: any) => o.id === updated.organizationId)
         };
-        setPrograms(programs.map(p => p.id === progId ? refreshed : p));
+        setPrograms(programs.map((p: any) => p.id === progId ? refreshed : p));
         showToast(`Certificate issued successfully for ${studentName}`);
       }
     } catch (err) {
@@ -610,7 +610,7 @@ export default function ProgramManagementPage() {
   // Export roster of programs as CSV
   const handleExportData = () => {
     const headers = ['ID', 'Program Name', 'Code', 'Type', 'Weeks', 'Enrolled', 'Status', 'Completion Rate'];
-    const rows = programs.map(p => [
+    const rows = programs.map((p: any) => [
       p.id,
       p.title,
       p.code,
@@ -621,7 +621,7 @@ export default function ProgramManagementPage() {
       p.completionRate
     ]);
     const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -724,7 +724,7 @@ export default function ProgramManagementPage() {
               { label: 'Placement Conversion', val: `${kpiStats.placementRate}%`, icon: TrendingUp, color: 'bg-teal-50 text-teal-600 border-teal-100', filter: { name: 'status', val: 'all' } },
               { label: 'Completed Cohorts', val: kpiStats.completed, icon: UserCheck, color: 'bg-cyan-50 text-cyan-600 border-cyan-100', filter: { name: 'status', val: 'Completed' } },
               { label: 'Draft / Pipelines', val: kpiStats.upcoming, icon: AlertCircle, color: 'bg-amber-50 text-amber-600 border-amber-100', filter: { name: 'status', val: 'Draft' } }
-            ].map((kpi, idx) => (
+            ].map((kpi: any, idx: any) => (
               <div 
                 key={idx}
                 onClick={() => {
@@ -763,7 +763,7 @@ export default function ProgramManagementPage() {
                   { type: 'Corporate Sponsored', count: typeStats['Corporate Sponsored'] || 0, color: 'bg-emerald-600' },
                   { type: 'Free Learning Programs', count: typeStats['Free Internship'] || 0, color: 'bg-purple-600' },
                   { type: 'Paid / Industrial Training', count: typeStats['Paid Internship'] || 0, color: 'bg-amber-500' }
-                ].map((item, index) => {
+                ].map((item: any, index: any) => {
                   const percent = Math.round((item.count / programs.length) * 100) || 0;
                   return (
                     <div key={index} className="space-y-1">
@@ -813,7 +813,7 @@ export default function ProgramManagementPage() {
                 
                 <select 
                   value={performanceMetric}
-                  onChange={(e) => setPerformanceMetric(e.target.value as any)}
+                  onChange={(e: any) => setPerformanceMetric(e.target.value as any)}
                   className="text-[10px] font-bold border border-border rounded p-1 bg-white focus:outline-none"
                 >
                   <option value="completion">Completion Rate</option>
@@ -824,7 +824,7 @@ export default function ProgramManagementPage() {
               </div>
 
               <div className="divide-y divide-border">
-                {performanceLeaderboard.map((prog, index) => {
+                {performanceLeaderboard.map((prog: any, index: any) => {
                   let valLabel = '';
                   if (performanceMetric === 'completion') {
                     valLabel = `${prog.completionRate}% Completion`;
@@ -867,7 +867,7 @@ export default function ProgramManagementPage() {
               </h3>
 
               <div className="space-y-3">
-                {mentorContributions.map((mentor, idx) => (
+                {mentorContributions.map((mentor: any, idx: any) => (
                   <div key={idx} className="bg-slate-50 border border-border rounded-lg p-3 space-y-2">
                     <div className="flex justify-between items-start">
                       <div>
@@ -909,17 +909,17 @@ export default function ProgramManagementPage() {
             </h3>
 
             <div className="divide-y divide-border max-h-[350px] overflow-y-auto pr-1">
-              {recentActivities.map((act, index) => (
+              {recentActivities.map((act: any, index: any) => (
                 <div 
                   key={index}
                   onClick={() => {
-                    const match = programs.find(p => p.id === act.progId);
+                    const match = programs.find((p: any) => p.id === act.progId);
                     if (match) handleOpenProfile(match);
                   }}
                   className="py-3 flex items-start gap-4 hover:bg-slate-50/50 px-2 rounded-lg cursor-pointer transition-colors group"
                 >
                   <div className="h-8 w-8 rounded bg-slate-100 text-text-primary font-extrabold text-[10px] flex items-center justify-center shrink-0">
-                    {act.progTitle.split(' ').map(n => n[0]).join('').slice(0, 3)}
+                    {act.progTitle.split(' ').map((n: any) => n[0]).join('').slice(0, 3)}
                   </div>
                   
                   <div className="flex-1 space-y-0.5 text-xs">
@@ -953,7 +953,7 @@ export default function ProgramManagementPage() {
                   type="text" 
                   placeholder="Search by name, code, mentor, tech, domain..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: any) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -998,7 +998,7 @@ export default function ProgramManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Program Type</label>
                   <select 
                     value={filterType} 
-                    onChange={(e) => setFilterType(e.target.value)}
+                    onChange={(e: any) => setFilterType(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none"
                   >
                     <option value="all">All Types</option>
@@ -1013,7 +1013,7 @@ export default function ProgramManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Status</label>
                   <select 
                     value={filterStatus} 
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    onChange={(e: any) => setFilterStatus(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none"
                   >
                     <option value="all">All Statuses</option>
@@ -1028,7 +1028,7 @@ export default function ProgramManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Duration weeks</label>
                   <select 
                     value={filterDuration} 
-                    onChange={(e) => setFilterDuration(e.target.value)}
+                    onChange={(e: any) => setFilterDuration(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none"
                   >
                     <option value="all">All Durations</option>
@@ -1042,11 +1042,11 @@ export default function ProgramManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Domain</label>
                   <select 
                     value={filterDomain} 
-                    onChange={(e) => setFilterDomain(e.target.value)}
+                    onChange={(e: any) => setFilterDomain(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none"
                   >
                     <option value="all">All Domains</option>
-                    {Array.from(new Set(programs.map(p => p.metadata.domain))).map(dom => (
+                    {Array.from(new Set(programs.map((p: any) => p.metadata.domain))).map((dom: any) => (
                       <option key={dom} value={dom}>{dom}</option>
                     ))}
                   </select>
@@ -1064,7 +1064,7 @@ export default function ProgramManagementPage() {
                     <th className="px-4 py-3 w-8">
                       <input 
                         type="checkbox" 
-                        checked={filteredPrograms.length > 0 && filteredPrograms.every(p => selectedIds.includes(p.id))}
+                        checked={filteredPrograms.length > 0 && filteredPrograms.every((p: any) => selectedIds.includes(p.id))}
                         onChange={toggleSelectAll}
                         className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
                       />
@@ -1084,7 +1084,7 @@ export default function ProgramManagementPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filteredPrograms.length > 0 ? (
-                    filteredPrograms.map((prog) => {
+                    filteredPrograms.map((prog: any) => {
                       const isSelected = selectedIds.includes(prog.id);
                       return (
                         <tr 
@@ -1094,7 +1094,7 @@ export default function ProgramManagementPage() {
                           }`}
                           onClick={() => handleOpenProfile(prog)}
                         >
-                          <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-4 py-3" onClick={(e: any) => e.stopPropagation()}>
                             <input 
                               type="checkbox" 
                               checked={isSelected}
@@ -1138,7 +1138,7 @@ export default function ProgramManagementPage() {
                             </span>
                           </td>
 
-                          <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
+                          <td className="px-4 py-3 text-right" onClick={(e: any) => e.stopPropagation()}>
                             <div className="flex justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                               <button 
                                 onClick={() => handleOpenProfile(prog)}
@@ -1342,7 +1342,7 @@ export default function ProgramManagementPage() {
                 { id: 'certifications', label: 'Certifications Management' },
                 { id: 'metadata', label: 'Domain Settings' },
                 { id: 'timeline', label: 'Timeline History' }
-              ].map((tab) => {
+              ].map((tab: any) => {
                 const isActive = profileTab === tab.id;
                 return (
                   <button
@@ -1384,7 +1384,7 @@ export default function ProgramManagementPage() {
                           { label: 'Duration Weeks', val: `${activeProfile.durationWeeks} Weeks` },
                           { label: 'Capacity limit', val: activeProfile.capacity },
                           { label: 'Eligibility', val: activeProfile.eligibility }
-                        ].map((row, idx) => (
+                        ].map((row: any, idx: any) => (
                           <div key={idx} className="py-2.5 flex justify-between">
                             <span className="text-text-secondary">{row.label}</span>
                             <span className="text-text-primary text-right max-w-[60%] leading-relaxed">{row.val}</span>
@@ -1403,12 +1403,12 @@ export default function ProgramManagementPage() {
                       <div className="divide-y divide-border text-xs font-semibold">
                         {[
                           { label: 'Total Enrollments', val: activeProfile.studentsEnrolled },
-                          { label: 'Active Students Count', val: activeProfile.enrollments.filter(e => e.status === 'Approved').length },
+                          { label: 'Active Students Count', val: activeProfile.enrollments.filter((e: any) => e.status === 'Approved').length },
                           { label: 'Completion Rate', val: `${activeProfile.completionRate}%` },
                           { label: 'Placement Rate', val: `${activeProfile.analytics.placementRate}%` },
                           { label: 'Assigned Mentors', val: activeProfile.mentorsAssigned },
                           { label: 'Academic Partner', val: activeProfile.organizationData?.name || 'Stanford University' }
-                        ].map((row, idx) => (
+                        ].map((row: any, idx: any) => (
                           <div key={idx} className="py-2.5 flex justify-between">
                             <span className="text-text-secondary">{row.label}</span>
                             <span className="text-text-primary font-extrabold">{row.val}</span>
@@ -1437,7 +1437,7 @@ export default function ProgramManagementPage() {
                       { type: 'Stipend Internship', fee: 'Funded (+$300/mo)', rules: 'YubiKey check and attendance verification', benefit: 'Stipend disbursement, mentor feedback dashboard' },
                       { type: 'Corporate Sponsored', fee: 'Sponsored by Partner', rules: 'Direct matching for corporate placement drives', benefit: 'Custom domain training, pre-placement review opportunities' },
                       { type: 'Research Program', fee: 'Sponsorship Grant', rules: 'Weekly progress reports & blueprint submission', benefit: 'Accreditation certificates, research publication scope' }
-                    ].map((row) => (
+                    ].map((row: any) => (
                       <div key={row.type} className="bg-white border border-border rounded-xl p-4.5 shadow-sm space-y-2">
                         <div className="flex justify-between items-center border-b border-border pb-2 mb-2">
                           <h5 className="font-extrabold text-text-primary text-xs">{row.type}</h5>
@@ -1478,7 +1478,7 @@ export default function ProgramManagementPage() {
                   </div>
 
                   <div className="space-y-4">
-                    {activeProfile.curriculum.map((mod, idx) => (
+                    {activeProfile.curriculum.map((mod: any, idx: any) => (
                       <div key={idx} className="bg-white border border-border rounded-xl p-5 shadow-sm space-y-3">
                         <h5 className="font-extrabold text-sm text-text-primary border-b border-border pb-2">{mod.name}</h5>
                         
@@ -1487,7 +1487,7 @@ export default function ProgramManagementPage() {
                           <div className="space-y-1">
                             <div className="text-[9px] font-bold text-text-secondary uppercase tracking-widest">Topics Covered</div>
                             <div className="flex flex-wrap gap-1.5 pt-1">
-                              {mod.topics.map((t, tIdx) => (
+                              {mod.topics.map((t: any, tIdx: any) => (
                                 <span key={tIdx} className="bg-slate-100 text-text-primary text-[10px] font-bold px-2 py-0.5 rounded">
                                   {t}
                                 </span>
@@ -1498,7 +1498,7 @@ export default function ProgramManagementPage() {
                           <div className="space-y-1">
                             <div className="text-[9px] font-bold text-text-secondary uppercase tracking-widest">Learning Outcomes</div>
                             <ul className="list-disc pl-4 space-y-0.5 pt-1">
-                              {mod.learningOutcomes.map((o, oIdx) => (
+                              {mod.learningOutcomes.map((o: any, oIdx: any) => (
                                 <li key={oIdx}>{o}</li>
                               ))}
                             </ul>
@@ -1554,7 +1554,7 @@ export default function ProgramManagementPage() {
                       </thead>
                       <tbody className="divide-y divide-border">
                         {activeProfile.enrollments.length > 0 ? (
-                          activeProfile.enrollments.map((enr) => (
+                          activeProfile.enrollments.map((enr: any) => (
                             <tr key={enr.id} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-4 py-3">
                                 <div className="font-extrabold text-text-primary">{enr.name}</div>
@@ -1572,7 +1572,7 @@ export default function ProgramManagementPage() {
                                   {enr.status}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
+                              <td className="px-4 py-3 text-right" onClick={(e: any) => e.stopPropagation()}>
                                 <div className="flex gap-2 justify-end">
                                   {enr.status !== 'Approved' && (
                                     <button 
@@ -1630,7 +1630,7 @@ export default function ProgramManagementPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {activeProfile.mentors.map((m, idx) => (
+                    {activeProfile.mentors.map((m: any, idx: any) => (
                       <div key={idx} className="bg-white border border-border rounded-xl p-5 shadow-sm space-y-4">
                         <div className="flex justify-between items-start">
                           <div>
@@ -1676,7 +1676,7 @@ export default function ProgramManagementPage() {
                       { label: 'Average Score Test', val: `${activeProfile.analytics.avgScore}%`, icon: Award, color: 'text-blue-600 bg-blue-50/40' },
                       { label: 'Placement Rate', val: `${activeProfile.analytics.placementRate}%`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50/40' },
                       { label: 'Satisfaction Rating', val: `${activeProfile.analytics.satisfactionScore} / 5`, icon: Star, color: 'text-amber-600 bg-amber-50/40' }
-                    ].map((kpi, idx) => (
+                    ].map((kpi: any, idx: any) => (
                       <div key={idx} className="bg-white border border-border rounded-xl p-4 shadow-sm flex items-center gap-3">
                         <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${kpi.color}`}>
                           <kpi.icon className="h-5 w-5" />
@@ -1720,7 +1720,7 @@ export default function ProgramManagementPage() {
                             <circle cx="90" cy="30" r="4" fill="#6366f1" />
                           </svg>
 
-                          {activeProfile.analytics.attendanceTrend.map((t, idx) => (
+                          {activeProfile.analytics.attendanceTrend.map((t: any, idx: any) => (
                             <div key={idx} className="z-10 flex flex-col items-center">
                               <span className="text-[10px] font-black text-text-primary bg-white border border-border rounded px-1 shadow-sm mb-1">{t.rate}%</span>
                               <span className="text-[10px] font-bold text-text-secondary">{t.week}</span>
@@ -1735,7 +1735,7 @@ export default function ProgramManagementPage() {
                       <h5 className="text-xs font-extrabold text-text-secondary uppercase tracking-widest">Average Assessment Performance</h5>
                       
                       <div className="space-y-4">
-                        {activeProfile.analytics.assessmentPerformance.map((item, idx) => (
+                        {activeProfile.analytics.assessmentPerformance.map((item: any, idx: any) => (
                           <div key={idx} className="space-y-1">
                             <div className="flex justify-between text-xs font-semibold text-text-primary">
                               <span>{item.testName}</span>
@@ -1786,8 +1786,8 @@ export default function ProgramManagementPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {activeProfile.enrollments.map((enr) => {
-                          const issuedCert = activeProfile.certifications.list.find(c => c.studentName === enr.name);
+                        {activeProfile.enrollments.map((enr: any) => {
+                          const issuedCert = activeProfile.certifications.list.find((c: any) => c.studentName === enr.name);
                           return (
                             <tr key={enr.id} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-4 py-3 font-mono font-bold text-text-secondary">
@@ -1804,7 +1804,7 @@ export default function ProgramManagementPage() {
                                   {issuedCert ? issuedCert.status : 'Pending'}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
+                              <td className="px-4 py-3 text-right" onClick={(e: any) => e.stopPropagation()}>
                                 <div className="flex gap-2 justify-end">
                                   {!issuedCert && (
                                     <button 
@@ -1865,7 +1865,7 @@ export default function ProgramManagementPage() {
                       <div className="py-3.5 space-y-1.5">
                         <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Technology Stack</div>
                         <div className="flex flex-wrap gap-1.5">
-                          {activeProfile.metadata.techStack.map((tech, idx) => (
+                          {activeProfile.metadata.techStack.map((tech: any, idx: any) => (
                             <span key={idx} className="bg-slate-100 text-text-primary text-[10px] font-bold px-2 py-0.5 rounded">
                               {tech}
                             </span>
@@ -1876,7 +1876,7 @@ export default function ProgramManagementPage() {
                       <div className="py-3.5 space-y-1.5">
                         <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Core Skills Taught</div>
                         <div className="flex flex-wrap gap-1.5">
-                          {activeProfile.metadata.skills.map((skill, idx) => (
+                          {activeProfile.metadata.skills.map((skill: any, idx: any) => (
                             <span key={idx} className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">
                               {skill}
                             </span>
@@ -1903,7 +1903,7 @@ export default function ProgramManagementPage() {
                   </h4>
 
                   <div className="relative border-l-2 border-border pl-6 space-y-6 ml-2 py-2">
-                    {activeProfile.timeline.map((evt, idx) => (
+                    {activeProfile.timeline.map((evt: any, idx: any) => (
                       <div key={idx} className="relative">
                         
                         <div className={`absolute -left-[31px] top-0 h-4 w-4 rounded-full border-2 border-white flex items-center justify-center ${
@@ -1994,7 +1994,7 @@ export default function ProgramManagementPage() {
                   <label className="block text-text-secondary">Select Program Stage Status</label>
                   <select
                     value={statusInput}
-                    onChange={(e) => setStatusInput(e.target.value as any)}
+                    onChange={(e: any) => setStatusInput(e.target.value as any)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white font-semibold text-xs focus:outline-none"
                   >
                     <option value="Draft">Draft Stage</option>
@@ -2031,7 +2031,7 @@ export default function ProgramManagementPage() {
                   <label className="block text-text-secondary">Select Program Mentor</label>
                   <select
                     value={mentorInput}
-                    onChange={(e) => setMentorInput(e.target.value)}
+                    onChange={(e: any) => setMentorInput(e.target.value)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white font-semibold text-xs focus:outline-none"
                   >
                     <option value="">Choose Mentor...</option>
@@ -2068,7 +2068,7 @@ export default function ProgramManagementPage() {
                     rows={3}
                     placeholder="Dispatches notifications to enrolled student cohort dashboard..."
                     value={notifyMsg}
-                    onChange={(e) => setNotifyMsg(e.target.value)}
+                    onChange={(e: any) => setNotifyMsg(e.target.value)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none text-xs font-semibold leading-relaxed"
                   />
                   
@@ -2101,7 +2101,7 @@ export default function ProgramManagementPage() {
                       required
                       placeholder="e.g. Module 3: Docker & Cloud Deployment"
                       value={moduleForm.name}
-                      onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })}
+                      onChange={(e: any) => setModuleForm({ ...moduleForm, name: e.target.value })}
                       className="w-full p-2 border border-border rounded focus:outline-none"
                     />
                   </div>
@@ -2113,7 +2113,7 @@ export default function ProgramManagementPage() {
                       required
                       placeholder="Dockerfiles, Kubernetes, ECS, VPC"
                       value={moduleForm.topicsString}
-                      onChange={(e) => setModuleForm({ ...moduleForm, topicsString: e.target.value })}
+                      onChange={(e: any) => setModuleForm({ ...moduleForm, topicsString: e.target.value })}
                       className="w-full p-2 border border-border rounded focus:outline-none"
                     />
                   </div>
@@ -2125,7 +2125,7 @@ export default function ProgramManagementPage() {
                       required
                       placeholder="Deploy containerized apps, Manage subnets"
                       value={moduleForm.outcomesString}
-                      onChange={(e) => setModuleForm({ ...moduleForm, outcomesString: e.target.value })}
+                      onChange={(e: any) => setModuleForm({ ...moduleForm, outcomesString: e.target.value })}
                       className="w-full p-2 border border-border rounded focus:outline-none"
                     />
                   </div>
@@ -2137,7 +2137,7 @@ export default function ProgramManagementPage() {
                         type="text" 
                         placeholder="Cloud Quiz"
                         value={moduleForm.assessmentsString}
-                        onChange={(e) => setModuleForm({ ...moduleForm, assessmentsString: e.target.value })}
+                        onChange={(e: any) => setModuleForm({ ...moduleForm, assessmentsString: e.target.value })}
                         className="w-full p-2 border border-border rounded focus:outline-none"
                       />
                     </div>
@@ -2147,7 +2147,7 @@ export default function ProgramManagementPage() {
                         type="text" 
                         placeholder="Deploy API"
                         value={moduleForm.assignmentsString}
-                        onChange={(e) => setModuleForm({ ...moduleForm, assignmentsString: e.target.value })}
+                        onChange={(e: any) => setModuleForm({ ...moduleForm, assignmentsString: e.target.value })}
                         className="w-full p-2 border border-border rounded focus:outline-none"
                       />
                     </div>
@@ -2157,7 +2157,7 @@ export default function ProgramManagementPage() {
                         type="text" 
                         placeholder="SaaS Deployment"
                         value={moduleForm.projectsString}
-                        onChange={(e) => setModuleForm({ ...moduleForm, projectsString: e.target.value })}
+                        onChange={(e: any) => setModuleForm({ ...moduleForm, projectsString: e.target.value })}
                         className="w-full p-2 border border-border rounded focus:outline-none"
                       />
                     </div>
@@ -2204,7 +2204,7 @@ export default function ProgramManagementPage() {
                           type="text" 
                           required
                           value={programForm.title}
-                          onChange={(e) => setProgramForm({ ...programForm, title: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, title: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2215,7 +2215,7 @@ export default function ProgramManagementPage() {
                           required
                           placeholder="e.g. SEI-2026"
                           value={programForm.code}
-                          onChange={(e) => setProgramForm({ ...programForm, code: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, code: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2223,7 +2223,7 @@ export default function ProgramManagementPage() {
                         <label className="block text-text-secondary text-[10px]">Program Classification Type</label>
                         <select 
                           value={programForm.type}
-                          onChange={(e) => setProgramForm({ ...programForm, type: e.target.value as any })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, type: e.target.value as any })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
                           <option value="Free Internship">Free Internship</option>
@@ -2238,10 +2238,10 @@ export default function ProgramManagementPage() {
                         <label className="block text-text-secondary text-[10px]">Academic Partner College</label>
                         <select 
                           value={programForm.organizationId}
-                          onChange={(e) => setProgramForm({ ...programForm, organizationId: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, organizationId: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
-                          {organizations.map(o => (
+                          {organizations.map((o: any) => (
                             <option key={o.id} value={o.id}>{o.name}</option>
                           ))}
                         </select>
@@ -2252,7 +2252,7 @@ export default function ProgramManagementPage() {
                           type="number" 
                           required
                           value={programForm.durationWeeks}
-                          onChange={(e) => setProgramForm({ ...programForm, durationWeeks: Number(e.target.value) })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, durationWeeks: Number(e.target.value) })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2262,7 +2262,7 @@ export default function ProgramManagementPage() {
                           type="number" 
                           required
                           value={programForm.capacity}
-                          onChange={(e) => setProgramForm({ ...programForm, capacity: Number(e.target.value) })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, capacity: Number(e.target.value) })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2275,7 +2275,7 @@ export default function ProgramManagementPage() {
                           type="text"
                           required
                           value={programForm.description}
-                          onChange={(e) => setProgramForm({ ...programForm, description: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, description: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2285,7 +2285,7 @@ export default function ProgramManagementPage() {
                           type="text" 
                           required
                           value={programForm.eligibility}
-                          onChange={(e) => setProgramForm({ ...programForm, eligibility: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, eligibility: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2305,7 +2305,7 @@ export default function ProgramManagementPage() {
                           required
                           placeholder="e.g. Software Engineering"
                           value={programForm.category}
-                          onChange={(e) => setProgramForm({ ...programForm, category: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, category: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2313,7 +2313,7 @@ export default function ProgramManagementPage() {
                         <label className="block text-text-secondary text-[10px]">Cognitive Level</label>
                         <select 
                           value={programForm.level}
-                          onChange={(e) => setProgramForm({ ...programForm, level: e.target.value as any })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, level: e.target.value as any })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
                           <option value="Beginner">Beginner Level</option>
@@ -2328,7 +2328,7 @@ export default function ProgramManagementPage() {
                           required
                           placeholder="e.g. Web Development"
                           value={programForm.domain}
-                          onChange={(e) => setProgramForm({ ...programForm, domain: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, domain: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2339,7 +2339,7 @@ export default function ProgramManagementPage() {
                           required
                           placeholder="e.g. Institutional Certificate"
                           value={programForm.certType}
-                          onChange={(e) => setProgramForm({ ...programForm, certType: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, certType: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2352,7 +2352,7 @@ export default function ProgramManagementPage() {
                           type="text" 
                           placeholder="React, NextJS, NestJS"
                           value={programForm.techStackString}
-                          onChange={(e) => setProgramForm({ ...programForm, techStackString: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, techStackString: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2362,7 +2362,7 @@ export default function ProgramManagementPage() {
                           type="text" 
                           placeholder="Frontend Architecture, API Design"
                           value={programForm.skillsString}
-                          onChange={(e) => setProgramForm({ ...programForm, skillsString: e.target.value })}
+                          onChange={(e: any) => setProgramForm({ ...programForm, skillsString: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>

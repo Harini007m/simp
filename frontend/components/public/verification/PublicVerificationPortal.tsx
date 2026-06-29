@@ -48,7 +48,7 @@ export default function PublicVerificationPortal() {
               <input 
                 type="text" 
                 value={certNumber}
-                onChange={(e) => setCertNumber(e.target.value)}
+                onChange={(e: any) => setCertNumber(e.target.value)}
                 placeholder="e.g. PS-CERT-2026-00001" 
                 className="w-full bg-gray-50 border-2 border-border rounded-2xl pl-14 pr-32 py-5 text-lg font-mono tracking-wider focus:outline-none focus:border-primary focus:bg-white transition-all"
                 required

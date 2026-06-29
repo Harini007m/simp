@@ -6,11 +6,9 @@ import { Stepper } from '@/components/feature/ui/Stepper';
 import { Button } from '@/components/feature/ui/Button';
 import { Search, ChevronRight, ChevronLeft, Upload, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card } from '@/components/feature/ui/Card';
-import { Module } from '@/src/data/mock-modules';
 import { moduleService } from '@/src/services/module.service';
 import { permissionService } from '@/src/services/permission.service';
 import { roleService } from '@/src/services/role.service';
-import { Role } from '@/src/data/mock-roles';
 
 interface CreateRoleWizardProps {
   isOpen: boolean;
@@ -73,7 +71,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
         }
       }
       if (Object.keys(newMap).length > 0) {
-        setPermissionsMap(prev => ({...prev, ...newMap}));
+        setPermissionsMap((prev: any) => ({...prev, ...newMap}));
       }
     }
     fetchPermissions();
@@ -92,7 +90,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
         // Parse permissions mapping from role permissions list (format is "moduleId:permissionName")
         const parsedPerms: Record<string, string[]> = {};
         if (roleToEdit.permissions) {
-          roleToEdit.permissions.forEach(permStr => {
+          roleToEdit.permissions.forEach((permStr: any) => {
             const parts = permStr.split(':');
             if (parts.length === 2) {
               const [modId, action] = parts;
@@ -131,9 +129,9 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
   useEffect(() => {
     // Only auto-assign for NEW modules in creation, not edit initialization
     if (!roleToEdit) {
-      setSelectedPermissions(prev => {
+      setSelectedPermissions((prev: any) => {
         const updated = { ...prev };
-        assignedModules.forEach(modId => {
+        assignedModules.forEach((modId: any) => {
           if (!prevAssignedRef.current.includes(modId) && !updated[modId]) {
             updated[modId] = ['View'];
           }
@@ -156,35 +154,35 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
       return;
     }
     if (currentStep < STEPS.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev: any) => prev + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev: any) => prev - 1);
     }
   };
 
   const toggleModule = (id: string) => {
     if (viewMode) return;
-    setAssignedModules(prev => 
-      prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
+    setAssignedModules((prev: any) => 
+      prev.includes(id) ? prev.filter((m: any) => m !== id) : [...prev, id]
     );
   };
 
   const toggleExpand = (id: string) => {
-    setExpandedModules(prev => 
-      prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
+    setExpandedModules((prev: any) => 
+      prev.includes(id) ? prev.filter((m: any) => m !== id) : [...prev, id]
     );
   };
 
   const togglePermission = (moduleId: string, perm: string) => {
     if (viewMode) return;
-    setSelectedPermissions(prev => {
+    setSelectedPermissions((prev: any) => {
       const current = prev[moduleId] || [];
       const updated = current.includes(perm)
-        ? current.filter(p => p !== perm)
+        ? current.filter((p: any) => p !== perm)
         : [...current, perm];
       return { ...prev, [moduleId]: updated };
     });
@@ -200,7 +198,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
     if (file) {
       setIconFileName(file.name);
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = (event: any) => {
         setIconFile(event.target?.result as string);
       };
       reader.readAsDataURL(file);
@@ -215,7 +213,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
     try {
       setIsSubmitting(true);
       const flatPermissions: string[] = [];
-      assignedModules.forEach(moduleId => {
+      assignedModules.forEach((moduleId: any) => {
         flatPermissions.push(`${moduleId}:view`);
       });
 
@@ -246,7 +244,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
     }
   };
 
-  const filteredModules = modules.filter(m =>
+  const filteredModules = modules.filter((m: any) =>
     m.name.toLowerCase().includes(moduleSearch.toLowerCase())
   );
 
@@ -267,7 +265,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                 <input 
                   type="text" 
                   value={roleName}
-                  onChange={e => setRoleName(e.target.value)}
+                  onChange={(e: any) => setRoleName(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   placeholder="e.g. Student" 
@@ -278,7 +276,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                 <input 
                   type="text" 
                   value={roleCode}
-                  onChange={e => setRoleCode(e.target.value)}
+                  onChange={(e: any) => setRoleCode(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   placeholder="e.g. ROLE_STUDENT" 
@@ -288,7 +286,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                 <label className="text-sm font-medium text-label">Description</label>
                 <textarea 
                   value={description}
-                  onChange={e => setDescription(e.target.value)}
+                  onChange={(e: any) => setDescription(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   rows={3} 
@@ -378,7 +376,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                 <input 
                   type="text" 
                   value={moduleSearch}
-                  onChange={e => setModuleSearch(e.target.value)}
+                  onChange={(e: any) => setModuleSearch(e.target.value)}
                   disabled={viewMode}
                   placeholder="Search modules..." 
                   className="w-56 rounded-md border border-border pl-8 pr-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
@@ -387,7 +385,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {filteredModules.map((module) => {
+              {filteredModules.map((module: any) => {
                 const isSelected = assignedModules.includes(module.id);
                 return (
                   <div 
@@ -454,8 +452,8 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                 <h3 className="font-semibold text-text-primary">Assigned Modules</h3>
               </div>
               <div className="p-4 space-y-2">
-                {assignedModules.map(moduleId => {
-                  const module = modules.find(m => m.id === moduleId);
+                {assignedModules.map((moduleId: any) => {
+                  const module = modules.find((m: any) => m.id === moduleId);
                   if (!module) return null;
                   return (
                     <div key={moduleId} className="flex flex-col gap-1 py-2 border-b border-border last:border-0">
@@ -465,7 +463,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                         <span className="text-[10px] font-mono text-text-secondary">({module.code})</span>
                       </div>
                       <div className="pl-4 flex flex-wrap gap-1 mt-1">
-                        {(selectedPermissions[moduleId] || []).map(perm => (
+                        {(selectedPermissions[moduleId] || []).map((perm: any) => (
                           <span key={perm} className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-text-secondary">
                             {perm}
                           </span>

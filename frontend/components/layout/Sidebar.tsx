@@ -30,7 +30,7 @@ export function Sidebar({ isMobileOpen, setMobileOpen, isCollapsed, setCollapsed
   };
 
   // Filter menu items dynamically based on module and permissions from FEATURE_REGISTRY
-  const filteredItems = FEATURE_REGISTRY.filter(item => {
+  const filteredItems = FEATURE_REGISTRY.filter((item: any) => {
     // If user has the module assigned
     const hasMod = hasModule(item.moduleId);
     if (!hasMod) return false;
@@ -77,7 +77,7 @@ export function Sidebar({ isMobileOpen, setMobileOpen, isCollapsed, setCollapsed
 
         {/* Dynamic Sidebar Links */}
         <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-1 font-sans select-none custom-scrollbar">
-          {filteredItems.map((item) => {
+          {filteredItems.map((item: any) => {
             const IconComponent = item.icon;
             const active = isLinkActive(item.route);
             return (

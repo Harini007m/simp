@@ -139,7 +139,7 @@ function ForecastChart({ forecast }: { forecast: InsightForecast }) {
           </defs>
 
           {/* Gridlines */}
-          {Array.from({ length: 4 }).map((_, idx) => {
+          {Array.from({ length: 4 }).map((_: any, idx: any) => {
             const val = minVal + (range / 3) * idx;
             const y = getY(val);
             return (
@@ -153,7 +153,7 @@ function ForecastChart({ forecast }: { forecast: InsightForecast }) {
           })}
 
           {/* X Axis Grid and Labels */}
-          {allValues.map((val, idx) => {
+          {allValues.map((val: any, idx: any) => {
             const x = getX(idx);
             const isPred = idx >= histLen;
             return (
@@ -174,7 +174,7 @@ function ForecastChart({ forecast }: { forecast: InsightForecast }) {
           <path d={predPath} fill="none" stroke="url(#predGrad)" strokeWidth="3" strokeDasharray="4 4" strokeLinecap="round" />
 
           {/* Data Points and Tooltips */}
-          {allValues.map((val, idx) => {
+          {allValues.map((val: any, idx: any) => {
             const x = getX(idx);
             const y = getY(val);
             const isPred = idx >= histLen - 1;
@@ -271,7 +271,7 @@ export default function PredictiveInsightsPage() {
   const handleApplyRec = (id: string) => {
     setApplyingRecId(id);
     setTimeout(() => {
-      setRecommendations(prev => prev.map(rec => {
+      setRecommendations((prev: any) => prev.map((rec: any) => {
         if (rec.id === id) {
           return { ...rec, status: 'Applied' as const };
         }
@@ -289,12 +289,12 @@ export default function PredictiveInsightsPage() {
     setIsCounselingSubmitting(true);
     setTimeout(() => {
       // Remove from list or lower risk score
-      setRisks(prev => prev.map(s => {
+      setRisks((prev: any) => prev.map((s: any) => {
         if (s.studentId === selectedStudent.studentId) {
           return {
             ...s,
             riskScore: Math.max(30, s.riskScore - 25), // Drop the score significantly
-            factors: s.factors.filter((_, idx) => idx > 0) // Remove one factor as addressed
+            factors: s.factors.filter((_: any, idx: any) => idx > 0) // Remove one factor as addressed
           };
         }
         return s;
@@ -307,7 +307,7 @@ export default function PredictiveInsightsPage() {
   };
 
   // Filtered risks selector
-  const filteredRisks = risks.filter(risk => {
+  const filteredRisks = risks.filter((risk: any) => {
     const matchesSearch = risk.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           risk.program.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -407,7 +407,7 @@ export default function PredictiveInsightsPage() {
           </div>
           <h3 className="text-text-secondary text-xs font-bold uppercase tracking-wider mt-4">High Risk Students</h3>
           <p className="text-2xl font-bold text-text-primary mt-1">
-            {risks.filter(r => r.riskScore >= 80).length} Defaulters
+            {risks.filter((r: any) => r.riskScore >= 80).length} Defaulters
           </p>
           <p className="text-[11px] text-text-secondary mt-2 font-medium">Based on Attendance & Assessments</p>
         </div>
@@ -430,7 +430,7 @@ export default function PredictiveInsightsPage() {
             </div>
 
             <div className="space-y-4">
-              {recommendations.map((rec) => (
+              {recommendations.map((rec: any) => (
                 <div 
                   key={rec.id} 
                   className={`border rounded-xl p-4.5 transition-all flex flex-col sm:flex-row sm:items-start gap-4 justify-between ${
@@ -507,7 +507,7 @@ export default function PredictiveInsightsPage() {
                   type="text"
                   placeholder="Search name or program..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e: any) => setSearchQuery(e.target.value)}
                   className="w-full bg-slate-50 border border-border rounded-xl pl-9 pr-4 py-2.5 text-xs focus:outline-none focus:border-fuchsia-500 transition-all font-medium text-text-primary placeholder-slate-400"
                 />
               </div>
@@ -518,7 +518,7 @@ export default function PredictiveInsightsPage() {
                   <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">Severity</span>
                   <select
                     value={riskFilter}
-                    onChange={(e) => setRiskFilter(e.target.value as any)}
+                    onChange={(e: any) => setRiskFilter(e.target.value as any)}
                     className="w-full bg-slate-50 border border-border rounded-lg px-2 py-1.5 text-[10px] font-bold text-text-secondary focus:outline-none cursor-pointer"
                   >
                     <option value="All">All Severity</option>
@@ -532,7 +532,7 @@ export default function PredictiveInsightsPage() {
                   <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">Risk Driver</span>
                   <select
                     value={factorFilter}
-                    onChange={(e) => setFactorFilter(e.target.value as any)}
+                    onChange={(e: any) => setFactorFilter(e.target.value as any)}
                     className="w-full bg-slate-50 border border-border rounded-lg px-2 py-1.5 text-[10px] font-bold text-text-secondary focus:outline-none cursor-pointer"
                   >
                     <option value="All">All Factors</option>
@@ -545,7 +545,7 @@ export default function PredictiveInsightsPage() {
 
             {/* Student Directory List */}
             <div className="divide-y divide-border max-h-[350px] overflow-y-auto pr-1">
-              {filteredRisks.map((risk) => (
+              {filteredRisks.map((risk: any) => (
                 <div 
                   key={risk.studentId} 
                   onClick={() => setSelectedStudent(risk)}
@@ -555,7 +555,7 @@ export default function PredictiveInsightsPage() {
                     <h4 className="font-bold text-text-primary text-xs group-hover:text-fuchsia-600 transition-colors">{risk.name}</h4>
                     <p className="text-[10px] text-text-secondary font-medium">{risk.program}</p>
                     <div className="flex gap-1.5 mt-1">
-                      {risk.factors.map(f => (
+                      {risk.factors.map((f: any) => (
                         <span key={f} className="bg-rose-50 text-rose-600 border border-rose-100 rounded text-[9px] px-1.5 py-0.5 font-bold uppercase tracking-wider">
                           {f}
                         </span>
@@ -642,7 +642,7 @@ export default function PredictiveInsightsPage() {
               <div className="space-y-2">
                 <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider block">Risk Drivers Detected</span>
                 <div className="flex flex-wrap gap-2">
-                  {selectedStudent.factors.map(f => (
+                  {selectedStudent.factors.map((f: any) => (
                     <span key={f} className="inline-flex items-center gap-1 bg-white border border-rose-200 text-rose-600 font-bold text-[9px] px-2 py-1 rounded-lg">
                       <AlertCircle className="w-3 h-3 text-rose-500 shrink-0" />
                       {f}
@@ -663,7 +663,7 @@ export default function PredictiveInsightsPage() {
                 <label className="text-[10px] font-bold text-text-secondary uppercase">Action Type</label>
                 <select
                   value={counselAction}
-                  onChange={(e) => setCounselAction(e.target.value)}
+                  onChange={(e: any) => setCounselAction(e.target.value)}
                   className="w-full bg-slate-50 border border-border rounded-xl px-3 py-2.5 text-xs font-bold text-text-primary cursor-pointer"
                 >
                   <option value="Schedule Counseling">Schedule Counseling Interview</option>
@@ -679,7 +679,7 @@ export default function PredictiveInsightsPage() {
                   required
                   rows={4}
                   value={counselNote}
-                  onChange={(e) => setCounselNote(e.target.value)}
+                  onChange={(e: any) => setCounselNote(e.target.value)}
                   placeholder="Record intervention details, communication logs, or recommendations here..."
                   className="w-full bg-slate-50 border border-border rounded-xl px-3 py-2 text-xs font-medium text-text-primary focus:outline-none focus:border-primary resize-none"
                 />

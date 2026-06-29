@@ -25,7 +25,7 @@ function SkeletonCard() {
 function SkeletonTable() {
   return (
     <div className="animate-pulse">
-      {Array.from({ length: 6 }).map((_, i) => (
+      {Array.from({ length: 6 }).map((_: any, i: any) => (
         <div key={i} className="flex gap-4 px-5 py-4 border-b border-border">
           <div className="h-8 w-8 bg-slate-200 rounded-full" />
           <div className="h-4 w-28 bg-slate-200 rounded" />
@@ -54,7 +54,7 @@ const statusColors: Record<string, string> = {
 };
 
 function getInitials(name: string) {
-  return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  return name.split(' ').map((n: any) => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
 function formatDateRange(start: string, end: string) {
@@ -104,7 +104,7 @@ export default function LeaveDashboard() {
   }, []);
 
   const filteredLeaves = useMemo(() => {
-    return leaves.filter(l => {
+    return leaves.filter((l: any) => {
       const matchesSearch = !search || l.userName.toLowerCase().includes(search.toLowerCase()) || l.reason.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === 'All' || l.status === statusFilter;
       const matchesType = typeFilter === 'All' || l.leaveType === typeFilter;
@@ -153,9 +153,9 @@ export default function LeaveDashboard() {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+          Array.from({ length: 4 }).map((_: any, i: any) => <SkeletonCard key={i} />)
         ) : (
-          statCards.map((c, i) => (
+          statCards.map((c: any, i: any) => (
             <div key={i} className="bg-white/80 backdrop-blur-xl border border-white/40 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer" onClick={() => {
               if (c.title === 'Pending') setStatusFilter('Pending');
               else if (c.title === 'Approved') setStatusFilter('Approved');
@@ -185,7 +185,7 @@ export default function LeaveDashboard() {
                 type="text"
                 placeholder="Search by name or reason..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e: any) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 text-sm border border-border rounded-xl bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary transition-all outline-none"
               />
               {search && (
@@ -207,7 +207,7 @@ export default function LeaveDashboard() {
             {/* Status pills */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Status</span>
-              {statusOptions.map(opt => (
+              {statusOptions.map((opt: any) => (
                 <button
                   key={opt}
                   onClick={() => setStatusFilter(opt)}
@@ -224,7 +224,7 @@ export default function LeaveDashboard() {
             {/* Type pills */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Type</span>
-              {typeOptions.map(opt => (
+              {typeOptions.map((opt: any) => (
                 <button
                   key={opt}
                   onClick={() => setTypeFilter(opt)}
@@ -241,7 +241,7 @@ export default function LeaveDashboard() {
             {/* Role pills */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Role</span>
-              {roleOptions.map(opt => (
+              {roleOptions.map((opt: any) => (
                 <button
                   key={opt}
                   onClick={() => setRoleFilter(opt)}
@@ -282,7 +282,7 @@ export default function LeaveDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-text-secondary">
-                {filteredLeaves.map(l => (
+                {filteredLeaves.map((l: any) => (
                   <tr key={l.id} className="hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => handleView(l)}>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
@@ -319,14 +319,14 @@ export default function LeaveDashboard() {
                         {l.status === 'Pending' && (
                           <>
                             <button
-                              onClick={e => { e.stopPropagation(); }}
+                              onClick={(e: any) => { e.stopPropagation(); }}
                               className="h-7 w-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center transition-colors"
                               title="Approve"
                             >
                               <ThumbsUp className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={e => { e.stopPropagation(); }}
+                              onClick={(e: any) => { e.stopPropagation(); }}
                               className="h-7 w-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors"
                               title="Reject"
                             >
@@ -335,7 +335,7 @@ export default function LeaveDashboard() {
                           </>
                         )}
                         <button
-                          onClick={e => { e.stopPropagation(); handleView(l); }}
+                          onClick={(e: any) => { e.stopPropagation(); handleView(l); }}
                           className="text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center gap-1"
                         >
                           <Eye className="w-4 h-4" />

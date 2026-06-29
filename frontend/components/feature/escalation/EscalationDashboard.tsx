@@ -25,7 +25,7 @@ function SkeletonCard() {
 function SkeletonTable() {
   return (
     <div className="animate-pulse">
-      {Array.from({ length: 6 }).map((_, i) => (
+      {Array.from({ length: 6 }).map((_: any, i: any) => (
         <div key={i} className="flex gap-4 px-5 py-4 border-b border-border">
           <div className="h-4 w-24 bg-slate-200 rounded" />
           <div className="h-4 w-20 bg-slate-200 rounded" />
@@ -84,9 +84,9 @@ export default function EscalationDashboard() {
         escalationService.getEscalations(),
         escalationService.getRules(),
       ]);
-      const ignored = e.filter(x => x.status === 'Ignored').length;
+      const ignored = e.filter((x: any) => x.status === 'Ignored').length;
       setStats({ ...s, ignoredEscalations: ignored });
-      setEscalations(e.sort((a, b) => new Date(b.triggeredDate).getTime() - new Date(a.triggeredDate).getTime()));
+      setEscalations(e.sort((a: any, b: any) => new Date(b.triggeredDate).getTime() - new Date(a.triggeredDate).getTime()));
       setRules(r);
     } catch (err) {
       console.error(err);
@@ -98,7 +98,7 @@ export default function EscalationDashboard() {
   useEffect(() => { loadData(); }, []);
 
   const filteredEscalations = useMemo(() => {
-    return escalations.filter(e => {
+    return escalations.filter((e: any) => {
       const matchesSearch = !search || e.targetName.toLowerCase().includes(search.toLowerCase()) || e.type.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === 'All' || e.status === statusFilter;
       const matchesType = typeFilter === 'All' || e.type === typeFilter;
@@ -164,9 +164,9 @@ export default function EscalationDashboard() {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+          Array.from({ length: 4 }).map((_: any, i: any) => <SkeletonCard key={i} />)
         ) : (
-          statCards.map((c, i) => (
+          statCards.map((c: any, i: any) => (
             <div key={i} className="bg-white/80 backdrop-blur-xl border border-white/40 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer" onClick={() => {
               setActiveTab('logs');
               if (c.title === 'Pending') setStatusFilter('Pending');
@@ -194,7 +194,7 @@ export default function EscalationDashboard() {
 
       {/* Tab Bar */}
       <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 w-fit">
-        {tabs.map(tab => (
+        {tabs.map((tab: any) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -225,7 +225,7 @@ export default function EscalationDashboard() {
                   type="text"
                   placeholder="Search by target name or type..."
                   value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  onChange={(e: any) => setSearch(e.target.value)}
                   className="w-full pl-9 pr-4 py-2.5 text-sm border border-border rounded-xl bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary transition-all outline-none"
                 />
                 {search && (
@@ -247,7 +247,7 @@ export default function EscalationDashboard() {
               {/* Status pills */}
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Status</span>
-                {statusOptions.map(opt => (
+                {statusOptions.map((opt: any) => (
                   <button
                     key={opt}
                     onClick={() => setStatusFilter(opt)}
@@ -264,7 +264,7 @@ export default function EscalationDashboard() {
               {/* Type pills */}
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Type</span>
-                {typeOptions.map(opt => (
+                {typeOptions.map((opt: any) => (
                   <button
                     key={opt}
                     onClick={() => setTypeFilter(opt)}
@@ -305,7 +305,7 @@ export default function EscalationDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border text-text-secondary">
-                  {filteredEscalations.map(e => (
+                  {filteredEscalations.map((e: any) => (
                     <tr key={e.id} className="hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => handleView(e)}>
                       <td className="px-5 py-3.5">
                         <div>
@@ -321,16 +321,16 @@ export default function EscalationDashboard() {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2.5">
                           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white text-[10px] font-bold">
-                            {e.targetName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                            {e.targetName.split(' ').map((n: any) => n[0]).join('').slice(0, 2)}
                           </div>
                           <span className="font-semibold text-text-primary text-xs">{e.targetName}</span>
                         </div>
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex -space-x-1.5">
-                          {e.notifiedUsers.slice(0, 3).map((u, i) => (
+                          {e.notifiedUsers.slice(0, 3).map((u: any, i: any) => (
                             <div key={i} className="h-6 w-6 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[8px] font-bold text-text-secondary" title={`${u.name} (${u.role})`}>
-                              {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                              {u.name.split(' ').map((n: any) => n[0]).join('').slice(0, 2)}
                             </div>
                           ))}
                           {e.notifiedUsers.length > 3 && (
@@ -357,13 +357,13 @@ export default function EscalationDashboard() {
                           {e.status === 'Pending' && (
                             <>
                               <button
-                                onClick={ev => { ev.stopPropagation(); handleResolve(e.id); }}
+                                onClick={(ev: any) => { ev.stopPropagation(); handleResolve(e.id); }}
                                 className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors"
                               >
                                 Resolve
                               </button>
                               <button
-                                onClick={ev => { ev.stopPropagation(); handleIgnore(e.id); }}
+                                onClick={(ev: any) => { ev.stopPropagation(); handleIgnore(e.id); }}
                                 className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-text-secondary hover:bg-slate-200 transition-colors"
                               >
                                 Ignore
@@ -371,7 +371,7 @@ export default function EscalationDashboard() {
                             </>
                           )}
                           <button
-                            onClick={ev => { ev.stopPropagation(); handleView(e); }}
+                            onClick={(ev: any) => { ev.stopPropagation(); handleView(e); }}
                             className="text-indigo-600 hover:text-indigo-800 p-1"
                           >
                             <Eye className="w-4 h-4" />
@@ -408,7 +408,7 @@ export default function EscalationDashboard() {
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {rules.map(rule => (
+              {rules.map((rule: any) => (
                 <div key={rule.id} className="p-5 hover:bg-slate-50/80 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
@@ -455,7 +455,7 @@ export default function EscalationDashboard() {
             {/* Escalation Header */}
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white text-lg font-bold shadow-lg">
-                {selectedEscalation.targetName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                {selectedEscalation.targetName.split(' ').map((n: any) => n[0]).join('').slice(0, 2)}
               </div>
               <div>
                 <h3 className="text-lg font-bold text-text-primary">{selectedEscalation.targetName}</h3>
@@ -502,11 +502,11 @@ export default function EscalationDashboard() {
             <div className="space-y-2">
               <h4 className="text-sm font-semibold text-text-primary">Notified Users</h4>
               <div className="space-y-2">
-                {selectedEscalation.notifiedUsers.map((u, i) => (
+                {selectedEscalation.notifiedUsers.map((u: any, i: any) => (
                   <div key={i} className="bg-slate-50 rounded-xl p-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-text-secondary">
-                        {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        {u.name.split(' ').map((n: any) => n[0]).join('').slice(0, 2)}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-text-primary">{u.name}</p>

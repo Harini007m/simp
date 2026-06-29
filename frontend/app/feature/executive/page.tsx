@@ -56,7 +56,7 @@ export default function ExecutiveDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {metrics.map(metric => (
+        {metrics.map((metric: any) => (
           <div key={metric.id} className="bg-slate-900 text-white p-6 rounded-2xl shadow-sm border border-border">
             <h3 className="text-text-secondary font-medium text-sm mb-2">{metric.title}</h3>
             <div className="text-3xl font-bold mb-4">{metric.value}</div>
@@ -78,7 +78,7 @@ export default function ExecutiveDashboardPage() {
           <h2 className="font-bold text-text-primary">Active Risk Indicators</h2>
         </div>
         <div className="divide-y divide-border">
-          {risks.map(risk => (
+          {risks.map((risk: any) => (
             <div key={risk.id} className="p-4 hover:bg-slate-50 transition-colors">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">

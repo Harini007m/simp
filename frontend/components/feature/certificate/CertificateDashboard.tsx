@@ -79,8 +79,8 @@ export default function CertificateDashboard() {
     }
   };
 
-  const issuedCount = certificates.filter(c => c.status === 'Issued').length;
-  const pendingCount = certificates.filter(c => c.status === 'Pending Approval').length;
+  const issuedCount = certificates.filter((c: any) => c.status === 'Issued').length;
+  const pendingCount = certificates.filter((c: any) => c.status === 'Pending Approval').length;
 
   return (
     <div className="space-y-6 font-sans">
@@ -141,7 +141,7 @@ export default function CertificateDashboard() {
         <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-text-secondary" /></div>
       ) : !selectedBatch ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {batches.map(batch => (
+          {batches.map((batch: any) => (
             <div 
               key={batch.id} 
               onClick={() => setSelectedBatch(batch)}
@@ -171,9 +171,9 @@ export default function CertificateDashboard() {
             <p className="text-xs font-medium text-text-secondary mt-1">Select a student to issue or view their certificate.</p>
           </div>
           <div className="divide-y divide-border">
-            {selectedBatch.students?.length > 0 ? selectedBatch.students.map(student => {
-              const studentCerts = certificates.filter(c => c.studentName === student.name);
-              const hasIssued = studentCerts.some(c => c.status === 'Issued');
+            {selectedBatch.students?.length > 0 ? selectedBatch.students.map((student: any) => {
+              const studentCerts = certificates.filter((c: any) => c.studentName === student.name);
+              const hasIssued = studentCerts.some((c: any) => c.status === 'Issued');
               
               return (
                 <div key={student.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors duration-200">
@@ -222,7 +222,7 @@ export default function CertificateDashboard() {
               type="text"
               required
               value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
+              onChange={(e: any) => setStudentName(e.target.value)}
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-bold text-text-primary"
               readOnly
             />
@@ -233,7 +233,7 @@ export default function CertificateDashboard() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Certificate Type</label>
               <select
                 value={certType}
-                onChange={(e) => setCertType(e.target.value as CertificateType)}
+                onChange={(e: any) => setCertType(e.target.value as CertificateType)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="Completion Certificate">Completion Certificate</option>
@@ -247,7 +247,7 @@ export default function CertificateDashboard() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Initial Status</label>
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
+                onChange={(e: any) => setStatus(e.target.value as any)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="Issued">Directly Issue (Active)</option>
@@ -263,7 +263,7 @@ export default function CertificateDashboard() {
                 type="text"
                 required
                 value={program}
-                onChange={(e) => setProgram(e.target.value)}
+                onChange={(e: any) => setProgram(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
                 readOnly
               />
@@ -274,7 +274,7 @@ export default function CertificateDashboard() {
                 type="text"
                 required
                 value={batchCode}
-                onChange={(e) => setBatchCode(e.target.value)}
+                onChange={(e: any) => setBatchCode(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
                 readOnly
               />
@@ -287,7 +287,7 @@ export default function CertificateDashboard() {
               type="text"
               required
               value={mentorName}
-              onChange={(e) => setMentorName(e.target.value)}
+              onChange={(e: any) => setMentorName(e.target.value)}
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
             />
           </div>

@@ -52,7 +52,7 @@ const LoginPage = () => {
         });
         
         setTimeout(() => {
-          setToastConfig(prev => ({ ...prev, show: false }));
+          setToastConfig((prev: any) => ({ ...prev, show: false }));
         }, 4000);
       }
     } catch (error) {
@@ -64,7 +64,7 @@ const LoginPage = () => {
         type: 'error'
       });
       setTimeout(() => {
-        setToastConfig(prev => ({ ...prev, show: false }));
+        setToastConfig((prev: any) => ({ ...prev, show: false }));
       }, 4000);
     }
   };
@@ -188,7 +188,7 @@ const LoginPage = () => {
                       placeholder="Eg: Harini" 
                       required 
                       value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      onChange={(e: any) => setUsername(e.target.value)}
                       className="block w-full rounded-none border border-border px-4 py-3 text-sm focus:border-orange-500 focus:outline-none focus:ring-0 transition-all placeholder-sky-300 bg-white" 
                     />
                   </div>
@@ -205,7 +205,7 @@ const LoginPage = () => {
                       required 
                       placeholder="••••••••"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e: any) => setPassword(e.target.value)}
                       className="block w-full rounded-none border border-border px-4 py-3 text-sm focus:border-orange-500 focus:outline-none focus:ring-0 transition-all placeholder-sky-300 bg-white" 
                     />
                   </div>
@@ -233,7 +233,7 @@ const LoginPage = () => {
           title={toastConfig.title}
           message={toastConfig.message}
           type={toastConfig.type}
-          onClose={() => setToastConfig(prev => ({ ...prev, show: false }))} 
+          onClose={() => setToastConfig((prev: any) => ({ ...prev, show: false }))} 
         />
       )}
     </div>

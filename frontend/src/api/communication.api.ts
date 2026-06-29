@@ -1,6 +1,4 @@
 import { Conversation, Message } from '../types/communication.types';
-import { MOCK_CONVERSATIONS, MOCK_MESSAGES } from '../data/mock-conversations';
-
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const communicationApi = {
@@ -8,11 +6,11 @@ export const communicationApi = {
     await delay(600);
     
     // Attach last message to conversations
-    const sortedConvs = [...MOCK_CONVERSATIONS]
-      .filter(c => c.participants.some(p => p.id === userId));
+    const sortedConvs = [...([] as any[])]
+      .filter(c => c.participants.some((p: any) => p.id === userId));
       
     sortedConvs.forEach(conv => {
-      const convMsgs = MOCK_MESSAGES.filter(m => m.conversationId === conv.id);
+      const convMsgs = ([] as any[]).filter(m => m.conversationId === conv.id);
       if (convMsgs.length > 0) {
         convMsgs.sort((a, b) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime());
         conv.lastMessage = convMsgs[0];
@@ -24,15 +22,13 @@ export const communicationApi = {
   
   getMessages: async (conversationId: string): Promise<Message[]> => {
     await delay(300);
-    return MOCK_MESSAGES
-      .filter(m => m.conversationId === conversationId)
-      .sort((a, b) => new Date(a.createdTime).getTime() - new Date(b.createdTime).getTime());
+    throw new Error('Backend implementation pending or failed');
   },
   
   sendMessage: async (data: Partial<Message>): Promise<Message> => {
     await delay(300);
     const newMessage: Message = {
-      id: `msg-${MOCK_MESSAGES.length + 1}`,
+      id: `msg-${([] as any[]).length + 1}`,
       conversationId: data.conversationId || '',
       senderId: data.senderId || 'u1',
       senderName: data.senderName || 'Current User',
@@ -42,10 +38,10 @@ export const communicationApi = {
       status: 'Sent',
       priority: data.priority || 'Normal'
     };
-    MOCK_MESSAGES.push(newMessage);
+    ([] as any[]).push(newMessage);
     
     // Update conversation
-    const conv = MOCK_CONVERSATIONS.find(c => c.id === data.conversationId);
+    const conv = ([] as any[]).find(c => c.id === data.conversationId);
     if (conv) {
       conv.updatedTime = newMessage.createdTime;
       conv.lastMessage = newMessage;
@@ -57,7 +53,7 @@ export const communicationApi = {
   createConversation: async (data: Partial<Conversation>): Promise<Conversation> => {
     await delay(300);
     const newConv: Conversation = {
-      id: `conv-${MOCK_CONVERSATIONS.length + 1}`,
+      id: `conv-${([] as any[]).length + 1}`,
       type: data.type || 'One-to-One',
       name: data.name,
       participants: data.participants || [
@@ -66,7 +62,7 @@ export const communicationApi = {
       unreadCount: 0,
       updatedTime: new Date().toISOString()
     };
-    MOCK_CONVERSATIONS.unshift(newConv);
+    ([] as any[]).unshift(newConv);
     return newConv;
   }
 };

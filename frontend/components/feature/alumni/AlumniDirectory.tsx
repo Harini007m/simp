@@ -83,7 +83,7 @@ export default function AlumniDirectory() {
   };
 
   // Filtered alumni profiles
-  const filteredAlumni = alumni.filter(al => {
+  const filteredAlumni = alumni.filter((al: any) => {
     const matchesSearch = al.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           al.currentCompany.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           al.currentDesignation.toLowerCase().includes(searchQuery.toLowerCase());
@@ -117,7 +117,7 @@ export default function AlumniDirectory() {
               type="text" 
               placeholder="Search alumni..." 
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: any) => setSearchQuery(e.target.value)}
               className="w-full bg-white border border-border rounded-xl pl-9.5 pr-4 py-2.5 text-xs focus:outline-none focus:border-primary font-medium text-text-primary"
             />
           </div>
@@ -125,7 +125,7 @@ export default function AlumniDirectory() {
           {/* Mentoring Filter selector */}
           <select
             value={mentoringFilter}
-            onChange={(e) => setMentoringFilter(e.target.value as any)}
+            onChange={(e: any) => setMentoringFilter(e.target.value as any)}
             className="bg-white border border-border rounded-xl px-3 py-2 text-xs font-bold text-text-primary focus:outline-none cursor-pointer"
           >
             <option value="All">All Mentoring Status</option>
@@ -136,7 +136,7 @@ export default function AlumniDirectory() {
           {/* Graduation Year selector */}
           <select
             value={yearFilter}
-            onChange={(e) => setYearFilter(e.target.value as any)}
+            onChange={(e: any) => setYearFilter(e.target.value as any)}
             className="bg-white border border-border rounded-xl px-3 py-2 text-xs font-bold text-text-primary focus:outline-none cursor-pointer"
           >
             <option value="All">All Class Years</option>
@@ -163,7 +163,7 @@ export default function AlumniDirectory() {
             Loading alumni network directory...
           </div>
         ) : (
-          filteredAlumni.slice(0, 12).map(al => (
+          filteredAlumni.slice(0, 12).map((al: any) => (
             <div key={al.id} className="bg-white rounded-2xl border border-border p-5 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden flex flex-col justify-between min-h-[190px]">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               
@@ -231,7 +231,7 @@ export default function AlumniDirectory() {
               type="text"
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e: any) => setName(e.target.value)}
               placeholder="e.g., John Doe"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
             />
@@ -244,7 +244,7 @@ export default function AlumniDirectory() {
                 type="text"
                 required
                 value={batch}
-                onChange={(e) => setBatch(e.target.value)}
+                onChange={(e: any) => setBatch(e.target.value)}
                 placeholder="e.g., Class of 2025"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
               />
@@ -255,7 +255,7 @@ export default function AlumniDirectory() {
                 type="number"
                 required
                 value={graduationYear}
-                onChange={(e) => setGraduationYear(parseInt(e.target.value) || 2025)}
+                onChange={(e: any) => setGraduationYear(parseInt(e.target.value) || 2025)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-mono font-bold text-text-primary"
               />
             </div>
@@ -268,7 +268,7 @@ export default function AlumniDirectory() {
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e: any) => setEmail(e.target.value)}
                 placeholder="e.g., john@example.com"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
               />
@@ -278,7 +278,7 @@ export default function AlumniDirectory() {
               <input
                 type="text"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e: any) => setPhone(e.target.value)}
                 placeholder="e.g., 9876543210"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
               />
@@ -292,7 +292,7 @@ export default function AlumniDirectory() {
                 type="text"
                 required
                 value={currentCompany}
-                onChange={(e) => setCurrentCompany(e.target.value)}
+                onChange={(e: any) => setCurrentCompany(e.target.value)}
                 placeholder="e.g., Google"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
               />
@@ -303,7 +303,7 @@ export default function AlumniDirectory() {
                 type="text"
                 required
                 value={currentDesignation}
-                onChange={(e) => setCurrentDesignation(e.target.value)}
+                onChange={(e: any) => setCurrentDesignation(e.target.value)}
                 placeholder="e.g., Senior Developer"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
               />
@@ -315,7 +315,7 @@ export default function AlumniDirectory() {
             <input
               type="url"
               value={linkedInUrl}
-              onChange={(e) => setLinkedInUrl(e.target.value)}
+              onChange={(e: any) => setLinkedInUrl(e.target.value)}
               placeholder="e.g., https://linkedin.com/in/username"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
             />
@@ -326,7 +326,7 @@ export default function AlumniDirectory() {
               type="checkbox"
               id="isMentoring"
               checked={isMentoring}
-              onChange={(e) => setIsMentoring(e.target.checked)}
+              onChange={(e: any) => setIsMentoring(e.target.checked)}
               className="h-4.5 w-4.5 rounded border-border text-indigo-650 focus:ring-primary cursor-pointer"
             />
             <label htmlFor="isMentoring" className="text-xs font-bold text-text-secondary cursor-pointer">

@@ -34,7 +34,7 @@ const SuccessCheckIcon = ({ className = "h-4 w-4" }) => <Check className={classN
 const ArrowBackIcon = ({ className = "h-4 w-4" }) => <ArrowLeft className={className} />;
 const UploadIcon = ({ className = "h-4 w-4" }) => <Upload className={className} />;
 
-const getStepIcon = (index: number, className = "h-4 w-4") => {
+const getStepIcon = (index: number, className: any = "h-4 w-4") => {
   switch (index) {
     case 0: return <UserIcon className={className} />;
     case 1: return <AcademicIcon className={className} />;
@@ -250,7 +250,7 @@ function ApplicationFormContent() {
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
-        setFormState((prev) => ({
+        setFormState((prev: any) => ({
           ...prev,
           personalInformation: { ...prev.personalInformation, ...parsed.personalInformation },
           academicInformation: { ...prev.academicInformation, ...parsed.academicInformation },
@@ -299,7 +299,7 @@ function ApplicationFormContent() {
 
   // Handle simple input modifications
   const handleInputChange = (section: keyof ApplicationState, field: string, value: string | boolean) => {
-    setFormState((prev) => ({
+    setFormState((prev: any) => ({
       ...prev,
       [section]: {
         ...prev[section] as object,
@@ -309,7 +309,7 @@ function ApplicationFormContent() {
     
     // Clear error immediately on change
     if (errors[field]) {
-      setErrors((prev) => {
+      setErrors((prev: any) => {
         const next = { ...prev };
         delete next[field];
         return next;
@@ -318,12 +318,12 @@ function ApplicationFormContent() {
   };
 
   const handleBlur = (field: string) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
+    setTouched((prev: any) => ({ ...prev, [field]: true }));
     const stepErrors = validateStepFields(currentStep);
     if (stepErrors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: stepErrors[field] }));
+      setErrors((prev: any) => ({ ...prev, [field]: stepErrors[field] }));
     } else {
-      setErrors((prev) => {
+      setErrors((prev: any) => {
         const next = { ...prev };
         delete next[field];
         return next;
@@ -473,10 +473,10 @@ function ApplicationFormContent() {
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       const newTouched: Record<string, boolean> = {};
-      Object.keys(stepErrors).forEach((key) => {
+      Object.keys(stepErrors).forEach((key: any) => {
         newTouched[key] = true;
       });
-      setTouched((prev) => ({ ...prev, ...newTouched }));
+      setTouched((prev: any) => ({ ...prev, ...newTouched }));
 
       const firstErrorField = Object.keys(stepErrors)[0];
       const el = document.getElementsByName(firstErrorField)[0];
@@ -484,12 +484,12 @@ function ApplicationFormContent() {
       return;
     }
 
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+    setCurrentStep((prev: any) => Math.min(prev + 1, steps.length - 1));
     topRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handlePrev = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 0));
+    setCurrentStep((prev: any) => Math.max(prev - 1, 0));
     topRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -515,41 +515,41 @@ function ApplicationFormContent() {
 
     if (type === "resume") {
       if (file.type !== "application/pdf") {
-        setErrors((prev) => ({ ...prev, resume: "Only PDF format is accepted." }));
+        setErrors((prev: any) => ({ ...prev, resume: "Only PDF format is accepted." }));
         return;
       }
       if (file.size > maxResumeSize) {
-        setErrors((prev) => ({ ...prev, resume: "Resume size must be under 10MB." }));
+        setErrors((prev: any) => ({ ...prev, resume: "Resume size must be under 10MB." }));
         return;
       }
     } else if (type === "photo") {
       const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
       if (!allowedTypes.includes(file.type)) {
-        setErrors((prev) => ({ ...prev, photo: "Only image files (JPEG, PNG, WEBP) are accepted." }));
+        setErrors((prev: any) => ({ ...prev, photo: "Only image files (JPEG, PNG, WEBP) are accepted." }));
         return;
       }
       if (file.size > maxScreenshotSize) {
-        setErrors((prev) => ({ ...prev, photo: "Photo size must be under 5MB." }));
+        setErrors((prev: any) => ({ ...prev, photo: "Photo size must be under 5MB." }));
         return;
       }
     } else if (type === "passbook") {
       const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
       if (!allowedTypes.includes(file.type)) {
-        setErrors((prev) => ({ ...prev, passbook: "Accepted files: JPEG, PNG, WEBP, or PDF." }));
+        setErrors((prev: any) => ({ ...prev, passbook: "Accepted files: JPEG, PNG, WEBP, or PDF." }));
         return;
       }
       if (file.size > maxScreenshotSize) {
-        setErrors((prev) => ({ ...prev, passbook: "Passbook size must be under 5MB." }));
+        setErrors((prev: any) => ({ ...prev, passbook: "Passbook size must be under 5MB." }));
         return;
       }
     } else {
       const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
       if (!allowedTypes.includes(file.type)) {
-        setErrors((prev) => ({ ...prev, paymentScreenshot: "Accepted files: JPEG, PNG, WEBP, or PDF." }));
+        setErrors((prev: any) => ({ ...prev, paymentScreenshot: "Accepted files: JPEG, PNG, WEBP, or PDF." }));
         return;
       }
       if (file.size > maxScreenshotSize) {
-        setErrors((prev) => ({ ...prev, paymentScreenshot: "Payment screenshot must be under 5MB." }));
+        setErrors((prev: any) => ({ ...prev, paymentScreenshot: "Payment screenshot must be under 5MB." }));
         return;
       }
     }
@@ -564,41 +564,41 @@ function ApplicationFormContent() {
       };
 
       if (type === "resume") {
-        setFormState((prev) => ({
+        setFormState((prev: any) => ({
           ...prev,
           documents: { ...prev.documents, resume: fileObj }
         }));
-        setErrors((prev) => {
+        setErrors((prev: any) => {
           const next = { ...prev };
           delete next.resume;
           return next;
         });
       } else if (type === "photo") {
-        setFormState((prev) => ({
+        setFormState((prev: any) => ({
           ...prev,
           personalInformation: { ...prev.personalInformation, photo: fileObj }
         }));
-        setErrors((prev) => {
+        setErrors((prev: any) => {
           const next = { ...prev };
           delete next.photo;
           return next;
         });
       } else if (type === "passbook") {
-        setFormState((prev) => ({
+        setFormState((prev: any) => ({
           ...prev,
           documents: { ...prev.documents, passbook: fileObj }
         }));
-        setErrors((prev) => {
+        setErrors((prev: any) => {
           const next = { ...prev };
           delete next.passbook;
           return next;
         });
       } else {
-        setFormState((prev) => ({
+        setFormState((prev: any) => ({
           ...prev,
           internshipSpecificData: { ...prev.internshipSpecificData, paymentScreenshot: fileObj }
         }));
-        setErrors((prev) => {
+        setErrors((prev: any) => {
           const next = { ...prev };
           delete next.paymentScreenshot;
           return next;
@@ -610,22 +610,22 @@ function ApplicationFormContent() {
 
   const removeFile = (type: "resume" | "screenshot" | "photo" | "passbook") => {
     if (type === "resume") {
-      setFormState((prev) => ({
+      setFormState((prev: any) => ({
         ...prev,
         documents: { ...prev.documents, resume: null }
       }));
     } else if (type === "photo") {
-      setFormState((prev) => ({
+      setFormState((prev: any) => ({
         ...prev,
         personalInformation: { ...prev.personalInformation, photo: null }
       }));
     } else if (type === "passbook") {
-      setFormState((prev) => ({
+      setFormState((prev: any) => ({
         ...prev,
         documents: { ...prev.documents, passbook: null }
       }));
     } else {
-      setFormState((prev) => ({
+      setFormState((prev: any) => ({
         ...prev,
         internshipSpecificData: { ...prev.internshipSpecificData, paymentScreenshot: null }
       }));
@@ -636,7 +636,7 @@ function ApplicationFormContent() {
 
   const handleUPISimulation = () => {
     setIsSimulatingPayment(true);
-    setErrors((prev) => {
+    setErrors((prev: any) => {
       const next = { ...prev };
       delete next.upiPaid;
       delete next.paymentStatus;
@@ -645,7 +645,7 @@ function ApplicationFormContent() {
     setTimeout(() => {
       setIsSimulatingPayment(false);
       const mockTxnId = `UPI-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
-      setFormState((prev) => ({
+      setFormState((prev: any) => ({
         ...prev,
         internshipSpecificData: {
           ...prev.internshipSpecificData,
@@ -658,7 +658,7 @@ function ApplicationFormContent() {
 
   const handleCardSimulation = () => {
     setIsSimulatingPayment(true);
-    setErrors((prev) => {
+    setErrors((prev: any) => {
       const next = { ...prev };
       delete next.cardPaid;
       delete next.paymentStatus;
@@ -668,7 +668,7 @@ function ApplicationFormContent() {
       setIsSimulatingPayment(false);
       const mockTxnId = `CARD-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
       const mockAuthCode = `AUTH-${Math.floor(100000 + Math.random() * 900000)}`;
-      setFormState((prev) => ({
+      setFormState((prev: any) => ({
         ...prev,
         internshipSpecificData: {
           ...prev.internshipSpecificData,
@@ -755,7 +755,7 @@ function ApplicationFormContent() {
         const response = await applicationService.createApplication(payload as any);
         
         // Mocking delay for UX if API is too fast
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve: any) => setTimeout(resolve, 500));
 
         localStorage.setItem('pinesphere_submitted_photo', formState.personalInformation.photo?.base64 || '');
         localStorage.setItem('pinesphere_submitted_name', `${formState.personalInformation.firstName} ${formState.personalInformation.lastName}`);
@@ -774,7 +774,7 @@ function ApplicationFormContent() {
           message = err.message;
         }
 
-        setErrors((prev) => ({ ...prev, submit: message }));
+        setErrors((prev: any) => ({ ...prev, submit: message }));
         alert(`There was an error submitting your application: ${message}`);
         setIsSubmitting(false);
       }
@@ -795,7 +795,7 @@ function ApplicationFormContent() {
 
         <nav aria-label="Step Progress">
           <ol className="space-y-4">
-            {steps.map((step, idx) => {
+            {steps.map((step: any, idx: any) => {
               const isActive = currentStep === idx;
               const isDone = idx < currentStep;
               
@@ -888,7 +888,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. John"
                     value={formState.personalInformation.firstName}
                     onBlur={() => handleBlur("firstName")}
-                    onChange={(e) => handleInputChange("personalInformation", "firstName", e.target.value)}
+                    onChange={(e: any) => handleInputChange("personalInformation", "firstName", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.firstName && touched.firstName ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -911,7 +911,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. Doe"
                     value={formState.personalInformation.lastName}
                     onBlur={() => handleBlur("lastName")}
-                    onChange={(e) => handleInputChange("personalInformation", "lastName", e.target.value)}
+                    onChange={(e: any) => handleInputChange("personalInformation", "lastName", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.lastName && touched.lastName ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -934,7 +934,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. john.doe@email.com"
                     value={formState.personalInformation.email}
                     onBlur={() => handleBlur("email")}
-                    onChange={(e) => handleInputChange("personalInformation", "email", e.target.value)}
+                    onChange={(e: any) => handleInputChange("personalInformation", "email", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.email && touched.email ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -957,7 +957,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. 9876543210"
                     value={formState.personalInformation.mobileNumber}
                     onBlur={() => handleBlur("mobileNumber")}
-                    onChange={(e) => handleInputChange("personalInformation", "mobileNumber", e.target.value)}
+                    onChange={(e: any) => handleInputChange("personalInformation", "mobileNumber", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.mobileNumber && touched.mobileNumber ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -977,7 +977,7 @@ function ApplicationFormContent() {
                     id="dateOfBirth"
                     name="dateOfBirth"
                     value={formState.personalInformation.dateOfBirth}
-                    onChange={(e) => handleInputChange("personalInformation", "dateOfBirth", e.target.value)}
+                    onChange={(e: any) => handleInputChange("personalInformation", "dateOfBirth", e.target.value)}
                     className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white text-text-primary transition-all"
                   />
                 </div>
@@ -988,7 +988,7 @@ function ApplicationFormContent() {
                     id="gender"
                     name="gender"
                     value={formState.personalInformation.gender}
-                    onChange={(e) => handleInputChange("personalInformation", "gender", e.target.value)}
+                    onChange={(e: any) => handleInputChange("personalInformation", "gender", e.target.value)}
                     className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white text-text-primary transition-all"
                   >
                     <option value="">Select Gender</option>
@@ -1009,7 +1009,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. Chennai"
                     value={formState.personalInformation.city}
                     onBlur={() => handleBlur("city")}
-                    onChange={(e) => handleInputChange("personalInformation", "city", e.target.value)}
+                    onChange={(e: any) => handleInputChange("personalInformation", "city", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.city && touched.city ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1032,7 +1032,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. Tamil Nadu"
                     value={formState.personalInformation.state}
                     onBlur={() => handleBlur("state")}
-                    onChange={(e) => handleInputChange("personalInformation", "state", e.target.value)}
+                    onChange={(e: any) => handleInputChange("personalInformation", "state", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.state && touched.state ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1052,15 +1052,15 @@ function ApplicationFormContent() {
                     <div
                       ref={dragRefPhoto}
                       onClick={() => document.getElementById('photo-input')?.click()}
-                      onDragOver={(e) => {
+                      onDragOver={(e: any) => {
                         e.preventDefault();
                         dragRefPhoto.current?.classList.add("border-blue-500", "bg-blue-50/30");
                       }}
-                      onDragLeave={(e) => {
+                      onDragLeave={(e: any) => {
                         e.preventDefault();
                         dragRefPhoto.current?.classList.remove("border-blue-500", "bg-blue-50/30");
                       }}
-                      onDrop={(e) => {
+                      onDrop={(e: any) => {
                         e.preventDefault();
                         dragRefPhoto.current?.classList.remove("border-blue-500", "bg-blue-50/30");
                         const file = e.dataTransfer.files?.[0];
@@ -1076,7 +1076,7 @@ function ApplicationFormContent() {
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         className="hidden"
-                        onChange={(e) => {
+                        onChange={(e: any) => {
                           const file = e.target.files?.[0];
                           if (file) processFile(file, "photo");
                         }}
@@ -1136,7 +1136,7 @@ function ApplicationFormContent() {
                     required
                     value={formState.academicInformation.collegeName}
                     onBlur={() => handleBlur("collegeName")}
-                    onChange={(e) => handleInputChange("academicInformation", "collegeName", e.target.value)}
+                    onChange={(e: any) => handleInputChange("academicInformation", "collegeName", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder:text-placeholder text-text-primary transition-all ${
                       errors.collegeName && touched.collegeName ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1162,7 +1162,7 @@ function ApplicationFormContent() {
                     required
                     value={formState.academicInformation.department}
                     onBlur={() => handleBlur("department")}
-                    onChange={(e) => handleInputChange("academicInformation", "department", e.target.value)}
+                    onChange={(e: any) => handleInputChange("academicInformation", "department", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder:text-placeholder text-text-primary transition-all ${
                       errors.department && touched.department ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1188,7 +1188,7 @@ function ApplicationFormContent() {
                     required
                     value={formState.academicInformation.degree}
                     onBlur={() => handleBlur("degree")}
-                    onChange={(e) => handleInputChange("academicInformation", "degree", e.target.value)}
+                    onChange={(e: any) => handleInputChange("academicInformation", "degree", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder:text-placeholder text-text-primary transition-all ${
                       errors.degree && touched.degree ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1214,7 +1214,7 @@ function ApplicationFormContent() {
                     required
                     value={formState.academicInformation.currentYear}
                     onBlur={() => handleBlur("currentYear")}
-                    onChange={(e) => handleInputChange("academicInformation", "currentYear", e.target.value)}
+                    onChange={(e: any) => handleInputChange("academicInformation", "currentYear", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white text-text-primary transition-all ${
                       errors.currentYear && touched.currentYear ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1245,7 +1245,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. 8.5 or 85%"
                     value={formState.academicInformation.cgpaPercentage}
                     onBlur={() => handleBlur("cgpaPercentage")}
-                    onChange={(e) => handleInputChange("academicInformation", "cgpaPercentage", e.target.value)}
+                    onChange={(e: any) => handleInputChange("academicInformation", "cgpaPercentage", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.cgpaPercentage && touched.cgpaPercentage ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1268,7 +1268,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. 2027"
                     value={formState.academicInformation.graduationYear}
                     onBlur={() => handleBlur("graduationYear")}
-                    onChange={(e) => handleInputChange("academicInformation", "graduationYear", e.target.value)}
+                    onChange={(e: any) => handleInputChange("academicInformation", "graduationYear", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                       errors.graduationYear && touched.graduationYear ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1303,7 +1303,7 @@ function ApplicationFormContent() {
                     placeholder="E.g. React, Node.js, TypeScript, CSS, UI Design"
                     value={formState.professionalInformation.skills}
                     onBlur={() => handleBlur("skills")}
-                    onChange={(e) => handleInputChange("professionalInformation", "skills", e.target.value)}
+                    onChange={(e: any) => handleInputChange("professionalInformation", "skills", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-slate-850 transition-all ${
                       errors.skills && touched.skills ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1325,7 +1325,7 @@ function ApplicationFormContent() {
                     placeholder="https://github.com/username"
                     value={formState.professionalInformation.githubUrl}
                     onBlur={() => handleBlur("githubUrl")}
-                    onChange={(e) => handleInputChange("professionalInformation", "githubUrl", e.target.value)}
+                    onChange={(e: any) => handleInputChange("professionalInformation", "githubUrl", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-slate-850 transition-all ${
                       errors.githubUrl && touched.githubUrl ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1347,7 +1347,7 @@ function ApplicationFormContent() {
                     placeholder="https://linkedin.com/in/username"
                     value={formState.professionalInformation.linkedinUrl}
                     onBlur={() => handleBlur("linkedinUrl")}
-                    onChange={(e) => handleInputChange("professionalInformation", "linkedinUrl", e.target.value)}
+                    onChange={(e: any) => handleInputChange("professionalInformation", "linkedinUrl", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-slate-855 transition-all ${
                       errors.linkedinUrl && touched.linkedinUrl ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1369,7 +1369,7 @@ function ApplicationFormContent() {
                     placeholder="https://myportfolio.com"
                     value={formState.professionalInformation.portfolioUrl}
                     onBlur={() => handleBlur("portfolioUrl")}
-                    onChange={(e) => handleInputChange("professionalInformation", "portfolioUrl", e.target.value)}
+                    onChange={(e: any) => handleInputChange("professionalInformation", "portfolioUrl", e.target.value)}
                     className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-slate-850 transition-all ${
                       errors.portfolioUrl && touched.portfolioUrl ? "border-rose-500 bg-rose-50/20" : "border-border"
                     }`}
@@ -1390,7 +1390,7 @@ function ApplicationFormContent() {
                     rows={4}
                     placeholder="Describe some key projects you've built, the tech stacks used, and details of your contributions."
                     value={formState.professionalInformation.projectExperience}
-                    onChange={(e) => handleInputChange("professionalInformation", "projectExperience", e.target.value)}
+                    onChange={(e: any) => handleInputChange("professionalInformation", "projectExperience", e.target.value)}
                     className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all"
                   ></textarea>
                 </div>
@@ -1439,7 +1439,7 @@ function ApplicationFormContent() {
                       id="feeAcceptance"
                       name="feeAcceptance"
                       checked={formState.internshipSpecificData.feeAcceptance}
-                      onChange={(e) => handleInputChange("internshipSpecificData", "feeAcceptance", e.target.checked)}
+                      onChange={(e: any) => handleInputChange("internshipSpecificData", "feeAcceptance", e.target.checked)}
                       className="h-5 w-5 shrink-0 rounded border-border text-blue-600 focus:ring-primary accent-blue-600 mt-0.5"
                     />
                     <div>
@@ -1463,9 +1463,9 @@ function ApplicationFormContent() {
                           required
                           value={formState.internshipSpecificData.paymentMode}
                           onBlur={() => handleBlur("paymentMode")}
-                          onChange={(e) => {
+                          onChange={(e: any) => {
                             const mode = e.target.value;
-                            setFormState((prev) => ({
+                            setFormState((prev: any) => ({
                               ...prev,
                               internshipSpecificData: {
                                 ...prev.internshipSpecificData,
@@ -1482,7 +1482,7 @@ function ApplicationFormContent() {
                                 transactionId: "",
                               }
                             }));
-                            setErrors((prev) => {
+                            setErrors((prev: any) => {
                               const next = { ...prev };
                               delete next.paymentMode;
                               delete next.upiApp;
@@ -1531,7 +1531,7 @@ function ApplicationFormContent() {
                             id="upiApp"
                             name="upiApp"
                             value={formState.internshipSpecificData.upiApp}
-                            onChange={(e) => handleInputChange("internshipSpecificData", "upiApp", e.target.value)}
+                            onChange={(e: any) => handleInputChange("internshipSpecificData", "upiApp", e.target.value)}
                             className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none bg-white text-text-primary"
                           >
                             <option value="">Choose App</option>
@@ -1603,7 +1603,7 @@ function ApplicationFormContent() {
                               name="bankName"
                               placeholder="E.g. State Bank of India"
                               value={formState.internshipSpecificData.bankName}
-                              onChange={(e) => handleInputChange("internshipSpecificData", "bankName", e.target.value)}
+                              onChange={(e: any) => handleInputChange("internshipSpecificData", "bankName", e.target.value)}
                               className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none bg-white text-text-primary"
                             />
                             {errors.bankName && (
@@ -1622,7 +1622,7 @@ function ApplicationFormContent() {
                               name="utrNumber"
                               placeholder="12-22 digit alphanumeric UTR"
                               value={formState.internshipSpecificData.utrNumber}
-                              onChange={(e) => {
+                              onChange={(e: any) => {
                                 const val = e.target.value.toUpperCase();
                                 handleInputChange("internshipSpecificData", "utrNumber", val);
                                 handleInputChange("internshipSpecificData", "transactionId", val);
@@ -1644,7 +1644,7 @@ function ApplicationFormContent() {
                               id="transferDate"
                               name="transferDate"
                               value={formState.internshipSpecificData.transferDate}
-                              onChange={(e) => handleInputChange("internshipSpecificData", "transferDate", e.target.value)}
+                              onChange={(e: any) => handleInputChange("internshipSpecificData", "transferDate", e.target.value)}
                               className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none bg-white text-text-primary"
                             />
                             {errors.transferDate && (
@@ -1668,7 +1668,7 @@ function ApplicationFormContent() {
                               id="cardType"
                               name="cardType"
                               value={formState.internshipSpecificData.cardType}
-                              onChange={(e) => handleInputChange("internshipSpecificData", "cardType", e.target.value)}
+                              onChange={(e: any) => handleInputChange("internshipSpecificData", "cardType", e.target.value)}
                               className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none bg-white text-text-primary"
                             >
                               <option value="">Select Network</option>
@@ -1696,7 +1696,7 @@ function ApplicationFormContent() {
                               inputMode="numeric"
                               pattern="[0-9]{4}"
                               value={formState.internshipSpecificData.last4Digits}
-                              onChange={(e) => {
+                              onChange={(e: any) => {
                                 const val = e.target.value.replace(/\D/g, "").slice(0, 4);
                                 handleInputChange("internshipSpecificData", "last4Digits", val);
                               }}
@@ -1764,15 +1764,15 @@ function ApplicationFormContent() {
                       <div
                         ref={dragRefScreenshot}
                         onClick={() => document.getElementById('screenshot-input')?.click()}
-                        onDragOver={(e) => {
+                        onDragOver={(e: any) => {
                           e.preventDefault();
                           dragRefScreenshot.current?.classList.add("border-blue-500", "bg-blue-50/30");
                         }}
-                        onDragLeave={(e) => {
+                        onDragLeave={(e: any) => {
                           e.preventDefault();
                           dragRefScreenshot.current?.classList.remove("border-blue-500", "bg-blue-50/30");
                         }}
-                        onDrop={(e) => {
+                        onDrop={(e: any) => {
                           e.preventDefault();
                           dragRefScreenshot.current?.classList.remove("border-blue-500", "bg-blue-50/30");
                           const file = e.dataTransfer.files?.[0];
@@ -1788,7 +1788,7 @@ function ApplicationFormContent() {
                           type="file"
                           accept="image/*,application/pdf"
                           className="hidden"
-                          onChange={(e) => {
+                          onChange={(e: any) => {
                             const file = e.target.files?.[0];
                             if (file) processFile(file, "screenshot");
                           }}
@@ -1841,7 +1841,7 @@ function ApplicationFormContent() {
                       placeholder="Detail any background projects, certifications, or past learnings related to this internship position..."
                       value={formState.internshipSpecificData.relevantExperience}
                       onBlur={() => handleBlur("relevantExperience")}
-                      onChange={(e) => handleInputChange("internshipSpecificData", "relevantExperience", e.target.value)}
+                      onChange={(e: any) => handleInputChange("internshipSpecificData", "relevantExperience", e.target.value)}
                       className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.relevantExperience && touched.relevantExperience ? "border-rose-500 bg-rose-50/20" : "border-border"
                       }`}
@@ -1869,7 +1869,7 @@ function ApplicationFormContent() {
                       placeholder="E.g. React/Next.js for frontend, Node.js/Express for backend, PostgreSQL, etc."
                       value={formState.internshipSpecificData.preferredTechStack}
                       onBlur={() => handleBlur("preferredTechStack")}
-                      onChange={(e) => handleInputChange("internshipSpecificData", "preferredTechStack", e.target.value)}
+                      onChange={(e: any) => handleInputChange("internshipSpecificData", "preferredTechStack", e.target.value)}
                       className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.preferredTechStack && touched.preferredTechStack ? "border-rose-500 bg-rose-50/20" : "border-border"
                       }`}
@@ -1892,7 +1892,7 @@ function ApplicationFormContent() {
                       placeholder="Describe any industrial experience, workflows, or technical applications you have configured..."
                       value={formState.internshipSpecificData.relevantTechnicalExperience}
                       onBlur={() => handleBlur("relevantTechnicalExperience")}
-                      onChange={(e) => handleInputChange("internshipSpecificData", "relevantTechnicalExperience", e.target.value)}
+                      onChange={(e: any) => handleInputChange("internshipSpecificData", "relevantTechnicalExperience", e.target.value)}
                       className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.relevantTechnicalExperience && touched.relevantTechnicalExperience ? "border-rose-500 bg-rose-50/20" : "border-border"
                       }`}
@@ -1920,7 +1920,7 @@ function ApplicationFormContent() {
                       placeholder="E.g. Neural Networks, Computer Vision, Cryptography"
                       value={formState.internshipSpecificData.researchAreaOfInterest}
                       onBlur={() => handleBlur("researchAreaOfInterest")}
-                      onChange={(e) => handleInputChange("internshipSpecificData", "researchAreaOfInterest", e.target.value)}
+                      onChange={(e: any) => handleInputChange("internshipSpecificData", "researchAreaOfInterest", e.target.value)}
                       className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.researchAreaOfInterest && touched.researchAreaOfInterest ? "border-rose-500 bg-rose-50/20" : "border-border"
                       }`}
@@ -1943,7 +1943,7 @@ function ApplicationFormContent() {
                       placeholder="Why does this research area interest you? What goals or outcomes do you aim to pursue?"
                       value={formState.internshipSpecificData.researchInterestStatement}
                       onBlur={() => handleBlur("researchInterestStatement")}
-                      onChange={(e) => handleInputChange("internshipSpecificData", "researchInterestStatement", e.target.value)}
+                      onChange={(e: any) => handleInputChange("internshipSpecificData", "researchInterestStatement", e.target.value)}
                       className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                         errors.researchInterestStatement && touched.researchInterestStatement ? "border-rose-500 bg-rose-50/20" : "border-border"
                       }`}
@@ -1962,7 +1962,7 @@ function ApplicationFormContent() {
                       id="publicationsAvailable"
                       name="publicationsAvailable"
                       value={formState.internshipSpecificData.publicationsAvailable}
-                      onChange={(e) => handleInputChange("internshipSpecificData", "publicationsAvailable", e.target.value as "Yes" | "No")}
+                      onChange={(e: any) => handleInputChange("internshipSpecificData", "publicationsAvailable", e.target.value as "Yes" | "No")}
                       className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white text-text-primary transition-all"
                     >
                       <option value="No">No</option>
@@ -1981,7 +1981,7 @@ function ApplicationFormContent() {
                         placeholder="Provide links to your published papers, IEEE/ACM profiles, or repositories..."
                         value={formState.internshipSpecificData.publicationLinks}
                         onBlur={() => handleBlur("publicationLinks")}
-                        onChange={(e) => handleInputChange("internshipSpecificData", "publicationLinks", e.target.value)}
+                        onChange={(e: any) => handleInputChange("internshipSpecificData", "publicationLinks", e.target.value)}
                         className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-slate-850 transition-all ${
                           errors.publicationLinks && touched.publicationLinks ? "border-rose-500 bg-rose-50/20" : "border-border"
                         }`}
@@ -2014,15 +2014,15 @@ function ApplicationFormContent() {
                   <div
                     ref={dragRefResume}
                     onClick={() => document.getElementById('resume-input')?.click()}
-                    onDragOver={(e) => {
+                    onDragOver={(e: any) => {
                       e.preventDefault();
                       dragRefResume.current?.classList.add("border-blue-500", "bg-blue-50/30");
                     }}
-                    onDragLeave={(e) => {
+                    onDragLeave={(e: any) => {
                       e.preventDefault();
                       dragRefResume.current?.classList.remove("border-blue-500", "bg-blue-50/30");
                     }}
-                    onDrop={(e) => {
+                    onDrop={(e: any) => {
                       e.preventDefault();
                       dragRefResume.current?.classList.remove("border-blue-500", "bg-blue-50/30");
                       const file = e.dataTransfer.files?.[0];
@@ -2038,7 +2038,7 @@ function ApplicationFormContent() {
                       type="file"
                       accept="application/pdf"
                       className="hidden"
-                      onChange={(e) => {
+                      onChange={(e: any) => {
                         const file = e.target.files?.[0];
                         if (file) processFile(file, "resume");
                       }}
@@ -2085,7 +2085,7 @@ function ApplicationFormContent() {
                         type="file"
                         accept="image/jpeg,image/png,image/webp,application/pdf"
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        onChange={(e) => {
+                        onChange={(e: any) => {
                           if (e.target.files && e.target.files[0]) {
                             processFile(e.target.files[0], "passbook");
                           }
@@ -2150,7 +2150,7 @@ function ApplicationFormContent() {
                   placeholder="Explain your goals, background skills alignment, and what you aim to achieve during this internship at Pinesphere..."
                   value={formState.motivation.whyInternship}
                   onBlur={() => handleBlur("whyInternship")}
-                  onChange={(e) => handleInputChange("motivation", "whyInternship", e.target.value)}
+                  onChange={(e: any) => handleInputChange("motivation", "whyInternship", e.target.value)}
                   className={`w-full rounded-xl border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all ${
                     errors.whyInternship && touched.whyInternship ? "border-rose-500 bg-rose-50/20" : "border-border"
                   }`}

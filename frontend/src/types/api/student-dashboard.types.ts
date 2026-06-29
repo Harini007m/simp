@@ -1,0 +1,1 @@
+export interface StudentDashboardData { [key: string]: any; }

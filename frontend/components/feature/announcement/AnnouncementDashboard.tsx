@@ -17,7 +17,7 @@ export default function AnnouncementDashboard() {
       
       setStats({
         total: announcements.length,
-        active: announcements.filter(a => a.status === 'Published').length,
+        active: announcements.filter((a: any) => a.status === 'Published').length,
         pending: pending.length
       });
     }
@@ -78,7 +78,7 @@ export default function AnnouncementDashboard() {
       <CreateAnnouncementModal 
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        onSuccess={() => setRefreshTrigger(prev => prev + 1)}
+        onSuccess={() => setRefreshTrigger((prev: any) => prev + 1)}
       />
     </div>
   );

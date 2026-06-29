@@ -24,7 +24,7 @@ function SkeletonCard() {
 function SkeletonTable() {
   return (
     <div className="animate-pulse">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_: any, i: any) => (
         <div key={i} className="flex gap-4 px-5 py-4 border-b border-border">
           <div className="h-4 w-28 bg-slate-200 rounded" />
           <div className="h-4 w-16 bg-slate-200 rounded" />
@@ -84,7 +84,7 @@ export default function ReportingManagerDashboard() {
   }, []);
 
   const filteredAssignments = useMemo(() => {
-    return assignments.filter(a => {
+    return assignments.filter((a: any) => {
       const matchesSearch = !search || a.internName.toLowerCase().includes(search.toLowerCase()) || a.batch.toLowerCase().includes(search.toLowerCase()) || a.college.toLowerCase().includes(search.toLowerCase());
       const matchesRisk = riskFilter === 'All' || a.riskLevel === riskFilter;
       return matchesSearch && matchesRisk;
@@ -132,9 +132,9 @@ export default function ReportingManagerDashboard() {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+          Array.from({ length: 4 }).map((_: any, i: any) => <SkeletonCard key={i} />)
         ) : (
-          statCards.map((c, i) => (
+          statCards.map((c: any, i: any) => (
             <div key={i} className="bg-white/80 backdrop-blur-xl border border-white/40 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group">
               <div className="flex justify-between items-start mb-4">
                 <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${c.bg} ${c.color} group-hover:scale-110 transition-transform duration-300`}>
@@ -150,7 +150,7 @@ export default function ReportingManagerDashboard() {
 
       {/* Tab Bar */}
       <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 w-fit">
-        {tabs.map(tab => (
+        {tabs.map((tab: any) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -179,7 +179,7 @@ export default function ReportingManagerDashboard() {
                 type="text"
                 placeholder="Search by name, batch, or college..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e: any) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 text-sm border border-border rounded-xl bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary transition-all outline-none"
               />
               {search && (
@@ -189,7 +189,7 @@ export default function ReportingManagerDashboard() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {riskOptions.map(opt => (
+              {riskOptions.map((opt: any) => (
                 <button
                   key={opt}
                   onClick={() => setRiskFilter(opt)}
@@ -230,12 +230,12 @@ export default function ReportingManagerDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border text-text-secondary">
-                  {filteredAssignments.map(a => (
+                  {filteredAssignments.map((a: any) => (
                     <tr key={a.id} className="hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => handleViewIntern(a)}>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
-                            {a.internName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                            {a.internName.split(' ').map((n: any) => n[0]).join('').slice(0, 2)}
                           </div>
                           <div>
                             <span className="font-semibold text-text-primary">{a.internName}</span>
@@ -267,7 +267,7 @@ export default function ReportingManagerDashboard() {
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <button
-                          onClick={e => { e.stopPropagation(); handleViewIntern(a); }}
+                          onClick={(e: any) => { e.stopPropagation(); handleViewIntern(a); }}
                           className="text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center gap-1 ml-auto"
                         >
                           <Eye className="w-4 h-4" />
@@ -308,7 +308,7 @@ export default function ReportingManagerDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border text-text-secondary">
-                  {evaluations.map(ev => (
+                  {evaluations.map((ev: any) => (
                     <tr key={ev.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="px-5 py-3.5 font-medium text-text-primary">{ev.internId}</td>
                       <td className="px-5 py-3.5 text-text-secondary">{new Date(ev.evaluationDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
@@ -343,7 +343,7 @@ export default function ReportingManagerDashboard() {
             {/* Intern Header */}
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                {selectedIntern.internName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                {selectedIntern.internName.split(' ').map((n: any) => n[0]).join('').slice(0, 2)}
               </div>
               <div>
                 <h3 className="text-xl font-bold text-text-primary">{selectedIntern.internName}</h3>
@@ -410,11 +410,11 @@ export default function ReportingManagerDashboard() {
             {/* Related Evaluations */}
             <div className="space-y-3">
               <h4 className="text-sm font-semibold text-text-primary">Evaluation History</h4>
-              {evaluations.filter(e => e.internId === selectedIntern.internId).length === 0 ? (
+              {evaluations.filter((e: any) => e.internId === selectedIntern.internId).length === 0 ? (
                 <p className="text-sm text-text-secondary bg-slate-50 rounded-xl p-4 text-center">No evaluations recorded yet.</p>
               ) : (
                 <div className="space-y-2">
-                  {evaluations.filter(e => e.internId === selectedIntern.internId).map(ev => (
+                  {evaluations.filter((e: any) => e.internId === selectedIntern.internId).map((ev: any) => (
                     <div key={ev.id} className="bg-slate-50 rounded-xl p-3 flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-text-primary">{new Date(ev.evaluationDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>

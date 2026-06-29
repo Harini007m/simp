@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, User, Eye, Plus, Clock, Briefcase } from 'lucide-react';
 import { mentorService } from '@/src/services/mentor.service';
-import { MentorProfile } from '@/src/data/mock-mentors';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import BatchMappingView from './BatchMappingView';
 import MentorPerformanceView from './MentorPerformanceView';
@@ -49,7 +48,7 @@ export default function MentorProfilePage() {
       employee_id: createForm.employee_id,
       employeeName: createForm.employeeName,
       mentor_bio: createForm.mentor_bio,
-      mentor_expertise: createForm.mentor_expertise_string.split(',').map(s => s.trim()).filter(Boolean),
+      mentor_expertise: createForm.mentor_expertise_string.split(',').map((s: any) => s.trim()).filter(Boolean),
       years_of_experience: Number(createForm.years_of_experience),
       max_student_capacity: Number(createForm.max_student_capacity),
       current_student_count: 0,
@@ -71,7 +70,7 @@ export default function MentorProfilePage() {
     setIsCreateOpen(false);
   };
 
-  const filtered = profiles.filter(p =>
+  const filtered = profiles.filter((p: any) =>
     p.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.employee_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.mentor_profile_id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -87,7 +86,7 @@ export default function MentorProfilePage() {
       is_available: !profile.is_available,
     });
     if (updated) {
-      setProfiles(prev => prev.map(p => p.mentor_profile_id === updated.mentor_profile_id ? updated : p));
+      setProfiles((prev: any) => prev.map((p: any) => p.mentor_profile_id === updated.mentor_profile_id ? updated : p));
       if (selected?.mentor_profile_id === updated.mentor_profile_id) setSelected(updated);
     }
   };
@@ -153,7 +152,7 @@ export default function MentorProfilePage() {
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: any) => setSearchTerm(e.target.value)}
                   placeholder="Search by name, employee ID..."
                   className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
@@ -178,7 +177,7 @@ export default function MentorProfilePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map(p => (
+                {filtered.map((p: any) => (
                   <tr
                     key={p.mentor_profile_id}
                     className="hover:bg-blue-50/50 cursor-pointer transition-colors"
@@ -195,7 +194,7 @@ export default function MentorProfilePage() {
                     <td className="px-6 py-4 text-text-secondary">{p.years_of_experience} yrs</td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1 max-w-xs">
-                        {p.mentor_expertise.slice(0, 2).map(exp => (
+                        {p.mentor_expertise.slice(0, 2).map((exp: any) => (
                           <span key={exp} className="px-2 py-0.5 bg-slate-100 text-text-secondary rounded text-xs font-semibold">{exp}</span>
                         ))}
                         {p.mentor_expertise.length > 2 && (
@@ -265,7 +264,7 @@ export default function MentorProfilePage() {
               <div className="bg-white p-5 rounded-xl border border-border shadow-sm">
                 <h3 className="text-sm font-semibold text-text-primary border-b border-border pb-2 mb-4">Expertise</h3>
                 <div className="flex flex-wrap gap-2">
-                  {selected.mentor_expertise.map(exp => (
+                  {selected.mentor_expertise.map((exp: any) => (
                     <span key={exp} className="px-2.5 py-1 bg-slate-100 text-text-primary rounded-lg text-xs font-semibold">{exp}</span>
                   ))}
                 </div>
@@ -351,9 +350,9 @@ export default function MentorProfilePage() {
                       <select 
                         required
                         value={createForm.employee_id}
-                        onChange={(e) => {
+                        onChange={(e: any) => {
                           const empId = e.target.value;
-                          const emp = employees.find(emp => emp.employee_id === empId);
+                          const emp = employees.find((emp: any) => emp.employee_id === empId);
                           setCreateForm({
                             ...createForm,
                             employee_id: empId,
@@ -363,7 +362,7 @@ export default function MentorProfilePage() {
                         className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none text-text-primary font-semibold"
                       >
                         <option value="">-- Choose Employee --</option>
-                        {employees.map(emp => (
+                        {employees.map((emp: any) => (
                           <option key={emp.employee_id} value={emp.employee_id}>
                             {emp.name} ({emp.employee_id} - {emp.designation})
                           </option>
@@ -378,7 +377,7 @@ export default function MentorProfilePage() {
                         required
                         min={0}
                         value={createForm.years_of_experience}
-                        onChange={(e) => setCreateForm({ ...createForm, years_of_experience: Number(e.target.value) })}
+                        onChange={(e: any) => setCreateForm({ ...createForm, years_of_experience: Number(e.target.value) })}
                         className="w-full p-2 border border-border rounded text-xs focus:outline-none text-text-primary font-semibold"
                       />
                     </div>
@@ -390,7 +389,7 @@ export default function MentorProfilePage() {
                         required
                         min={1}
                         value={createForm.max_student_capacity}
-                        onChange={(e) => setCreateForm({ ...createForm, max_student_capacity: Number(e.target.value) })}
+                        onChange={(e: any) => setCreateForm({ ...createForm, max_student_capacity: Number(e.target.value) })}
                         className="w-full p-2 border border-border rounded text-xs focus:outline-none text-text-primary font-semibold"
                       />
                     </div>
@@ -401,7 +400,7 @@ export default function MentorProfilePage() {
                       <label className="block text-text-secondary text-[10px]">Availability Status</label>
                       <select 
                         value={createForm.is_available ? 'true' : 'false'}
-                        onChange={(e) => setCreateForm({ ...createForm, is_available: e.target.value === 'true' })}
+                        onChange={(e: any) => setCreateForm({ ...createForm, is_available: e.target.value === 'true' })}
                         className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none text-text-primary font-semibold"
                       >
                         <option value="true">Available</option>
@@ -423,7 +422,7 @@ export default function MentorProfilePage() {
                         type="text" 
                         placeholder="e.g. React, Node.js, Cloud Architecture"
                         value={createForm.mentor_expertise_string}
-                        onChange={(e) => setCreateForm({ ...createForm, mentor_expertise_string: e.target.value })}
+                        onChange={(e: any) => setCreateForm({ ...createForm, mentor_expertise_string: e.target.value })}
                         className="w-full p-2 border border-border rounded text-xs focus:outline-none text-text-primary font-semibold"
                       />
                     </div>
@@ -434,7 +433,7 @@ export default function MentorProfilePage() {
                         required
                         placeholder="Write a brief biography..."
                         value={createForm.mentor_bio}
-                        onChange={(e) => setCreateForm({ ...createForm, mentor_bio: e.target.value })}
+                        onChange={(e: any) => setCreateForm({ ...createForm, mentor_bio: e.target.value })}
                         className="w-full p-2 border border-border rounded text-xs focus:outline-none font-semibold text-text-primary"
                       />
                     </div>

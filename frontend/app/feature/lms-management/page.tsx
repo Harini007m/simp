@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, Play, FileText, Trash2, Save, CheckCircle2, GripVertical, ChevronLeft, Image, FolderOpen, UploadCloud
 } from 'lucide-react';
-import { CommonFile } from '@/src/data/mock-common-files';
+import { CommonFile } from '../../../src/types/api/common-file.types';
 import { fileService } from '@/src/services/file.service';
 
 interface Submodule {
@@ -188,7 +188,7 @@ export default function LMSManagementPage() {
       submodules: []
     };
 
-    setModules(prev => [...prev, newModule]);
+    setModules((prev: any) => [...prev, newModule]);
     setNewModTitle('');
     setNewModDesc('');
     triggerToast(`Added module: ${newModTitle}`);
@@ -216,7 +216,7 @@ export default function LMSManagementPage() {
       } : undefined
     };
 
-    setModules(prev => prev.map(m => {
+    setModules((prev: any) => prev.map((m: any) => {
       if (m.id === activeModIdForSub) {
         return {
           ...m,
@@ -234,7 +234,7 @@ export default function LMSManagementPage() {
 
   const handleMoveModuleUp = (index: number) => {
     if (index === 0) return;
-    setModules(prev => {
+    setModules((prev: any) => {
       const copy = [...prev];
       const temp = copy[index];
       copy[index] = copy[index - 1];
@@ -244,7 +244,7 @@ export default function LMSManagementPage() {
   };
 
   const handleDeleteModule = (modId: string) => {
-    setModules(prev => prev.filter(m => m.id !== modId));
+    setModules((prev: any) => prev.filter((m: any) => m.id !== modId));
   };
 
   return (
@@ -275,7 +275,7 @@ export default function LMSManagementPage() {
 
       {viewMode === 'list' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {courses.map((course) => (
+          {courses.map((course: any) => (
             <div key={course.id} className="bg-white border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <div className="h-32 bg-slate-100 relative">
                 {course.thumbnail ? (
@@ -329,7 +329,7 @@ export default function LMSManagementPage() {
               <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Target Batch</label>
               <select 
                 value={targetBatchId}
-                onChange={(e) => setTargetBatchId(e.target.value)}
+                onChange={(e: any) => setTargetBatchId(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none cursor-pointer font-bold"
               >
                 <option value="batch-ai-2026">AI Batch 2026</option>
@@ -339,7 +339,7 @@ export default function LMSManagementPage() {
               <label className="block text-[10px] font-bold text-slate-455 uppercase mb-1.5">Program Category</label>
               <select 
                 value={courseProgram}
-                onChange={(e) => setCourseProgram(e.target.value)}
+                onChange={(e: any) => setCourseProgram(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none cursor-pointer font-bold"
               >
                 <option value="Software Engineering">Software Engineering</option>
@@ -352,7 +352,7 @@ export default function LMSManagementPage() {
               <input 
                 type="text"
                 value={courseThumbnail}
-                onChange={(e) => setCourseThumbnail(e.target.value)}
+                onChange={(e: any) => setCourseThumbnail(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none font-bold"
               />
             </div>
@@ -365,7 +365,7 @@ export default function LMSManagementPage() {
                 type="text"
                 required
                 value={courseName}
-                onChange={(e) => setCourseName(e.target.value)}
+                onChange={(e: any) => setCourseName(e.target.value)}
                 placeholder="e.g. Master Advanced Neural Architectures"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none"
               />
@@ -376,7 +376,7 @@ export default function LMSManagementPage() {
                 rows={3}
                 required
                 value={courseDesc}
-                onChange={(e) => setCourseDesc(e.target.value)}
+                onChange={(e: any) => setCourseDesc(e.target.value)}
                 placeholder="Detail the modules stack, language prerequisites, and graduation certificate criteria."
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-2.5 text-xs text-text-primary outline-none resize-none leading-relaxed"
               />
@@ -388,7 +388,7 @@ export default function LMSManagementPage() {
             <h4 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Syllabus Outline Builder</h4>
             
             <div className="space-y-4">
-              {modules.map((mod, mIdx) => (
+              {modules.map((mod: any, mIdx: any) => (
                 <div key={mod.id} className="p-4 border border-border rounded-xl bg-slate-50/50 space-y-3">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -403,7 +403,7 @@ export default function LMSManagementPage() {
                   </div>
 
                   <div className="space-y-1.5 pl-4 border-l-2 border-border">
-                    {mod.submodules.map((sub, sIdx) => (
+                    {mod.submodules.map((sub: any, sIdx: any) => (
                       <div key={sub.id} className="flex justify-between items-center text-[11px] p-2 bg-white rounded border border-border">
                         <span className="font-semibold text-text-secondary">{sIdx + 1}. {sub.title} ({sub.type})</span>
                         <span className="text-[10px] text-text-secondary font-bold">
@@ -426,7 +426,7 @@ export default function LMSManagementPage() {
                           <input 
                             type="text"
                             value={subTitle}
-                            onChange={(e) => setSubTitle(e.target.value)}
+                            onChange={(e: any) => setSubTitle(e.target.value)}
                             placeholder="e.g. Master Loops Spec"
                             className="w-full bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none"
                           />
@@ -435,7 +435,7 @@ export default function LMSManagementPage() {
                           <label className="block text-[9px] font-bold text-text-secondary uppercase mb-1">Type</label>
                           <select 
                             value={subType}
-                            onChange={(e) => setSubType(e.target.value as any)}
+                            onChange={(e: any) => setSubType(e.target.value as any)}
                             className="w-full bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none cursor-pointer font-bold"
                           >
                             <option value="PDF">PDF document</option>
@@ -451,9 +451,9 @@ export default function LMSManagementPage() {
                             <div className="flex items-center gap-2">
                               <select
                                 value={selectedFileId}
-                                onChange={(e) => {
+                                onChange={(e: any) => {
                                   setSelectedFileId(e.target.value);
-                                  const file = commonFiles.find(f => f.file_id === e.target.value);
+                                  const file = commonFiles.find((f: any) => f.file_id === e.target.value);
                                   if (file) {
                                     setSubUrl(file.storage_url);
                                   }
@@ -461,7 +461,7 @@ export default function LMSManagementPage() {
                                 className="flex-1 bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none font-bold"
                               >
                                 <option value="">-- Select from Common Files --</option>
-                                {commonFiles.map(file => (
+                                {commonFiles.map((file: any) => (
                                   <option key={file.file_id} value={file.file_id}>
                                     {file.file_name} ({file.file_type})
                                   </option>
@@ -479,7 +479,7 @@ export default function LMSManagementPage() {
                             <input 
                               type="text"
                               value={subUrl}
-                              onChange={(e) => setSubUrl(e.target.value)}
+                              onChange={(e: any) => setSubUrl(e.target.value)}
                               placeholder="Or manually enter URL..."
                               className="w-full bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary outline-none"
                             />
@@ -495,7 +495,7 @@ export default function LMSManagementPage() {
                             <input 
                               type="number"
                               value={minReadTime}
-                              onChange={(e) => setMinReadTime(parseInt(e.target.value) || 30)}
+                              onChange={(e: any) => setMinReadTime(parseInt(e.target.value) || 30)}
                               className="w-24 bg-white border border-border rounded px-2 py-1 text-xs text-text-primary outline-none font-bold"
                             />
                             <span className="text-xs text-text-secondary">Seconds</span>
@@ -512,7 +512,7 @@ export default function LMSManagementPage() {
                               <input 
                                 type="number"
                                 value={videoDuration}
-                                onChange={(e) => setVideoDuration(parseInt(e.target.value) || 120)}
+                                onChange={(e: any) => setVideoDuration(parseInt(e.target.value) || 120)}
                                 className="w-24 bg-white border border-border rounded px-2 py-1 text-xs text-text-primary outline-none font-bold"
                               />
                             </div>
@@ -521,7 +521,7 @@ export default function LMSManagementPage() {
                               <input 
                                 type="number"
                                 value={idleTime}
-                                onChange={(e) => setIdleTime(parseInt(e.target.value) || 10)}
+                                onChange={(e: any) => setIdleTime(parseInt(e.target.value) || 10)}
                                 className="w-24 bg-white border border-border rounded px-2 py-1 text-xs text-text-primary outline-none font-bold"
                               />
                             </div>
@@ -533,7 +533,7 @@ export default function LMSManagementPage() {
                                 type="checkbox"
                                 id="checkpointCheck"
                                 checked={enableCheckpoint}
-                                onChange={(e) => setEnableCheckpoint(e.target.checked)}
+                                onChange={(e: any) => setEnableCheckpoint(e.target.checked)}
                                 className="h-3.5 w-3.5 text-indigo-655 rounded border-slate-350 cursor-pointer"
                               />
                               <label htmlFor="checkpointCheck" className="text-xs font-bold text-label cursor-pointer select-none">
@@ -548,7 +548,7 @@ export default function LMSManagementPage() {
                                   <input 
                                     type="number"
                                     value={checkpointTime}
-                                    onChange={(e) => setCheckpointTime(parseInt(e.target.value) || 60)}
+                                    onChange={(e: any) => setCheckpointTime(parseInt(e.target.value) || 60)}
                                     className="w-20 bg-white border border-border rounded px-2 py-1 text-xs text-text-primary font-bold"
                                   />
                                   <span>Seconds</span>
@@ -559,7 +559,7 @@ export default function LMSManagementPage() {
                                   <input 
                                     type="text"
                                     value={chkQuestion}
-                                    onChange={(e) => setChkQuestion(e.target.value)}
+                                    onChange={(e: any) => setChkQuestion(e.target.value)}
                                     className="w-full bg-white border border-border rounded px-3 py-1.5 text-xs text-slate-805"
                                   />
                                 </div>
@@ -570,13 +570,13 @@ export default function LMSManagementPage() {
                                     ['B', chkOptB, setChkOptB],
                                     ['C', chkOptC, setChkOptC],
                                     ['D', chkOptD, setChkOptD]
-                                  ] as [string, string, React.Dispatch<React.SetStateAction<string>>][]).map((o, idx) => (
+                                  ] as [string, string, React.Dispatch<React.SetStateAction<string>>][]).map((o: any, idx: any) => (
                                     <div key={idx} className="flex items-center gap-1.5">
                                       <span className="font-bold text-text-secondary">{o[0]}:</span>
                                       <input 
                                         type="text"
                                         value={o[1]}
-                                        onChange={(e) => o[2](e.target.value)}
+                                        onChange={(e: any) => o[2](e.target.value)}
                                         className="w-full bg-white border border-border rounded px-2 py-1 text-xs text-text-primary"
                                       />
                                     </div>
@@ -587,7 +587,7 @@ export default function LMSManagementPage() {
                                   <span className="font-bold text-slate-505">Correct Option:</span>
                                   <select 
                                     value={chkAns}
-                                    onChange={(e) => setChkAns(e.target.value)}
+                                    onChange={(e: any) => setChkAns(e.target.value)}
                                     className="bg-white border rounded px-2 py-1 text-xs cursor-pointer outline-none font-bold"
                                   >
                                     <option value="A">A</option>
@@ -624,7 +624,7 @@ export default function LMSManagementPage() {
                   <input 
                     type="text"
                     value={newModTitle}
-                    onChange={(e) => setNewModTitle(e.target.value)}
+                    onChange={(e: any) => setNewModTitle(e.target.value)}
                     placeholder="e.g. Module 3: Advanced OOP Patterns"
                     className="w-full bg-white border border-border rounded-lg px-3 py-2 text-xs text-text-primary outline-none"
                   />
@@ -634,7 +634,7 @@ export default function LMSManagementPage() {
                   <input 
                     type="text"
                     value={newModDesc}
-                    onChange={(e) => setNewModDesc(e.target.value)}
+                    onChange={(e: any) => setNewModDesc(e.target.value)}
                     placeholder="e.g. Class definitions, inheritance structures"
                     className="w-full bg-white border border-border rounded-lg px-3 py-2 text-xs text-text-primary outline-none"
                   />

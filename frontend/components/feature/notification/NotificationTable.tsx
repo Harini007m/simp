@@ -74,7 +74,7 @@ export default function NotificationTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {notifications.slice(0, 50).map((n) => (
+            {notifications.slice(0, 50).map((n: any) => (
               <tr 
                 key={n.id} 
                 className="hover:bg-slate-50/70 transition-colors cursor-pointer"
@@ -84,7 +84,7 @@ export default function NotificationTable() {
                   if (!n.readStatus) {
                     try {
                       await NotificationService.markAsRead(n.id);
-                      setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, readStatus: true } : item));
+                      setNotifications((prev: any) => prev.map((item: any) => item.id === n.id ? { ...item, readStatus: true } : item));
                     } catch (e) {
                       console.error("Failed to mark as read", e);
                     }

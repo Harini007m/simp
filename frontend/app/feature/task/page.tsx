@@ -42,7 +42,7 @@ export default function TaskDashboardPage() {
       const storedTasks = localStorage.getItem('pinesphere_created_tasks');
       if (storedTasks) {
         const parsed = JSON.parse(storedTasks) as { batchId: string; task: LocalTask }[];
-        const filtered = parsed.filter(x => x.batchId === 'batch-ai-2026').map(x => x.task);
+        const filtered = parsed.filter((x: any) => x.batchId === 'batch-ai-2026').map((x: any) => x.task);
         setTasks([...INITIAL_TASKS, ...filtered]);
       }
     }
@@ -51,7 +51,7 @@ export default function TaskDashboardPage() {
   // Stats calculation
   const totalTasks = tasks.length;
   const submissionRate = 92; // Mock statistic
-  const overdueCount = tasks.filter(t => new Date(t.dueDate).getTime() < Date.now()).length;
+  const overdueCount = tasks.filter((t: any) => new Date(t.dueDate).getTime() < Date.now()).length;
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -82,7 +82,7 @@ export default function TaskDashboardPage() {
       <div className="space-y-4">
         <h3 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Milestones Directory</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tasks.map(task => {
+          {tasks.map((task: any) => {
             const isOverdue = new Date(task.dueDate).getTime() < Date.now();
             return (
               <div 

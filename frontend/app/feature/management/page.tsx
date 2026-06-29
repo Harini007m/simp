@@ -131,7 +131,7 @@ export default function TaskManagementPage() {
     };
 
     setTasks([newTask, ...tasks]);
-    setSubmissions(prev => ({ ...prev, [newTaskId]: [] }));
+    setSubmissions((prev: any) => ({ ...prev, [newTaskId]: [] }));
     setSelectedTaskId(newTaskId);
     setShowTaskForm(false);
     triggerToast(`Task "${taskInput.title}" published!`);
@@ -148,9 +148,9 @@ export default function TaskManagementPage() {
   const handleEvaluateSubmission = (status: 'approved' | 'rejected' | 'resubmit') => {
     if (!selectedSubId) return;
     
-    setSubmissions(prev => {
+    setSubmissions((prev: any) => {
       const taskSubs = prev[selectedTaskId] || [];
-      const updated = taskSubs.map(s => {
+      const updated = taskSubs.map((s: any) => {
         if (s.id === selectedSubId) {
           return {
             ...s,
@@ -169,9 +169,9 @@ export default function TaskManagementPage() {
     setFeedbackInput('');
   };
 
-  const selectedTask = tasks.find(t => t.id === selectedTaskId);
+  const selectedTask = tasks.find((t: any) => t.id === selectedTaskId);
   const taskSubmissions = selectedTaskId ? (submissions[selectedTaskId] || []) : [];
-  const selectedSubmission = taskSubmissions.find(s => s.id === selectedSubId);
+  const selectedSubmission = taskSubmissions.find((s: any) => s.id === selectedSubId);
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -219,10 +219,10 @@ export default function TaskManagementPage() {
             <h3 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Active Assignments</h3>
           </div>
           <div className="divide-y divide-border flex flex-col">
-            {tasks.map((task) => {
+            {tasks.map((task: any) => {
               const isActive = selectedTaskId === task.id;
               const subs = submissions[task.id] || [];
-              const pendingGradeCount = subs.filter(s => s.status === 'pending').length;
+              const pendingGradeCount = subs.filter((s: any) => s.status === 'pending').length;
 
               return (
                 <button
@@ -287,7 +287,7 @@ export default function TaskManagementPage() {
                 <h4 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Student Submissions</h4>
                 
                 <div className="grid grid-cols-1 gap-3">
-                  {taskSubmissions.map((sub) => {
+                  {taskSubmissions.map((sub: any) => {
                     const isGraded = sub.status !== 'pending';
                     const isSelected = selectedSubId === sub.id;
 
@@ -306,7 +306,7 @@ export default function TaskManagementPage() {
                       >
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center font-black text-xs text-text-secondary">
-                            {sub.studentName.split(' ').map(n => n[0]).join('')}
+                            {sub.studentName.split(' ').map((n: any) => n[0]).join('')}
                           </div>
                           <div>
                             <div className="text-xs font-bold text-text-primary">{sub.studentName}</div>
@@ -386,7 +386,7 @@ export default function TaskManagementPage() {
                       rows={3} 
                       placeholder="Write evaluation review details..." 
                       value={feedbackInput}
-                      onChange={(e) => setFeedbackInput(e.target.value)}
+                      onChange={(e: any) => setFeedbackInput(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded-lg p-3 text-xs text-text-primary focus:outline-none"
                     />
                   </div>
@@ -439,7 +439,7 @@ export default function TaskManagementPage() {
                 required 
                 placeholder="Database Normalization Quiz" 
                 value={taskInput.title}
-                onChange={(e) => setTaskInput({ ...taskInput, title: e.target.value })}
+                onChange={(e: any) => setTaskInput({ ...taskInput, title: e.target.value })}
                 className="w-full bg-slate-50 border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none"
               />
             </div>
@@ -448,7 +448,7 @@ export default function TaskManagementPage() {
               <label className="text-[9px] font-bold text-text-secondary uppercase block">Assigned Cohort Batch</label>
               <select 
                 value={taskInput.batchId}
-                onChange={(e) => setTaskInput({ ...taskInput, batchId: e.target.value })}
+                onChange={(e: any) => setTaskInput({ ...taskInput, batchId: e.target.value })}
                 className="w-full bg-slate-50 border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none"
               >
                 <option value="batch-1">Cohort Alpha (Batch 1)</option>
@@ -463,7 +463,7 @@ export default function TaskManagementPage() {
                   type="date" 
                   required 
                   value={taskInput.dueDate}
-                  onChange={(e) => setTaskInput({ ...taskInput, dueDate: e.target.value })}
+                  onChange={(e: any) => setTaskInput({ ...taskInput, dueDate: e.target.value })}
                   className="w-full bg-slate-50 border border-border rounded-lg px-3 py-2 text-xs text-slate-850 focus:outline-none"
                 />
               </div>
@@ -475,7 +475,7 @@ export default function TaskManagementPage() {
                   min={1} 
                   required 
                   value={taskInput.maxAttempts}
-                  onChange={(e) => setTaskInput({ ...taskInput, maxAttempts: e.target.value })}
+                  onChange={(e: any) => setTaskInput({ ...taskInput, maxAttempts: e.target.value })}
                   className="w-full bg-slate-50 border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none"
                 />
               </div>
@@ -488,7 +488,7 @@ export default function TaskManagementPage() {
                 rows={3} 
                 placeholder="Include description guidelines and file specifications..." 
                 value={taskInput.description}
-                onChange={(e) => setTaskInput({ ...taskInput, description: e.target.value })}
+                onChange={(e: any) => setTaskInput({ ...taskInput, description: e.target.value })}
                 className="w-full bg-slate-50 border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none"
               />
             </div>

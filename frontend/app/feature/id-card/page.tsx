@@ -569,7 +569,7 @@ export default function IDCardPage() {
     }
 
     // Map legacy parameters to DEFAULT layouts for dynamic render
-    const mappedFront = DEFAULT_FRONT_ELEMENTS.map(el => {
+    const mappedFront = DEFAULT_FRONT_ELEMENTS.map((el: any) => {
       if (el.id === 'card_banner_shape') {
         return { ...el, fill: legacy.primaryColor };
       }
@@ -591,7 +591,7 @@ export default function IDCardPage() {
       return el;
     });
 
-    const mappedBack = DEFAULT_BACK_ELEMENTS.map(el => {
+    const mappedBack = DEFAULT_BACK_ELEMENTS.map((el: any) => {
       if (el.id === 'back_qr') {
         return { ...el, isVisible: legacy.showQrCode };
       }
@@ -637,7 +637,7 @@ export default function IDCardPage() {
     const googleFontsList = ['Inter', 'Roboto', 'Montserrat', 'Orbitron', 'Playfair Display', 'Courier Prime'];
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = `https://fonts.googleapis.com/css2?family=${googleFontsList.map(f => f.replace(' ', '+')).join('&family=')}:wght@400;700&display=swap`;
+    link.href = `https://fonts.googleapis.com/css2?family=${googleFontsList.map((f: any) => f.replace(' ', '+')).join('&family=')}:wght@400;700&display=swap`;
     document.head.appendChild(link);
 
     let active = true;
@@ -701,7 +701,7 @@ export default function IDCardPage() {
     
     let result = text || '';
     if (result.includes('{{')) {
-      Object.keys(cardData).forEach((k) => {
+      Object.keys(cardData).forEach((k: any) => {
         let val = cardData[k as keyof DigitalIDCard];
         if (k === 'expiryDate' || k === 'issueDate') {
           val = formatDate(val);
@@ -730,8 +730,8 @@ export default function IDCardPage() {
 
   const renderSideElements = (elements: Element[]) => {
     return elements
-      .filter(el => el.isVisible)
-      .map((el) => (
+      .filter((el: any) => el.isVisible)
+      .map((el: any) => (
         <div
           key={el.id}
           style={{
@@ -1004,7 +1004,7 @@ export default function IDCardPage() {
           <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-4 mb-5">
               <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white text-lg font-bold shadow-lg">
-                {card.studentName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                {card.studentName.split(' ').map((n: any) => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
               <div>
                 <h3 className="text-lg font-bold text-text-primary">{card.studentName}</h3>

@@ -72,7 +72,7 @@ export default function ExportCenterPage() {
             </button>
           </div>
           <div className="divide-y divide-border">
-            {jobs.slice(0, 5).map(job => (
+            {jobs.slice(0, 5).map((job: any) => (
               <div key={job.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -115,7 +115,7 @@ export default function ExportCenterPage() {
             )}
           </div>
           <div className="divide-y divide-border">
-            {schedules.map(schedule => (
+            {schedules.map((schedule: any) => (
               <div key={schedule.id} className="p-4 hover:bg-slate-50 transition-colors">
                 <div className="flex justify-between items-start mb-2">
                   <div>

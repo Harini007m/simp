@@ -84,7 +84,7 @@ export default function PlacementDashboard() {
     }
   };
 
-  const filteredCompanies = companies.filter(comp => {
+  const filteredCompanies = companies.filter((comp: any) => {
     const matchesSearch = comp.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           comp.contactPerson.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesIndustry = industryFilter === 'All' || comp.industry === industryFilter;
@@ -191,7 +191,7 @@ export default function PlacementDashboard() {
                 type="text"
                 placeholder="Search company name or contact..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: any) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl pl-9.5 pr-4 py-2.5 text-xs focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
               />
             </div>
@@ -200,7 +200,7 @@ export default function PlacementDashboard() {
               <span className="font-bold text-text-secondary uppercase tracking-wider">Industry</span>
               <select
                 value={industryFilter}
-                onChange={(e) => setIndustryFilter(e.target.value)}
+                onChange={(e: any) => setIndustryFilter(e.target.value)}
                 className="bg-slate-50 border border-border rounded-xl px-3 py-2 font-bold text-text-primary focus:outline-none cursor-pointer"
               >
                 <option value="All">All Industries</option>
@@ -230,7 +230,7 @@ export default function PlacementDashboard() {
                       Loading partner companies...
                     </td>
                   </tr>
-                ) : filteredCompanies.map(comp => (
+                ) : filteredCompanies.map((comp: any) => (
                   <tr key={comp.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-5 py-4">
                       <div className="font-bold text-text-primary">{comp.name}</div>
@@ -288,7 +288,7 @@ export default function PlacementDashboard() {
               type="text"
               required
               value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
+              onChange={(e: any) => setCompanyName(e.target.value)}
               placeholder="e.g., Pinesphere Tech Labs"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
             />
@@ -299,7 +299,7 @@ export default function PlacementDashboard() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Industry</label>
               <select
                 value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
+                onChange={(e: any) => setIndustry(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="IT Services">IT Services</option>
@@ -313,7 +313,7 @@ export default function PlacementDashboard() {
                 min="1"
                 required
                 value={activeRoles}
-                onChange={(e) => setActiveRoles(parseInt(e.target.value) || 1)}
+                onChange={(e: any) => setActiveRoles(parseInt(e.target.value) || 1)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-mono font-bold text-text-primary"
               />
             </div>
@@ -325,7 +325,7 @@ export default function PlacementDashboard() {
               type="url"
               required
               value={website}
-              onChange={(e) => setWebsite(e.target.value)}
+              onChange={(e: any) => setWebsite(e.target.value)}
               placeholder="e.g., https://pinesphere.com"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
             />
@@ -338,7 +338,7 @@ export default function PlacementDashboard() {
                 type="text"
                 required
                 value={contactPerson}
-                onChange={(e) => setContactPerson(e.target.value)}
+                onChange={(e: any) => setContactPerson(e.target.value)}
                 placeholder="e.g., Jane Doe"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
               />
@@ -349,7 +349,7 @@ export default function PlacementDashboard() {
                 type="email"
                 required
                 value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
+                onChange={(e: any) => setContactEmail(e.target.value)}
                 placeholder="e.g., hr@pinesphere.com"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
               />

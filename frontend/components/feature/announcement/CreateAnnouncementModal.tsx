@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { X, Send, Megaphone, Check } from 'lucide-react';
 import { AnnouncementService } from '@/src/services/announcement.service';
 import { NotificationService } from '@/src/services/notification.service';
-import { MOCK_USERS } from '@/src/data/mock-users';
+
 
 interface CreateAnnouncementModalProps {
   isOpen: boolean;
@@ -40,10 +40,10 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
   const rolesList = ['All', 'Student', 'Mentor', 'HR', 'College Coordinator'];
 
   const handleCheckboxChange = (field: 'channels' | 'targetRoles', value: string) => {
-    setForm(prev => {
+    setForm((prev: any) => {
       const current = prev[field] as string[];
       if (current.includes(value)) {
-        return { ...prev, [field]: current.filter(x => x !== value) };
+        return { ...prev, [field]: current.filter((x: any) => x !== value) };
       } else {
         return { ...prev, [field]: [...current, value] };
       }
@@ -84,7 +84,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
       if (form.targetType === 'roles') {
         audience = form.targetRoles;
       } else {
-        const userObj = MOCK_USERS.find(u => u.id === form.targetPersonId);
+        const userObj = ([] as any[]).find((u: any) => u.id === form.targetPersonId);
         if (userObj) {
           audience = [userObj.roleName];
           targetedUser = userObj.name;
@@ -122,11 +122,11 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
       }
 
       // 4. Simulate sending other channels
-      const otherChannels = form.channels.filter(c => c !== 'Portal');
+      const otherChannels = form.channels.filter((c: any) => c !== 'Portal');
       if (otherChannels.length > 0) {
         showToast(`Dispatched message via: ${otherChannels.join(', ')}`);
         // wait shortly for user to see toast
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise((r: any) => setTimeout(r, 1200));
       }
 
       onSuccess();
@@ -179,7 +179,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
               required
               placeholder="E.g. Mid-Term Intern Assessment Timeline"
               value={form.title}
-              onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e: any) => setForm((prev: any) => ({ ...prev, title: e.target.value }))}
               className="w-full rounded-xl border border-slate-350 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all"
             />
           </div>
@@ -192,7 +192,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
               rows={4}
               placeholder="Enter the full message details..."
               value={form.description}
-              onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e: any) => setForm((prev: any) => ({ ...prev, description: e.target.value }))}
               className="w-full rounded-xl border border-slate-350 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all font-medium whitespace-pre-wrap"
             />
           </div>
@@ -203,22 +203,22 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
               <label className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Category</label>
               <select 
                 value={form.category}
-                onChange={e => setForm(prev => ({ ...prev, category: e.target.value as any }))}
+                onChange={(e: any) => setForm((prev: any) => ({ ...prev, category: e.target.value as any }))}
                 className="w-full rounded-xl border border-border px-4 py-3 text-sm bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-text-primary"
               >
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                {categories.map((c: any) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Priority</label>
               <div className="flex gap-2">
-                {priorities.map(p => {
+                {priorities.map((p: any) => {
                   const active = form.priority === p;
                   return (
                     <button
                       key={p}
                       type="button"
-                      onClick={() => setForm(prev => ({ ...prev, priority: p as any }))}
+                      onClick={() => setForm((prev: any) => ({ ...prev, priority: p as any }))}
                       className={`flex-1 py-2 px-3 rounded-lg border text-xs font-bold transition-all ${
                         active 
                           ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20' 
@@ -237,7 +237,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
           <div>
             <label className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Delivery Channels *</label>
             <div className="grid grid-cols-2 gap-3">
-              {channelsList.map(ch => {
+              {channelsList.map((ch: any) => {
                 const checked = form.channels.includes(ch.value);
                 return (
                   <label 
@@ -267,7 +267,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
             <div className="flex bg-slate-100 rounded-xl p-1 max-w-[280px]">
               <button
                 type="button"
-                onClick={() => setForm(prev => ({ ...prev, targetType: 'roles' }))}
+                onClick={() => setForm((prev: any) => ({ ...prev, targetType: 'roles' }))}
                 className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
                   form.targetType === 'roles' ? 'bg-white text-text-primary shadow-sm' : 'text-text-secondary'
                 }`}
@@ -276,7 +276,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
               </button>
               <button
                 type="button"
-                onClick={() => setForm(prev => ({ ...prev, targetType: 'person' }))}
+                onClick={() => setForm((prev: any) => ({ ...prev, targetType: 'person' }))}
                 className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
                   form.targetType === 'person' ? 'bg-white text-text-primary shadow-sm' : 'text-text-secondary'
                 }`}
@@ -291,7 +291,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
             <div>
               <label className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Select Roles *</label>
               <div className="flex flex-wrap gap-2">
-                {rolesList.map(r => {
+                {rolesList.map((r: any) => {
                   const checked = form.targetRoles.includes(r);
                   return (
                     <button
@@ -315,11 +315,11 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
               <label className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Select Person *</label>
               <select
                 value={form.targetPersonId}
-                onChange={e => setForm(prev => ({ ...prev, targetPersonId: e.target.value }))}
+                onChange={(e: any) => setForm((prev: any) => ({ ...prev, targetPersonId: e.target.value }))}
                 className="w-full rounded-xl border border-border px-4 py-3 text-sm bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-text-primary"
               >
                 <option value="">-- Choose User --</option>
-                {MOCK_USERS.map(u => (
+                {([] as any[]).map((u: any) => (
                   <option key={u.id} value={u.id}>
                     {u.name} ({u.roleName}) - {u.email}
                   </option>
@@ -333,7 +333,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
             <input 
               type="checkbox"
               checked={form.pinned}
-              onChange={e => setForm(prev => ({ ...prev, pinned: e.target.checked }))}
+              onChange={(e: any) => setForm((prev: any) => ({ ...prev, pinned: e.target.checked }))}
               className="h-4.5 w-4.5 text-blue-650 border-border rounded focus:ring-primary focus:ring-2"
             />
             <div className="text-xs">

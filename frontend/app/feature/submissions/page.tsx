@@ -7,7 +7,6 @@ import { AlertTriangle,
   CheckSquare
  } from 'lucide-react';
 import { submissionService } from '@/src/services/submission.service';
-import { Submission } from '@/src/data/mock-submissions';
 import { studentService, ExtendedStudent } from '@/src/services/student.service';
 import { Drawer } from '@/components/feature/ui/Drawer';
 
@@ -43,12 +42,12 @@ export default function SubmissionsManagementPage() {
     setIsDrawerOpen(true);
   };
 
-  const filteredSubmissions = submissions.filter(s => s.studentId.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredSubmissions = submissions.filter((s: any) => s.studentId.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Batch Grouping
   const batchMap = new Map<string, { students: ExtendedStudent[], submissions: Submission[] }>();
   
-  students.forEach(stu => {
+  students.forEach((stu: any) => {
     const batchName = stu.batch?.name || stu.internshipInfo?.batchName || 'Unassigned';
     if (!batchMap.has(batchName)) {
       batchMap.set(batchName, { students: [], submissions: [] });
@@ -56,8 +55,8 @@ export default function SubmissionsManagementPage() {
     batchMap.get(batchName)!.students.push(stu);
   });
 
-  submissions.forEach(sub => {
-    const stu = students.find(s => s.id === sub.studentId || s.student_id === sub.studentId);
+  submissions.forEach((sub: any) => {
+    const stu = students.find((s: any) => s.id === sub.studentId || s.student_id === sub.studentId);
     const batchName = stu?.batch?.name || stu?.internshipInfo?.batchName || 'Unassigned';
     if (!batchMap.has(batchName)) {
       batchMap.set(batchName, { students: [], submissions: [] });
@@ -68,12 +67,12 @@ export default function SubmissionsManagementPage() {
   const batches = Array.from(batchMap.entries()).map(([name, data]) => ({
     name,
     ...data
-  })).filter(b => b.submissions.length > 0 || b.students.length > 0);
+  })).filter((b: any) => b.submissions.length > 0 || b.students.length > 0);
 
   // KPIs
   const totalSubmissions = submissions.length;
-  const pendingReview = submissions.filter(s => s.status === 'PENDING').length;
-  const approvedCount = submissions.filter(s => s.status === 'APPROVED').length;
+  const pendingReview = submissions.filter((s: any) => s.status === 'PENDING').length;
+  const approvedCount = submissions.filter((s: any) => s.status === 'APPROVED').length;
   const approvalRate = totalSubmissions > 0 ? Math.round((approvedCount / totalSubmissions) * 100) : 0;
 
   if (loading) {
@@ -140,7 +139,7 @@ export default function SubmissionsManagementPage() {
             <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-4">
               <h3 className="text-lg font-bold text-text-primary">Recent Submissions</h3>
               <div className="space-y-3">
-                {submissions.slice(0, 5).map((sub) => (
+                {submissions.slice(0, 5).map((sub: any) => (
                   <div key={sub.id} className="p-4 bg-slate-50 border border-border rounded-xl flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSubmissionClick(sub)}>
                     <div className="flex items-center gap-4">
                       <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
@@ -176,7 +175,7 @@ export default function SubmissionsManagementPage() {
                   <input 
                     type="text"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: any) => setSearchTerm(e.target.value)}
                     placeholder="Search by student ID..."
                     className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
@@ -198,7 +197,7 @@ export default function SubmissionsManagementPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredSubmissions.map(s => (
+                  {filteredSubmissions.map((s: any) => (
                     <tr key={s.id} className="hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => handleSubmissionClick(s)}>
                       <td className="px-6 py-4 font-medium text-text-primary">{s.studentId}</td>
                       <td className="px-6 py-4 text-text-secondary">{s.taskId || s.assessmentId}</td>
@@ -228,7 +227,7 @@ export default function SubmissionsManagementPage() {
           <div className="space-y-6 max-w-7xl mx-auto">
             {!selectedBatch ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {batches.map(b => (
+                {batches.map((b: any) => (
                   <div key={b.name} onClick={() => setSelectedBatch(b.name)} className="bg-white p-6 rounded-xl border border-border shadow-sm hover:shadow-md hover:border-secondary transition-all cursor-pointer group">
                     <div className="flex items-center justify-between mb-4">
                       <div className="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition-colors">
@@ -247,7 +246,7 @@ export default function SubmissionsManagementPage() {
                 )}
               </div>
             ) : (() => {
-              const batch = batches.find(b => b.name === selectedBatch);
+              const batch = batches.find((b: any) => b.name === selectedBatch);
               if (!batch) return null;
               
               return (
@@ -272,8 +271,8 @@ export default function SubmissionsManagementPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {batch.students.map(stu => {
-                          const stuSubmissions = batch.submissions.filter(s => s.studentId === stu.id || s.studentId === stu.student_id);
+                        {batch.students.map((stu: any) => {
+                          const stuSubmissions = batch.submissions.filter((s: any) => s.studentId === stu.id || s.studentId === stu.student_id);
                           return (
                             <tr key={stu.id || stu.student_id} className="hover:bg-blue-50/50 transition-colors">
                               <td className="px-6 py-4 font-medium text-text-primary">{stu.name || 'Unknown'}</td>
@@ -281,7 +280,7 @@ export default function SubmissionsManagementPage() {
                               <td className="px-6 py-4">
                                 {stuSubmissions.length > 0 ? (
                                   <div className="flex flex-col gap-1">
-                                    {stuSubmissions.map(sub => (
+                                    {stuSubmissions.map((sub: any) => (
                                       <div key={sub.id} className="flex items-center gap-2 cursor-pointer hover:text-blue-600" onClick={() => handleSubmissionClick(sub)}>
                                         <FileText className="h-3 w-3 text-text-secondary" />
                                         <span className="text-xs font-medium">{sub.taskId || sub.assessmentId || sub.id}</span>
@@ -348,7 +347,7 @@ export default function SubmissionsManagementPage() {
             </div>
 
             <div className="flex overflow-x-auto border-b border-border bg-white px-6 shrink-0">
-              {['overview', 'files', 'feedback', 'audit'].map(t => (
+              {['overview', 'files', 'feedback', 'audit'].map((t: any) => (
                 <button
                   key={t}
                   onClick={() => setActiveTab(t as any)}
@@ -387,7 +386,7 @@ export default function SubmissionsManagementPage() {
                   <div className="bg-white p-5 rounded-xl border border-border shadow-sm">
                     <h3 className="text-sm font-semibold text-text-primary border-b border-border pb-4 mb-4">Subtasks</h3>
                     <div className="space-y-3">
-                      {selectedSubmission.subtasks.map(st => (
+                      {selectedSubmission.subtasks.map((st: any) => (
                         <div key={st.id} className="flex items-center gap-3">
                           {st.completed ? <CheckSquare className="h-4 w-4 text-blue-600" /> : <div className="h-4 w-4 border-2 border-border rounded" />}
                           <span className={`text-sm ${st.completed ? 'text-text-primary' : 'text-text-secondary'}`}>{st.task}</span>
@@ -401,7 +400,7 @@ export default function SubmissionsManagementPage() {
               {activeTab === 'files' && (
                 <div className="space-y-4">
                   {selectedSubmission.fileIds && selectedSubmission.fileIds.length > 0 ? (
-                    selectedSubmission.fileIds.map(fid => (
+                    selectedSubmission.fileIds.map((fid: any) => (
                       <div key={fid} className="bg-white p-4 rounded-xl border border-border shadow-sm flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-blue-50 text-blue-600 rounded-full shrink-0">
@@ -430,7 +429,7 @@ export default function SubmissionsManagementPage() {
                 <div className="bg-white rounded-xl border border-border shadow-sm p-6">
                   <h3 className="text-sm font-semibold text-text-primary border-b border-border pb-4 mb-4">Commit History</h3>
                   <div className="space-y-4 border-l-2 border-border ml-2 pl-4">
-                    {selectedSubmission.commits.map(c => (
+                    {selectedSubmission.commits.map((c: any) => (
                       <div key={c.commit} className="relative">
                         <div className="absolute -left-[23px] bg-white p-1">
                           <div className="h-3 w-3 rounded-full bg-blue-500 ring-4 ring-white" />

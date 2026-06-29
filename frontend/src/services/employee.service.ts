@@ -1,6 +1,6 @@
 import { employeeApi } from '../api/employee.api';
 import { EmployeeCreate, EmployeeResponse } from '../types/api/employee.types';
-import { Employee, MOCK_EMPLOYEES } from '../data/mock-employees';
+import { Employee } from '../types/api/employee.types';
 
 export type ExtendedEmployee = EmployeeResponse & Employee;
 
@@ -40,20 +40,8 @@ export const employeeService = {
   },
 
   async getEmployees(): Promise<ExtendedEmployee[]> {
-    try {
       const data = await employeeApi.getEmployees();
-      if (data && data.length > 0) {
-        return data.map(emp => this.mapToExtended(emp));
-      }
-    } catch (e) {
-      console.debug("Failed to load employees from API, falling back to mock data:", e);
-    }
-    return MOCK_EMPLOYEES.map((emp: any) => ({
-      ...emp,
-      employee_id: emp.id,
-      official_email: emp.email,
-      designation: emp.designation || emp.roleName || 'Employee'
-    })) as ExtendedEmployee[];
+      return data.map(emp => this.mapToExtended(emp));
   },
 
   async getEmployee(id: string): Promise<ExtendedEmployee | undefined> {

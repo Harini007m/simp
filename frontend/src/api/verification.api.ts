@@ -1,18 +1,15 @@
 import { VerificationRequest, VerificationResult } from '../types/verification.types';
-import { MOCK_VERIFICATION_REQUESTS } from '../data/mock-verifications';
-import { MOCK_CERTIFICATES } from '../data/mock-certificates';
-
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 export const VerificationApi = {
   getRequests: async (): Promise<VerificationRequest[]> => {
     await delay(500);
-    return MOCK_VERIFICATION_REQUESTS;
+    throw new Error('Backend implementation pending or failed');
   },
 
   verifyCertificate: async (certNumber: string): Promise<VerificationResult> => {
     await delay(600);
-    const cert = MOCK_CERTIFICATES.find(c => c.certificateNumber === certNumber);
+    const cert = ([] as any[]).find(c => c.certificateNumber === certNumber);
     if (!cert) {
       return { status: 'Invalid', message: 'Certificate not found in records.' };
     }

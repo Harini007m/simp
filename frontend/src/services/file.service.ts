@@ -1,8 +1,8 @@
-import { CommonFile, FileReference, MOCK_COMMON_FILES, MOCK_FILE_REFERENCES } from '../data/mock-common-files';
+import { CommonFile, FileReference } from '../types/api/common-file.types';
 
 class FileService {
-  private files: CommonFile[] = [...MOCK_COMMON_FILES];
-  private references: FileReference[] = [...MOCK_FILE_REFERENCES];
+  private files: CommonFile[] = [...([] as any[])];
+  private references: FileReference[] = [...([] as any[])];
 
   async getFiles(): Promise<CommonFile[]> {
     return [...this.files];

@@ -190,7 +190,7 @@ const WIDGET_ICONS: Record<string, React.ElementType> = {
 
 const GenericWidget = ({ widget }: { widget: WidgetDefinition }) => {
   // Generate a consistent seed based on the widget id
-  const seed = widget.widgetId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const seed = widget.widgetId.split('').reduce((acc: any, char: any) => acc + char.charCodeAt(0), 0);
   
   let valueStr = "";
   let trendStr = "";
@@ -268,7 +268,7 @@ export default function DashboardShell() {
   if (!user) return null;
 
   // Filter widgets based on WIDGET_REGISTRY, user roles, and permissions
-  const authorizedWidgets = WIDGET_REGISTRY.filter((widget) => {
+  const authorizedWidgets = WIDGET_REGISTRY.filter((widget: any) => {
     // Check if widget supports user's role
     const supportsRole = widget.supportedRoles.includes('*') || 
                          widget.supportedRoles.includes(user.roleName) || 
@@ -309,7 +309,7 @@ export default function DashboardShell() {
 
         {/* Dynamic Widgets Rendered from Registry */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {authorizedWidgets.map((widget) => {
+          {authorizedWidgets.map((widget: any) => {
             // Apply col-span based on size
             let colSpan = 'col-span-1';
             if (widget.size === 'medium') colSpan = 'col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2';

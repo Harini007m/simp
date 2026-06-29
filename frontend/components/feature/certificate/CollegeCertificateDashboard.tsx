@@ -70,14 +70,14 @@ export default function CollegeCertificateDashboard() {
   const collegeCertificates = useMemo(() => {
     if (!selectedCollege) return [];
     const studentNames = COLLEGE_STUDENT_MAP[selectedCollege] || [];
-    return certificates.filter(c => studentNames.includes(c.studentName) && c.status === 'Issued');
+    return certificates.filter((c: any) => studentNames.includes(c.studentName) && c.status === 'Issued');
   }, [selectedCollege, certificates]);
 
   // Filter by search
   const filteredCertificates = useMemo(() => {
     if (!searchQuery.trim()) return collegeCertificates;
     const q = searchQuery.toLowerCase();
-    return collegeCertificates.filter(c =>
+    return collegeCertificates.filter((c: any) =>
       c.studentName.toLowerCase().includes(q) ||
       c.certificateNumber.toLowerCase().includes(q) ||
       c.type.toLowerCase().includes(q) ||
@@ -88,7 +88,7 @@ export default function CollegeCertificateDashboard() {
   // Group by student
   const studentGroups = useMemo(() => {
     const groups: Record<string, Certificate[]> = {};
-    filteredCertificates.forEach(cert => {
+    filteredCertificates.forEach((cert: any) => {
       if (!groups[cert.studentName]) groups[cert.studentName] = [];
       groups[cert.studentName].push(cert);
     });
@@ -96,7 +96,7 @@ export default function CollegeCertificateDashboard() {
   }, [filteredCertificates]);
 
   const totalIssued = collegeCertificates.length;
-  const uniqueStudents = new Set(collegeCertificates.map(c => c.studentName)).size;
+  const uniqueStudents = new Set(collegeCertificates.map((c: any) => c.studentName)).size;
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +151,7 @@ export default function CollegeCertificateDashboard() {
               { label: 'Issued Certificates', value: totalIssued, icon: Award, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
               { label: 'Unique Students', value: uniqueStudents, icon: Users, iconBg: 'bg-blue-50', iconColor: 'text-blue-600' },
               { label: 'Verification Status', value: 'Secure', icon: ShieldCheck, iconBg: 'bg-violet-50', iconColor: 'text-violet-600' },
-            ].map(kpi => (
+            ].map((kpi: any) => (
               <div key={kpi.label} className="bg-white p-5 rounded-2xl border border-border shadow-sm flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold text-text-secondary uppercase tracking-wider">{kpi.label}</p>
@@ -173,7 +173,7 @@ export default function CollegeCertificateDashboard() {
               type="text"
               placeholder="Search by student name, certificate number, type, or program..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: any) => setSearchQuery(e.target.value)}
               className="w-full bg-white border border-border rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all duration-200 font-medium text-text-primary shadow-sm placeholder:text-placeholder"
             />
           </div>
@@ -226,7 +226,7 @@ export default function CollegeCertificateDashboard() {
                     {/* Expanded Certificate Rows */}
                     {isExpanded && (
                       <div className="border-t border-border bg-slate-50/50 divide-y divide-border">
-                        {certs.map(cert => {
+                        {certs.map((cert: any) => {
                           const vHash = generateVerificationHash(cert);
                           return (
                             <div key={cert.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white transition-colors duration-200">
@@ -253,7 +253,7 @@ export default function CollegeCertificateDashboard() {
                                   <Hash className="w-3 h-3 text-amber-600" />
                                   <span className="text-[10px] font-mono font-bold text-amber-800">{vHash}</span>
                                   <button
-                                    onClick={(e) => { e.stopPropagation(); handleCopyCode(cert.certificateNumber); }}
+                                    onClick={(e: any) => { e.stopPropagation(); handleCopyCode(cert.certificateNumber); }}
                                     className="ml-0.5 p-0.5 hover:bg-amber-100 rounded transition-colors duration-150 cursor-pointer"
                                     title="Copy certificate number"
                                   >
@@ -264,7 +264,7 @@ export default function CollegeCertificateDashboard() {
                                 </div>
                                 {/* View Detail */}
                                 <button
-                                  onClick={(e) => { e.stopPropagation(); setSelectedCert(cert); setDetailDrawerOpen(true); }}
+                                  onClick={(e: any) => { e.stopPropagation(); setSelectedCert(cert); setDetailDrawerOpen(true); }}
                                   className="p-2 bg-white border border-border rounded-lg hover:bg-slate-50 hover:border-secondary transition-colors duration-200 cursor-pointer shadow-sm"
                                   title="View certificate details"
                                 >
@@ -272,7 +272,7 @@ export default function CollegeCertificateDashboard() {
                                 </button>
                                 {/* Verify */}
                                 <button
-                                  onClick={(e) => {
+                                  onClick={(e: any) => {
                                     e.stopPropagation();
                                     setVerifyCode(cert.certificateNumber);
                                     setVerificationResult(null);
@@ -323,7 +323,7 @@ export default function CollegeCertificateDashboard() {
                 <input
                   type="text"
                   value={verifyCode}
-                  onChange={(e) => setVerifyCode(e.target.value)}
+                  onChange={(e: any) => setVerifyCode(e.target.value)}
                   placeholder="e.g. PS-CERT-2026-00001"
                   className="w-full bg-slate-50 border border-border rounded-xl pl-11 pr-4 py-3.5 text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all duration-200 text-text-primary"
                   required

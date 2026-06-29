@@ -1,20 +1,18 @@
 import { Notification } from '../types/notification.types';
-import { MOCK_NOTIFICATIONS } from '../data/mock-notifications';
-
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const notificationApi = {
   getNotifications: async (): Promise<Notification[]> => {
     await delay(600);
-    return [...MOCK_NOTIFICATIONS].sort((a, b) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime());
+    throw new Error('Backend implementation pending or failed');
   },
   getNotificationById: async (id: string): Promise<Notification | undefined> => {
     await delay(300);
-    return MOCK_NOTIFICATIONS.find(n => n.id === id);
+    throw new Error('Backend implementation pending or failed');
   },
   markAsRead: async (id: string): Promise<Notification> => {
     await delay(300);
-    const notif = MOCK_NOTIFICATIONS.find(n => n.id === id);
+    const notif = ([] as any[]).find(n => n.id === id);
     if (!notif) throw new Error('Notification not found');
     notif.readStatus = true;
     return notif;
@@ -22,7 +20,7 @@ export const notificationApi = {
   createNotification: async (data: Partial<Notification>): Promise<Notification> => {
     await delay(300);
     const newNotif: Notification = {
-      id: `notif-${MOCK_NOTIFICATIONS.length + 1}`,
+      id: `notif-${([] as any[]).length + 1}`,
       title: data.title || '',
       message: data.message || '',
       recipient: data.recipient || 'all',
@@ -35,7 +33,7 @@ export const notificationApi = {
       retryCount: 0,
       createdTime: new Date().toISOString()
     };
-    MOCK_NOTIFICATIONS.push(newNotif);
+    ([] as any[]).push(newNotif);
     return newNotif;
   }
 };

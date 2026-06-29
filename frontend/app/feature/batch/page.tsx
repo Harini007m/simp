@@ -10,7 +10,7 @@ import {
   PlusSquare, ArrowRight, Layers
 } from 'lucide-react';
 import { batchService } from '@/src/services/batch.service';
-import { Batch, BatchStudent, BatchTimelineEvent, BatchProject } from '@/src/data/mock-batches';
+import { Batch, BatchStudent, BatchTimelineEvent, BatchProject } from '../../../src/types/api/batch.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 
@@ -134,18 +134,18 @@ export default function BatchManagementPage() {
 
   // Derived Filter Lists
   const programsList = useMemo(() => {
-    const programs = new Set(batches.map(b => b.programName));
+    const programs = new Set(batches.map((b: any) => b.programName));
     return Array.from(programs);
   }, [batches]);
 
   const mentorsList = useMemo(() => {
-    const mentors = new Set(batches.map(b => b.mentor.name).filter(Boolean));
+    const mentors = new Set(batches.map((b: any) => b.mentor.name).filter(Boolean));
     return Array.from(mentors);
   }, [batches]);
 
   // Filtered Batches logic
   const filteredBatches = useMemo(() => {
-    return batches.filter(b => {
+    return batches.filter((b: any) => {
       const q = searchTerm.toLowerCase();
       const matchesSearch = 
         b.name.toLowerCase().includes(q) ||
@@ -181,24 +181,24 @@ export default function BatchManagementPage() {
   // Dashboard calculations
   const dashboardStats = useMemo(() => {
     const total = batches.length;
-    const active = batches.filter(b => b.status === 'Active').length;
-    const upcoming = batches.filter(b => b.status === 'Upcoming' || b.status === 'Enrollment Open').length;
-    const completed = batches.filter(b => b.status === 'Completed').length;
+    const active = batches.filter((b: any) => b.status === 'Active').length;
+    const upcoming = batches.filter((b: any) => b.status === 'Upcoming' || b.status === 'Enrollment Open').length;
+    const completed = batches.filter((b: any) => b.status === 'Completed').length;
     
     let totalStudents = 0;
     let totalCapacity = 0;
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       totalStudents += b.students.length;
       totalCapacity += b.capacity;
     });
 
-    const uniqueMentors = new Set(batches.map(b => b.mentor.id).filter(Boolean)).size;
+    const uniqueMentors = new Set(batches.map((b: any) => b.mentor.id).filter(Boolean)).size;
     const avgOccupancy = totalCapacity > 0 ? Math.round((totalStudents / totalCapacity) * 100) : 0;
     
     // Average completion rate of completed batches
-    const completedBatches = batches.filter(b => b.status === 'Completed');
+    const completedBatches = batches.filter((b: any) => b.status === 'Completed');
     const avgCompletion = completedBatches.length > 0 
-      ? Math.round(completedBatches.reduce((acc, curr) => acc + curr.completionRate, 0) / completedBatches.length)
+      ? Math.round(completedBatches.reduce((acc: any, curr: any) => acc + curr.completionRate, 0) / completedBatches.length)
       : 88; // industry default fallback
 
     return { total, active, upcoming, completed, totalStudents, uniqueMentors, avgOccupancy, avgCompletion };
@@ -207,7 +207,7 @@ export default function BatchManagementPage() {
   // Chart aggregates
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = { Draft: 0, Upcoming: 0, 'Enrollment Open': 0, Active: 0, 'On Hold': 0, Completed: 0, Archived: 0 };
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       if (counts[b.status] !== undefined) counts[b.status]++;
     });
     return counts;
@@ -216,7 +216,7 @@ export default function BatchManagementPage() {
   const capacityAlloc = useMemo(() => {
     let totalCapacity = 0;
     let totalOccupied = 0;
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       totalCapacity += b.capacity;
       totalOccupied += b.students.length;
     });
@@ -227,7 +227,7 @@ export default function BatchManagementPage() {
 
   const mentorWorkloads = useMemo(() => {
     const workloads: Record<string, { name: string; students: number; batchesCount: number; maxCap: number }> = {};
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       if (!b.mentor.name) return;
       if (!workloads[b.mentor.name]) {
         workloads[b.mentor.name] = { name: b.mentor.name, students: 0, batchesCount: 0, maxCap: 0 };
@@ -243,7 +243,7 @@ export default function BatchManagementPage() {
     const counts: Record<string, number> = {
       'Free Internship': 0, 'Paid Internship': 0, 'Stipend Internship': 0, 'Industrial Internship': 0, 'Research Internship': 0, 'Corporate Internship': 0
     };
-    batches.forEach(b => {
+    batches.forEach((b: any) => {
       if (counts[b.internshipType] !== undefined) counts[b.internshipType]++;
     });
     return counts;
@@ -252,8 +252,8 @@ export default function BatchManagementPage() {
   // Activity Feed
   const activityFeed = useMemo(() => {
     const feed: { batchName: string; code: string; date: string; title: string; desc: string; type: string }[] = [];
-    batches.forEach(b => {
-      b.timeline.forEach(evt => {
+    batches.forEach((b: any) => {
+      b.timeline.forEach((evt: any) => {
         feed.push({
           batchName: b.name,
           code: b.code,
@@ -264,7 +264,7 @@ export default function BatchManagementPage() {
         });
       });
     });
-    return feed.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 8);
+    return feed.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 8);
   }, [batches]);
 
   // Drawer / Selection Syncing
@@ -301,7 +301,7 @@ export default function BatchManagementPage() {
     if (!activeActionModal?.batchId) return;
 
     const targetId = activeActionModal.batchId;
-    const original = batches.find(b => b.id === targetId);
+    const original = batches.find((b: any) => b.id === targetId);
     if (!original) return;
 
     const updated = await batchService.updateBatch(targetId, {
@@ -315,15 +315,15 @@ export default function BatchManagementPage() {
         type: original.metadata.type,
         category: editForm.category,
         domain: editForm.domain,
-        techStack: editForm.techStackString.split(',').map(s => s.trim()).filter(Boolean),
-        tags: editForm.tagsString.split(',').map(s => s.trim()).filter(Boolean),
+        techStack: editForm.techStackString.split(',').map((s: any) => s.trim()).filter(Boolean),
+        tags: editForm.tagsString.split(',').map((s: any) => s.trim()).filter(Boolean),
         priority: editForm.priority,
         academicYear: editForm.academicYear
       }
     });
 
     if (updated) {
-      setBatches(batches.map(b => b.id === targetId ? updated : b));
+      setBatches(batches.map((b: any) => b.id === targetId ? updated : b));
       if (activeProfile?.id === targetId) {
         setActiveProfile(updated);
       }
@@ -357,7 +357,7 @@ export default function BatchManagementPage() {
     if (!activeProfile) return;
     const batchId = activeProfile.id;
 
-    const hasStudent = activeProfile.students.some(s => s.internId === studentForm.internId);
+    const hasStudent = activeProfile.students.some((s: any) => s.internId === studentForm.internId);
     if (hasStudent) {
       showToast('Student is already allocated to this batch roster.', 'error');
       return;
@@ -387,7 +387,7 @@ export default function BatchManagementPage() {
     });
 
     if (updated) {
-      setBatches(batches.map(b => b.id === batchId ? updated : b));
+      setBatches(batches.map((b: any) => b.id === batchId ? updated : b));
       setActiveProfile(updated);
       showToast(`Allocated student ${studentForm.name} to ${activeProfile.name}`);
       setActiveActionModal(null);
@@ -399,8 +399,8 @@ export default function BatchManagementPage() {
     if (!activeProfile) return;
     const batchId = activeProfile.id;
 
-    const removedStudent = activeProfile.students.find(s => s.id === studentId);
-    const updatedStudents = activeProfile.students.filter(s => s.id !== studentId);
+    const removedStudent = activeProfile.students.find((s: any) => s.id === studentId);
+    const updatedStudents = activeProfile.students.filter((s: any) => s.id !== studentId);
     const updatedTimeline = [...activeProfile.timeline];
     updatedTimeline.unshift({
       date: new Date().toISOString().split('T')[0],
@@ -415,7 +415,7 @@ export default function BatchManagementPage() {
     });
 
     if (updated) {
-      setBatches(batches.map(b => b.id === batchId ? updated : b));
+      setBatches(batches.map((b: any) => b.id === batchId ? updated : b));
       setActiveProfile(updated);
       showToast('Removed student allocation');
     }
@@ -453,7 +453,7 @@ export default function BatchManagementPage() {
       const finalObj = await batchService.updateBatch(batchId, { timeline: updatedTimeline });
       
       if (finalObj) {
-        setBatches(batches.map(b => b.id === batchId ? finalObj : b));
+        setBatches(batches.map((b: any) => b.id === batchId ? finalObj : b));
         setActiveProfile(finalObj);
         showToast(`Remapped batch lead mentor to ${mentorName}`);
         setActiveActionModal(null);
@@ -482,7 +482,7 @@ export default function BatchManagementPage() {
       const finalObj = await batchService.updateBatch(batchId, { timeline: updatedTimeline });
 
       if (finalObj) {
-        setBatches(batches.map(b => b.id === batchId ? finalObj : b));
+        setBatches(batches.map((b: any) => b.id === batchId ? finalObj : b));
         setActiveProfile(finalObj);
         showToast(`Batch seat capacity updated to ${capacityForm}`);
         setActiveActionModal(null);
@@ -511,7 +511,7 @@ export default function BatchManagementPage() {
       const finalObj = await batchService.updateBatch(batchId, { timeline: updatedTimeline });
 
       if (finalObj) {
-        setBatches(batches.map(b => b.id === batchId ? finalObj : b));
+        setBatches(batches.map((b: any) => b.id === batchId ? finalObj : b));
         setActiveProfile(finalObj);
         showToast(`Cohort status updated to ${statusForm}`);
         setActiveActionModal(null);
@@ -522,7 +522,7 @@ export default function BatchManagementPage() {
   // Multi-row Selection
   const handleToggleSelectRow = (id: string) => {
     if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter(item => item !== id));
+      setSelectedIds(selectedIds.filter((item: any) => item !== id));
     } else {
       setSelectedIds([...selectedIds, id]);
     }
@@ -532,7 +532,7 @@ export default function BatchManagementPage() {
     if (selectedIds.length === filteredBatches.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredBatches.map(b => b.id));
+      setSelectedIds(filteredBatches.map((b: any) => b.id));
     }
   };
 
@@ -568,7 +568,7 @@ export default function BatchManagementPage() {
 
   const handleExportRoster = () => {
     const listToExport = selectedIds.length > 0 
-      ? batches.filter(b => selectedIds.includes(b.id))
+      ? batches.filter((b: any) => selectedIds.includes(b.id))
       : filteredBatches;
 
     if (listToExport.length === 0) {
@@ -577,7 +577,7 @@ export default function BatchManagementPage() {
     }
 
     const headers = ['Batch Code', 'Batch Name', 'Internship Program', 'Mentor Assigned', 'Occupied Capacity', 'Total Capacity', 'Start Date', 'End Date', 'Status', 'Completion Rate'];
-    const rows = listToExport.map(b => [
+    const rows = listToExport.map((b: any) => [
       b.code,
       b.name,
       b.programName,
@@ -590,7 +590,7 @@ export default function BatchManagementPage() {
       b.completionRate
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map(r => r.map(val => `"${val}"`).join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map((r: any) => r.map((val: any) => `"${val}"`).join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -704,7 +704,7 @@ export default function BatchManagementPage() {
               { label: 'Facilitators Assigned', count: dashboardStats.uniqueMentors, icon: Shield, color: 'text-teal-600 bg-teal-50 border-teal-100', filterKey: 'all', filterVal: 'all' },
               { label: 'Average Occupancy', count: `${dashboardStats.avgOccupancy}%`, icon: Layers, color: 'text-pink-600 bg-pink-50 border-pink-100', filterKey: 'all', filterVal: 'all' },
               { label: 'Batch Completion Rate', count: `${dashboardStats.avgCompletion}%`, icon: Award, color: 'text-rose-600 bg-rose-50 border-rose-100', filterKey: 'all', filterVal: 'all' }
-            ].map((kpi, idx) => (
+            ].map((kpi: any, idx: any) => (
               <div 
                 key={idx}
                 onClick={() => {
@@ -737,7 +737,7 @@ export default function BatchManagementPage() {
                 Status Distribution
               </h3>
               <div className="space-y-2">
-                {Object.entries(statusCounts).map(([status, count], index) => {
+                {Object.entries(statusCounts).map(([status, count], index: any) => {
                   const pct = Math.round((count / batches.length) * 100) || 0;
                   return (
                     <div key={index} className="space-y-1">
@@ -823,7 +823,7 @@ export default function BatchManagementPage() {
                 Facilitator Workloads
               </h3>
               <div className="space-y-3.5 max-h-[220px] overflow-y-auto pr-1">
-                {mentorWorkloads.map((mentor, index) => {
+                {mentorWorkloads.map((mentor: any, index: any) => {
                   const limit = 60; // Max default target students
                   const pct = Math.min(Math.round((mentor.students / limit) * 100), 100);
                   const isOverloaded = mentor.students > 45;
@@ -855,7 +855,7 @@ export default function BatchManagementPage() {
                 Program Mapping Split
               </h3>
               <div className="space-y-2">
-                {Object.entries(programTypeCounts).map(([type, count], index) => {
+                {Object.entries(programTypeCounts).map(([type, count], index: any) => {
                   const pct = Math.round((count / batches.length) * 100) || 0;
                   return (
                     <div key={index} className="space-y-1">
@@ -887,7 +887,7 @@ export default function BatchManagementPage() {
                 Critical Watch List (Under 80%)
               </h3>
               <div className="space-y-3">
-                {batches.filter(b => b.performance.attendanceRate < 90 || b.performance.assessmentAverage < 80).map(b => (
+                {batches.filter((b: any) => b.performance.attendanceRate < 90 || b.performance.assessmentAverage < 80).map((b: any) => (
                   <div 
                     key={b.id} 
                     onClick={() => handleOpenProfile(b)}
@@ -915,7 +915,7 @@ export default function BatchManagementPage() {
                 Active Capstones Submission Rates
               </h3>
               <div className="space-y-3.5">
-                {batches.flatMap(b => b.projects.map(p => ({ batchName: b.name, ...p }))).slice(0, 5).map((proj, idx) => (
+                {batches.flatMap((b: any) => b.projects.map((p: any) => ({ batchName: b.name, ...p }))).slice(0, 5).map((proj: any, idx: any) => (
                   <div key={idx} className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold text-text-primary">
                       <span className="font-extrabold truncate max-w-[180px]">{proj.name}</span>
@@ -939,7 +939,7 @@ export default function BatchManagementPage() {
                 Operational Delivery Logs
               </h3>
               <div className="relative border-l-2 border-border ml-2 space-y-4.5 pl-4 max-h-[300px] overflow-y-auto">
-                {activityFeed.map((act, index) => (
+                {activityFeed.map((act: any, index: any) => (
                   <div key={index} className="relative">
                     <div className="absolute -left-[23px] top-0.5 bg-slate-100 text-text-primary h-4 w-4 rounded-full flex items-center justify-center text-[7px] font-black border border-white uppercase">
                       {act.code.slice(-2)}
@@ -975,7 +975,7 @@ export default function BatchManagementPage() {
                   ref={searchInputRef}
                   placeholder="Search batches (Name, Code, Program, Mentor)... [Ctrl+F]"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: any) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -1019,11 +1019,11 @@ export default function BatchManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Internship Program</label>
                   <select 
                     value={filterProgram}
-                    onChange={(e) => setFilterProgram(e.target.value)}
+                    onChange={(e: any) => setFilterProgram(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Programs</option>
-                    {programsList.map((p, idx) => <option key={idx} value={p}>{p}</option>)}
+                    {programsList.map((p: any, idx: any) => <option key={idx} value={p}>{p}</option>)}
                   </select>
                 </div>
 
@@ -1032,7 +1032,7 @@ export default function BatchManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Batch Status</label>
                   <select 
                     value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    onChange={(e: any) => setFilterStatus(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Statuses</option>
@@ -1051,11 +1051,11 @@ export default function BatchManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Cohort Coach</label>
                   <select 
                     value={filterMentor}
-                    onChange={(e) => setFilterMentor(e.target.value)}
+                    onChange={(e: any) => setFilterMentor(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Mentors</option>
-                    {mentorsList.map((m, idx) => <option key={idx} value={m}>{m}</option>)}
+                    {mentorsList.map((m: any, idx: any) => <option key={idx} value={m}>{m}</option>)}
                   </select>
                 </div>
 
@@ -1064,7 +1064,7 @@ export default function BatchManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Seats Utilization</label>
                   <select 
                     value={filterCapacity}
-                    onChange={(e) => setFilterCapacity(e.target.value)}
+                    onChange={(e: any) => setFilterCapacity(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Levels</option>
@@ -1079,7 +1079,7 @@ export default function BatchManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Completion Rates</label>
                   <select 
                     value={filterCompletion}
-                    onChange={(e) => setFilterCompletion(e.target.value)}
+                    onChange={(e: any) => setFilterCompletion(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Ranges</option>
@@ -1094,7 +1094,7 @@ export default function BatchManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Internship Type</label>
                   <select 
                     value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
+                    onChange={(e: any) => setFilterType(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Types</option>
@@ -1138,7 +1138,7 @@ export default function BatchManagementPage() {
               </thead>
               <tbody className="divide-y divide-border font-medium">
                 {filteredBatches.length > 0 ? (
-                  filteredBatches.map(b => {
+                  filteredBatches.map((b: any) => {
                     const isSelected = selectedIds.includes(b.id);
                     const utilPct = Math.round((b.students.length / b.capacity) * 100) || 0;
 
@@ -1389,7 +1389,7 @@ export default function BatchManagementPage() {
                 { id: 'projects', label: 'Projects & Tasks' },
                 { id: 'metadata', label: 'Domain Settings' },
                 { id: 'timeline', label: 'Audits History' }
-              ].map(tab => (
+              ].map((tab: any) => (
                 <button
                   key={tab.id}
                   onClick={() => setProfileTab(tab.id as any)}
@@ -1517,7 +1517,7 @@ export default function BatchManagementPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border font-semibold text-text-primary">
-                          {activeProfile.students.map(stu => (
+                          {activeProfile.students.map((stu: any) => (
                             <tr key={stu.id} className="hover:bg-slate-50/50">
                               <td className="px-4 py-2.5 font-extrabold text-text-primary">{stu.name}</td>
                               <td className="px-4 py-2.5 font-mono text-text-secondary font-bold">{stu.internId}</td>
@@ -1628,7 +1628,7 @@ export default function BatchManagementPage() {
                           }
                         });
                         if (updated) {
-                          setBatches(batches.map(b => b.id === activeProfile.id ? updated : b));
+                          setBatches(batches.map((b: any) => b.id === activeProfile.id ? updated : b));
                           setActiveProfile(updated);
                           showToast('Removed assigned mentor');
                         }
@@ -1686,7 +1686,7 @@ export default function BatchManagementPage() {
                       onClick={async () => {
                         const updated = await batchService.updateBatch(activeProfile.id, { status: 'Enrollment Open' });
                         if (updated) {
-                          setBatches(batches.map(b => b.id === activeProfile.id ? updated : b));
+                          setBatches(batches.map((b: any) => b.id === activeProfile.id ? updated : b));
                           setActiveProfile(updated);
                           showToast('Enrollment open status activated');
                         }
@@ -1700,7 +1700,7 @@ export default function BatchManagementPage() {
                       onClick={async () => {
                         const updated = await batchService.updateBatch(activeProfile.id, { status: 'Active' });
                         if (updated) {
-                          setBatches(batches.map(b => b.id === activeProfile.id ? updated : b));
+                          setBatches(batches.map((b: any) => b.id === activeProfile.id ? updated : b));
                           setActiveProfile(updated);
                           showToast('Enrollment frozen');
                         }
@@ -1728,7 +1728,7 @@ export default function BatchManagementPage() {
                     { label: 'Assessment Avg', value: `${activeProfile.performance.assessmentAverage}/100`, color: 'bg-indigo-50 text-indigo-700' },
                     { label: 'Hiring Conversion', value: `${activeProfile.performance.placementConversion}%`, color: 'bg-purple-50 text-purple-700' },
                     { label: 'Satisfaction Score', value: `★ ${activeProfile.performance.satisfactionScore}/5`, color: 'bg-amber-50 text-amber-700' }
-                  ].map((card, idx) => (
+                  ].map((card: any, idx: any) => (
                     <div key={idx} className={`p-3 rounded-lg border border-border flex flex-col justify-center ${card.color}`}>
                       <div className="text-lg font-black">{card.value}</div>
                       <div className="text-[9px] uppercase font-bold text-text-secondary mt-0.5">{card.label}</div>
@@ -1744,7 +1744,7 @@ export default function BatchManagementPage() {
                     <div className="bg-slate-50 border border-border rounded-lg p-4 space-y-3">
                       <h5 className="text-[10px] font-black uppercase text-text-secondary">Weekly Attendance Trends</h5>
                       <div className="h-32 w-full flex items-end justify-between px-2 pt-4">
-                        {activeProfile.performance.attendanceTrend.map((t, idx) => (
+                        {activeProfile.performance.attendanceTrend.map((t: any, idx: any) => (
                           <div key={idx} className="flex flex-col items-center gap-1.5 flex-1">
                             <div className="text-[9px] font-bold text-text-secondary">{t.rate}%</div>
                             <div className="w-8 bg-emerald-600 rounded-t" style={{ height: `${t.rate * 0.8}px` }} />
@@ -1758,7 +1758,7 @@ export default function BatchManagementPage() {
                     <div className="bg-slate-50 border border-border rounded-lg p-4 space-y-3">
                       <h5 className="text-[10px] font-black uppercase text-text-secondary">Assessment Average</h5>
                       <div className="h-32 w-full flex items-end justify-between px-2 pt-4">
-                        {activeProfile.performance.assessmentTrend.map((t, idx) => (
+                        {activeProfile.performance.assessmentTrend.map((t: any, idx: any) => (
                           <div key={idx} className="flex flex-col items-center gap-1.5 flex-1">
                             <div className="text-[9px] font-bold text-text-secondary">{t.average}</div>
                             <div className="w-8 bg-indigo-600 rounded-t" style={{ height: `${t.average * 0.8}px` }} />
@@ -1790,7 +1790,7 @@ export default function BatchManagementPage() {
                     { key: 'Enrollment Open', title: 'Phase 3: Registration Open', desc: 'Open to student allocations and university mapping.' },
                     { key: 'Active', title: 'Phase 4: Program Activated', desc: 'Coaching classes running. Weekly sprints launched.' },
                     { key: 'Completed', title: 'Phase 5: Concluded & Certified', desc: 'Milestones concluded. Internship credentials verified.' }
-                  ].map((phase, idx) => {
+                  ].map((phase: any, idx: any) => {
                     const statusCycle = ['Draft', 'Upcoming', 'Enrollment Open', 'Active', 'Completed'];
                     const currentIdx = statusCycle.indexOf(activeProfile.status === 'On Hold' ? 'Enrollment Open' : activeProfile.status);
                     const isPast = statusCycle.indexOf(phase.key) <= currentIdx;
@@ -1820,7 +1820,7 @@ export default function BatchManagementPage() {
 
                 {activeProfile.projects.length > 0 ? (
                   <div className="space-y-3">
-                    {activeProfile.projects.map((proj, idx) => (
+                    {activeProfile.projects.map((proj: any, idx: any) => (
                       <div key={idx} className="bg-slate-50 border border-border rounded-lg p-3 space-y-2">
                         <div className="flex justify-between items-center text-xs font-extrabold text-text-primary">
                           <span>{proj.name}</span>
@@ -1857,7 +1857,7 @@ export default function BatchManagementPage() {
                       }];
                       const updated = await batchService.updateBatch(activeProfile.id, { projects: updatedProj });
                       if (updated) {
-                        setBatches(batches.map(b => b.id === activeProfile.id ? updated : b));
+                        setBatches(batches.map((b: any) => b.id === activeProfile.id ? updated : b));
                         setActiveProfile(updated);
                         showToast('Appended new sprint capstone task');
                       }
@@ -1879,7 +1879,7 @@ export default function BatchManagementPage() {
                 <div className="bg-white border border-border rounded-lg p-4 space-y-3">
                   <h4 className="text-xs font-black uppercase text-text-secondary">Software Stack Dependencies</h4>
                   <div className="flex flex-wrap gap-1.5">
-                    {activeProfile.metadata.techStack.map((tech, idx) => (
+                    {activeProfile.metadata.techStack.map((tech: any, idx: any) => (
                       <span key={idx} className="bg-slate-100 text-text-primary border border-border px-2 py-0.5 rounded font-mono text-[10.5px]">
                         {tech}
                       </span>
@@ -1891,7 +1891,7 @@ export default function BatchManagementPage() {
                 <div className="bg-white border border-border rounded-lg p-4 space-y-3">
                   <h4 className="text-xs font-black uppercase text-text-secondary">Batch Categorization Tags</h4>
                   <div className="flex flex-wrap gap-1.5">
-                    {activeProfile.metadata.tags.map((tag, idx) => (
+                    {activeProfile.metadata.tags.map((tag: any, idx: any) => (
                       <span key={idx} className="bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded text-[10.5px] font-bold">
                         #{tag}
                       </span>
@@ -1933,7 +1933,7 @@ export default function BatchManagementPage() {
                 <h4 className="text-xs font-black uppercase text-text-secondary">Chronological Audit Timeline</h4>
                 
                 <div className="relative border-l border-border ml-2 space-y-4 pl-4 pt-1">
-                  {activeProfile.timeline.map((evt, idx) => (
+                  {activeProfile.timeline.map((evt: any, idx: any) => (
                     <div key={idx} className="relative text-xs">
                       <div className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-slate-400 border border-white" />
                       <div className="text-[9.5px] font-bold text-text-secondary">{evt.date}</div>
@@ -2018,7 +2018,7 @@ export default function BatchManagementPage() {
                           type="text" 
                           required 
                           value={editForm.name}
-                          onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, name: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2038,7 +2038,7 @@ export default function BatchManagementPage() {
                           <label className="text-[10px] font-bold text-text-secondary">Program ID Mapped</label>
                           <select 
                             value={editForm.programId}
-                            onChange={e => {
+                            onChange={(e: any) => {
                               const pId = e.target.value;
                               const pName = pId === 'prog-1' ? 'Summer Software Engineering Internship' : pId === 'prog-2' ? 'Data Science Boot Camp' : 'Sales Boot Camp';
                               setEditForm({ ...editForm, programId: pId, programName: pName });
@@ -2057,7 +2057,7 @@ export default function BatchManagementPage() {
                           <label className="text-[10px] font-bold text-text-secondary">Program ID Mapped</label>
                           <select 
                             value={editForm.programId}
-                            onChange={e => {
+                            onChange={(e: any) => {
                               const pId = e.target.value;
                               const pName = pId === 'prog-1' ? 'Summer Software Engineering Internship' : pId === 'prog-2' ? 'Data Science Boot Camp' : 'Sales Boot Camp';
                               setEditForm({ ...editForm, programId: pId, programName: pName });
@@ -2075,7 +2075,7 @@ export default function BatchManagementPage() {
                         <label className="text-[10px] font-bold text-text-secondary">Internship Classification</label>
                         <select 
                           value={editForm.internshipType}
-                          onChange={e => setEditForm({ ...editForm, internshipType: e.target.value as any })}
+                          onChange={(e: any) => setEditForm({ ...editForm, internshipType: e.target.value as any })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         >
                           <option value="Free Internship">Free Internship</option>
@@ -2092,7 +2092,7 @@ export default function BatchManagementPage() {
                         <input 
                           type="date" 
                           value={editForm.startDate}
-                          onChange={e => setEditForm({ ...editForm, startDate: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, startDate: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2102,7 +2102,7 @@ export default function BatchManagementPage() {
                         <input 
                           type="date" 
                           value={editForm.endDate}
-                          onChange={e => setEditForm({ ...editForm, endDate: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, endDate: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2112,7 +2112,7 @@ export default function BatchManagementPage() {
                         <input 
                           type="number" 
                           value={editForm.capacity}
-                          onChange={e => setEditForm({ ...editForm, capacity: Number(e.target.value) })}
+                          onChange={(e: any) => setEditForm({ ...editForm, capacity: Number(e.target.value) })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2121,7 +2121,7 @@ export default function BatchManagementPage() {
                         <label className="text-[10px] font-bold text-text-secondary">Lifecycle Status</label>
                         <select 
                           value={editForm.status}
-                          onChange={e => setEditForm({ ...editForm, status: e.target.value as any })}
+                          onChange={(e: any) => setEditForm({ ...editForm, status: e.target.value as any })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         >
                           <option value="Draft">Draft</option>
@@ -2147,7 +2147,7 @@ export default function BatchManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.category}
-                          onChange={e => setEditForm({ ...editForm, category: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, category: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2156,7 +2156,7 @@ export default function BatchManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.domain}
-                          onChange={e => setEditForm({ ...editForm, domain: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, domain: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2164,7 +2164,7 @@ export default function BatchManagementPage() {
                         <label className="text-[10px] font-bold text-text-secondary">Priority Urgency</label>
                         <select 
                           value={editForm.priority}
-                          onChange={e => setEditForm({ ...editForm, priority: e.target.value as any })}
+                          onChange={(e: any) => setEditForm({ ...editForm, priority: e.target.value as any })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         >
                           <option value="High">High</option>
@@ -2177,7 +2177,7 @@ export default function BatchManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.academicYear}
-                          onChange={e => setEditForm({ ...editForm, academicYear: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, academicYear: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2186,7 +2186,7 @@ export default function BatchManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.techStackString}
-                          onChange={e => setEditForm({ ...editForm, techStackString: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, techStackString: e.target.value })}
                           placeholder="e.g. React, Node.js, Docker"
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
@@ -2206,7 +2206,7 @@ export default function BatchManagementPage() {
                       type="text" 
                       required
                       value={studentForm.name}
-                      onChange={e => setStudentForm({ ...studentForm, name: e.target.value })}
+                      onChange={(e: any) => setStudentForm({ ...studentForm, name: e.target.value })}
                       placeholder="e.g. John Doe"
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary"
                     />
@@ -2218,7 +2218,7 @@ export default function BatchManagementPage() {
                         type="text" 
                         required
                         value={studentForm.internId}
-                        onChange={e => setStudentForm({ ...studentForm, internId: e.target.value })}
+                        onChange={(e: any) => setStudentForm({ ...studentForm, internId: e.target.value })}
                         placeholder="e.g. INT-2026-999"
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary"
                       />
@@ -2229,7 +2229,7 @@ export default function BatchManagementPage() {
                         type="number" 
                         required
                         value={studentForm.performanceScore}
-                        onChange={e => setStudentForm({ ...studentForm, performanceScore: Number(e.target.value) })}
+                        onChange={(e: any) => setStudentForm({ ...studentForm, performanceScore: Number(e.target.value) })}
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary"
                       />
                     </div>
@@ -2240,7 +2240,7 @@ export default function BatchManagementPage() {
                       <input 
                         type="text" 
                         value={studentForm.college}
-                        onChange={e => setStudentForm({ ...studentForm, college: e.target.value })}
+                        onChange={(e: any) => setStudentForm({ ...studentForm, college: e.target.value })}
                         placeholder="e.g. Stanford University"
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary"
                       />
@@ -2249,7 +2249,7 @@ export default function BatchManagementPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase">Department</label>
                       <select 
                         value={studentForm.department}
-                        onChange={e => setStudentForm({ ...studentForm, department: e.target.value })}
+                        onChange={(e: any) => setStudentForm({ ...studentForm, department: e.target.value })}
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                       >
                         <option value="CSE">CSE</option>
@@ -2273,7 +2273,7 @@ export default function BatchManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Lead Cohort Coach *</label>
                     <select
                       value={mentorForm.mentorId}
-                      onChange={e => {
+                      onChange={(e: any) => {
                         const mId = e.target.value;
                         const mName = mId === 'emp-2' ? 'Bob Johnson' : mId === 'emp-3' ? 'Diana Prince' : 'Charlie Davis';
                         setMentorForm({ mentorId: mId, mentorName: mName });
@@ -2297,7 +2297,7 @@ export default function BatchManagementPage() {
                       type="number" 
                       required
                       value={capacityForm}
-                      onChange={e => setCapacityForm(Number(e.target.value))}
+                      onChange={(e: any) => setCapacityForm(Number(e.target.value))}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     />
                   </div>
@@ -2311,7 +2311,7 @@ export default function BatchManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Update Lifecycle Status *</label>
                     <select
                       value={statusForm}
-                      onChange={e => setStatusForm(e.target.value as any)}
+                      onChange={(e: any) => setStatusForm(e.target.value as any)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="Draft">Draft</option>
@@ -2333,7 +2333,7 @@ export default function BatchManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Bulk Status Update *</label>
                     <select
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="">-- Choose Status --</option>
@@ -2355,7 +2355,7 @@ export default function BatchManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Map Coach *</label>
                     <select
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="">-- Choose Mentor --</option>
@@ -2375,7 +2375,7 @@ export default function BatchManagementPage() {
                       type="number"
                       required
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     />
                   </div>
@@ -2390,7 +2390,7 @@ export default function BatchManagementPage() {
                       required
                       rows={3}
                       value={notifyMsg}
-                      onChange={e => setNotifyMsg(e.target.value)}
+                      onChange={(e: any) => setNotifyMsg(e.target.value)}
                       placeholder="Write cohort email notifications content..."
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     />

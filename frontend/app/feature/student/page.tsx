@@ -9,7 +9,7 @@ import {
   UserX, ListFilter, Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock
 } from 'lucide-react';
 import { studentService } from '@/src/services/student.service';
-import { Student, StudentDocument, StudentTimelineEvent, StudentBatch } from '@/src/data/mock-students';
+import { Student, StudentDocument, StudentTimelineEvent, StudentBatch } from '../../../src/types/api/student.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
@@ -147,28 +147,28 @@ export default function StudentLifecycleManagementPage() {
 
   // Derived Filter Lists
   const collegesList = useMemo(() => {
-    const colleges = new Set(students.map(s => s.academicInfo.college));
+    const colleges = new Set(students.map((s: any) => s.academicInfo.college));
     return Array.from(colleges);
   }, [students]);
 
   const programsList = useMemo(() => {
-    const programs = new Set(students.map(s => s.internshipInfo.program));
+    const programs = new Set(students.map((s: any) => s.internshipInfo.program));
     return Array.from(programs);
   }, [students]);
 
   const batchesList = useMemo(() => {
-    const batches = new Set(students.map(s => s.internshipInfo.batchName).filter(Boolean));
+    const batches = new Set(students.map((s: any) => s.internshipInfo.batchName).filter(Boolean));
     return Array.from(batches);
   }, [students]);
 
   const mentorsList = useMemo(() => {
-    const mentors = new Set(students.map(s => s.internshipInfo.mentorName).filter(Boolean));
+    const mentors = new Set(students.map((s: any) => s.internshipInfo.mentorName).filter(Boolean));
     return Array.from(mentors);
   }, [students]);
 
   // Filtered Students logic
   const filteredStudents = useMemo(() => {
-    return students.filter(s => {
+    return students.filter((s: any) => {
       // Global text query search (ID, Name, Email, Phone, College)
       const q = searchTerm.toLowerCase();
       const matchesSearch = 
@@ -201,17 +201,17 @@ export default function StudentLifecycleManagementPage() {
   // Executive Dashboard KPIs
   const dashboardStats = useMemo(() => {
     const total = students.length;
-    const active = students.filter(s => s.status === 'Active').length;
-    const training = students.filter(s => s.status === 'Enrolled' || s.status === 'Active').length;
-    const completed = students.filter(s => s.status === 'Completed' || s.status === 'Certified' || s.status === 'Placed').length;
-    const placementReady = students.filter(s => s.placement.status === 'Placement Ready' || s.placement.status === 'Placed' || s.placement.status === 'Offer Received').length;
-    const placed = students.filter(s => s.status === 'Placed' || s.placement.status === 'Placed').length;
-    const activeMentors = new Set(students.map(s => s.internshipInfo.mentorId).filter(Boolean)).size;
+    const active = students.filter((s: any) => s.status === 'Active').length;
+    const training = students.filter((s: any) => s.status === 'Enrolled' || s.status === 'Active').length;
+    const completed = students.filter((s: any) => s.status === 'Completed' || s.status === 'Certified' || s.status === 'Placed').length;
+    const placementReady = students.filter((s: any) => s.placement.status === 'Placement Ready' || s.placement.status === 'Placed' || s.placement.status === 'Offer Received').length;
+    const placed = students.filter((s: any) => s.status === 'Placed' || s.placement.status === 'Placed').length;
+    const activeMentors = new Set(students.map((s: any) => s.internshipInfo.mentorId).filter(Boolean)).size;
     
     // Count pending documents across all students
     let pendingDocs = 0;
-    students.forEach(s => {
-      s.documents.forEach(d => {
+    students.forEach((s: any) => {
+      s.documents.forEach((d: any) => {
         if (d.status === 'Pending') pendingDocs++;
       });
     });
@@ -224,7 +224,7 @@ export default function StudentLifecycleManagementPage() {
     const counts: Record<string, number> = {
       Applied: 0, Approved: 0, Enrolled: 0, Active: 0, 'On Hold': 0, Completed: 0, Certified: 0, Placed: 0, Dropped: 0, Suspended: 0
     };
-    students.forEach(s => {
+    students.forEach((s: any) => {
       if (counts[s.status] !== undefined) counts[s.status]++;
     });
     return counts;
@@ -234,7 +234,7 @@ export default function StudentLifecycleManagementPage() {
     const counts: Record<string, number> = {
       CSE: 0, IT: 0, 'AI & DS': 0, ECE: 0, EEE: 0, Mechanical: 0, Civil: 0, MBA: 0
     };
-    students.forEach(s => {
+    students.forEach((s: any) => {
       const dept = s.academicInfo.department;
       if (counts[dept] !== undefined) counts[dept]++;
     });
@@ -245,7 +245,7 @@ export default function StudentLifecycleManagementPage() {
     const counts: Record<string, number> = {
       'Free Internship': 0, 'Paid Internship': 0, 'Industrial Internship': 0, 'Research Internship': 0, 'Corporate Internship': 0, 'Stipend Internship': 0
     };
-    students.forEach(s => {
+    students.forEach((s: any) => {
       const type = s.internshipInfo.internshipType;
       if (counts[type] !== undefined) counts[type]++;
     });
@@ -254,18 +254,18 @@ export default function StudentLifecycleManagementPage() {
 
   // Performers list (Top 4 & Bottom 4)
   const sortedPerformers = useMemo(() => {
-    const sorted = [...students].sort((a, b) => b.performance.overallPerformance - a.performance.overallPerformance);
+    const sorted = [...students].sort((a: any, b: any) => b.performance.overallPerformance - a.performance.overallPerformance);
     return {
       top: sorted.slice(0, 4),
-      bottom: [...sorted].reverse().slice(0, 4).filter(s => s.performance.overallPerformance < 75)
+      bottom: [...sorted].reverse().slice(0, 4).filter((s: any) => s.performance.overallPerformance < 75)
     };
   }, [students]);
 
   // Global Activity Feed based on timeline logs
   const activityFeed = useMemo(() => {
     const feed: { studentName: string; avatar: string; date: string; title: string; desc: string; type: string }[] = [];
-    students.forEach(s => {
-      s.timeline.forEach(evt => {
+    students.forEach((s: any) => {
+      s.timeline.forEach((evt: any) => {
         feed.push({
           studentName: s.personalInfo.name,
           avatar: s.personalInfo.avatar,
@@ -276,7 +276,7 @@ export default function StudentLifecycleManagementPage() {
         });
       });
     });
-    return feed.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 7);
+    return feed.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 7);
   }, [students]);
 
   // Click handler to open Drawer and sync the active profile
@@ -318,7 +318,7 @@ export default function StudentLifecycleManagementPage() {
     if (!activeActionModal?.studentId) return;
     
     const targetId = activeActionModal.studentId;
-    const original = students.find(s => s.id === targetId);
+    const original = students.find((s: any) => s.id === targetId);
     if (!original) return;
 
     const updated = await studentService.updateStudent(targetId, {
@@ -330,7 +330,7 @@ export default function StudentLifecycleManagementPage() {
         dob: editForm.dob,
         gender: editForm.gender,
         address: editForm.address,
-        avatar: editForm.name.split(' ').map(n => n[0]).join('').toUpperCase()
+        avatar: editForm.name.split(' ').map((n: any) => n[0]).join('').toUpperCase()
       },
       academicInfo: {
         college: editForm.college,
@@ -353,7 +353,7 @@ export default function StudentLifecycleManagementPage() {
     });
 
     if (updated) {
-      setStudents(students.map(s => s.id === targetId ? updated : s));
+      setStudents(students.map((s: any) => s.id === targetId ? updated : s));
       if (activeProfile?.id === targetId) {
         setActiveProfile(updated);
       }
@@ -378,10 +378,10 @@ export default function StudentLifecycleManagementPage() {
 
   // Document verification toggle
   const handleVerifyDocument = async (studentId: string, docType: string, newStatus: 'Verified' | 'Rejected') => {
-    const student = students.find(s => s.id === studentId);
+    const student = students.find((s: any) => s.id === studentId);
     if (!student) return;
 
-    const updatedDocs = student.documents.map(doc => {
+    const updatedDocs = student.documents.map((doc: any) => {
       if (doc.type === docType) {
         return { ...doc, status: newStatus, verifiedBy: user?.name || 'System Coordinator' };
       }
@@ -402,7 +402,7 @@ export default function StudentLifecycleManagementPage() {
     });
 
     if (updated) {
-      setStudents(students.map(s => s.id === studentId ? updated : s));
+      setStudents(students.map((s: any) => s.id === studentId ? updated : s));
       if (activeProfile?.id === studentId) {
         setActiveProfile(updated);
       }
@@ -412,7 +412,7 @@ export default function StudentLifecycleManagementPage() {
 
   // Credential resets
   const handleToggleAccess = async (studentId: string, accessKey: keyof Student['credentials']) => {
-    const student = students.find(s => s.id === studentId);
+    const student = students.find((s: any) => s.id === studentId);
     if (!student) return;
 
     const updatedCreds = {
@@ -425,7 +425,7 @@ export default function StudentLifecycleManagementPage() {
     });
 
     if (updated) {
-      setStudents(students.map(s => s.id === studentId ? updated : s));
+      setStudents(students.map((s: any) => s.id === studentId ? updated : s));
       if (activeProfile?.id === studentId) {
         setActiveProfile(updated);
       }
@@ -466,7 +466,7 @@ export default function StudentLifecycleManagementPage() {
       const finalObj = await studentService.updateStudent(studentId, { timeline: updatedTimeline });
       
       if (finalObj) {
-        setStudents(students.map(s => s.id === studentId ? finalObj : s));
+        setStudents(students.map((s: any) => s.id === studentId ? finalObj : s));
         setActiveProfile(finalObj);
         showToast(`Transferred student to batch ${batchForm.name}`);
         setActiveActionModal(null);
@@ -507,7 +507,7 @@ export default function StudentLifecycleManagementPage() {
       const finalObj = await studentService.updateStudent(studentId, { timeline: updatedTimeline });
 
       if (finalObj) {
-        setStudents(students.map(s => s.id === studentId ? finalObj : s));
+        setStudents(students.map((s: any) => s.id === studentId ? finalObj : s));
         setActiveProfile(finalObj);
         showToast(`Assigned mentor ${mentorForm.mentorName} successfully`);
         setActiveActionModal(null);
@@ -536,7 +536,7 @@ export default function StudentLifecycleManagementPage() {
       const finalObj = await studentService.updateStudent(studentId, { timeline: updatedTimeline });
 
       if (finalObj) {
-        setStudents(students.map(s => s.id === studentId ? finalObj : s));
+        setStudents(students.map((s: any) => s.id === studentId ? finalObj : s));
         setActiveProfile(finalObj);
         showToast(`Student status updated to ${statusForm}`);
         setActiveActionModal(null);
@@ -571,7 +571,7 @@ export default function StudentLifecycleManagementPage() {
       const finalObj = await studentService.updateStudent(studentId, { timeline: updatedTimeline });
 
       if (finalObj) {
-        setStudents(students.map(s => s.id === studentId ? finalObj : s));
+        setStudents(students.map((s: any) => s.id === studentId ? finalObj : s));
         setActiveProfile(finalObj);
         showToast(`Placement parameters updated for ${activeProfile.personalInfo.name}`);
         setActiveActionModal(null);
@@ -581,10 +581,10 @@ export default function StudentLifecycleManagementPage() {
 
   // Generate certificate for single student
   const handleGenerateCertificate = async (studentId: string) => {
-    const student = students.find(s => s.id === studentId);
+    const student = students.find((s: any) => s.id === studentId);
     if (!student) return;
 
-    const hasCert = student.documents.some(doc => doc.type === 'Completion Certificate');
+    const hasCert = student.documents.some((doc: any) => doc.type === 'Completion Certificate');
     let updatedDocs = [...student.documents];
     if (!hasCert) {
       updatedDocs.push({
@@ -612,7 +612,7 @@ export default function StudentLifecycleManagementPage() {
     });
 
     if (updated) {
-      setStudents(students.map(s => s.id === studentId ? updated : s));
+      setStudents(students.map((s: any) => s.id === studentId ? updated : s));
       if (activeProfile?.id === studentId) {
         setActiveProfile(updated);
       }
@@ -622,10 +622,10 @@ export default function StudentLifecycleManagementPage() {
 
   // Revoke certificate
   const handleRevokeCertificate = async (studentId: string) => {
-    const student = students.find(s => s.id === studentId);
+    const student = students.find((s: any) => s.id === studentId);
     if (!student) return;
 
-    const updatedDocs = student.documents.filter(doc => doc.type !== 'Completion Certificate');
+    const updatedDocs = student.documents.filter((doc: any) => doc.type !== 'Completion Certificate');
     const updatedTimeline = [...student.timeline];
     updatedTimeline.unshift({
       date: new Date().toISOString().split('T')[0],
@@ -641,7 +641,7 @@ export default function StudentLifecycleManagementPage() {
     });
 
     if (updated) {
-      setStudents(students.map(s => s.id === studentId ? updated : s));
+      setStudents(students.map((s: any) => s.id === studentId ? updated : s));
       if (activeProfile?.id === studentId) {
         setActiveProfile(updated);
       }
@@ -652,7 +652,7 @@ export default function StudentLifecycleManagementPage() {
   // Multi-row Selection handlers
   const handleToggleSelectRow = (id: string) => {
     if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter(item => item !== id));
+      setSelectedIds(selectedIds.filter((item: any) => item !== id));
     } else {
       setSelectedIds([...selectedIds, id]);
     }
@@ -662,7 +662,7 @@ export default function StudentLifecycleManagementPage() {
     if (selectedIds.length === filteredStudents.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredStudents.map(s => s.id));
+      setSelectedIds(filteredStudents.map((s: any) => s.id));
     }
   };
 
@@ -716,7 +716,7 @@ export default function StudentLifecycleManagementPage() {
   // Export selected roster to CSV
   const handleExportRoster = () => {
     const listToExport = selectedIds.length > 0 
-      ? students.filter(s => selectedIds.includes(s.id))
+      ? students.filter((s: any) => selectedIds.includes(s.id))
       : filteredStudents;
 
     if (listToExport.length === 0) {
@@ -725,7 +725,7 @@ export default function StudentLifecycleManagementPage() {
     }
 
     const headers = ['Intern ID', 'Full Name', 'Email', 'Phone', 'College', 'Department', 'Batch', 'Program', 'Mentor', 'Status', 'Performance Score', 'Placement Status'];
-    const rows = listToExport.map(s => [
+    const rows = listToExport.map((s: any) => [
       s.internId,
       s.personalInfo.name,
       s.personalInfo.email,
@@ -740,7 +740,7 @@ export default function StudentLifecycleManagementPage() {
       s.placement.status
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map(r => r.map(val => `"${val}"`).join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map((r: any) => r.map((val: any) => `"${val}"`).join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -858,7 +858,7 @@ export default function StudentLifecycleManagementPage() {
               { label: 'Hired & Placed', count: dashboardStats.placed, icon: UserCheck, color: 'text-teal-600 bg-teal-50 border-teal-100', filterKey: 'status', filterVal: 'Placed' },
               { label: 'Assigned Mentors', count: dashboardStats.activeMentors, icon: Shield, color: 'text-pink-600 bg-pink-50 border-pink-100', filterKey: 'all', filterVal: 'all' },
               { label: 'Pending Documents', count: dashboardStats.pendingDocs, icon: FileText, color: 'text-rose-600 bg-rose-50 border-rose-100', filterKey: 'all', filterVal: 'all' }
-            ].map((kpi, idx) => (
+            ].map((kpi: any, idx: any) => (
               <div 
                 key={idx}
                 onClick={() => {
@@ -892,7 +892,7 @@ export default function StudentLifecycleManagementPage() {
                 Status Distribution
               </h3>
               <div className="space-y-2">
-                {Object.entries(statusCounts).map(([status, count], index) => {
+                {Object.entries(statusCounts).map(([status, count], index: any) => {
                   const pct = Math.round((count / students.length) * 100) || 0;
                   return (
                     <div key={index} className="space-y-1">
@@ -919,7 +919,7 @@ export default function StudentLifecycleManagementPage() {
                 Enrollments by Department
               </h3>
               <div className="space-y-2">
-                {Object.entries(deptCounts).map(([dept, count], index) => {
+                {Object.entries(deptCounts).map(([dept, count], index: any) => {
                   const pct = Math.round((count / students.length) * 100) || 0;
                   return (
                     <div key={index} className="space-y-1">
@@ -946,7 +946,7 @@ export default function StudentLifecycleManagementPage() {
                 Internship Type Mapping
               </h3>
               <div className="space-y-2">
-                {Object.entries(programTypeCounts).map(([type, count], index) => {
+                {Object.entries(programTypeCounts).map(([type, count], index: any) => {
                   const pct = Math.round((count / students.length) * 100) || 0;
                   return (
                     <div key={index} className="space-y-1">
@@ -978,7 +978,7 @@ export default function StudentLifecycleManagementPage() {
                 Academic Top Performers (90%+)
               </h3>
               <div className="space-y-3">
-                {sortedPerformers.top.map(s => (
+                {sortedPerformers.top.map((s: any) => (
                   <div 
                     key={s.id} 
                     onClick={() => handleOpenProfile(s)}
@@ -1009,7 +1009,7 @@ export default function StudentLifecycleManagementPage() {
               </h3>
               <div className="space-y-3">
                 {sortedPerformers.bottom.length > 0 ? (
-                  sortedPerformers.bottom.map(s => (
+                  sortedPerformers.bottom.map((s: any) => (
                     <div 
                       key={s.id} 
                       onClick={() => handleOpenProfile(s)}
@@ -1042,7 +1042,7 @@ export default function StudentLifecycleManagementPage() {
                 Recent SLMS Activity Feed
               </h3>
               <div className="relative border-l-2 border-border ml-2 space-y-4.5 pl-4 max-h-[300px] overflow-y-auto">
-                {activityFeed.map((act, index) => (
+                {activityFeed.map((act: any, index: any) => (
                   <div key={index} className="relative">
                     <div className="absolute -left-[23px] top-0.5 bg-blue-100 text-blue-700 h-4 w-4 rounded-full flex items-center justify-center text-[8px] font-bold border border-white">
                       {act.avatar[0]}
@@ -1077,7 +1077,7 @@ export default function StudentLifecycleManagementPage() {
                   ref={searchInputRef}
                   placeholder="Search students (Name, ID, Email, Phone, College)... [Ctrl+F]"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: any) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -1123,11 +1123,11 @@ export default function StudentLifecycleManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Internship Program</label>
                   <select 
                     value={filterProgram}
-                    onChange={(e) => setFilterProgram(e.target.value)}
+                    onChange={(e: any) => setFilterProgram(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Programs</option>
-                    {programsList.map((p, idx) => <option key={idx} value={p}>{p}</option>)}
+                    {programsList.map((p: any, idx: any) => <option key={idx} value={p}>{p}</option>)}
                   </select>
                 </div>
 
@@ -1136,7 +1136,7 @@ export default function StudentLifecycleManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Lifecycle Status</label>
                   <select 
                     value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    onChange={(e: any) => setFilterStatus(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Statuses</option>
@@ -1158,11 +1158,11 @@ export default function StudentLifecycleManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Institution College</label>
                   <select 
                     value={filterCollege}
-                    onChange={(e) => setFilterCollege(e.target.value)}
+                    onChange={(e: any) => setFilterCollege(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Colleges</option>
-                    {collegesList.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
+                    {collegesList.map((c: any, idx: any) => <option key={idx} value={c}>{c}</option>)}
                   </select>
                 </div>
 
@@ -1171,7 +1171,7 @@ export default function StudentLifecycleManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Department</label>
                   <select 
                     value={filterDept}
-                    onChange={(e) => setFilterDept(e.target.value)}
+                    onChange={(e: any) => setFilterDept(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Departments</option>
@@ -1191,11 +1191,11 @@ export default function StudentLifecycleManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Batch Cohort</label>
                   <select 
                     value={filterBatch}
-                    onChange={(e) => setFilterBatch(e.target.value)}
+                    onChange={(e: any) => setFilterBatch(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Batches</option>
-                    {batchesList.map((b, idx) => <option key={idx} value={b}>{b}</option>)}
+                    {batchesList.map((b: any, idx: any) => <option key={idx} value={b}>{b}</option>)}
                   </select>
                 </div>
 
@@ -1204,11 +1204,11 @@ export default function StudentLifecycleManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Mentor Assigned</label>
                   <select 
                     value={filterMentor}
-                    onChange={(e) => setFilterMentor(e.target.value)}
+                    onChange={(e: any) => setFilterMentor(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Mentors</option>
-                    {mentorsList.map((m, idx) => <option key={idx} value={m}>{m}</option>)}
+                    {mentorsList.map((m: any, idx: any) => <option key={idx} value={m}>{m}</option>)}
                   </select>
                 </div>
 
@@ -1217,7 +1217,7 @@ export default function StudentLifecycleManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Placement Stage</label>
                   <select 
                     value={filterPlacement}
-                    onChange={(e) => setFilterPlacement(e.target.value)}
+                    onChange={(e: any) => setFilterPlacement(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Placement Stages</option>
@@ -1235,7 +1235,7 @@ export default function StudentLifecycleManagementPage() {
                   <label className="text-[10px] font-black uppercase text-text-secondary">Overall Performance</label>
                   <select 
                     value={filterPerformance}
-                    onChange={(e) => setFilterPerformance(e.target.value)}
+                    onChange={(e: any) => setFilterPerformance(e.target.value)}
                     className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
                   >
                     <option value="all">All Ranges</option>
@@ -1278,7 +1278,7 @@ export default function StudentLifecycleManagementPage() {
               </thead>
               <tbody className="divide-y divide-border font-medium">
                 {filteredStudents.length > 0 ? (
-                  filteredStudents.map((s) => {
+                  filteredStudents.map((s: any) => {
                     const isSelected = selectedIds.includes(s.id);
                     return (
                       <tr 
@@ -1576,7 +1576,7 @@ export default function StudentLifecycleManagementPage() {
                 { id: 'placement', label: 'Placement' },
                 { id: 'lifecycle', label: 'Journey' },
                 { id: 'timeline', label: 'Audit Timeline' }
-              ].map(tab => (
+              ].map((tab: any) => (
                 <button
                   key={tab.id}
                   onClick={() => setProfileTab(tab.id as any)}
@@ -1703,7 +1703,7 @@ export default function StudentLifecycleManagementPage() {
               <div className="space-y-4">
                 <h4 className="text-xs font-black uppercase text-text-secondary">Document Management Center</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeProfile.documents.map((doc, idx) => (
+                  {activeProfile.documents.map((doc: any, idx: any) => (
                     <div key={idx} className="bg-slate-50 border border-border rounded-lg p-3 flex flex-col justify-between gap-3">
                       <div>
                         <div className="flex items-center justify-between">
@@ -1744,7 +1744,7 @@ export default function StudentLifecycleManagementPage() {
                         )}
                         <a
                           href="#"
-                          onClick={(e) => { e.preventDefault(); showToast(`Simulating download for ${doc.name}`); }}
+                          onClick={(e: any) => { e.preventDefault(); showToast(`Simulating download for ${doc.name}`); }}
                           className="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-[10px] font-bold text-text-primary rounded transition text-center"
                         >
                           Download
@@ -1973,7 +1973,7 @@ export default function StudentLifecycleManagementPage() {
                   <h5 className="text-[10.5px] font-black uppercase text-text-secondary">Recent Mentor Performance Review logs</h5>
                   {activeProfile.mentor.feedbackGiven.length > 0 ? (
                     <div className="space-y-3">
-                      {activeProfile.mentor.feedbackGiven.map((fb, idx) => (
+                      {activeProfile.mentor.feedbackGiven.map((fb: any, idx: any) => (
                         <div key={idx} className="bg-white border border-border p-3 rounded-lg text-xs leading-relaxed text-text-primary">
                           <div className="flex justify-between font-bold text-text-secondary text-[10px] mb-1">
                             <span>Reviewed by: {fb.reviewer}</span>
@@ -2017,7 +2017,7 @@ export default function StudentLifecycleManagementPage() {
                           }
                         });
                         if (updated) {
-                          setStudents(students.map(s => s.id === activeProfile.id ? updated : s));
+                          setStudents(students.map((s: any) => s.id === activeProfile.id ? updated : s));
                           setActiveProfile(updated);
                           showToast('Removed assigned mentor');
                         }
@@ -2044,7 +2044,7 @@ export default function StudentLifecycleManagementPage() {
                     { label: 'Capstones/Proj', value: `${activeProfile.performance.projectScore}/100`, color: 'bg-purple-50 text-purple-700' },
                     { label: 'Mentor Rating', value: `★ ${activeProfile.performance.mentorRating}/5`, color: 'bg-amber-50 text-amber-700' },
                     { label: 'Overall Perf', value: `${activeProfile.performance.overallPerformance}%`, color: 'bg-emerald-50 text-emerald-700' }
-                  ].map((card, idx) => (
+                  ].map((card: any, idx: any) => (
                     <div key={idx} className={`p-3 rounded-lg border border-border flex flex-col justify-center text-center ${card.color}`}>
                       <div className="text-lg font-black">{card.value}</div>
                       <div className="text-[9.5px] uppercase font-bold text-text-secondary mt-0.5">{card.label}</div>
@@ -2060,7 +2060,7 @@ export default function StudentLifecycleManagementPage() {
                     <div className="bg-slate-50 border border-border rounded-lg p-4 space-y-3">
                       <h5 className="text-[10px] font-black uppercase text-text-secondary">Attendance Score Progression</h5>
                       <div className="h-32 w-full flex items-end justify-between px-2 pt-4">
-                        {activeProfile.performance.attendanceTrend.map((t, idx) => (
+                        {activeProfile.performance.attendanceTrend.map((t: any, idx: any) => (
                           <div key={idx} className="flex flex-col items-center gap-1.5 flex-1">
                             <div className="text-[9px] font-bold text-text-secondary">{t.score}%</div>
                             <div className="w-8 bg-blue-600 rounded-t" style={{ height: `${t.score * 0.8}px` }} />
@@ -2074,7 +2074,7 @@ export default function StudentLifecycleManagementPage() {
                     <div className="bg-slate-50 border border-border rounded-lg p-4 space-y-3">
                       <h5 className="text-[10px] font-black uppercase text-text-secondary">Milestone Test Scores</h5>
                       <div className="h-32 w-full flex items-end justify-between px-2 pt-4">
-                        {activeProfile.performance.assessmentTrend.map((t, idx) => (
+                        {activeProfile.performance.assessmentTrend.map((t: any, idx: any) => (
                           <div key={idx} className="flex flex-col items-center gap-1.5 flex-1">
                             <div className="text-[9px] font-bold text-text-secondary">{t.score}</div>
                             <div className="w-8 bg-indigo-600 rounded-t" style={{ height: `${t.score * 0.8}px` }} />
@@ -2096,7 +2096,7 @@ export default function StudentLifecycleManagementPage() {
                   <div className="bg-slate-50 border border-border rounded-lg p-4 space-y-3">
                     <h5 className="text-[10px] font-black uppercase text-text-secondary">Skill Acquisition Metrics</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {activeProfile.performance.skills.map((skill, idx) => (
+                      {activeProfile.performance.skills.map((skill: any, idx: any) => (
                         <div key={idx} className="space-y-1">
                           <div className="flex justify-between text-xs font-semibold text-text-primary">
                             <span>{skill.name}</span>
@@ -2127,7 +2127,7 @@ export default function StudentLifecycleManagementPage() {
                     
                     {[
                       'Not Eligible', 'Eligible', 'Placement Ready', 'Interview Scheduled', 'Offer Received', 'Placed'
-                    ].map((stage, idx) => {
+                    ].map((stage: any, idx: any) => {
                       const stages = ['Not Eligible', 'Eligible', 'Placement Ready', 'Interview Scheduled', 'Offer Received', 'Placed'];
                       const activeIdx = stages.indexOf(activeProfile.placement.status);
                       const isPast = idx <= activeIdx;
@@ -2205,7 +2205,7 @@ export default function StudentLifecycleManagementPage() {
                     { key: 'Completed', title: 'Phase 5: Capstone Completed', desc: 'Syllabus modules are completed and verified by course managers.' },
                     { key: 'Certified', title: 'Phase 6: PineSphere Certified', desc: 'LMS credentials archived, completion certificate issued.' },
                     { key: 'Placed', title: 'Phase 7: Corporate Placement', desc: 'Hired in corporate partner network with verified offer letter.' }
-                  ].map((phase, idx) => {
+                  ].map((phase: any, idx: any) => {
                     const statusCycle = ['Applied', 'Approved', 'Enrolled', 'Active', 'Completed', 'Certified', 'Placed'];
                     const currentIdx = statusCycle.indexOf(activeProfile.status === 'On Hold' ? 'Enrolled' : activeProfile.status);
                     const isPast = statusCycle.indexOf(phase.key) <= currentIdx;
@@ -2232,7 +2232,7 @@ export default function StudentLifecycleManagementPage() {
               <div className="space-y-4">
                 <h4 className="text-xs font-black uppercase text-text-secondary">Chronological Audit Log Feed</h4>
                 <div className="relative border-l border-border ml-2 space-y-4 pl-4 pt-1">
-                  {activeProfile.timeline.map((evt, idx) => (
+                  {activeProfile.timeline.map((evt: any, idx: any) => (
                     <div key={idx} className="relative text-xs">
                       <div className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-slate-400 border border-white" />
                       <div className="text-[9.5px] font-bold text-text-secondary">{evt.date}</div>
@@ -2317,7 +2317,7 @@ export default function StudentLifecycleManagementPage() {
                           type="text" 
                           required 
                           value={editForm.name}
-                          onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, name: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2327,7 +2327,7 @@ export default function StudentLifecycleManagementPage() {
                           type="email" 
                           required 
                           value={editForm.email}
-                          onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, email: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2336,7 +2336,7 @@ export default function StudentLifecycleManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.phone}
-                          onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, phone: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2345,7 +2345,7 @@ export default function StudentLifecycleManagementPage() {
                         <input 
                           type="date" 
                           value={editForm.dob}
-                          onChange={e => setEditForm({ ...editForm, dob: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, dob: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2353,7 +2353,7 @@ export default function StudentLifecycleManagementPage() {
                         <label className="text-[10px] font-bold text-text-secondary">Gender</label>
                         <select 
                           value={editForm.gender}
-                          onChange={e => setEditForm({ ...editForm, gender: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, gender: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         >
                           <option value="Male">Male</option>
@@ -2366,7 +2366,7 @@ export default function StudentLifecycleManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.address}
-                          onChange={e => setEditForm({ ...editForm, address: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, address: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2385,7 +2385,7 @@ export default function StudentLifecycleManagementPage() {
                           type="text" 
                           required
                           value={editForm.college}
-                          onChange={e => setEditForm({ ...editForm, college: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, college: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2393,7 +2393,7 @@ export default function StudentLifecycleManagementPage() {
                         <label className="text-[10px] font-bold text-text-secondary">Department</label>
                         <select 
                           value={editForm.department}
-                          onChange={e => setEditForm({ ...editForm, department: e.target.value as any })}
+                          onChange={(e: any) => setEditForm({ ...editForm, department: e.target.value as any })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         >
                           <option value="CSE">CSE</option>
@@ -2411,7 +2411,7 @@ export default function StudentLifecycleManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.degree}
-                          onChange={e => setEditForm({ ...editForm, degree: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, degree: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2421,7 +2421,7 @@ export default function StudentLifecycleManagementPage() {
                           type="number" 
                           step="0.01"
                           value={editForm.cgpa}
-                          onChange={e => setEditForm({ ...editForm, cgpa: Number(e.target.value) })}
+                          onChange={(e: any) => setEditForm({ ...editForm, cgpa: Number(e.target.value) })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2430,7 +2430,7 @@ export default function StudentLifecycleManagementPage() {
                         <input 
                           type="number" 
                           value={editForm.year}
-                          onChange={e => setEditForm({ ...editForm, year: Number(e.target.value) })}
+                          onChange={(e: any) => setEditForm({ ...editForm, year: Number(e.target.value) })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2439,7 +2439,7 @@ export default function StudentLifecycleManagementPage() {
                         <input 
                           type="number" 
                           value={editForm.graduationYear}
-                          onChange={e => setEditForm({ ...editForm, graduationYear: Number(e.target.value) })}
+                          onChange={(e: any) => setEditForm({ ...editForm, graduationYear: Number(e.target.value) })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2457,7 +2457,7 @@ export default function StudentLifecycleManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.program}
-                          onChange={e => setEditForm({ ...editForm, program: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, program: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2465,7 +2465,7 @@ export default function StudentLifecycleManagementPage() {
                         <label className="text-[10px] font-bold text-text-secondary">Internship Type</label>
                         <select 
                           value={editForm.internshipType}
-                          onChange={e => setEditForm({ ...editForm, internshipType: e.target.value as any })}
+                          onChange={(e: any) => setEditForm({ ...editForm, internshipType: e.target.value as any })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         >
                           <option value="Free Internship">Free Internship</option>
@@ -2481,7 +2481,7 @@ export default function StudentLifecycleManagementPage() {
                         <input 
                           type="text" 
                           value={editForm.batchName}
-                          onChange={e => setEditForm({ ...editForm, batchName: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, batchName: e.target.value })}
                           className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                         />
                       </div>
@@ -2500,7 +2500,7 @@ export default function StudentLifecycleManagementPage() {
                       type="text" 
                       required
                       value={batchForm.name}
-                      onChange={e => setBatchForm({ ...batchForm, name: e.target.value })}
+                      onChange={(e: any) => setBatchForm({ ...batchForm, name: e.target.value })}
                       placeholder="e.g. Gamma Cohort 2026"
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary"
                     />
@@ -2510,7 +2510,7 @@ export default function StudentLifecycleManagementPage() {
                     <input 
                       type="text" 
                       value={batchForm.program}
-                      onChange={e => setBatchForm({ ...batchForm, program: e.target.value })}
+                      onChange={(e: any) => setBatchForm({ ...batchForm, program: e.target.value })}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary"
                     />
                   </div>
@@ -2520,7 +2520,7 @@ export default function StudentLifecycleManagementPage() {
                       <input 
                         type="date" 
                         value={batchForm.startDate}
-                        onChange={e => setBatchForm({ ...batchForm, startDate: e.target.value })}
+                        onChange={(e: any) => setBatchForm({ ...batchForm, startDate: e.target.value })}
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary"
                       />
                     </div>
@@ -2529,7 +2529,7 @@ export default function StudentLifecycleManagementPage() {
                       <input 
                         type="date" 
                         value={batchForm.endDate}
-                        onChange={e => setBatchForm({ ...batchForm, endDate: e.target.value })}
+                        onChange={(e: any) => setBatchForm({ ...batchForm, endDate: e.target.value })}
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary"
                       />
                     </div>
@@ -2544,7 +2544,7 @@ export default function StudentLifecycleManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Select Target Mentor *</label>
                     <select
                       value={mentorForm.mentorId}
-                      onChange={e => {
+                      onChange={(e: any) => {
                         const mId = e.target.value;
                         const mName = mId === 'emp-2' ? 'Bob Johnson' : mId === 'emp-3' ? 'Diana Prince' : 'Charlie Davis';
                         setMentorForm({ mentorId: mId, mentorName: mName });
@@ -2566,7 +2566,7 @@ export default function StudentLifecycleManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Shift Lifecycle Status *</label>
                     <select
                       value={statusForm}
-                      onChange={e => setStatusForm(e.target.value as any)}
+                      onChange={(e: any) => setStatusForm(e.target.value as any)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="Applied">Applied</option>
@@ -2591,7 +2591,7 @@ export default function StudentLifecycleManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Employment Pipeline Phase</label>
                     <select
                       value={placementForm.status}
-                      onChange={e => setPlacementForm({ ...placementForm, status: e.target.value as any })}
+                      onChange={(e: any) => setPlacementForm({ ...placementForm, status: e.target.value as any })}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="Not Eligible">Not Eligible</option>
@@ -2608,7 +2608,7 @@ export default function StudentLifecycleManagementPage() {
                       <input 
                         type="text" 
                         value={placementForm.company}
-                        onChange={e => setPlacementForm({ ...placementForm, company: e.target.value })}
+                        onChange={(e: any) => setPlacementForm({ ...placementForm, company: e.target.value })}
                         placeholder="e.g. Amazon India"
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                       />
@@ -2618,7 +2618,7 @@ export default function StudentLifecycleManagementPage() {
                       <input 
                         type="text" 
                         value={placementForm.package}
-                        onChange={e => setPlacementForm({ ...placementForm, package: e.target.value })}
+                        onChange={(e: any) => setPlacementForm({ ...placementForm, package: e.target.value })}
                         placeholder="e.g. 15 LPA"
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                       />
@@ -2630,7 +2630,7 @@ export default function StudentLifecycleManagementPage() {
                       <input 
                         type="text" 
                         value={placementForm.interviewStatus}
-                        onChange={e => setPlacementForm({ ...placementForm, interviewStatus: e.target.value })}
+                        onChange={(e: any) => setPlacementForm({ ...placementForm, interviewStatus: e.target.value })}
                         placeholder="e.g. L2 Cleared"
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                       />
@@ -2640,7 +2640,7 @@ export default function StudentLifecycleManagementPage() {
                       <input 
                         type="text" 
                         value={placementForm.offerStatus}
-                        onChange={e => setPlacementForm({ ...placementForm, offerStatus: e.target.value })}
+                        onChange={(e: any) => setPlacementForm({ ...placementForm, offerStatus: e.target.value })}
                         placeholder="e.g. Accepted"
                         className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                       />
@@ -2656,7 +2656,7 @@ export default function StudentLifecycleManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Bulk Shift Lifecycle Status *</label>
                     <select
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="">-- Choose Status --</option>
@@ -2682,7 +2682,7 @@ export default function StudentLifecycleManagementPage() {
                       type="text"
                       required
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       placeholder="e.g. Sigma Cohort 2026"
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     />
@@ -2696,7 +2696,7 @@ export default function StudentLifecycleManagementPage() {
                     <label className="text-[10px] font-bold text-text-secondary uppercase">Map Mentor *</label>
                     <select
                       value={bulkVal}
-                      onChange={e => setBulkVal(e.target.value)}
+                      onChange={(e: any) => setBulkVal(e.target.value)}
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     >
                       <option value="">-- Select Mentor --</option>
@@ -2716,7 +2716,7 @@ export default function StudentLifecycleManagementPage() {
                       required
                       rows={3}
                       value={notifyMsg}
-                      onChange={e => setNotifyMsg(e.target.value)}
+                      onChange={(e: any) => setNotifyMsg(e.target.value)}
                       placeholder="Enter system broadcast email/SMS text content here..."
                       className="w-full bg-slate-50 border border-border rounded p-2 text-xs font-semibold text-text-primary focus:outline-none"
                     />

@@ -6,7 +6,6 @@ import {
   CheckSquare, ClipboardList, Activity, Eye, FileText
 } from 'lucide-react';
 import { performanceService } from '@/src/services/performance.service';
-import { StudentPerformance, BatchPerformance } from '@/src/data/mock-performance';
 import { Drawer } from '@/components/feature/ui/Drawer';
 
 export default function PerformanceManagementPage() {
@@ -35,13 +34,13 @@ export default function PerformanceManagementPage() {
     setIsDrawerOpen(true);
   };
 
-  const filteredPerformances = performances.filter(p => p.studentId.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredPerformances = performances.filter((p: any) => p.studentId.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // KPIs
   const totalStudents = performances.length;
-  const avgScoreOverall = totalStudents > 0 ? Math.round(performances.reduce((acc, p) => acc + p.average_score, 0) / totalStudents) : 0;
-  const atRiskCount = performances.filter(p => p.isAtRisk).length;
-  const topPerformers = performances.filter(p => p.average_score >= 90).length;
+  const avgScoreOverall = totalStudents > 0 ? Math.round(performances.reduce((acc: any, p: any) => acc + p.average_score, 0) / totalStudents) : 0;
+  const atRiskCount = performances.filter((p: any) => p.isAtRisk).length;
+  const topPerformers = performances.filter((p: any) => p.average_score >= 90).length;
 
   if (loading) {
     return (
@@ -89,7 +88,7 @@ export default function PerformanceManagementPage() {
                 { label: 'Total Students', val: totalStudents, icon: Users, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
                 { label: 'Top Performers', val: topPerformers, icon: Activity, color: 'text-purple-600 bg-purple-50 border-purple-100' },
                 { label: 'At-Risk Students', val: atRiskCount, icon: AlertTriangle, color: 'text-rose-600 bg-rose-50 border-rose-100' }
-              ].map((kpi, idx) => (
+              ].map((kpi: any, idx: any) => (
                 <div key={idx} className="bg-white border border-border rounded-xl p-5 shadow-sm flex items-center justify-between group hover:border-secondary transition-all duration-200">
                   <div>
                     <div className="text-2.5xl font-black text-text-primary tracking-tight">{kpi.val}</div>
@@ -109,7 +108,7 @@ export default function PerformanceManagementPage() {
                   Top Performers
                 </h3>
                 <div className="space-y-3 pt-1">
-                  {performances.filter(p => p.average_score >= 90).map((perf) => (
+                  {performances.filter((p: any) => p.average_score >= 90).map((perf: any) => (
                     <div key={perf.studentId} className="p-3 bg-slate-50 border border-border rounded-xl flex items-center justify-between">
                       <div>
                         <h4 className="text-sm font-bold text-text-primary leading-tight">{perf.studentId}</h4>
@@ -127,7 +126,7 @@ export default function PerformanceManagementPage() {
                   At-Risk Students
                 </h3>
                 <div className="space-y-3 pt-1">
-                  {performances.filter(p => p.isAtRisk).map((perf) => (
+                  {performances.filter((p: any) => p.isAtRisk).map((perf: any) => (
                     <div key={perf.studentId} className="p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-center justify-between">
                       <div>
                         <h4 className="text-sm font-bold text-text-primary leading-tight">{perf.studentId}</h4>
@@ -136,7 +135,7 @@ export default function PerformanceManagementPage() {
                       <span className="bg-rose-100 text-rose-700 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">{perf.average_score}% Avg</span>
                     </div>
                   ))}
-                  {performances.filter(p => p.isAtRisk).length === 0 && (
+                  {performances.filter((p: any) => p.isAtRisk).length === 0 && (
                     <div className="p-4 text-center text-text-secondary text-sm">No at-risk students.</div>
                   )}
                 </div>
@@ -154,7 +153,7 @@ export default function PerformanceManagementPage() {
                   <input 
                     type="text"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: any) => setSearchTerm(e.target.value)}
                     placeholder="Search by student ID..."
                     className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
@@ -178,7 +177,7 @@ export default function PerformanceManagementPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredPerformances.map(p => (
+                  {filteredPerformances.map((p: any) => (
                     <tr key={p.studentId} className="hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => handleStudentClick(p)}>
                       <td className="px-6 py-4 font-medium text-text-primary flex items-center gap-3">
                         <Users className="h-4 w-4 text-blue-500" />
@@ -234,7 +233,7 @@ export default function PerformanceManagementPage() {
             </div>
 
             <div className="flex overflow-x-auto border-b border-border bg-white px-6 shrink-0">
-              {['overview', 'analytics', 'tasks', 'assessments'].map(t => (
+              {['overview', 'analytics', 'tasks', 'assessments'].map((t: any) => (
                 <button
                   key={t}
                   onClick={() => setActiveTab(t as any)}

@@ -23,7 +23,7 @@ function SuccessPageContent() {
     // Optionally fetch or send success data to the backend
     if (type) {
       fetch(`${API_ENDPOINTS.SUCCESS_DATA}?type=${type}`)
-        .then((res) => {
+        .then((res: any) => {
           if (!res.ok) {
             console.warn('Failed to record success data');
             setToastConfig({
@@ -32,7 +32,7 @@ function SuccessPageContent() {
               message: 'Failed to record success data telemetry.',
               type: 'warning'
             });
-            setTimeout(() => setToastConfig(prev => ({ ...prev, show: false })), 4000);
+            setTimeout(() => setToastConfig((prev: any) => ({ ...prev, show: false })), 4000);
           } else {
             setToastConfig({
               show: true,
@@ -40,10 +40,10 @@ function SuccessPageContent() {
               message: 'Your activity has been successfully logged.',
               type: 'success'
             });
-            setTimeout(() => setToastConfig(prev => ({ ...prev, show: false })), 4000);
+            setTimeout(() => setToastConfig((prev: any) => ({ ...prev, show: false })), 4000);
           }
         })
-        .catch((err) => {
+        .catch((err: any) => {
           console.error('Error fetching success data:', err);
           setToastConfig({
             show: true,
@@ -51,7 +51,7 @@ function SuccessPageContent() {
             message: 'Unable to connect to the server.',
             type: 'error'
           });
-          setTimeout(() => setToastConfig(prev => ({ ...prev, show: false })), 4000);
+          setTimeout(() => setToastConfig((prev: any) => ({ ...prev, show: false })), 4000);
         });
     }
   }, [type]);
@@ -64,7 +64,7 @@ function SuccessPageContent() {
           title={toastConfig.title}
           message={toastConfig.message}
           type={toastConfig.type}
-          onClose={() => setToastConfig(prev => ({ ...prev, show: false }))} 
+          onClose={() => setToastConfig((prev: any) => ({ ...prev, show: false }))} 
         />
       )}
       

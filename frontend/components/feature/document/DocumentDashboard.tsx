@@ -35,7 +35,7 @@ export default function DocumentDashboard() {
       setDocuments(docs);
       setTemplates(tpls);
       
-      const count = docs.filter(d => d.type === 'Offer Letter').length;
+      const count = docs.filter((d: any) => d.type === 'Offer Letter').length;
       setOfferLettersCount(count);
     } catch (e) {
       console.error(e);
@@ -150,7 +150,7 @@ export default function DocumentDashboard() {
         title="Available Document Templates"
       >
         <div className="p-6 space-y-4 overflow-y-auto">
-          {templates.map(tpl => (
+          {templates.map((tpl: any) => (
             <div key={tpl.id} className="bg-slate-50 border border-slate-150 rounded-2xl p-5 space-y-3">
               <div className="flex justify-between items-start">
                 <div>
@@ -164,7 +164,7 @@ export default function DocumentDashboard() {
               <div className="pt-2">
                 <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Dynamic Variables:</span>
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
-                  {tpl.variables.map(v => (
+                  {tpl.variables.map((v: any) => (
                     <code key={v} className="bg-white border border-border px-2 py-0.5 rounded text-[10px] text-text-primary font-mono">{v}</code>
                   ))}
                 </div>
@@ -187,7 +187,7 @@ export default function DocumentDashboard() {
               type="text"
               required
               value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
+              onChange={(e: any) => setStudentName(e.target.value)}
               placeholder="e.g., Harin Nair"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
             />
@@ -197,7 +197,7 @@ export default function DocumentDashboard() {
             <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Document Type / Template</label>
             <select
               value={docType}
-              onChange={(e) => setDocType(e.target.value as any)}
+              onChange={(e: any) => setDocType(e.target.value as any)}
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
             >
               <option value="Offer Letter">Offer Letter</option>
@@ -214,7 +214,7 @@ export default function DocumentDashboard() {
               type="text"
               required
               value={program}
-              onChange={(e) => setProgram(e.target.value)}
+              onChange={(e: any) => setProgram(e.target.value)}
               placeholder="e.g., Full Stack Web Development"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
             />
@@ -225,7 +225,7 @@ export default function DocumentDashboard() {
             <input
               type="text"
               value={stipend}
-              onChange={(e) => setStipend(e.target.value)}
+              onChange={(e: any) => setStipend(e.target.value)}
               placeholder="e.g., 15000"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-mono font-bold text-text-primary"
             />

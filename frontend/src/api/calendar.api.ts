@@ -1,17 +1,15 @@
 import { CalendarEvent } from '../types/calendar.types';
-import { MOCK_EVENTS } from '../data/mock-events';
-
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const calendarApi = {
   getEvents: async (): Promise<CalendarEvent[]> => {
     await delay(600);
-    return [...MOCK_EVENTS].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+    throw new Error('Backend implementation pending or failed');
   },
   createEvent: async (data: Partial<CalendarEvent>): Promise<CalendarEvent> => {
     await delay(400);
     const newEvent: CalendarEvent = {
-      id: `evt-${MOCK_EVENTS.length + 1}`,
+      id: `evt-${([] as any[]).length + 1}`,
       title: data.title || '',
       description: data.description || '',
       type: data.type || 'Meeting',
@@ -24,7 +22,7 @@ export const calendarApi = {
       repeatRule: data.repeatRule || 'None',
       status: data.status || 'Scheduled'
     };
-    MOCK_EVENTS.push(newEvent);
+    ([] as any[]).push(newEvent);
     return newEvent;
   }
 };

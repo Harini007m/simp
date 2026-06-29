@@ -1,6 +1,7 @@
 import { opportunityApi } from '../api/opportunity.api';
 import { OpeningCreate, OpeningResponse } from '../types/api/opportunity.types';
-import { Opportunity, MOCK_OPPORTUNITIES } from '../data/mock-opportunities';
+import { Opportunity } from '../types/api/opportunity.types';
+import { opportunitiesApi } from "../api/opportunities.api";
 
 export type ExtendedOpening = OpeningResponse & Opportunity;
 
@@ -28,37 +29,17 @@ class OpportunitiesService {
   }
 
   async getOpportunities(): Promise<ExtendedOpening[]> {
-    try {
-      // Commented out backend call to use mock data for the landing page
-      // const data = await opportunityApi.getOpenings();
-      // return data.map(opp => this.mapToExtended(opp));
-      
-      // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      return MOCK_OPPORTUNITIES as any;
-    } catch (e) {
-      console.debug(e);
-      return [];
-    }
+      throw new Error('Backend implementation pending or failed');
   }
 
   async getOpportunity(id: string): Promise<ExtendedOpening | undefined> {
-    try {
-      // const opp = await opportunityApi.getOpening(id);
-      // return this.mapToExtended(opp);
       await new Promise(resolve => setTimeout(resolve, 500));
-      return MOCK_OPPORTUNITIES.find(o => o.id === id) as any;
-    } catch (e) {
-      console.debug(e);
-      return undefined;
-    }
+      throw new Error('Backend implementation pending or failed');
   }
 
   async createOpportunity(opp: OpeningCreate): Promise<ExtendedOpening> {
-    // const res = await opportunityApi.createOpening(opp);
-    // return this.mapToExtended(res);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return MOCK_OPPORTUNITIES[0] as any;
+      return opportunitiesApi.createOpportunity(opp);
   }
 }
 

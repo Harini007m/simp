@@ -49,7 +49,7 @@ export default function SelfServicePage() {
     try {
       const allNotifs = await NotificationService.getNotifications();
       if (user && user.roleName !== 'Super Admin') {
-        const filtered = allNotifs.filter(n => {
+        const filtered = allNotifs.filter((n: any) => {
           const recipientLower = n.recipient.toLowerCase();
           const emailLower = user.email.toLowerCase();
           const roleLower = n.role.toLowerCase();
@@ -89,7 +89,7 @@ export default function SelfServicePage() {
       setRecentRequests(data.recentRequests);
 
       const allCerts = await CertificateService.getCertificates();
-      const myCerts = allCerts.filter(c => c.studentName === mergedProfile?.name && c.status === 'Issued');
+      const myCerts = allCerts.filter((c: any) => c.studentName === mergedProfile?.name && c.status === 'Issued');
       setMyCertificates(myCerts);
 
       await loadNotifications();
@@ -131,7 +131,7 @@ export default function SelfServicePage() {
   };
 
   const getUnreadNotifCount = () => {
-    return notifications.filter(n => !n.readStatus).length;
+    return notifications.filter((n: any) => !n.readStatus).length;
   };
 
   if (!hasPermission('selfservice.view')) {
@@ -285,7 +285,7 @@ export default function SelfServicePage() {
                         type="text"
                         required
                         value={editForm.name || ''}
-                        onChange={e => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e: any) => setEditForm((prev: any) => ({ ...prev, name: e.target.value }))}
                         className="w-full rounded-xl border border-border px-4 py-2.5 text-sm bg-white text-text-primary focus:outline-none focus:border-primary"
                       />
                     </div>
@@ -295,7 +295,7 @@ export default function SelfServicePage() {
                         type="email"
                         required
                         value={editForm.email || ''}
-                        onChange={e => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                        onChange={(e: any) => setEditForm((prev: any) => ({ ...prev, email: e.target.value }))}
                         className="w-full rounded-xl border border-border px-4 py-2.5 text-sm bg-white text-text-primary focus:outline-none focus:border-primary"
                       />
                     </div>
@@ -305,7 +305,7 @@ export default function SelfServicePage() {
                         type="text"
                         required
                         value={editForm.phone || ''}
-                        onChange={e => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                        onChange={(e: any) => setEditForm((prev: any) => ({ ...prev, phone: e.target.value }))}
                         className="w-full rounded-xl border border-border px-4 py-2.5 text-sm bg-white text-text-primary focus:outline-none focus:border-primary"
                       />
                     </div>
@@ -321,7 +321,7 @@ export default function SelfServicePage() {
                         type="text"
                         required
                         value={editForm.address || ''}
-                        onChange={e => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                        onChange={(e: any) => setEditForm((prev: any) => ({ ...prev, address: e.target.value }))}
                         className="w-full rounded-xl border border-border px-4 py-2.5 text-sm bg-white text-text-primary focus:outline-none focus:border-primary"
                       />
                     </div>
@@ -390,7 +390,7 @@ export default function SelfServicePage() {
                 <h4 className="font-bold text-text-primary text-base mb-4">Verification & Document Requests</h4>
                 <div className="bg-white rounded-xl border border-slate-150 overflow-hidden">
                   <div className="divide-y divide-slate-150">
-                    {recentRequests.map(req => (
+                    {recentRequests.map((req: any) => (
                       <div key={req.id} className="p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                         <div>
                           <div className="font-bold text-slate-750 text-sm">{req.type}</div>
@@ -446,7 +446,7 @@ export default function SelfServicePage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border text-text-primary">
-                      {submittedDocs.map(doc => (
+                      {submittedDocs.map((doc: any) => (
                         <tr key={doc.name} className="hover:bg-slate-50/50 transition-all font-medium text-text-primary">
                           <td className="px-5 py-4 font-bold text-text-primary">{doc.name}</td>
                           <td className="px-5 py-4"><span className="bg-slate-100 text-text-secondary px-2 py-0.5 rounded text-xs">{doc.type}</span></td>
@@ -486,7 +486,7 @@ export default function SelfServicePage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border text-text-primary">
-                      {providedDocs.map(doc => (
+                      {providedDocs.map((doc: any) => (
                         <tr key={doc.name} className="hover:bg-slate-50/50 transition-all font-medium text-text-primary">
                           <td className="px-5 py-4 font-bold text-text-primary">{doc.name}</td>
                           <td className="px-5 py-4"><span className="bg-teal-50 text-teal-700 border border-teal-100 px-2 py-0.5 rounded text-xs font-semibold">{doc.type}</span></td>
@@ -520,7 +520,7 @@ export default function SelfServicePage() {
 
                 {myCertificates.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {myCertificates.map(cert => (
+                    {myCertificates.map((cert: any) => (
                       <div key={cert.id} className="border border-border rounded-xl p-5 hover:shadow-md transition-all">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-2">
@@ -570,7 +570,7 @@ export default function SelfServicePage() {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-150 border border-slate-150 rounded-2xl overflow-hidden bg-white">
-                  {notifications.slice(0, 30).map((n) => (
+                  {notifications.slice(0, 30).map((n: any) => (
                     <div 
                       key={n.id}
                       onClick={async () => {
@@ -579,7 +579,7 @@ export default function SelfServicePage() {
                         if (!n.readStatus) {
                           try {
                             await NotificationService.markAsRead(n.id);
-                            setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, readStatus: true } : item));
+                            setNotifications((prev: any) => prev.map((item: any) => item.id === n.id ? { ...item, readStatus: true } : item));
                             window.dispatchEvent(new Event('notifications-updated'));
                           } catch (e) {
                             console.error(e);

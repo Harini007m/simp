@@ -6,7 +6,7 @@ import { AlertTriangle,
   Database, Server, HardDrive, AlertCircle, CheckCircle
  } from 'lucide-react';
 import { superAdminService } from '@/src/services/super-admin.service';
-import { SystemSetting, AuditLog, RolePermission } from '@/src/data/mock-super-admin';
+import { SystemSetting, AuditLog, RolePermission } from '../../../src/types/api/super-admin.types';
 
 export default function SuperAdminPage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'settings' | 'logs' | 'roles'>('dashboard');
@@ -80,7 +80,7 @@ export default function SuperAdminPage() {
           { id: 'settings', label: 'Global Settings', icon: Settings },
           { id: 'roles', label: 'Role Permissions', icon: Users },
           { id: 'logs', label: 'Audit Logs', icon: List }
-        ].map(t => (
+        ].map((t: any) => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as any)}
@@ -171,7 +171,7 @@ export default function SuperAdminPage() {
                 <h3 className="font-bold text-text-primary">Global Configuration</h3>
               </div>
               <div className="divide-y divide-border">
-                {settings.map(s => (
+                {settings.map((s: any) => (
                   <div key={s.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                     <div>
                       <span className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-1 block">{s.category}</span>
@@ -193,11 +193,11 @@ export default function SuperAdminPage() {
                 <h3 className="font-bold text-text-primary">Role Permissions Mapping</h3>
               </div>
               <div className="divide-y divide-border">
-                {roles.map(r => (
+                {roles.map((r: any) => (
                   <div key={r.role} className="p-5">
                     <h4 className="font-bold text-text-primary mb-3">{r.role}</h4>
                     <div className="flex flex-wrap gap-2">
-                      {r.permissions.map(p => (
+                      {r.permissions.map((p: any) => (
                         <span key={p} className="px-2.5 py-1 bg-slate-100 border border-border text-text-primary rounded-md text-xs font-medium font-mono">
                           {p}
                         </span>
@@ -226,7 +226,7 @@ export default function SuperAdminPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {logs.map(l => (
+                  {logs.map((l: any) => (
                     <tr key={l.id} className="hover:bg-slate-50">
                       <td className="px-6 py-3 text-text-secondary whitespace-nowrap">{l.timestamp}</td>
                       <td className="px-6 py-3 font-medium text-text-primary font-mono text-xs">{l.action}</td>

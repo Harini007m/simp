@@ -71,7 +71,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
       try {
         const allNotifs = await NotificationService.getNotifications();
         if (user && user.roleName !== 'Super Admin') {
-          const filtered = allNotifs.filter(n => {
+          const filtered = allNotifs.filter((n: any) => {
             const recipientLower = n.recipient.toLowerCase();
             const emailLower = user.email.toLowerCase();
             const roleLower = n.role.toLowerCase();
@@ -97,14 +97,14 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
 
   // Generate search routes dynamically from user's modules
   const searchRoutes = modules
-    .filter(m => m.id !== 'dashboard' && m.id !== 'super_admin')
-    .map(m => ({
+    .filter((m: any) => m.id !== 'dashboard' && m.id !== 'super_admin')
+    .map((m: any) => ({
       name: m.name,
       path: m.route === '/feature' ? '/feature' : `/admin${m.route}`,
       description: m.desc || `Manage ${m.name.toLowerCase()}`,
     }));
 
-  const filteredRoutes = searchRoutes.filter(r => 
+  const filteredRoutes = searchRoutes.filter((r: any) => 
     r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     r.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -134,7 +134,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
             placeholder="Search modules..."
             type="text"
             value={searchQuery}
-            onChange={(e) => {
+            onChange={(e: any) => {
               setSearchQuery(e.target.value);
               setShowDropdown(true);
             }}
@@ -157,7 +157,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
               </div>
               <ul className="max-h-80 overflow-y-auto">
                 {filteredRoutes.length > 0 ? (
-                  filteredRoutes.map((route) => (
+                  filteredRoutes.map((route: any) => (
                     <li key={route.path}>
                       <button
                         onClick={() => {
@@ -199,7 +199,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
             >
               <span className="sr-only">View notifications</span>
               <Bell className={`h-5 w-5 transition-transform duration-300 ${showNotifDropdown ? 'rotate-12 scale-110' : 'group-hover:rotate-12'}`} aria-hidden="true" />
-              {notifications.filter(n => !n.readStatus).length > 0 && (
+              {notifications.filter((n: any) => !n.readStatus).length > 0 && (
                 <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gradient-to-r from-rose-500 to-red-600 border border-white shadow-sm"></span>
@@ -212,7 +212,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
                 <div className="px-5 py-4 border-b border-border/80 bg-slate-50/40 flex justify-between items-center">
                   <span className="font-extrabold text-text-primary text-sm tracking-tight font-display-premium">Notifications</span>
                   <span className="text-[10px] font-bold bg-indigo-50 text-indigo-650 border border-indigo-100 px-2.5 py-0.5 rounded-full tracking-wide">
-                    {notifications.filter(n => !n.readStatus).length} New
+                    {notifications.filter((n: any) => !n.readStatus).length} New
                   </span>
                 </div>
                 <div className="divide-y divide-border max-h-80 overflow-y-auto custom-scrollbar">
@@ -221,7 +221,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
                       No notifications yet
                     </div>
                   ) : (
-                    notifications.slice(0, 10).map((n) => {
+                    notifications.slice(0, 10).map((n: any) => {
                       const ch = channelIcons[n.channel] || channelIcons['In-App Notification'];
                       const ChIcon = ch.icon;
                       const isUnread = !n.readStatus;
@@ -236,7 +236,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
                             if (!n.readStatus) {
                               try {
                                 await NotificationService.markAsRead(n.id);
-                                setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, readStatus: true } : item));
+                                setNotifications((prev: any) => prev.map((item: any) => item.id === n.id ? { ...item, readStatus: true } : item));
                               } catch (e) {
                                 console.error(e);
                               }

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle,  HardDrive, File, Clock, Search, Filter, Plus, Upload, Download, Eye, Trash, ArrowRight  } from 'lucide-react';
 import { fileService } from '@/src/services/file.service';
-import { CommonFile } from '@/src/data/mock-common-files';
+import { CommonFile } from '../../../src/types/api/common-file.types';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
 
@@ -23,10 +23,10 @@ export default function CommonFilePage() {
     setFiles(data);
   };
 
-  const totalSize = files.reduce((acc, f) => acc + f.file_size, 0);
+  const totalSize = files.reduce((acc: any, f: any) => acc + f.file_size, 0);
   const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
 
-  const filteredFiles = files.filter(f => f.file_name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredFiles = files.filter((f: any) => f.file_name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleFileClick = (file: CommonFile) => {
     setSelectedFile(file);
@@ -110,7 +110,7 @@ export default function CommonFilePage() {
                 </button>
               </div>
               <div className="divide-y divide-border">
-                {files.slice(0, 5).map(f => (
+                {files.slice(0, 5).map((f: any) => (
                   <div key={f.file_id} className="p-4 px-6 hover:bg-slate-50 flex items-center justify-between cursor-pointer" onClick={() => handleFileClick(f)}>
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-100 text-text-secondary rounded-lg"><File className="h-4 w-4" /></div>
@@ -138,7 +138,7 @@ export default function CommonFilePage() {
                   <input 
                     type="text"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e: any) => setSearchTerm(e.target.value)}
                     placeholder="Search files..."
                     className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
@@ -166,7 +166,7 @@ export default function CommonFilePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredFiles.map(f => (
+                  {filteredFiles.map((f: any) => (
                     <tr key={f.file_id} className="hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => handleFileClick(f)}>
                       <td className="px-6 py-4 font-medium text-text-primary flex items-center gap-2">
                         <File className="h-4 w-4 text-text-secondary" />

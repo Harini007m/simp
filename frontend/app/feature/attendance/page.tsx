@@ -131,8 +131,8 @@ export default function AttendanceDashboardPage() {
           const approved = parsedAppeals.filter((a: any) => a.reviewStatus === 'Approved');
           
           if (approved.length > 0) {
-            setBatches(prev => prev.map(b => {
-              const updatedStudents = b.students.map(s => {
+            setBatches((prev: any) => prev.map((b: any) => {
+              const updatedStudents = b.students.map((s: any) => {
                 const studentAppeals = approved.filter((a: any) => a.studentId === s.id);
                 if (studentAppeals.length > 0) {
                   const newLogs = { ...s.logs };
@@ -145,9 +145,9 @@ export default function AttendanceDashboardPage() {
                   
                   // Recalculate stats
                   const logVals = Object.values(newLogs);
-                  const pres = logVals.filter(x => x === 'Present').length;
-                  const abs = logVals.filter(x => x === 'Absent').length;
-                  const lat = logVals.filter(x => x === 'Late').length;
+                  const pres = logVals.filter((x: any) => x === 'Present').length;
+                  const abs = logVals.filter((x: any) => x === 'Absent').length;
+                  const lat = logVals.filter((x: any) => x === 'Late').length;
                   const rate = Math.round((pres / logVals.length) * 100);
 
                   return {
@@ -178,10 +178,10 @@ export default function AttendanceDashboardPage() {
   }, []);
 
   // Recalculate top statistics
-  const totalStudentsMarked = batches.reduce((sum, b) => sum + b.students.length, 0);
-  const averageRate = Math.round(batches.reduce((sum, b) => sum + b.rate, 0) / batches.length);
-  const totalAbsentCount = batches.reduce((sum, b) => sum + b.absentCount, 0);
-  const totalLateCount = batches.reduce((sum, b) => sum + b.lateCount, 0);
+  const totalStudentsMarked = batches.reduce((sum: any, b: any) => sum + b.students.length, 0);
+  const averageRate = Math.round(batches.reduce((sum: any, b: any) => sum + b.rate, 0) / batches.length);
+  const totalAbsentCount = batches.reduce((sum: any, b: any) => sum + b.absentCount, 0);
+  const totalLateCount = batches.reduce((sum: any, b: any) => sum + b.lateCount, 0);
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -220,7 +220,7 @@ export default function AttendanceDashboardPage() {
           <div className="space-y-4">
             <h3 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Cohort Compliance</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {batches.map(b => (
+              {batches.map((b: any) => (
                 <div 
                   key={b.id} 
                   onClick={() => setSelectedBatch(b)}
@@ -263,7 +263,7 @@ export default function AttendanceDashboardPage() {
             </div>
 
             <div className="space-y-2">
-              {selectedBatch.students.map(s => (
+              {selectedBatch.students.map((s: any) => (
                 <div 
                   key={s.id}
                   onClick={() => setSelectedStudent(s)}
@@ -333,7 +333,7 @@ export default function AttendanceDashboardPage() {
                 <div className="space-y-3.5">
                   <h4 className="font-bold text-xs text-slate-455 uppercase tracking-widest">June 2026 Logs Timeline</h4>
                   <div className="grid grid-cols-5 sm:grid-cols-7 gap-2.5">
-                    {Array.from({ length: 30 }).map((_, idx) => {
+                    {Array.from({ length: 30 }).map((_: any, idx: any) => {
                       const day = idx + 1;
                       const log = selectedStudent.logs[day];
 

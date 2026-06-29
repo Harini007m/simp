@@ -1,8 +1,8 @@
-import { StudentDashboardData, MOCK_STUDENT_DASHBOARD } from '../data/mock-student-dashboard';
+import { StudentDashboardData } from '../types/api/student-dashboard.types';
+import { studentDashboardApi } from "../api/studentDashboard.api";
 
 export const studentDashboardService = {
   async getDashboardData(): Promise<StudentDashboardData> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return MOCK_STUDENT_DASHBOARD;
-  }
+        return studentDashboardApi.getDashboardData();
+    }
 };

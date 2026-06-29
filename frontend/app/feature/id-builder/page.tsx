@@ -162,12 +162,12 @@ export default function AdvancedDesignerPage() {
 
   // Selected element
   const selectedElement = useMemo(() => {
-    return activeElements.find(el => el.id === selectedId) || null;
+    return activeElements.find((el: any) => el.id === selectedId) || null;
   }, [selectedId, activeElements]);
 
   // Push to history
   const pushState = useCallback((newFront: Element[], newBack: Element[]) => {
-    setHistory(prev => {
+    setHistory((prev: any) => {
       const updatedHistory = prev.slice(0, historyIndex + 1);
       updatedHistory.push({ front: JSON.parse(JSON.stringify(newFront)), back: JSON.parse(JSON.stringify(newBack)) });
       
@@ -177,7 +177,7 @@ export default function AdvancedDesignerPage() {
       }
       return updatedHistory;
     });
-    setHistoryIndex(prev => prev + 1);
+    setHistoryIndex((prev: any) => prev + 1);
   }, [historyIndex]);
 
   const updateActiveElements = (updater: (prev: Element[]) => Element[]) => {
@@ -216,11 +216,11 @@ export default function AdvancedDesignerPage() {
   // Delete Element
   const handleDeleteElement = useCallback((id: string) => {
     if (activeSide === 'front') {
-      const next = frontElements.filter(el => el.id !== id);
+      const next = frontElements.filter((el: any) => el.id !== id);
       setFrontElements(next);
       pushState(next, backElements);
     } else {
-      const next = backElements.filter(el => el.id !== id);
+      const next = backElements.filter((el: any) => el.id !== id);
       setBackElements(next);
       pushState(frontElements, next);
     }
@@ -232,7 +232,7 @@ export default function AdvancedDesignerPage() {
 
   // Duplicate Element
   const handleDuplicateElement = useCallback((id: string) => {
-    const src = activeElements.find(el => el.id === id);
+    const src = activeElements.find((el: any) => el.id === id);
     if (!src) return;
     const copy: Element = {
       ...JSON.parse(JSON.stringify(src)),
@@ -1060,10 +1060,10 @@ export default function AdvancedDesignerPage() {
   }, [user, handleLoadTemplatePreset]);
 
   useEffect(() => {
-    const fonts = GOOGLE_FONTS.map(f => f.name);
+    const fonts = GOOGLE_FONTS.map((f: any) => f.name);
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = `https://fonts.googleapis.com/css2?family=${fonts.map(f => f.replace(' ', '+')).join('&family=')}:wght@400;700&display=swap`;
+    link.href = `https://fonts.googleapis.com/css2?family=${fonts.map((f: any) => f.replace(' ', '+')).join('&family=')}:wght@400;700&display=swap`;
     document.head.appendChild(link);
 
     let active = true;
@@ -1149,7 +1149,7 @@ export default function AdvancedDesignerPage() {
       lineHeight: 1.2,
       textTransform: 'none'
     };
-    updateActiveElements(prev => [...prev, newText]);
+    updateActiveElements((prev: any) => [...prev, newText]);
     setSelectedId(newText.id);
     showToast('Text block added');
   };
@@ -1174,7 +1174,7 @@ export default function AdvancedDesignerPage() {
       borderColor: '#000000',
       borderStyle: 'solid'
     };
-    updateActiveElements(prev => [...prev, newShape]);
+    updateActiveElements((prev: any) => [...prev, newShape]);
     setSelectedId(newShape.id);
     showToast(`${shapeType.toUpperCase()} shape added`);
   };
@@ -1204,7 +1204,7 @@ export default function AdvancedDesignerPage() {
       qrType: type === 'qr' ? 'url' : undefined,
       barcodeType: type === 'barcode' ? 'code128' : undefined
     };
-    updateActiveElements(prev => [...prev, newComponent]);
+    updateActiveElements((prev: any) => [...prev, newComponent]);
     setSelectedId(newComponent.id);
     showToast(`${newComponent.name} placeholder added`);
   };
@@ -1235,7 +1235,7 @@ export default function AdvancedDesignerPage() {
       textTransform: 'none',
       binding: `employee.${field.field}`
     };
-    updateActiveElements(prev => [...prev, newField]);
+    updateActiveElements((prev: any) => [...prev, newField]);
     setSelectedId(newField.id);
     showToast(`Dynamic Field ${field.label} added`);
   };
@@ -1246,9 +1246,9 @@ export default function AdvancedDesignerPage() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = (event: any) => {
       const base64Url = event.target?.result as string;
-      setUploadedImages(prev => [base64Url, ...prev]);
+      setUploadedImages((prev: any) => [base64Url, ...prev]);
       
       // Auto add to canvas
       const newImage: Element = {
@@ -1266,7 +1266,7 @@ export default function AdvancedDesignerPage() {
         url: base64Url,
         opacity: 1
       };
-      updateActiveElements(prev => [...prev, newImage]);
+      updateActiveElements((prev: any) => [...prev, newImage]);
       setSelectedId(newImage.id);
       showToast('Image uploaded and placed');
     };
@@ -1276,18 +1276,18 @@ export default function AdvancedDesignerPage() {
   // Properties Updates
   const handleUpdateElementProperty = <K extends keyof Element>(key: K, val: Element[K]) => {
     if (!selectedId) return;
-    updateActiveElements(prev => 
-      prev.map(el => el.id === selectedId ? { ...el, [key]: val } : el)
+    updateActiveElements((prev: any) => 
+      prev.map((el: any) => el.id === selectedId ? { ...el, [key]: val } : el)
     );
   };
 
   // Layers controls
   const handleMoveLayer = (id: string, direction: 'up' | 'down' | 'top' | 'bottom') => {
-    const elIndex = activeElements.findIndex(el => el.id === id);
+    const elIndex = activeElements.findIndex((el: any) => el.id === id);
     if (elIndex === -1) return;
 
-    let targetElements = [...activeElements].sort((a, b) => a.zIndex - b.zIndex);
-    const element = targetElements.find(el => el.id === id)!;
+    let targetElements = [...activeElements].sort((a: any, b: any) => a.zIndex - b.zIndex);
+    const element = targetElements.find((el: any) => el.id === id)!;
     
     const curIdx = targetElements.indexOf(element);
 
@@ -1298,15 +1298,15 @@ export default function AdvancedDesignerPage() {
       targetElements[curIdx] = targetElements[curIdx - 1];
       targetElements[curIdx - 1] = element;
     } else if (direction === 'top') {
-      targetElements = targetElements.filter(el => el.id !== id);
+      targetElements = targetElements.filter((el: any) => el.id !== id);
       targetElements.push(element);
     } else if (direction === 'bottom') {
-      targetElements = targetElements.filter(el => el.id !== id);
+      targetElements = targetElements.filter((el: any) => el.id !== id);
       targetElements.unshift(element);
     }
 
     // Re-index zIndex
-    const reindexed = targetElements.map((el, i) => ({ ...el, zIndex: i + 1 }));
+    const reindexed = targetElements.map((el: any, i: any) => ({ ...el, zIndex: i + 1 }));
     
     if (activeSide === 'front') {
       setFrontElements(reindexed);
@@ -1344,8 +1344,8 @@ export default function AdvancedDesignerPage() {
       nextY = Math.round(nextY / GRID_SIZE) * GRID_SIZE;
     }
 
-    updateActiveElements(prev => 
-      prev.map(el => el.id === selectedId ? { ...el, x: nextX, y: nextY } : el)
+    updateActiveElements((prev: any) => 
+      prev.map((el: any) => el.id === selectedId ? { ...el, x: nextX, y: nextY } : el)
     );
     showToast(`Aligned element to ${alignment}`);
   };
@@ -1437,7 +1437,7 @@ export default function AdvancedDesignerPage() {
       if (!canvasBounds) return;
 
       const activeList = activeSide === 'front' ? frontElements : backElements;
-      const element = activeList.find(el => el.id === ref.elementId);
+      const element = activeList.find((el: any) => el.id === ref.elementId);
       if (!element) return;
 
       const screenCenterX = canvasBounds.left + (element.x + element.width / 2) * zoom;
@@ -1469,9 +1469,9 @@ export default function AdvancedDesignerPage() {
   // Helper to adjust position/rotation in UI state immediately without filling history stack
   const setElementsOnlyNoHistory = (id: string, updates: Partial<Element>) => {
     if (activeSide === 'front') {
-      setFrontElements(prev => prev.map(el => el.id === id ? { ...el, ...updates } : el));
+      setFrontElements((prev: any) => prev.map((el: any) => el.id === id ? { ...el, ...updates } : el));
     } else {
-      setBackElements(prev => prev.map(el => el.id === id ? { ...el, ...updates } : el));
+      setBackElements((prev: any) => prev.map((el: any) => el.id === id ? { ...el, ...updates } : el));
     }
   };
 
@@ -1525,8 +1525,8 @@ export default function AdvancedDesignerPage() {
 
     // Generate elements SVG snippet
     const elementsSvg = elements
-      .filter(el => el.isVisible)
-      .map(el => {
+      .filter((el: any) => el.isVisible)
+      .map((el: any) => {
         const rotationTransform = el.rotation ? `transform="rotate(${el.rotation} ${el.x + el.width / 2} ${el.y + el.height / 2})"` : '';
         
         if (el.type === 'shape') {
@@ -1649,7 +1649,7 @@ export default function AdvancedDesignerPage() {
               <input 
                 type="text" 
                 value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
+                onChange={(e: any) => setTemplateName(e.target.value)}
                 className="bg-transparent border border-transparent hover:border-secondary focus:border-primary hover:bg-slate-900 focus:bg-slate-900 rounded px-2 py-0.5 text-xs font-black text-white focus:outline-none transition-all w-48"
               />
               <p className="text-[10px] text-text-secondary px-2 mt-0.5">Advanced Visual Builder</p>
@@ -1680,14 +1680,14 @@ export default function AdvancedDesignerPage() {
 
           <div className="flex items-center bg-slate-900 rounded-lg p-0.5 border border-border text-xs">
             <button 
-              onClick={() => setZoom(prev => Math.max(0.25, prev - 0.25))}
+              onClick={() => setZoom((prev: any) => Math.max(0.25, prev - 0.25))}
               className="p-1.5 rounded-md text-slate-300 hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <span className="px-2 font-bold text-text-secondary w-12 text-center">{Math.round(zoom * 100)}%</span>
             <button 
-              onClick={() => setZoom(prev => Math.min(2.0, prev + 0.25))}
+              onClick={() => setZoom((prev: any) => Math.min(2.0, prev + 0.25))}
               className="p-1.5 rounded-md text-slate-300 hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <ZoomIn className="w-3.5 h-3.5" />
@@ -1924,7 +1924,7 @@ export default function AdvancedDesignerPage() {
                   <div className="space-y-2 pt-2">
                     <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider block">Uploaded Items</span>
                     <div className="grid grid-cols-2 gap-2">
-                      {uploadedImages.map((img, idx) => (
+                      {uploadedImages.map((img: any, idx: any) => (
                         <div 
                           key={idx}
                           onClick={() => {
@@ -1944,7 +1944,7 @@ export default function AdvancedDesignerPage() {
                               url: img,
                               opacity: 1
                             };
-                            updateActiveElements(prev => [...prev, newImg]);
+                            updateActiveElements((prev: any) => [...prev, newImg]);
                             setSelectedId(newImg.id);
                           }}
                           className="h-20 bg-slate-900 border border-border rounded-lg overflow-hidden flex items-center justify-center cursor-pointer hover:border-secondary"
@@ -1965,7 +1965,7 @@ export default function AdvancedDesignerPage() {
                   These blocks bind directly to actual employee records when rendering cards in production.
                 </p>
                 <div className="flex flex-col gap-1.5 pt-2">
-                  {DYNAMIC_FIELDS.map((field) => (
+                  {DYNAMIC_FIELDS.map((field: any) => (
                     <button 
                       key={field.field}
                       onClick={() => handleAddDynamicField(field)}
@@ -2040,7 +2040,7 @@ export default function AdvancedDesignerPage() {
               )}
 
               {/* Elements Renderer */}
-              {activeElements.map((el) => {
+              {activeElements.map((el: any) => {
                 if (!el.isVisible) return null;
                 const isSelected = el.id === selectedId;
                 
@@ -2056,7 +2056,7 @@ export default function AdvancedDesignerPage() {
                       transform: `rotate(${el.rotation || 0}deg)`,
                       zIndex: el.zIndex || 1,
                     }}
-                    onPointerDown={(e) => handlePointerDown(e, el, 'drag')}
+                    onPointerDown={(e: any) => handlePointerDown(e, el, 'drag')}
                     className={`select-none absolute group ${
                       el.isLocked ? 'pointer-events-none' : 'cursor-move'
                     } ${
@@ -2156,25 +2156,25 @@ export default function AdvancedDesignerPage() {
                         {/* 4 Corner Resize Handles */}
                         <div 
                           className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-indigo-650 rounded-full cursor-nwse-resize z-50 hover:scale-125 transition-transform" 
-                          onPointerDown={(e) => handlePointerDown(e, el, 'resize', 'nw')}
+                          onPointerDown={(e: any) => handlePointerDown(e, el, 'resize', 'nw')}
                         />
                         <div 
                           className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-indigo-650 rounded-full cursor-nesw-resize z-50 hover:scale-125 transition-transform" 
-                          onPointerDown={(e) => handlePointerDown(e, el, 'resize', 'ne')}
+                          onPointerDown={(e: any) => handlePointerDown(e, el, 'resize', 'ne')}
                         />
                         <div 
                           className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-indigo-650 rounded-full cursor-nesw-resize z-50 hover:scale-125 transition-transform" 
-                          onPointerDown={(e) => handlePointerDown(e, el, 'resize', 'sw')}
+                          onPointerDown={(e: any) => handlePointerDown(e, el, 'resize', 'sw')}
                         />
                         <div 
                           className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-indigo-650 rounded-full cursor-nwse-resize z-50 hover:scale-125 transition-transform" 
-                          onPointerDown={(e) => handlePointerDown(e, el, 'resize', 'se')}
+                          onPointerDown={(e: any) => handlePointerDown(e, el, 'resize', 'se')}
                         />
 
                         {/* Rotate handle hook */}
                         <div 
                           className="absolute -bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center z-50 cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"
-                          onPointerDown={(e) => handlePointerDown(e, el, 'rotate')}
+                          onPointerDown={(e: any) => handlePointerDown(e, el, 'rotate')}
                         >
                           <div className="w-[1px] h-3 bg-indigo-500" />
                           <div className="w-5 h-5 bg-white border-2 border-indigo-650 rounded-full flex items-center justify-center shadow-md">
@@ -2241,8 +2241,8 @@ export default function AdvancedDesignerPage() {
                 ) : (
                   <div className="flex flex-col gap-2">
                     {[...activeElements]
-                      .sort((a, b) => b.zIndex - a.zIndex)
-                      .map((el) => {
+                      .sort((a: any, b: any) => b.zIndex - a.zIndex)
+                      .map((el: any) => {
                         const isSelected = el.id === selectedId;
                         return (
                           <div 
@@ -2265,7 +2265,7 @@ export default function AdvancedDesignerPage() {
                               <input 
                                 type="text"
                                 value={el.name}
-                                onChange={(e) => {
+                                onChange={(e: any) => {
                                   setSelectedId(el.id);
                                   handleUpdateElementProperty('name', e.target.value);
                                 }}
@@ -2276,7 +2276,7 @@ export default function AdvancedDesignerPage() {
                             {/* Visibility, Locking, Delete Tools */}
                             <div className="flex items-center gap-1 shrink-0">
                               <button 
-                                onClick={(e) => {
+                                onClick={(e: any) => {
                                   e.stopPropagation();
                                   setSelectedId(el.id);
                                   handleUpdateElementProperty('isVisible', !el.isVisible);
@@ -2287,7 +2287,7 @@ export default function AdvancedDesignerPage() {
                               </button>
 
                               <button 
-                                onClick={(e) => {
+                                onClick={(e: any) => {
                                   e.stopPropagation();
                                   setSelectedId(el.id);
                                   handleUpdateElementProperty('isLocked', !el.isLocked);
@@ -2301,14 +2301,14 @@ export default function AdvancedDesignerPage() {
 
                               {/* Ordering */}
                               <button 
-                                onClick={(e) => { e.stopPropagation(); handleMoveLayer(el.id, 'up'); }}
+                                onClick={(e: any) => { e.stopPropagation(); handleMoveLayer(el.id, 'up'); }}
                                 className="p-1 text-[10px] text-text-secondary hover:text-slate-300 font-bold"
                                 title="Bring Forward"
                               >
                                 ▲
                               </button>
                               <button 
-                                onClick={(e) => { e.stopPropagation(); handleMoveLayer(el.id, 'down'); }}
+                                onClick={(e: any) => { e.stopPropagation(); handleMoveLayer(el.id, 'down'); }}
                                 className="p-1 text-[10px] text-text-secondary hover:text-slate-300 font-bold"
                                 title="Send Backward"
                               >
@@ -2316,7 +2316,7 @@ export default function AdvancedDesignerPage() {
                               </button>
 
                               <button 
-                                onClick={(e) => { e.stopPropagation(); handleDeleteElement(el.id); }}
+                                onClick={(e: any) => { e.stopPropagation(); handleDeleteElement(el.id); }}
                                 className="p-1 text-text-secondary hover:text-red-400"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -2346,7 +2346,7 @@ export default function AdvancedDesignerPage() {
                         <button 
                           onClick={() => {
                             const setter = activeSide === 'front' ? setFrontBg : setBackBg;
-                            setter(prev => ({ ...prev, type: 'solid' }));
+                            setter((prev: any) => ({ ...prev, type: 'solid' }));
                           }}
                           className={`p-2 bg-slate-900 border rounded-lg text-[10px] font-bold text-center cursor-pointer ${
                             (activeSide === 'front' ? frontBg.type : backBg.type) === 'solid' 
@@ -2359,7 +2359,7 @@ export default function AdvancedDesignerPage() {
                         <button 
                           onClick={() => {
                             const setter = activeSide === 'front' ? setFrontBg : setBackBg;
-                            setter(prev => ({ ...prev, type: 'linear' }));
+                            setter((prev: any) => ({ ...prev, type: 'linear' }));
                           }}
                           className={`p-2 bg-slate-900 border rounded-lg text-[10px] font-bold text-center cursor-pointer ${
                             (activeSide === 'front' ? frontBg.type : backBg.type) === 'linear' 
@@ -2379,9 +2379,9 @@ export default function AdvancedDesignerPage() {
                         <input 
                           type="color" 
                           value={activeSide === 'front' ? frontBg.color1 : backBg.color1}
-                          onChange={(e) => {
+                          onChange={(e: any) => {
                             const setter = activeSide === 'front' ? setFrontBg : setBackBg;
-                            setter(prev => ({ ...prev, color1: e.target.value }));
+                            setter((prev: any) => ({ ...prev, color1: e.target.value }));
                           }}
                           className="w-8 h-8 rounded border border-border bg-transparent cursor-pointer"
                         />
@@ -2394,9 +2394,9 @@ export default function AdvancedDesignerPage() {
                             <input 
                               type="color" 
                               value={activeSide === 'front' ? frontBg.color2 : backBg.color2}
-                              onChange={(e) => {
+                              onChange={(e: any) => {
                                 const setter = activeSide === 'front' ? setFrontBg : setBackBg;
-                                setter(prev => ({ ...prev, color2: e.target.value }));
+                                setter((prev: any) => ({ ...prev, color2: e.target.value }));
                               }}
                               className="w-8 h-8 rounded border border-border bg-transparent cursor-pointer"
                             />
@@ -2412,9 +2412,9 @@ export default function AdvancedDesignerPage() {
                               min="0" 
                               max="360" 
                               value={activeSide === 'front' ? frontBg.angle : backBg.angle}
-                              onChange={(e) => {
+                              onChange={(e: any) => {
                                 const setter = activeSide === 'front' ? setFrontBg : setBackBg;
-                                setter(prev => ({ ...prev, angle: parseInt(e.target.value) }));
+                                setter((prev: any) => ({ ...prev, angle: parseInt(e.target.value) }));
                               }}
                               className="w-full accent-indigo-500 bg-slate-800 h-1 rounded-lg cursor-pointer"
                             />
@@ -2460,7 +2460,7 @@ export default function AdvancedDesignerPage() {
                           <input 
                             type="number"
                             value={selectedElement.x}
-                            onChange={(e) => handleUpdateElementProperty('x', parseInt(e.target.value) || 0)}
+                            onChange={(e: any) => handleUpdateElementProperty('x', parseInt(e.target.value) || 0)}
                             className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-100 focus:outline-none w-full"
                           />
                         </div>
@@ -2469,7 +2469,7 @@ export default function AdvancedDesignerPage() {
                           <input 
                             type="number"
                             value={selectedElement.y}
-                            onChange={(e) => handleUpdateElementProperty('y', parseInt(e.target.value) || 0)}
+                            onChange={(e: any) => handleUpdateElementProperty('y', parseInt(e.target.value) || 0)}
                             className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-100 focus:outline-none w-full"
                           />
                         </div>
@@ -2478,7 +2478,7 @@ export default function AdvancedDesignerPage() {
                           <input 
                             type="number"
                             value={selectedElement.width}
-                            onChange={(e) => handleUpdateElementProperty('width', Math.max(1, parseInt(e.target.value) || 1))}
+                            onChange={(e: any) => handleUpdateElementProperty('width', Math.max(1, parseInt(e.target.value) || 1))}
                             className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-100 focus:outline-none w-full"
                           />
                         </div>
@@ -2487,7 +2487,7 @@ export default function AdvancedDesignerPage() {
                           <input 
                             type="number"
                             value={selectedElement.height}
-                            onChange={(e) => handleUpdateElementProperty('height', Math.max(1, parseInt(e.target.value) || 1))}
+                            onChange={(e: any) => handleUpdateElementProperty('height', Math.max(1, parseInt(e.target.value) || 1))}
                             className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-100 focus:outline-none w-full"
                           />
                         </div>
@@ -2498,7 +2498,7 @@ export default function AdvancedDesignerPage() {
                             min="0"
                             max="360"
                             value={selectedElement.rotation || 0}
-                            onChange={(e) => handleUpdateElementProperty('rotation', parseInt(e.target.value))}
+                            onChange={(e: any) => handleUpdateElementProperty('rotation', parseInt(e.target.value))}
                             className="w-full mt-1.5 accent-indigo-500 cursor-pointer"
                           />
                         </div>
@@ -2527,7 +2527,7 @@ export default function AdvancedDesignerPage() {
                           <span className="text-[9px] text-text-secondary font-bold">Edit Text Content</span>
                           <textarea 
                             value={selectedElement.text || ''}
-                            onChange={(e) => handleUpdateElementProperty('text', e.target.value)}
+                            onChange={(e: any) => handleUpdateElementProperty('text', e.target.value)}
                             rows={3}
                             className="bg-slate-900 border border-slate-850 rounded p-2 text-xxs text-slate-200 focus:outline-none w-full"
                           />
@@ -2538,10 +2538,10 @@ export default function AdvancedDesignerPage() {
                             <span>Font Family</span>
                             <select 
                               value={selectedElement.fontFamily || 'Inter'}
-                              onChange={(e) => handleUpdateElementProperty('fontFamily', e.target.value)}
+                              onChange={(e: any) => handleUpdateElementProperty('fontFamily', e.target.value)}
                               className="bg-slate-900 border border-slate-850 rounded px-2 py-1 mt-1 text-slate-200 w-full focus:outline-none"
                             >
-                              {GOOGLE_FONTS.map(f => (
+                              {GOOGLE_FONTS.map((f: any) => (
                                 <option key={f.name} value={f.name}>{f.name}</option>
                               ))}
                             </select>
@@ -2551,7 +2551,7 @@ export default function AdvancedDesignerPage() {
                             <input 
                               type="number" 
                               value={selectedElement.fontSize || 12}
-                              onChange={(e) => handleUpdateElementProperty('fontSize', Math.max(1, parseInt(e.target.value) || 1))}
+                              onChange={(e: any) => handleUpdateElementProperty('fontSize', Math.max(1, parseInt(e.target.value) || 1))}
                               className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-200 w-full focus:outline-none"
                             />
                           </div>
@@ -2561,13 +2561,13 @@ export default function AdvancedDesignerPage() {
                               <input 
                                 type="color" 
                                 value={selectedElement.color || '#000000'}
-                                onChange={(e) => handleUpdateElementProperty('color', e.target.value)}
+                                onChange={(e: any) => handleUpdateElementProperty('color', e.target.value)}
                                 className="w-8 h-8 rounded border border-border bg-transparent cursor-pointer shrink-0"
                               />
                               <input 
                                 type="text"
                                 value={selectedElement.color || '#000000'}
-                                onChange={(e) => handleUpdateElementProperty('color', e.target.value)}
+                                onChange={(e: any) => handleUpdateElementProperty('color', e.target.value)}
                                 className="bg-slate-900 border border-slate-850 rounded px-2 py-1 text-slate-200 w-full focus:outline-none"
                               />
                             </div>
@@ -2576,7 +2576,7 @@ export default function AdvancedDesignerPage() {
                             <span>Alignment</span>
                             <select 
                               value={selectedElement.textAlign || 'left'}
-                              onChange={(e) => handleUpdateElementProperty('textAlign', e.target.value as 'left' | 'center' | 'right')}
+                              onChange={(e: any) => handleUpdateElementProperty('textAlign', e.target.value as 'left' | 'center' | 'right')}
                               className="bg-slate-900 border border-slate-850 rounded px-2 py-1 mt-1 text-slate-200 w-full focus:outline-none"
                             >
                               <option value="left">Left</option>
@@ -2588,7 +2588,7 @@ export default function AdvancedDesignerPage() {
                             <span>Weight</span>
                             <select 
                               value={selectedElement.fontWeight || '400'}
-                              onChange={(e) => handleUpdateElementProperty('fontWeight', e.target.value)}
+                              onChange={(e: any) => handleUpdateElementProperty('fontWeight', e.target.value)}
                               className="bg-slate-900 border border-slate-850 rounded px-2 py-1 mt-1 text-slate-200 w-full focus:outline-none"
                             >
                               <option value="400">Regular</option>
@@ -2630,13 +2630,13 @@ export default function AdvancedDesignerPage() {
                               <input 
                                 type="color" 
                                 value={selectedElement.fill || '#000000'}
-                                onChange={(e) => handleUpdateElementProperty('fill', e.target.value)}
+                                onChange={(e: any) => handleUpdateElementProperty('fill', e.target.value)}
                                 className="w-8 h-8 rounded border border-border bg-transparent cursor-pointer shrink-0"
                               />
                               <input 
                                 type="text"
                                 value={selectedElement.fill || '#000000'}
-                                onChange={(e) => handleUpdateElementProperty('fill', e.target.value)}
+                                onChange={(e: any) => handleUpdateElementProperty('fill', e.target.value)}
                                 className="bg-slate-900 border border-slate-850 rounded px-2 py-1 text-slate-200 w-full focus:outline-none"
                               />
                             </div>
@@ -2648,7 +2648,7 @@ export default function AdvancedDesignerPage() {
                               <input 
                                 type="number" 
                                 value={selectedElement.borderRadius || 0}
-                                onChange={(e) => handleUpdateElementProperty('borderRadius', Math.max(0, parseInt(e.target.value) || 0))}
+                                onChange={(e: any) => handleUpdateElementProperty('borderRadius', Math.max(0, parseInt(e.target.value) || 0))}
                                 className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-200 w-full focus:outline-none"
                               />
                             </div>
@@ -2661,7 +2661,7 @@ export default function AdvancedDesignerPage() {
                             <input 
                               type="color" 
                               value={selectedElement.borderColor || '#000000'}
-                              onChange={(e) => handleUpdateElementProperty('borderColor', e.target.value)}
+                              onChange={(e: any) => handleUpdateElementProperty('borderColor', e.target.value)}
                               className="w-8 h-8 rounded border border-border bg-transparent cursor-pointer mt-1"
                             />
                           </div>
@@ -2670,7 +2670,7 @@ export default function AdvancedDesignerPage() {
                             <input 
                               type="number" 
                               value={selectedElement.borderWidth || 0}
-                              onChange={(e) => handleUpdateElementProperty('borderWidth', Math.max(0, parseInt(e.target.value) || 0))}
+                              onChange={(e: any) => handleUpdateElementProperty('borderWidth', Math.max(0, parseInt(e.target.value) || 0))}
                               className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-200 w-full focus:outline-none"
                             />
                           </div>
@@ -2688,7 +2688,7 @@ export default function AdvancedDesignerPage() {
                           <input 
                             type="text" 
                             value={selectedElement.url || ''}
-                            onChange={(e) => handleUpdateElementProperty('url', e.target.value)}
+                            onChange={(e: any) => handleUpdateElementProperty('url', e.target.value)}
                             className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-200 w-full focus:outline-none"
                           />
                         </div>
@@ -2699,7 +2699,7 @@ export default function AdvancedDesignerPage() {
                             <input 
                               type="number" 
                               value={selectedElement.borderRadius || 0}
-                              onChange={(e) => handleUpdateElementProperty('borderRadius', Math.max(0, parseInt(e.target.value) || 0))}
+                              onChange={(e: any) => handleUpdateElementProperty('borderRadius', Math.max(0, parseInt(e.target.value) || 0))}
                               className="bg-slate-900 border border-slate-850 rounded px-2.5 py-1 mt-1 text-slate-200 w-full focus:outline-none"
                             />
                           </div>

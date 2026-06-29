@@ -178,13 +178,13 @@ export default function AssessmentDashboardPage() {
         const storedStr = localStorage.getItem('pinesphere_quiz_submissions');
         if (storedStr) {
           const parsed = JSON.parse(storedStr) as { asmId: string; attempt: StudentAttempt }[];
-          setBatches(prev => prev.map(b => {
-            const updatedAsms = b.assessments.map(a => {
-              const matches = parsed.filter(p => p.asmId === a.id).map(p => p.attempt);
+          setBatches((prev: any) => prev.map((b: any) => {
+            const updatedAsms = b.assessments.map((a: any) => {
+              const matches = parsed.filter((p: any) => p.asmId === a.id).map((p: any) => p.attempt);
               if (matches.length > 0) {
                 const merged = [...a.attempts];
-                matches.forEach(newAttempt => {
-                  const idx = merged.findIndex(x => x.studentId === newAttempt.studentId);
+                matches.forEach((newAttempt: any) => {
+                  const idx = merged.findIndex((x: any) => x.studentId === newAttempt.studentId);
                   if (idx >= 0) {
                     merged[idx] = { ...merged[idx], ...newAttempt };
                   } else {
@@ -208,8 +208,8 @@ export default function AssessmentDashboardPage() {
     return () => window.removeEventListener('storage', syncSubmissions);
   }, []);
 
-  const activeCount = batches.reduce((sum, b) => sum + b.assessments.length, 0);
-  const totalSubCount = batches.reduce((sum, b) => sum + b.assessments.reduce((s, a) => s + a.attempts.length, 0), 0);
+  const activeCount = batches.reduce((sum: any, b: any) => sum + b.assessments.length, 0);
+  const totalSubCount = batches.reduce((sum: any, b: any) => sum + b.assessments.reduce((s: any, a: any) => s + a.attempts.length, 0), 0);
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -246,7 +246,7 @@ export default function AssessmentDashboardPage() {
           <div className="space-y-4">
             <h3 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Roster Compliance</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {batches.map(b => (
+              {batches.map((b: any) => (
                 <div 
                   key={b.id}
                   onClick={() => setSelectedBatch(b)}
@@ -287,7 +287,7 @@ export default function AssessmentDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {selectedBatch.assessments.map(asm => (
+            {selectedBatch.assessments.map((asm: any) => (
               <div 
                 key={asm.id}
                 onClick={() => setSelectedAsm(asm)}
@@ -329,7 +329,7 @@ export default function AssessmentDashboardPage() {
             </div>
 
             <div className="space-y-2">
-              {selectedAsm.attempts.map(att => (
+              {selectedAsm.attempts.map((att: any) => (
                 <div 
                   key={att.studentId}
                   onClick={() => setSelectedAttempt(att)}
@@ -400,7 +400,7 @@ export default function AssessmentDashboardPage() {
                 <div className="space-y-3.5">
                   <h4 className="font-bold text-xs text-slate-455 uppercase tracking-widest">Question trace detail</h4>
                   <div className="space-y-2">
-                    {selectedAttempt.questionAnalysis.detailed.map((det, idx) => (
+                    {selectedAttempt.questionAnalysis.detailed.map((det: any, idx: any) => (
                       <div key={idx} className="p-3 bg-slate-50 border border-slate-150 rounded-xl flex items-center justify-between text-xs font-semibold">
                         <span className="text-slate-750 truncate mr-4">{det.question}</span>
                         <div className="flex items-center gap-3 shrink-0">

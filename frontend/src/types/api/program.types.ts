@@ -32,3 +32,4 @@ export interface ProgramResponse {
   certificate_available: boolean;
   status: string;
 }
+export interface Program { id: string; name: string; [key: string]: any; }

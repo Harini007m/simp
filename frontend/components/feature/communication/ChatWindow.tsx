@@ -32,7 +32,7 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
   const loadConversationDetails = async () => {
     try {
       const convs = await CommunicationService.getConversations('u1');
-      const found = convs.find(c => c.id === conversationId);
+      const found = convs.find((c: any) => c.id === conversationId);
       if (found) setConversation(found);
     } catch (e) {
       console.error(e);
@@ -71,7 +71,7 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
         attachments
       });
 
-      setMessages(prev => [...prev, newMsg]);
+      setMessages((prev: any) => [...prev, newMsg]);
       setInputText('');
       setAttachedFile(null);
       setShowEmojis(false);
@@ -88,7 +88,7 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
   };
 
   const handleSelectEmoji = (emoji: string) => {
-    setInputText(prev => prev + emoji);
+    setInputText((prev: any) => prev + emoji);
   };
 
   const handleStartCall = (type: 'voice' | 'video') => {
@@ -109,11 +109,11 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
 
   // Resolve Header Details
   const titleName = (conversation?.type === 'One-to-One' 
-    ? conversation.participants.find(p => p.id !== 'u1')?.name 
+    ? conversation.participants.find((p: any) => p.id !== 'u1')?.name 
     : conversation?.name) || 'Discussion Group';
   
   const roleLabel = conversation?.type === 'One-to-One'
-    ? conversation.participants.find(p => p.id !== 'u1')?.role || 'Mentor'
+    ? conversation.participants.find((p: any) => p.id !== 'u1')?.role || 'Mentor'
     : `${conversation?.participants?.length || 2} Members`;
 
   return (
@@ -155,7 +155,7 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
             <Loader2 className="w-6 h-6 animate-spin text-text-secondary" />
           </div>
         ) : (
-          messages.map(msg => {
+          messages.map((msg: any) => {
             const isMe = msg.senderId === 'u1';
             return (
               <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-fade-in`}>
@@ -173,7 +173,7 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
                     <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                     {msg.attachments && msg.attachments.length > 0 && (
                       <div className="mt-2.5 space-y-1.5">
-                        {msg.attachments.map((att, i) => (
+                        {msg.attachments.map((att: any, i: any) => (
                           <div 
                             key={i} 
                             className={`p-2 rounded-xl text-[10px] font-mono font-bold flex items-center gap-1.5 border ${
@@ -221,7 +221,7 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
 
         {showEmojis && (
           <div className="py-3 border-t border-border flex flex-wrap gap-2 animate-fade-in">
-            {emojis.map(e => (
+            {emojis.map((e: any) => (
               <button 
                 key={e} 
                 type="button"
@@ -249,8 +249,8 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
             <input
               type="text"
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              onChange={(e: any) => setInputText(e.target.value)}
+              onKeyDown={(e: any) => e.key === 'Enter' && handleSend()}
               placeholder="Type a message..."
               className="flex-1 bg-transparent border-none py-3.5 focus:outline-none focus:ring-0 text-xs px-2 font-medium text-text-primary placeholder-slate-400"
             />

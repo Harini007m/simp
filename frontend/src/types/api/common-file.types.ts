@@ -1,0 +1,2 @@
+export interface CommonFile { id: string; url: string; [key: string]: any; }
+export interface FileReference { file_id: string; file_name: string; mime_type?: string; file_type?: string; file_size?: number; uploaded_by?: string; uploaded_at?: string; storage_url?: string; version?: number; id?: string; url?: string; }

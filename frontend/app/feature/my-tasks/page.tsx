@@ -112,15 +112,15 @@ export default function MyTasksPage() {
           const parsed = JSON.parse(customTasksStr) as { batchId: string; task: any }[];
           // Map to student-batch (AI Batch 2026 / batch-ai-2026)
           const filtered = parsed
-            .filter(x => x.batchId === 'batch-ai-2026')
-            .map(x => ({
+            .filter((x: any) => x.batchId === 'batch-ai-2026')
+            .map((x: any) => ({
               ...x.task,
               status: 'pending' as const,
               isOverdue: new Date(x.task.dueDate).getTime() < Date.now()
             }));
           
-          filtered.forEach(ct => {
-            if (!combinedTasks.some(t => t.id === ct.id)) {
+          filtered.forEach((ct: any) => {
+            if (!combinedTasks.some((t: any) => t.id === ct.id)) {
               combinedTasks.push(ct);
             }
           });
@@ -130,8 +130,8 @@ export default function MyTasksPage() {
         const submissionsStr = localStorage.getItem('pinesphere_task_submissions');
         if (submissionsStr) {
           const parsed = JSON.parse(submissionsStr) as LocalSubmission[];
-          combinedTasks = combinedTasks.map(t => {
-            const sub = parsed.find(x => x.taskId === t.id && x.submission.studentId === 'stu-12');
+          combinedTasks = combinedTasks.map((t: any) => {
+            const sub = parsed.find((x: any) => x.taskId === t.id && x.submission.studentId === 'stu-12');
             if (sub) {
               return {
                 ...t,
@@ -146,8 +146,8 @@ export default function MyTasksPage() {
         const gradesStr = localStorage.getItem('pinesphere_task_grades');
         if (gradesStr) {
           const parsed = JSON.parse(gradesStr) as { taskId: string; studentId: string; score: number; feedback: string }[];
-          combinedTasks = combinedTasks.map(t => {
-            const gr = parsed.find(x => x.taskId === t.id && x.studentId === 'stu-12');
+          combinedTasks = combinedTasks.map((t: any) => {
+            const gr = parsed.find((x: any) => x.taskId === t.id && x.studentId === 'stu-12');
             if (gr) {
               return {
                 ...t,
@@ -184,7 +184,7 @@ export default function MyTasksPage() {
   const handleSubmitSolution = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const selected = tasks.find(t => t.id === selectedTaskId);
+    const selected = tasks.find((t: any) => t.id === selectedTaskId);
     if (!selected) return;
 
     // Build the submission payload
@@ -214,7 +214,7 @@ export default function MyTasksPage() {
       localStorage.setItem('pinesphere_task_submissions', JSON.stringify(cleaned));
     }
 
-    setTasks(prev => prev.map(t => t.id === selectedTaskId ? { ...t, status: 'review' } : t));
+    setTasks((prev: any) => prev.map((t: any) => t.id === selectedTaskId ? { ...t, status: 'review' } : t));
     
     // Clear inputs
     setGithubUrl('');
@@ -226,7 +226,7 @@ export default function MyTasksPage() {
     triggerToast("Deliverables uploaded successfully for mentor evaluation!");
   };
 
-  const selectedTask = tasks.find(t => t.id === selectedTaskId);
+  const selectedTask = tasks.find((t: any) => t.id === selectedTaskId);
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -259,7 +259,7 @@ export default function MyTasksPage() {
           <h3 className="font-bold text-[10px] text-text-secondary uppercase tracking-widest">Active Milestones</h3>
           
           <div className="space-y-3">
-            {tasks.map((task) => {
+            {tasks.map((task: any) => {
               const isSelected = task.id === selectedTaskId;
               const isOverdue = task.isOverdue && task.status === 'pending';
 
@@ -411,7 +411,7 @@ export default function MyTasksPage() {
                             required
                             placeholder="https://github.com/ananya/project" 
                             value={githubUrl}
-                            onChange={(e) => setGithubUrl(e.target.value)}
+                            onChange={(e: any) => setGithubUrl(e.target.value)}
                             className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2.5 text-xs text-text-primary outline-none focus:border-primary focus:bg-white"
                           />
                         </div>
@@ -428,7 +428,7 @@ export default function MyTasksPage() {
                             required
                             placeholder="https://project-demo.vercel.app" 
                             value={deployUrl}
-                            onChange={(e) => setDeployUrl(e.target.value)}
+                            onChange={(e: any) => setDeployUrl(e.target.value)}
                             className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2.5 text-xs text-text-primary outline-none focus:border-primary focus:bg-white"
                           />
                         </div>
@@ -447,7 +447,7 @@ export default function MyTasksPage() {
                             required
                             placeholder="https://loom.com/share/video-id" 
                             value={videoUrl}
-                            onChange={(e) => setVideoUrl(e.target.value)}
+                            onChange={(e: any) => setVideoUrl(e.target.value)}
                             className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2.5 text-xs text-text-primary outline-none focus:border-primary focus:bg-white"
                           />
                         </div>

@@ -59,7 +59,7 @@ export default function PlacementPipeline() {
                 <td colSpan={5} className="px-6 py-8 text-center text-text-secondary">Loading pipeline data...</td>
               </tr>
             ) : (
-              placements.slice(0, 20).map(pl => (
+              placements.slice(0, 20).map((pl: any) => (
                 <tr key={pl.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">

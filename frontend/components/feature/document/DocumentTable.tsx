@@ -88,7 +88,7 @@ export default function DocumentTable({ documents, loading, onUpdate }: Document
                   Loading generated documents...
                 </td>
               </tr>
-            ) : documents.map(doc => (
+            ) : documents.map((doc: any) => (
               <tr key={doc.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-5 py-4">
                   <div className="flex flex-col">

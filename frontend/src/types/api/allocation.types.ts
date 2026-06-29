@@ -1,0 +1,1 @@
+export interface Allocation { id: string; [key: string]: any; }

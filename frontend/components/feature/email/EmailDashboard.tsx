@@ -106,11 +106,11 @@ export default function EmailDashboard() {
       setTestTemplate(null);
       setTestEmail('');
       // Simulate incrementing delivered stats
-      setStats(prev => ({ ...prev, delivered: prev.delivered + 1 }));
+      setStats((prev: any) => ({ ...prev, delivered: prev.delivered + 1 }));
     }, 1500);
   };
 
-  const filteredTemplates = templates.filter(t => {
+  const filteredTemplates = templates.filter((t: any) => {
     const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           t.subject.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === 'All' || t.category === categoryFilter;
@@ -210,7 +210,7 @@ export default function EmailDashboard() {
                 type="text"
                 placeholder="Search templates..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: any) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl pl-9.5 pr-4 py-2.5 text-xs focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-400"
               />
             </div>
@@ -219,7 +219,7 @@ export default function EmailDashboard() {
               <span className="font-bold text-text-secondary uppercase tracking-wider">Category</span>
               <select
                 value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+                onChange={(e: any) => setCategoryFilter(e.target.value)}
                 className="bg-slate-50 border border-border rounded-xl px-3 py-2 font-bold text-text-primary focus:outline-none cursor-pointer"
               >
                 <option value="All">All Categories</option>
@@ -252,7 +252,7 @@ export default function EmailDashboard() {
                       Loading templates...
                     </td>
                   </tr>
-                ) : filteredTemplates.map(tpl => (
+                ) : filteredTemplates.map((tpl: any) => (
                   <tr key={tpl.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-5 py-4">
                       <div className="font-bold text-text-primary text-sm">{tpl.name}</div>
@@ -311,7 +311,7 @@ export default function EmailDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {history.slice(0, 30).map(item => (
+                {history.slice(0, 30).map((item: any) => (
                   <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-5 py-4 font-bold text-text-primary">{item.recipientEmail}</td>
                     <td className="px-5 py-4 font-mono font-medium text-text-secondary">{item.templateId}</td>
@@ -350,7 +350,7 @@ export default function EmailDashboard() {
               type="text"
               required
               value={formName}
-              onChange={(e) => setFormName(e.target.value)}
+              onChange={(e: any) => setFormName(e.target.value)}
               placeholder="e.g., Student Welcome Onboarding"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
             />
@@ -361,7 +361,7 @@ export default function EmailDashboard() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Category</label>
               <select
                 value={formCategory}
-                onChange={(e) => setFormCategory(e.target.value as any)}
+                onChange={(e: any) => setFormCategory(e.target.value as any)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="Registration">Registration</option>
@@ -376,7 +376,7 @@ export default function EmailDashboard() {
               <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">Initial Status</label>
               <select
                 value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as any)}
+                onChange={(e: any) => setFormStatus(e.target.value as any)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
                 <option value="Active">Active (Ready to Send)</option>
@@ -392,7 +392,7 @@ export default function EmailDashboard() {
               type="text"
               required
               value={formSubject}
-              onChange={(e) => setFormSubject(e.target.value)}
+              onChange={(e: any) => setFormSubject(e.target.value)}
               placeholder="e.g., Welcome to Pinesphere Internship Program!"
               className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary"
             />
@@ -403,7 +403,7 @@ export default function EmailDashboard() {
             <textarea
               required
               value={formBody}
-              onChange={(e) => setFormBody(e.target.value)}
+              onChange={(e: any) => setFormBody(e.target.value)}
               placeholder="Write template message body..."
               className="w-full flex-1 bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary resize-none font-mono text-xs"
             />
@@ -454,7 +454,7 @@ export default function EmailDashboard() {
                 type="email"
                 required
                 value={testEmail}
-                onChange={(e) => setTestEmail(e.target.value)}
+                onChange={(e: any) => setTestEmail(e.target.value)}
                 placeholder="e.g., test-recipient@example.com"
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary placeholder-slate-405"
               />

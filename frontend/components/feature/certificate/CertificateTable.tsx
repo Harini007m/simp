@@ -43,7 +43,7 @@ export default function CertificateTable({ certificates, loading, onUpdate }: Ce
     }
   };
 
-  const filteredCertificates = certificates.filter(c => {
+  const filteredCertificates = certificates.filter((c: any) => {
     const matchesSearch = c.studentName.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           c.certificateNumber.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'All' || c.status === statusFilter;
@@ -82,7 +82,7 @@ export default function CertificateTable({ certificates, loading, onUpdate }: Ce
               type="text" 
               placeholder="Search by ID or student..." 
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: any) => setSearchQuery(e.target.value)}
               className="bg-white border border-border rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-primary font-medium text-text-primary"
             />
           </div>
@@ -90,7 +90,7 @@ export default function CertificateTable({ certificates, loading, onUpdate }: Ce
           {/* Status Filter */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e: any) => setStatusFilter(e.target.value as any)}
             className="bg-white border border-border rounded-xl px-3 py-2 text-xs font-bold text-text-primary focus:outline-none cursor-pointer"
           >
             <option value="All">All Statuses</option>
@@ -119,7 +119,7 @@ export default function CertificateTable({ certificates, loading, onUpdate }: Ce
                   Loading certificates...
                 </td>
               </tr>
-            ) : filteredCertificates.slice(0, 20).map(cert => (
+            ) : filteredCertificates.slice(0, 20).map((cert: any) => (
               <tr key={cert.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-5 py-4">
                   <div className="flex flex-col">

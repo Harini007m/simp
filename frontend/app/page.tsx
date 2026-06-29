@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { opportunitiesService } from '@/src/services/opportunities.service';
-import { Opportunity } from '@/src/data/mock-opportunities';
+import { Opportunity } from '../src/types/api/opportunity.types';
 import { Footer } from '@/components/layout/Footer';
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
@@ -23,7 +23,7 @@ const heroData = {
 // --- COMMON COMPONENTS ---
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {}
 const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
-  ({ className, children, ...props }, ref) => (
+  ({ className, children, ...props }, ref: any) => (
     <div ref={ref} className={`max-w-[1440px] mx-auto px-6 md:px-12 ${className || ""}`} {...props}>
       {children}
     </div>
@@ -33,7 +33,7 @@ Container.displayName = "Container";
 
 interface SectionProps extends React.HTMLAttributes<HTMLElement> {}
 const Section = React.forwardRef<HTMLElement, SectionProps>(
-  ({ className, children, ...props }, ref) => (
+  ({ className, children, ...props }, ref: any) => (
     <section ref={ref} className={`py-12 md:py-24 lg:py-32 ${className || ""}`} {...props}>
       {children}
     </section>
@@ -180,7 +180,7 @@ export default function LandingPage() {
     video.muted = true;
     
     const handlePlay = () => {
-      video.play().catch((err) => {
+      video.play().catch((err: any) => {
         console.warn("Autoplay was prevented by browser:", err);
       });
     };
@@ -291,7 +291,7 @@ export default function LandingPage() {
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
                 <p>Loading opportunities...</p>
               </div>
-            ) : opportunities.map((opp, idx) => (
+            ) : opportunities.map((opp: any, idx: any) => (
               <div 
                 key={idx} 
                 className={`flex flex-col h-full rounded-2xl border border-border bg-white p-8 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.06)] hover:-translate-y-1.5 transition-all duration-300 ${
@@ -385,7 +385,7 @@ export default function LandingPage() {
                 </div>
 
                 <button 
-                  onClick={(e) => {
+                  onClick={(e: any) => {
                     e.preventDefault();
                     setSelectedOpp(opp);
                     setVerifyModalOpen(true);

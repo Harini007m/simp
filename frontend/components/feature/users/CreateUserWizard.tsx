@@ -6,15 +6,15 @@ import { Stepper } from '@/components/feature/ui/Stepper';
 import { Button } from '@/components/feature/ui/Button';
 import { Search, CheckCircle2, ChevronRight, ChevronLeft, Shield, Upload, Users, Sparkles, Key } from 'lucide-react';
 import { Card } from '@/components/feature/ui/Card';
-import { Role } from '@/src/data/mock-roles';
-import { Module } from '@/src/data/mock-modules';
+import { Role } from '@/src/types/api/role.types';
+import { Module } from '@/src/types/api/module.types';
 import { roleService } from '@/src/services/role.service';
 import { moduleService } from '@/src/services/module.service';
 import { userService } from '@/src/services/user.service';
 import { employeeService, ExtendedEmployee } from '@/src/services/employee.service';
 import { studentService, ExtendedStudent } from '@/src/services/student.service';
 import { organizationService, ExtendedCollege } from '@/src/services/organization.service';
-import { User } from '@/src/data/mock-users';
+import { User } from '@/src/types/api/user.types';
 
 interface CreateUserWizardProps {
   isOpen: boolean;
@@ -80,10 +80,10 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
           userService.getUsers()
         ]);
         
-        const userEmails = new Set(loadedUsers.map(u => u.email.toLowerCase()));
+        const userEmails = new Set(loadedUsers.map((u: any) => u.email.toLowerCase()));
         const entities: AutofillEntity[] = [];
 
-        loadedEmployees.forEach(emp => {
+        loadedEmployees.forEach((emp: any) => {
           const email = (emp.email || emp.official_email || '').toLowerCase();
           if (email && !userEmails.has(email)) {
             entities.push({
@@ -97,7 +97,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
           }
         });
 
-        loadedStudents.forEach(stu => {
+        loadedStudents.forEach((stu: any) => {
           const email = (stu.email || stu.official_email || stu.personalInfo?.email || '').toLowerCase();
           if (email && !userEmails.has(email)) {
             entities.push({
@@ -111,7 +111,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
           }
         });
 
-        loadedOrganizations.forEach(org => {
+        loadedOrganizations.forEach((org: any) => {
           const email = (org.email || '').toLowerCase();
           if (email && !userEmails.has(email)) {
             entities.push({
@@ -160,7 +160,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
           const loadAssigned = async () => {
             const uMods = await userService.getUserModules(userToEdit.id);
             if (isMounted) {
-              setAssignedModules(uMods.map(m => m.id));
+              setAssignedModules(uMods.map((m: any) => m.id));
             }
           };
           loadAssigned();
@@ -215,7 +215,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
       return;
     }
 
-    const entity = unlinkedEntities.find(e => e.id === entityId);
+    const entity = unlinkedEntities.find((e: any) => e.id === entityId);
     if (entity) {
       setFullName(entity.name);
       setEmail(entity.email);
@@ -242,7 +242,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
       candidate = `${cleanBase}${suffix}`;
       
       // Check if username already exists
-      const match = existingUsers.some(u => u.username.toLowerCase() === candidate.toLowerCase());
+      const match = existingUsers.some((u: any) => u.username.toLowerCase() === candidate.toLowerCase());
       if (!match) {
         isUnique = true;
       } else {
@@ -283,7 +283,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
     let isMounted = true;
     // Only auto-update default modules for NEW users, not during edit mode initialization
     if (!userToEdit && selectedRole && modules.length > 0) {
-      const roleObj = roles.find(r => r.id === selectedRole);
+      const roleObj = roles.find((r: any) => r.id === selectedRole);
       if (roleObj && roleObj.moduleIds) {
         Promise.resolve().then(() => {
           if (isMounted) {
@@ -313,20 +313,20 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
       return;
     }
     if (currentStep < STEPS.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev: any) => prev + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev: any) => prev - 1);
     }
   };
 
   const toggleModule = (id: string) => {
     if (viewMode) return;
-    setAssignedModules(prev => 
-      prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
+    setAssignedModules((prev: any) => 
+      prev.includes(id) ? prev.filter((m: any) => m !== id) : [...prev, id]
     );
   };
 
@@ -340,7 +340,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
     if (file) {
       setAvatarName(file.name);
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = (event: any) => {
         setAvatar(event.target?.result as string);
       };
       reader.readAsDataURL(file);
@@ -354,7 +354,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
     }
     try {
       setIsSubmitting(true);
-      const roleObj = roles.find(r => r.id === selectedRole);
+      const roleObj = roles.find((r: any) => r.id === selectedRole);
       const roleName = roleObj ? roleObj.name : 'User';
       
       const userData = {
@@ -364,11 +364,11 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
         roleId: selectedRole,
         roleName: roleName,
         status: userToEdit ? userToEdit.status : ('Active' as const),
-        moduleOverrides: assignedModules.filter(id => {
+        moduleOverrides: assignedModules.filter((id: any) => {
           const defaultModuleIds = roleObj?.moduleIds || [];
           return !defaultModuleIds.includes(id);
         }),
-        avatar: avatar || fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        avatar: avatar || fullName.split(' ').map((n: any) => n[0]).join('').toUpperCase().slice(0, 2)
       };
       
       if (userToEdit) {
@@ -389,7 +389,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
     }
   };
 
-  const filteredModules = modules.filter(m => 
+  const filteredModules = modules.filter((m: any) => 
     m.name.toLowerCase().includes(moduleSearch.toLowerCase())
   );
 
@@ -413,16 +413,16 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <div className="flex gap-2">
                   <select
                     value={selectedEntityId}
-                    onChange={e => handleEntitySelect(e.target.value)}
+                    onChange={(e: any) => handleEntitySelect(e.target.value)}
                     className="flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">-- Select an unlinked employee/student/org to autofill --</option>
-                    {['Employee', 'Student', 'Organization'].map(t => {
-                      const groupEntities = unlinkedEntities.filter(e => e.type === t);
+                    {['Employee', 'Student', 'Organization'].map((t: any) => {
+                      const groupEntities = unlinkedEntities.filter((e: any) => e.type === t);
                       if (groupEntities.length === 0) return null;
                       return (
                         <optgroup key={t} label={`${t}s`}>
-                          {groupEntities.map(ent => (
+                          {groupEntities.map((ent: any) => (
                             <option key={ent.id} value={ent.id}>
                               [{t}] {ent.name} ({ent.detail}) - {ent.email}
                             </option>
@@ -454,7 +454,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <input 
                   type="text" 
                   value={fullName}
-                  onChange={e => setFullName(e.target.value)}
+                  onChange={(e: any) => setFullName(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   placeholder="John Doe" 
@@ -476,7 +476,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <input 
                   type="text" 
                   value={username}
-                  onChange={e => setUsername(e.target.value)}
+                  onChange={(e: any) => setUsername(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   placeholder="johndoe001" 
@@ -487,7 +487,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <input 
                   type="email" 
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e: any) => setEmail(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   placeholder="john@example.com" 
@@ -498,7 +498,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <input 
                   type="tel" 
                   value={phone}
-                  onChange={e => setPhone(e.target.value)}
+                  onChange={(e: any) => setPhone(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   placeholder="+1 (555) 000-0000" 
@@ -520,7 +520,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <input 
                   type="password" 
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e: any) => setPassword(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   placeholder="••••••••" 
@@ -536,7 +536,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <input 
                   type="password" 
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
+                  onChange={(e: any) => setConfirmPassword(e.target.value)}
                   disabled={viewMode}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                   placeholder="••••••••" 
@@ -585,7 +585,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                   <input 
                     type="checkbox" 
                     checked={sendEmail}
-                    onChange={e => setSendEmail(e.target.checked)}
+                    onChange={(e: any) => setSendEmail(e.target.checked)}
                     disabled={viewMode}
                     className="h-4 w-4 rounded border-border text-blue-600 focus:ring-primary disabled:opacity-50" 
                   />
@@ -595,7 +595,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                   <input 
                     type="checkbox" 
                     checked={forcePasswordChange}
-                    onChange={e => setForcePasswordChange(e.target.checked)}
+                    onChange={(e: any) => setForcePasswordChange(e.target.checked)}
                     disabled={viewMode}
                     className="h-4 w-4 rounded border-border text-blue-600 focus:ring-primary disabled:opacity-50" 
                   />
@@ -606,7 +606,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                   <input 
                     type="number" 
                     value={accountValidationPeriod}
-                    onChange={e => setAccountValidationPeriod(e.target.value)}
+                    onChange={(e: any) => setAccountValidationPeriod(e.target.value)}
                     disabled={viewMode}
                     className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
                     placeholder="e.g. 365 (Leave empty for unlimited)" 
@@ -623,7 +623,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
             <div className="flex-1 space-y-4">
               <h3 className="text-sm font-semibold text-text-primary">Select Role</h3>
               <div className="grid gap-3">
-                {roles.map((role) => (
+                {roles.map((role: any) => (
                   <div 
                     key={role.id}
                     onClick={() => {
@@ -659,8 +659,8 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <h3 className="text-sm font-semibold text-text-primary mb-3">Modules Inherited</h3>
                 {selectedRole ? (
                   <ul className="space-y-2">
-                    {assignedModules.map(id => {
-                      const mod = modules.find(m => m.id === id);
+                    {assignedModules.map((id: any) => {
+                      const mod = modules.find((m: any) => m.id === id);
                       return mod ? (
                         <li key={id} className="flex items-center gap-2 text-sm text-text-secondary">
                           <CheckCircle2 className="h-4 w-4 text-emerald-500" /> {mod.name}
@@ -686,7 +686,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                   <input 
                     type="text" 
                     value={moduleSearch}
-                    onChange={e => setModuleSearch(e.target.value)}
+                    onChange={(e: any) => setModuleSearch(e.target.value)}
                     disabled={viewMode}
                     placeholder="Search..." 
                     className="w-48 rounded-md border border-border pl-8 pr-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:bg-slate-50" 
@@ -695,7 +695,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
               </div>
               
               <div className="grid grid-cols-2 gap-3">
-                {filteredModules.map((module) => {
+                {filteredModules.map((module: any) => {
                   const isAssigned = assignedModules.includes(module.id);
                   return (
                     <div 
@@ -719,8 +719,8 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
               <div className="sticky top-0 rounded-lg border border-border bg-slate-50 p-4">
                 <h3 className="text-sm font-semibold text-text-primary mb-3">Final Access</h3>
                 <ul className="space-y-2">
-                  {assignedModules.map(id => {
-                    const mod = modules.find(m => m.id === id);
+                  {assignedModules.map((id: any) => {
+                    const mod = modules.find((m: any) => m.id === id);
                     return mod ? (
                       <li key={id} className="flex items-center gap-2 text-sm text-text-secondary">
                         <CheckCircle2 className="h-4 w-4 text-emerald-500" /> {mod.name}
@@ -768,7 +768,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                   <div>
                     <p className="text-xs text-text-secondary">Selected Role</p>
                     <p className="text-sm font-medium text-text-primary">
-                      {selectedRole ? roles.find(r => r.id === selectedRole)?.name : 'None'}
+                      {selectedRole ? roles.find((r: any) => r.id === selectedRole)?.name : 'None'}
                     </p>
                   </div>
                   {!viewMode && (
@@ -800,8 +800,8 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                 <h3 className="font-semibold text-text-primary">Assigned Modules</h3>
               </div>
               <div className="p-4 flex flex-wrap gap-2">
-                {assignedModules.map(id => {
-                  const mod = modules.find(m => m.id === id);
+                {assignedModules.map((id: any) => {
+                  const mod = modules.find((m: any) => m.id === id);
                   return mod ? (
                     <span key={id} className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
                       {mod.name}

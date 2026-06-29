@@ -45,7 +45,7 @@ export default function ProductivityPage() {
     if (!workspace) return;
     setWorkspace({
       ...workspace,
-      tasks: workspace.tasks.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t)
+      tasks: workspace.tasks.map((t: any) => t.id === taskId ? { ...t, completed: !t.completed } : t)
     });
   };
 
@@ -73,7 +73,7 @@ export default function ProductivityPage() {
     if (!workspace) return;
     setWorkspace({
       ...workspace,
-      tasks: workspace.tasks.filter(t => t.id !== taskId)
+      tasks: workspace.tasks.filter((t: any) => t.id !== taskId)
     });
   };
 
@@ -95,7 +95,7 @@ export default function ProductivityPage() {
       // Editing existing note
       setWorkspace({
         ...workspace,
-        notes: workspace.notes.map(n => n.id === noteForm.id ? { 
+        notes: workspace.notes.map((n: any) => n.id === noteForm.id ? { 
           ...n, 
           content: noteForm.content.trim(), 
           color: noteForm.color 
@@ -123,7 +123,7 @@ export default function ProductivityPage() {
     if (!workspace) return;
     setWorkspace({
       ...workspace,
-      notes: workspace.notes.filter(n => n.id !== noteId)
+      notes: workspace.notes.filter((n: any) => n.id !== noteId)
     });
   };
 
@@ -158,7 +158,7 @@ export default function ProductivityPage() {
     if (!workspace) return;
     setWorkspace({
       ...workspace,
-      bookmarks: workspace.bookmarks.filter(b => b.id !== bookmarkId)
+      bookmarks: workspace.bookmarks.filter((b: any) => b.id !== bookmarkId)
     });
   };
 
@@ -210,7 +210,7 @@ export default function ProductivityPage() {
             {workspace.tasks.length === 0 ? (
               <div className="p-8 text-center text-xs text-text-secondary">No tasks created.</div>
             ) : (
-              workspace.tasks.map(task => (
+              workspace.tasks.map((task: any) => (
                 <div 
                   key={task.id} 
                   onClick={() => handleToggleTask(task.id)}
@@ -234,7 +234,7 @@ export default function ProductivityPage() {
                     </div>
                   </div>
                   <button 
-                    onClick={(e) => handleDeleteTask(task.id, e)}
+                    onClick={(e: any) => handleDeleteTask(task.id, e)}
                     className="p-1 rounded-lg hover:bg-rose-50 text-text-secondary hover:text-rose-600 transition-colors"
                     title="Delete task"
                   >
@@ -265,7 +265,7 @@ export default function ProductivityPage() {
             {workspace.notes.length === 0 ? (
               <div className="p-8 text-center text-xs text-text-secondary">No notes created.</div>
             ) : (
-              workspace.notes.map(note => (
+              workspace.notes.map((note: any) => (
                 <div 
                   key={note.id} 
                   onClick={() => handleOpenNoteModal(note)}
@@ -287,7 +287,7 @@ export default function ProductivityPage() {
                         <Edit2 className="w-3.5 h-3.5" />
                       </span>
                       <button 
-                        onClick={(e) => handleDeleteNote(note.id, e)}
+                        onClick={(e: any) => handleDeleteNote(note.id, e)}
                         className="p-1 rounded bg-white/70 hover:bg-rose-50 text-text-secondary hover:text-rose-600 transition-colors shadow-xs"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -319,7 +319,7 @@ export default function ProductivityPage() {
             {workspace.bookmarks.length === 0 ? (
               <div className="p-8 text-center text-xs text-text-secondary">No bookmarks saved.</div>
             ) : (
-              workspace.bookmarks.map(bm => (
+              workspace.bookmarks.map((bm: any) => (
                 <div 
                   key={bm.id} 
                   className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group"
@@ -338,7 +338,7 @@ export default function ProductivityPage() {
                   </a>
                   <div className="flex items-center gap-1 shrink-0">
                     <button 
-                      onClick={(e) => handleDeleteBookmark(bm.id, e)}
+                      onClick={(e: any) => handleDeleteBookmark(bm.id, e)}
                       className="p-1.5 rounded-lg hover:bg-rose-50 text-text-secondary hover:text-rose-600 transition-colors"
                       title="Delete bookmark"
                     >
@@ -372,7 +372,7 @@ export default function ProductivityPage() {
                   required
                   placeholder="E.g. Complete slides for review"
                   value={taskForm.title}
-                  onChange={e => setTaskForm(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e: any) => setTaskForm((prev: any) => ({ ...prev, title: e.target.value }))}
                   className="w-full rounded-xl border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-text-primary bg-white placeholder-slate-400"
                 />
               </div>
@@ -382,7 +382,7 @@ export default function ProductivityPage() {
                   type="date" 
                   required
                   value={taskForm.dueDate}
-                  onChange={e => setTaskForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                  onChange={(e: any) => setTaskForm((prev: any) => ({ ...prev, dueDate: e.target.value }))}
                   className="w-full rounded-xl border border-border px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-slate-850 bg-white"
                 />
               </div>
@@ -414,20 +414,20 @@ export default function ProductivityPage() {
                   rows={4}
                   placeholder="Write your note content here..."
                   value={noteForm.content}
-                  onChange={e => setNoteForm(prev => ({ ...prev, content: e.target.value }))}
+                  onChange={(e: any) => setNoteForm((prev: any) => ({ ...prev, content: e.target.value }))}
                   className="w-full rounded-xl border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-text-primary bg-white placeholder-slate-400 whitespace-pre-wrap font-medium"
                 />
               </div>
               <div>
                 <label className="block text-xs font-bold text-text-secondary mb-2 uppercase tracking-wide">Note Theme Color</label>
                 <div className="flex gap-3">
-                  {(['yellow', 'blue', 'green', 'pink'] as const).map(c => {
+                  {(['yellow', 'blue', 'green', 'pink'] as const).map((c: any) => {
                     const active = noteForm.color === c;
                     return (
                       <button
                         key={c}
                         type="button"
-                        onClick={() => setNoteForm(prev => ({ ...prev, color: c }))}
+                        onClick={() => setNoteForm((prev: any) => ({ ...prev, color: c }))}
                         className={`w-10 h-10 rounded-full border transition-all relative ${
                           c === 'yellow' ? 'bg-amber-50 border-amber-300' :
                           c === 'blue' ? 'bg-blue-50 border-blue-300' :
@@ -472,7 +472,7 @@ export default function ProductivityPage() {
                   required
                   placeholder="E.g. GitHub Repository"
                   value={bookmarkForm.title}
-                  onChange={e => setBookmarkForm(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e: any) => setBookmarkForm((prev: any) => ({ ...prev, title: e.target.value }))}
                   className="w-full rounded-xl border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-text-primary bg-white placeholder-slate-400"
                 />
               </div>
@@ -483,7 +483,7 @@ export default function ProductivityPage() {
                   required
                   placeholder="E.g. github.com/user/project"
                   value={bookmarkForm.url}
-                  onChange={e => setBookmarkForm(prev => ({ ...prev, url: e.target.value }))}
+                  onChange={(e: any) => setBookmarkForm((prev: any) => ({ ...prev, url: e.target.value }))}
                   className="w-full rounded-xl border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-text-primary bg-white placeholder-slate-400"
                 />
               </div>
@@ -493,7 +493,7 @@ export default function ProductivityPage() {
                   type="text" 
                   placeholder="E.g. Work, Learning, Personal"
                   value={bookmarkForm.category}
-                  onChange={e => setBookmarkForm(prev => ({ ...prev, category: e.target.value }))}
+                  onChange={(e: any) => setBookmarkForm((prev: any) => ({ ...prev, category: e.target.value }))}
                   className="w-full rounded-xl border border-border px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-text-primary bg-white placeholder-slate-400"
                 />
               </div>

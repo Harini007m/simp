@@ -1,21 +1,14 @@
 import { batchApi } from '../api/batch.api';
 import { BatchCreate, BatchResponse, BatchStudentCreate } from '../types/api/batch.types';
-import { Batch, MOCK_BATCHES } from '../data/mock-batches';
+import { Batch } from '../types/api/batch.types';
 
 export type ExtendedBatch = BatchResponse & Batch;
 
 export const batchService = {
   async getBatches(): Promise<ExtendedBatch[]> {
-    try {
-      const data = await batchApi.getBatches();
-      if (data && data.length > 0) {
+        const data = await batchApi.getBatches();
         return data.map(b => this.mapToExtended(b));
-      }
-    } catch (e) {
-      console.warn('Backend API unavailable, falling back to mock batches.');
-    }
-    return MOCK_BATCHES as unknown as ExtendedBatch[];
-  },
+    },
 
   async getBatch(id: string): Promise<ExtendedBatch | undefined> {
     try {

@@ -1,12 +1,10 @@
 import { ReportRecord, ReportTemplate } from '../types/report.types';
-import { MOCK_REPORTS, MOCK_REPORT_TEMPLATES } from '../data/mock-reports';
-
 export const ReportApi = {
   getTemplates: async (): Promise<ReportTemplate[]> => {
-    return new Promise((resolve) => setTimeout(() => resolve(MOCK_REPORT_TEMPLATES), 500));
+    throw new Error('Backend implementation pending or failed');
   },
   getReports: async (): Promise<ReportRecord[]> => {
-    return new Promise((resolve) => setTimeout(() => resolve(MOCK_REPORTS), 700));
+    throw new Error('Backend implementation pending or failed');
   },
   generateReport: async (templateId: string): Promise<ReportRecord> => {
     return new Promise((resolve) => setTimeout(() => resolve({

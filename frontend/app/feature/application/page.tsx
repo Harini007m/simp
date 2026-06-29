@@ -8,9 +8,9 @@ import {
   Sparkles, MapPin, GraduationCap, Eye, BookOpen, AlertCircle, Layers
 } from 'lucide-react';
 import { applicationService } from '@/src/services/application.service';
-import { Application, ApplicationStatus } from '@/src/data/mock-applications';
+import { Application, ApplicationStatus } from '../../../src/types/api/application.types';
 import { opportunitiesService } from '@/src/services/opportunities.service';
-import { Opportunity } from '@/src/data/mock-opportunities';
+import { Opportunity } from '../../../src/types/api/opportunity.types';
 import { AddCandidateDrawer } from '@/components/feature/application/AddCandidateDrawer';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { useRouter } from 'next/navigation';
@@ -73,7 +73,7 @@ export default function ApplicationPage() {
   };
 
   // Load Data
-  const loadData = React.useCallback(async (showLoader = true) => {
+  const loadData = React.useCallback(async (showLoader: any = true) => {
     if (showLoader) setLoading(true);
     try {
       const appData = await applicationService.getApplications();
@@ -133,7 +133,7 @@ export default function ApplicationPage() {
       if (updated) {
         setReviewApp(updated);
         // Refresh local cache
-        setApplications(applications.map(a => a.id === reviewApp.id ? updated : a));
+        setApplications(applications.map((a: any) => a.id === reviewApp.id ? updated : a));
         triggerToast('Evaluation Saved', `Successfully updated review score for ${reviewApp.candidateName}.`, 'success');
       }
     } catch (err) {
@@ -147,7 +147,7 @@ export default function ApplicationPage() {
     try {
       const updated = await applicationService.updateApplicationStatus(id, status);
       if (updated) {
-        setApplications(applications.map(a => a.id === id ? updated : a));
+        setApplications(applications.map((a: any) => a.id === id ? updated : a));
         if (reviewApp && reviewApp.id === id) {
           setReviewApp(updated);
         }
@@ -163,7 +163,7 @@ export default function ApplicationPage() {
     try {
       const updated = await applicationService.updateApplicationStatus(app.id, 'Selected');
       if (updated) {
-        setApplications(applications.map(a => a.id === app.id ? updated : a));
+        setApplications(applications.map((a: any) => a.id === app.id ? updated : a));
         if (reviewApp && reviewApp.id === app.id) {
           setReviewApp(updated);
         }
@@ -186,7 +186,7 @@ export default function ApplicationPage() {
       };
       const updated = await applicationService.updateApplicationDetails(id, updates);
       if (updated) {
-        setApplications(applications.map(a => a.id === id ? updated : a));
+        setApplications(applications.map((a: any) => a.id === id ? updated : a));
         if (reviewApp && reviewApp.id === id) {
           setReviewApp(updated);
         }
@@ -203,7 +203,7 @@ export default function ApplicationPage() {
     if (selectedIds.length === 0) return;
     try {
       await applicationService.bulkUpdateStatus(selectedIds, status);
-      setApplications(applications.map(app => 
+      setApplications(applications.map((app: any) => 
         selectedIds.includes(app.id) ? { ...app, status } : app
       ));
       setSelectedIds([]);
@@ -217,7 +217,7 @@ export default function ApplicationPage() {
     if (selectedIds.length === 0 || !bulkReviewerName.trim()) return;
     try {
       await applicationService.bulkAssignReviewer(selectedIds, bulkReviewerName.trim());
-      setApplications(applications.map(app => 
+      setApplications(applications.map((app: any) => 
         selectedIds.includes(app.id) ? { ...app, assignedReviewer: bulkReviewerName.trim() } : app
       ));
       setSelectedIds([]);
@@ -231,14 +231,14 @@ export default function ApplicationPage() {
 
   // Filtered Applications Calculation
   const filteredApplications = useMemo(() => {
-    return applications.filter(app => {
+    return applications.filter((app: any) => {
       const matchesSearch = 
         app.candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.college.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.skills.some(s => s.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        app.skills.some((s: any) => s.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (app.researchArea && app.researchArea.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesType = filterType === 'all' ? true : app.internshipType === filterType;
@@ -263,33 +263,33 @@ export default function ApplicationPage() {
   // Statistics Calculation
   const stats = useMemo(() => {
     const total = applications.length;
-    const pending = applications.filter(a => a.status === 'New' || a.status === 'Under Review' || a.status === 'Pending').length;
-    const shortlisted = applications.filter(a => a.status === 'Shortlisted').length;
-    const interviews = applications.filter(a => a.status === 'Interview Scheduled' || a.status === 'Interview').length;
-    const selected = applications.filter(a => a.status === 'Selected' || a.status === 'Accepted').length;
-    const rejected = applications.filter(a => a.status === 'Rejected').length;
+    const pending = applications.filter((a: any) => a.status === 'New' || a.status === 'Under Review' || a.status === 'Pending').length;
+    const shortlisted = applications.filter((a: any) => a.status === 'Shortlisted').length;
+    const interviews = applications.filter((a: any) => a.status === 'Interview Scheduled' || a.status === 'Interview').length;
+    const selected = applications.filter((a: any) => a.status === 'Selected' || a.status === 'Accepted').length;
+    const rejected = applications.filter((a: any) => a.status === 'Rejected').length;
     
     // Calculate applications by type
     const types: Record<string, number> = {};
-    applications.forEach(a => {
+    applications.forEach((a: any) => {
       types[a.internshipType] = (types[a.internshipType] || 0) + 1;
     });
 
     // Calculate applications by college
     const colleges: Record<string, number> = {};
-    applications.forEach(a => {
+    applications.forEach((a: any) => {
       colleges[a.college] = (colleges[a.college] || 0) + 1;
     });
 
     // Skills aggregation
     const skills: Record<string, number> = {};
-    applications.forEach(a => {
-      a.skills.forEach(s => {
+    applications.forEach((a: any) => {
+      a.skills.forEach((s: any) => {
         skills[s] = (skills[s] || 0) + 1;
       });
     });
     const topSkills = Object.entries(skills)
-      .sort((a, b) => b[1] - a[1])
+      .sort((a: any, b: any) => b[1] - a[1])
       .slice(0, 6);
 
     return {
@@ -307,8 +307,8 @@ export default function ApplicationPage() {
 
   // Unique reviewers & colleges for filter options
   const filterOptions = useMemo(() => {
-    const reviewers = Array.from(new Set(applications.map(a => a.assignedReviewer))).filter(Boolean);
-    const colleges = Array.from(new Set(applications.map(a => a.college))).filter(Boolean);
+    const reviewers = Array.from(new Set(applications.map((a: any) => a.assignedReviewer))).filter(Boolean);
+    const colleges = Array.from(new Set(applications.map((a: any) => a.college))).filter(Boolean);
     return { reviewers, colleges };
   }, [applications]);
 
@@ -371,7 +371,7 @@ export default function ApplicationPage() {
               <button 
                 onClick={() => {
                   const csvContent = "data:text/csv;charset=utf-8,ID,Name,College,Type,Status,CGPA\n" + 
-                    applications.map(a => `"${a.id}","${a.candidateName}","${a.college}","${a.internshipType}","${a.status}",${a.cgpa}`).join("\n");
+                    applications.map((a: any) => `"${a.id}","${a.candidateName}","${a.college}","${a.internshipType}","${a.status}",${a.cgpa}`).join("\n");
                   const encodedUri = encodeURI(csvContent);
                   const link = document.createElement("a");
                   link.setAttribute("href", encodedUri);
@@ -552,7 +552,7 @@ export default function ApplicationPage() {
           <div className="bg-white border border-border rounded-xl p-5 shadow-sm space-y-4">
             <h3 className="text-sm font-bold text-text-primary">Recent Applications Feed</h3>
             <div className="divide-y divide-border">
-              {applications.slice(0, 4).map((app) => (
+              {applications.slice(0, 4).map((app: any) => (
                 <div key={app.id} className="flex items-center justify-between py-4.5 first:pt-0 last:pb-0">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-slate-100 text-text-primary flex items-center justify-center font-bold text-sm shrink-0">
@@ -596,7 +596,7 @@ export default function ApplicationPage() {
                 type="text" 
                 placeholder="Search candidates, skills, colleges, etc..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e: any) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-medium placeholder-slate-400"
               />
             </div>
@@ -642,7 +642,7 @@ export default function ApplicationPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Internship Type</label>
                       <select 
                         value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
+                        onChange={(e: any) => setFilterType(e.target.value)}
                         className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
                       >
                         <option value="all">All Types</option>
@@ -658,7 +658,7 @@ export default function ApplicationPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Status</label>
                       <select 
                         value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
+                        onChange={(e: any) => setFilterStatus(e.target.value)}
                         className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
                       >
                         <option value="all">All Statuses</option>
@@ -678,7 +678,7 @@ export default function ApplicationPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">CGPA Range</label>
                       <select 
                         value={filterCgpa}
-                        onChange={(e) => setFilterCgpa(e.target.value)}
+                        onChange={(e: any) => setFilterCgpa(e.target.value)}
                         className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
                       >
                         <option value="all">All Grades</option>
@@ -692,11 +692,11 @@ export default function ApplicationPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Reviewer</label>
                       <select 
                         value={filterReviewer}
-                        onChange={(e) => setFilterReviewer(e.target.value)}
+                        onChange={(e: any) => setFilterReviewer(e.target.value)}
                         className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
                       >
                         <option value="all">All Reviewers</option>
-                        {filterOptions.reviewers.map(r => (
+                        {filterOptions.reviewers.map((r: any) => (
                           <option key={r} value={r}>{r}</option>
                         ))}
                       </select>
@@ -706,11 +706,11 @@ export default function ApplicationPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">College</label>
                       <select 
                         value={filterCollege}
-                        onChange={(e) => setFilterCollege(e.target.value)}
+                        onChange={(e: any) => setFilterCollege(e.target.value)}
                         className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white truncate"
                       >
                         <option value="all">All Colleges</option>
-                        {filterOptions.colleges.map(c => (
+                        {filterOptions.colleges.map((c: any) => (
                           <option key={c} value={c}>{c}</option>
                         ))}
                       </select>
@@ -720,7 +720,7 @@ export default function ApplicationPage() {
                       <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Payment Verification</label>
                       <select 
                         value={filterPayment}
-                        onChange={(e) => setFilterPayment(e.target.value)}
+                        onChange={(e: any) => setFilterPayment(e.target.value)}
                         className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
                       >
                         <option value="all">All Payments</option>
@@ -752,9 +752,9 @@ export default function ApplicationPage() {
                       <input 
                         type="checkbox"
                         checked={selectedIds.length === filteredApplications.length && filteredApplications.length > 0}
-                        onChange={(e) => {
+                        onChange={(e: any) => {
                           if (e.target.checked) {
-                            setSelectedIds(filteredApplications.map(a => a.id));
+                            setSelectedIds(filteredApplications.map((a: any) => a.id));
                           } else {
                             setSelectedIds([]);
                           }
@@ -776,7 +776,7 @@ export default function ApplicationPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filteredApplications.length > 0 ? (
-                    filteredApplications.map((app) => {
+                    filteredApplications.map((app: any) => {
                       const isSelected = selectedIds.includes(app.id);
                       return (
                         <tr 
@@ -787,11 +787,11 @@ export default function ApplicationPage() {
                             <input 
                               type="checkbox"
                               checked={isSelected}
-                              onChange={(e) => {
+                              onChange={(e: any) => {
                                 if (e.target.checked) {
                                   setSelectedIds([...selectedIds, app.id]);
                                 } else {
-                                  setSelectedIds(selectedIds.filter(id => id !== app.id));
+                                  setSelectedIds(selectedIds.filter((id: any) => id !== app.id));
                                 }
                               }}
                               className="rounded border-border text-blue-600 focus:ring-primary cursor-pointer h-3.5 w-3.5"
@@ -808,7 +808,7 @@ export default function ApplicationPage() {
                               <div>
                                 <span className="font-bold text-text-primary block leading-tight">{app.candidateName}</span>
                                 <span className="text-[10px] text-blue-600 font-semibold block mt-0.5">
-                                  {opportunities.find(o => o.id === app.opportunityId)?.title || app.opportunityId}
+                                  {opportunities.find((o: any) => o.id === app.opportunityId)?.title || app.opportunityId}
                                 </span>
                                 <span className="text-[10px] text-text-secondary block mt-0.5">{app.email}</span>
                               </div>
@@ -936,7 +936,7 @@ export default function ApplicationPage() {
                       type="text" 
                       placeholder="Reviewer Name" 
                       value={bulkReviewerName}
-                      onChange={(e) => setBulkReviewerName(e.target.value)}
+                      onChange={(e: any) => setBulkReviewerName(e.target.value)}
                       className="bg-slate-800 text-white border border-border rounded px-2 py-1 text-[10px] w-28 focus:outline-none"
                     />
                     <button 
@@ -969,8 +969,8 @@ export default function ApplicationPage() {
       {/* VIEW 3: KANBAN WORKFLOW PIPELINE */}
       {activeTab === 'pipeline' && (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 overflow-x-auto pb-6 animate-slide-in">
-          {(['New', 'Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected', 'Rejected'] as ApplicationStatus[]).map((col) => {
-            const colApps = applications.filter(a => a.status === col);
+          {(['New', 'Under Review', 'Shortlisted', 'Interview Scheduled', 'Selected', 'Rejected'] as ApplicationStatus[]).map((col: any) => {
+            const colApps = applications.filter((a: any) => a.status === col);
             return (
               <div key={col} className="bg-slate-100/60 rounded-xl p-3 border border-border/50 flex flex-col min-w-[200px] h-[550px]">
                 {/* Column Title */}
@@ -984,7 +984,7 @@ export default function ApplicationPage() {
                 {/* Column Cards */}
                 <div className="flex-1 overflow-y-auto space-y-3 mt-3 pr-1">
                   {colApps.length > 0 ? (
-                    colApps.map(app => (
+                    colApps.map((app: any) => (
                       <div 
                         key={app.id} 
                         className="bg-white border border-border rounded-xl p-3.5 shadow-sm space-y-3 hover:border-secondary hover:shadow transition-all group"
@@ -1003,7 +1003,7 @@ export default function ApplicationPage() {
                         <div>
                           <h4 className="text-xs font-bold text-text-primary">{app.candidateName}</h4>
                           <p className="text-[10px] text-blue-600 font-semibold mt-0.5 truncate">
-                            {opportunities.find(o => o.id === app.opportunityId)?.title || app.opportunityId}
+                            {opportunities.find((o: any) => o.id === app.opportunityId)?.title || app.opportunityId}
                           </p>
                           <p className="text-[10px] text-text-secondary mt-0.5 truncate">{app.college}</p>
                         </div>
@@ -1078,11 +1078,11 @@ export default function ApplicationPage() {
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3 pt-3">
               {[
                 { stage: 'Total Apps', count: stats.total, color: 'bg-slate-900 text-white', pct: 100 },
-                { stage: 'Under Review', count: applications.filter(a => a.status !== 'New').length, color: 'bg-blue-600 text-white', pct: Math.round((applications.filter(a => a.status !== 'New').length / stats.total) * 100) },
+                { stage: 'Under Review', count: applications.filter((a: any) => a.status !== 'New').length, color: 'bg-blue-600 text-white', pct: Math.round((applications.filter((a: any) => a.status !== 'New').length / stats.total) * 100) },
                 { stage: 'Shortlisted', count: stats.shortlisted, color: 'bg-purple-600 text-white', pct: Math.round((stats.shortlisted / stats.total) * 100) },
                 { stage: 'Interviewed', count: stats.interviews, color: 'bg-indigo-600 text-white', pct: Math.round((stats.interviews / stats.total) * 100) },
                 { stage: 'Offers Extended', count: stats.selected, color: 'bg-emerald-600 text-white', pct: Math.round((stats.selected / stats.total) * 100) }
-              ].map((step, idx) => (
+              ].map((step: any, idx: any) => (
                 <div key={step.stage} className="relative flex flex-col justify-between border border-border rounded-xl p-4 h-32 hover:border-secondary">
                   <div>
                     <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Step {idx + 1}</span>
@@ -1113,10 +1113,10 @@ export default function ApplicationPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {['Alice Vance', 'David Miller', 'Sarah Connor'].map(rev => {
-                      const revApps = applications.filter(a => a.assignedReviewer === rev);
-                      const scores = revApps.map(a => a.reviewScore).filter(Boolean) as number[];
-                      const avg = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b, 0) / scores.length) : '-';
+                    {['Alice Vance', 'David Miller', 'Sarah Connor'].map((rev: any) => {
+                      const revApps = applications.filter((a: any) => a.assignedReviewer === rev);
+                      const scores = revApps.map((a: any) => a.reviewScore).filter(Boolean) as number[];
+                      const avg = scores.length > 0 ? Math.round(scores.reduce((a: any,b: any)=>a+b, 0) / scores.length) : '-';
                       return (
                         <tr key={rev} className="hover:bg-slate-50/50">
                           <td className="px-4 py-3 font-semibold text-text-primary">{rev}</td>
@@ -1134,8 +1134,8 @@ export default function ApplicationPage() {
             <div className="bg-white border border-border rounded-xl p-5 shadow-sm space-y-4">
               <h3 className="text-sm font-bold text-text-primary">Applications by Location</h3>
               <div className="divide-y divide-border pt-2">
-                {Array.from(new Set(applications.map(a => `${a.city}, ${a.state}`))).map(loc => {
-                  const locCount = applications.filter(a => `${a.city}, ${a.state}` === loc).length;
+                {Array.from(new Set(applications.map((a: any) => `${a.city}, ${a.state}`))).map((loc: any) => {
+                  const locCount = applications.filter((a: any) => `${a.city}, ${a.state}` === loc).length;
                   return (
                     <div key={loc} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 text-xs font-semibold text-text-primary">
                       <div className="flex items-center gap-1.5 text-text-secondary">
@@ -1171,7 +1171,7 @@ export default function ApplicationPage() {
                 <div>
                   <h3 className="text-sm font-black text-text-primary leading-tight">{reviewApp.candidateName}</h3>
                   <span className="text-[10px] font-mono text-text-secondary">
-                    {reviewApp.id} • {reviewApp.email} • {opportunities.find(o => o.id === reviewApp.opportunityId)?.title || reviewApp.opportunityId}
+                    {reviewApp.id} • {reviewApp.email} • {opportunities.find((o: any) => o.id === reviewApp.opportunityId)?.title || reviewApp.opportunityId}
                   </span>
                 </div>
               </div>
@@ -1300,7 +1300,7 @@ export default function ApplicationPage() {
                     <div>
                       <span className="text-text-secondary font-semibold block uppercase text-[10px] mb-1.5">Tech Skills</span>
                       <div className="flex flex-wrap gap-1.5">
-                        {reviewApp.skills.map(s => (
+                        {reviewApp.skills.map((s: any) => (
                           <span key={s} className="bg-slate-50 border border-border text-text-primary font-semibold px-2 py-0.5 rounded text-[10px]">
                             {s}
                           </span>
@@ -1551,7 +1551,7 @@ export default function ApplicationPage() {
                       <div>
                         <span className="text-[10px] font-black text-blue-800 uppercase tracking-widest block mb-1">Key Strengths</span>
                         <ul className="list-disc list-inside space-y-1 text-text-secondary pl-1">
-                          {reviewApp.aiStrengths.map((str, idx) => (
+                          {reviewApp.aiStrengths.map((str: any, idx: any) => (
                             <li key={idx}>{str}</li>
                           ))}
                         </ul>
@@ -1562,7 +1562,7 @@ export default function ApplicationPage() {
                       <div>
                         <span className="text-[10px] font-black text-rose-800 uppercase tracking-widest block mb-1">Weaknesses</span>
                         <ul className="list-disc list-inside space-y-1 text-text-secondary pl-1">
-                          {reviewApp.aiWeaknesses.map((wk, idx) => (
+                          {reviewApp.aiWeaknesses.map((wk: any, idx: any) => (
                             <li key={idx} className="text-text-secondary">{wk}</li>
                           ))}
                         </ul>
@@ -1583,7 +1583,7 @@ export default function ApplicationPage() {
                       <div className="pt-2 border-t border-blue-100/60">
                         <span className="text-[10px] font-black text-blue-800 uppercase tracking-widest block mb-1">Suggested Interview Qs</span>
                         <ul className="list-decimal list-inside space-y-1.5 text-text-secondary pl-1 leading-snug">
-                          {reviewApp.aiSuggestedQuestions.map((q, idx) => (
+                          {reviewApp.aiSuggestedQuestions.map((q: any, idx: any) => (
                             <li key={idx} className="pl-0.5">{q}</li>
                           ))}
                         </ul>
@@ -1608,7 +1608,7 @@ export default function ApplicationPage() {
                       <input 
                         type="range" min="1" max="10" 
                         value={techScore} 
-                        onChange={(e) => setTechScore(parseInt(e.target.value))}
+                        onChange={(e: any) => setTechScore(parseInt(e.target.value))}
                         className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
                       />
                     </div>
@@ -1621,7 +1621,7 @@ export default function ApplicationPage() {
                       <input 
                         type="range" min="1" max="10" 
                         value={commScore} 
-                        onChange={(e) => setCommScore(parseInt(e.target.value))}
+                        onChange={(e: any) => setCommScore(parseInt(e.target.value))}
                         className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
                       />
                     </div>
@@ -1634,7 +1634,7 @@ export default function ApplicationPage() {
                       <input 
                         type="range" min="1" max="10" 
                         value={acadScore} 
-                        onChange={(e) => setAcadScore(parseInt(e.target.value))}
+                        onChange={(e: any) => setAcadScore(parseInt(e.target.value))}
                         className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
                       />
                     </div>
@@ -1647,7 +1647,7 @@ export default function ApplicationPage() {
                       <input 
                         type="range" min="1" max="10" 
                         value={cultureScore} 
-                        onChange={(e) => setCultureScore(parseInt(e.target.value))}
+                        onChange={(e: any) => setCultureScore(parseInt(e.target.value))}
                         className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
                       />
                     </div>
@@ -1658,7 +1658,7 @@ export default function ApplicationPage() {
                     <label className="text-[10px] font-black text-text-secondary uppercase tracking-wider block">Recruiter Recommendation</label>
                     <select 
                       value={overallRec}
-                      onChange={(e) => setOverallRec(e.target.value)}
+                      onChange={(e: any) => setOverallRec(e.target.value)}
                       className="w-full text-xs font-semibold border border-border rounded-lg p-2 bg-white"
                     >
                       <option value="Strong Hire">Strong Hire</option>
@@ -1674,7 +1674,7 @@ export default function ApplicationPage() {
                     <label className="text-[10px] font-black text-text-secondary uppercase tracking-wider block">Internal Reviewer Notes</label>
                     <textarea 
                       value={notesText}
-                      onChange={(e) => setNotesText(e.target.value)}
+                      onChange={(e: any) => setNotesText(e.target.value)}
                       rows={3}
                       placeholder="Enter technical interview thoughts, logic check outcomes..."
                       className="w-full text-xs font-medium border border-border rounded-lg p-2.5 bg-white focus:outline-none focus:border-primary placeholder-slate-300"
@@ -1685,7 +1685,7 @@ export default function ApplicationPage() {
                     <label className="text-[10px] font-black text-text-secondary uppercase tracking-wider block">Candidate Feedback (Sendable)</label>
                     <textarea 
                       value={feedbackText}
-                      onChange={(e) => setFeedbackText(e.target.value)}
+                      onChange={(e: any) => setFeedbackText(e.target.value)}
                       rows={3}
                       placeholder="Strengths to maintain, gaps to fill for next cycle..."
                       className="w-full text-xs font-medium border border-border rounded-lg p-2.5 bg-white focus:outline-none focus:border-primary placeholder-slate-300"

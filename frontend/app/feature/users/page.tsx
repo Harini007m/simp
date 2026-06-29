@@ -7,7 +7,7 @@ import { Badge } from '@/components/feature/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/feature/ui/Table';
 import { Search, Filter, Plus, Eye, Edit, Trash, UserX, Users } from 'lucide-react';
 import { CreateUserWizard } from '../../../components/feature/users/CreateUserWizard';
-import { User } from '@/src/data/mock-users';
+import { User } from '../../../src/types/api/user.types';
 import { userService } from '@/src/services/user.service';
 import { employeeService, ExtendedEmployee } from '@/src/services/employee.service';
 import { studentService, ExtendedStudent } from '@/src/services/student.service';
@@ -125,7 +125,7 @@ function UsersPageContent() {
   };
 
   const getLinkedUser = (email: string) => {
-    return data.find(u => u.email.toLowerCase() === email.toLowerCase());
+    return data.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
   };
 
   const handleCreateUserForEmployee = (employee: ExtendedEmployee) => {
@@ -162,7 +162,7 @@ function UsersPageContent() {
   };
 
   const filteredEmployees = useMemo(() => {
-    return employees.filter(emp => {
+    return employees.filter((emp: any) => {
       const search = employeeSearch.toLowerCase();
       const email = (emp.email || emp.official_email || '').toLowerCase();
       const designation = (emp.designation || emp.roleName || '').toLowerCase();
@@ -181,7 +181,7 @@ function UsersPageContent() {
   }, [filteredEmployees, empPage]);
 
   const filteredStudents = useMemo(() => {
-    return students.filter(stu => {
+    return students.filter((stu: any) => {
       const search = studentSearch.toLowerCase();
       const nameVal = stu.name || stu.personalInfo?.name || '';
       const emailVal = stu.email || stu.official_email || stu.personalInfo?.email || '';
@@ -200,7 +200,7 @@ function UsersPageContent() {
   }, [filteredStudents, stuPage]);
 
   const filteredOrganizations = useMemo(() => {
-    return organizations.filter(org => {
+    return organizations.filter((org: any) => {
       const search = organizationSearch.toLowerCase();
       const nameVal = org.name || org.college_name || '';
       const emailVal = org.email || '';
@@ -258,7 +258,7 @@ function UsersPageContent() {
   const columns = [
     columnHelper.accessor('name', {
       header: 'User',
-      cell: info => (
+      cell: (info: any) => (
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-700">
             {info.row.original.avatar}
@@ -269,15 +269,15 @@ function UsersPageContent() {
     }),
     columnHelper.accessor('username', {
       header: 'Username',
-      cell: info => <span className="text-text-secondary">{info.getValue()}</span>,
+      cell: (info: any) => <span className="text-text-secondary">{info.getValue()}</span>,
     }),
     columnHelper.accessor('email', {
       header: 'Email',
-      cell: info => <span className="text-text-secondary">{info.getValue()}</span>,
+      cell: (info: any) => <span className="text-text-secondary">{info.getValue()}</span>,
     }),
     columnHelper.accessor('roleName', {
       header: 'Role',
-      cell: info => (
+      cell: (info: any) => (
         <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-text-secondary">
           {info.getValue()}
         </span>
@@ -285,7 +285,7 @@ function UsersPageContent() {
     }),
     columnHelper.accessor('status', {
       header: 'Status',
-      cell: info => (
+      cell: (info: any) => (
         <Badge variant={info.getValue() === 'Active' ? 'success' : 'secondary'}>
           {info.getValue()}
         </Badge>
@@ -293,12 +293,12 @@ function UsersPageContent() {
     }),
     columnHelper.accessor('date', {
       header: 'Created Date',
-      cell: info => <span className="text-text-secondary">{info.getValue()}</span>,
+      cell: (info: any) => <span className="text-text-secondary">{info.getValue()}</span>,
     }),
     columnHelper.display({
       id: 'actions',
       header: () => <div className="text-right">Actions</div>,
-      cell: info => {
+      cell: (info: any) => {
         const user = info.row.original;
         const isUserActive = user.status === 'Active';
         return (
@@ -375,7 +375,7 @@ function UsersPageContent() {
           { id: 'employees', label: 'Registered Employees', count: employees.length },
           { id: 'students', label: 'Registered Students', count: students.length },
           { id: 'organizations', label: 'Registered Organizations', count: organizations.length }
-        ].map(t => (
+        ].map((t: any) => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id as any)}
@@ -405,7 +405,7 @@ function UsersPageContent() {
               <input 
                 type="text" 
                 value={globalFilter ?? ''}
-                onChange={e => setGlobalFilter(e.target.value)}
+                onChange={(e: any) => setGlobalFilter(e.target.value)}
                 placeholder="Search users..." 
                 className="w-full rounded-md border border-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
@@ -420,9 +420,9 @@ function UsersPageContent() {
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                {table.getHeaderGroups().map(headerGroup => (
+                {table.getHeaderGroups().map((headerGroup: any) => (
                   <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map(header => (
+                    {headerGroup.headers.map((header: any) => (
                       <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
@@ -449,9 +449,9 @@ function UsersPageContent() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  table.getRowModel().rows.map(row => (
+                  table.getRowModel().rows.map((row: any) => (
                     <TableRow key={row.id}>
-                      {row.getVisibleCells().map(cell => (
+                      {row.getVisibleCells().map((cell: any) => (
                         <TableCell key={cell.id}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
@@ -499,7 +499,7 @@ function UsersPageContent() {
               <input 
                 type="text" 
                 value={employeeSearch}
-                onChange={e => {
+                onChange={(e: any) => {
                   setEmployeeSearch(e.target.value);
                   setEmpPage(0);
                 }}
@@ -529,14 +529,14 @@ function UsersPageContent() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedEmployees.map(emp => {
+                  paginatedEmployees.map((emp: any) => {
                     const emailVal = emp.email || emp.official_email || '';
                     const linkedUser = getLinkedUser(emailVal);
                     const isLinked = !!linkedUser;
                     const initials = emp.name
                       ? emp.name
                           .split(' ')
-                          .map(n => n[0])
+                          .map((n: any) => n[0])
                           .join('')
                           .toUpperCase()
                           .slice(0, 2)
@@ -608,7 +608,7 @@ function UsersPageContent() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setEmpPage(prev => Math.max(0, prev - 1))}
+                  onClick={() => setEmpPage((prev: any) => Math.max(0, prev - 1))}
                   disabled={empPage === 0}
                 >
                   Previous
@@ -616,7 +616,7 @@ function UsersPageContent() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setEmpPage(prev => prev + 1)}
+                  onClick={() => setEmpPage((prev: any) => prev + 1)}
                   disabled={(empPage + 1) * empPageSize >= filteredEmployees.length}
                 >
                   Next
@@ -635,7 +635,7 @@ function UsersPageContent() {
               <input 
                 type="text" 
                 value={studentSearch}
-                onChange={e => {
+                onChange={(e: any) => {
                   setStudentSearch(e.target.value);
                   setStuPage(0);
                 }}
@@ -665,7 +665,7 @@ function UsersPageContent() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedStudents.map(stu => {
+                  paginatedStudents.map((stu: any) => {
                     const nameVal = stu.name || stu.personalInfo?.name || '';
                     const emailVal = stu.email || stu.official_email || stu.personalInfo?.email || '';
                     const phoneVal = stu.phone || stu.personalInfo?.phone || '';
@@ -750,7 +750,7 @@ function UsersPageContent() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setStuPage(prev => Math.max(0, prev - 1))}
+                  onClick={() => setStuPage((prev: any) => Math.max(0, prev - 1))}
                   disabled={stuPage === 0}
                 >
                   Previous
@@ -758,7 +758,7 @@ function UsersPageContent() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setStuPage(prev => prev + 1)}
+                  onClick={() => setStuPage((prev: any) => prev + 1)}
                   disabled={(stuPage + 1) * empPageSize >= filteredStudents.length}
                 >
                   Next
@@ -777,7 +777,7 @@ function UsersPageContent() {
               <input 
                 type="text" 
                 value={organizationSearch}
-                onChange={e => {
+                onChange={(e: any) => {
                   setOrganizationSearch(e.target.value);
                   setOrgPage(0);
                 }}
@@ -807,7 +807,7 @@ function UsersPageContent() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedOrganizations.map(org => {
+                  paginatedOrganizations.map((org: any) => {
                     const nameVal = org.name || org.college_name || '';
                     const codeVal = org.code || org.college_code || '';
                     const emailVal = org.email || '';
@@ -817,7 +817,7 @@ function UsersPageContent() {
                     const initials = nameVal
                       ? nameVal
                           .split(' ')
-                          .map(n => n[0])
+                          .map((n: any) => n[0])
                           .join('')
                           .toUpperCase()
                           .slice(0, 2)
@@ -889,7 +889,7 @@ function UsersPageContent() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setOrgPage(prev => Math.max(0, prev - 1))}
+                  onClick={() => setOrgPage((prev: any) => Math.max(0, prev - 1))}
                   disabled={orgPage === 0}
                 >
                   Previous
@@ -897,7 +897,7 @@ function UsersPageContent() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setOrgPage(prev => prev + 1)}
+                  onClick={() => setOrgPage((prev: any) => prev + 1)}
                   disabled={(orgPage + 1) * empPageSize >= filteredOrganizations.length}
                 >
                   Next

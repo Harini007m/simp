@@ -6,7 +6,6 @@ import { Badge } from '@/components/feature/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/feature/ui/Table';
 import { Search, Plus, Settings, Eye, Edit, ToggleLeft, ToggleRight, Info } from 'lucide-react';
 import { moduleService } from '@/src/services/module.service';
-import { Module } from '@/src/data/mock-modules';
 
 export default function ModuleRegistryPage() {
   const [modules, setModules] = useState<Module[]>([]);
@@ -41,7 +40,7 @@ export default function ModuleRegistryPage() {
     const newStatus = !module.active;
     try {
       // Optimistic update
-      setModules(prev => prev.map(m => m.id === module.id ? { ...m, active: newStatus } : m));
+      setModules((prev: any) => prev.map((m: any) => m.id === module.id ? { ...m, active: newStatus } : m));
       await moduleService.updateModule(module.id, { active: newStatus });
     } catch (err) {
       console.error('Failed to toggle active state', err);
@@ -58,7 +57,7 @@ export default function ModuleRegistryPage() {
     }
 
     try {
-      const exists = modules.some(m => m.id.toLowerCase() === modId.trim().toLowerCase());
+      const exists = modules.some((m: any) => m.id.toLowerCase() === modId.trim().toLowerCase());
       if (exists) {
         alert('A module with this ID already exists.');
         return;
@@ -86,7 +85,7 @@ export default function ModuleRegistryPage() {
   };
 
   const filteredModules = useMemo(() => {
-    return modules.filter(m => {
+    return modules.filter((m: any) => {
       const search = searchTerm.toLowerCase();
       const nameVal = m.name.toLowerCase();
       const codeVal = m.code.toLowerCase();
@@ -119,7 +118,7 @@ export default function ModuleRegistryPage() {
           <input 
             type="text" 
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e: any) => setSearchTerm(e.target.value)}
             placeholder="Search modules..." 
             className="w-full rounded-md border border-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
@@ -153,7 +152,7 @@ export default function ModuleRegistryPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredModules.map(m => (
+                filteredModules.map((m: any) => (
                   <TableRow key={m.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -216,7 +215,7 @@ export default function ModuleRegistryPage() {
                     <input 
                       type="text" 
                       value={modId}
-                      onChange={e => setModId(e.target.value)}
+                      onChange={(e: any) => setModId(e.target.value)}
                       className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
                       placeholder="e.g. settings"
                     />
@@ -226,7 +225,7 @@ export default function ModuleRegistryPage() {
                     <input 
                       type="text" 
                       value={modCode}
-                      onChange={e => setModCode(e.target.value)}
+                      onChange={(e: any) => setModCode(e.target.value)}
                       className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
                       placeholder="e.g. SETTINGS"
                     />
@@ -238,7 +237,7 @@ export default function ModuleRegistryPage() {
                   <input 
                     type="text" 
                     value={modName}
-                    onChange={e => setModName(e.target.value)}
+                    onChange={(e: any) => setModName(e.target.value)}
                     className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
                     placeholder="e.g. System Settings"
                   />
@@ -249,7 +248,7 @@ export default function ModuleRegistryPage() {
                   <input 
                     type="text" 
                     value={modRoute}
-                    onChange={e => setModRoute(e.target.value)}
+                    onChange={(e: any) => setModRoute(e.target.value)}
                     className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
                     placeholder="e.g. /feature/settings"
                   />
@@ -259,7 +258,7 @@ export default function ModuleRegistryPage() {
                   <label className="text-xs font-semibold text-label">Description</label>
                   <textarea 
                     value={modDesc}
-                    onChange={e => setModDesc(e.target.value)}
+                    onChange={(e: any) => setModDesc(e.target.value)}
                     className="w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
                     rows={3}
                     placeholder="Brief description of the module's target scope..."

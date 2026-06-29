@@ -27,3 +27,12 @@ export interface AttendanceStatus {
   isCheckedIn: boolean;
   clockInTime: string | null;
 }
+
+export interface AttendanceLog {
+  id: string;
+  date: string;
+  clockIn: string;
+  clockOut: string;
+  duration: string;
+  status: 'Present' | 'Absent' | 'Late';
+}

@@ -10,7 +10,7 @@ import {
   MoreVertical, RefreshCw
 } from 'lucide-react';
 import { organizationService } from '@/src/services/organization.service';
-import { Organization, OrganizationDepartment, OrganizationCoordinator, OrganizationStudent, OrganizationProgram, OrganizationDocument, OrganizationTimelineEvent } from '@/src/data/mock-organizations';
+import { Organization, OrganizationDepartment, OrganizationCoordinator, OrganizationStudent, OrganizationProgram, OrganizationDocument, OrganizationTimelineEvent } from '../../../src/types/api/organization.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 
@@ -118,7 +118,7 @@ export default function OrganizationManagementPage() {
   // Sync activeProfile state from main array
   useEffect(() => {
     if (activeProfile) {
-      const refreshed = organizations.find(o => o.id === activeProfile.id);
+      const refreshed = organizations.find((o: any) => o.id === activeProfile.id);
       if (refreshed) {
         setActiveProfile(refreshed);
       }
@@ -139,13 +139,13 @@ export default function OrganizationManagementPage() {
 
   // Filtered organizations calculation
   const filteredOrganizations = useMemo(() => {
-    return organizations.filter(org => {
+    return organizations.filter((org: any) => {
       const matchesSearch = 
         org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         org.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         org.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.coordinators.some(c => c.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        org.departments.some(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        org.coordinators.some((c: any) => c.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        org.departments.some((d: any) => d.name.toLowerCase().includes(searchTerm.toLowerCase()));
         
       const matchesLoc = filterLoc === 'all' ? true : org.location.includes(filterLoc);
       const matchesType = filterType === 'all' ? true : org.type === filterType;
@@ -159,15 +159,15 @@ export default function OrganizationManagementPage() {
   // Strategic KPI indicators
   const kpiStats = useMemo(() => {
     const total = organizations.length;
-    const active = organizations.filter(o => o.partnershipStatus === 'Active').length;
-    const inactive = organizations.filter(o => o.partnershipStatus === 'Inactive' || o.partnershipStatus === 'Partnership Expired' || o.partnershipStatus === 'Blacklisted').length;
+    const active = organizations.filter((o: any) => o.partnershipStatus === 'Active').length;
+    const inactive = organizations.filter((o: any) => o.partnershipStatus === 'Inactive' || o.partnershipStatus === 'Partnership Expired' || o.partnershipStatus === 'Blacklisted').length;
     
     let departmentsCount = 0;
     let coordinatorsCount = 0;
     let studentsCount = 0;
     let programsCount = 0;
     
-    organizations.forEach(o => {
+    organizations.forEach((o: any) => {
       departmentsCount += o.departments.length;
       coordinatorsCount += o.coordinators.length;
       studentsCount += o.students.length; // headcount/students
@@ -180,8 +180,8 @@ export default function OrganizationManagementPage() {
   // Combined Activities Feed
   const recentActivities = useMemo(() => {
     const events: { orgId: string; orgName: string; event: OrganizationTimelineEvent }[] = [];
-    organizations.forEach(org => {
-      org.timeline.forEach(t => {
+    organizations.forEach((org: any) => {
+      org.timeline.forEach((t: any) => {
         events.push({
           orgId: org.id,
           orgName: org.name,
@@ -190,26 +190,26 @@ export default function OrganizationManagementPage() {
       });
     });
     return events
-      .sort((a, b) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime())
+      .sort((a: any, b: any) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime())
       .slice(0, 10);
   }, [organizations]);
 
   // Leaders rankings for the dashboard
   const leaderboardColleges = useMemo(() => {
-    return [...organizations].sort((a, b) => {
+    return [...organizations].sort((a: any, b: any) => {
       if (leaderboardMetric === 'students') {
         return b.students.length - a.students.length;
       } else if (leaderboardMetric === 'internships') {
         let aCount = 0, bCount = 0;
-        a.departments.forEach(d => aCount += d.internshipsCount);
-        b.departments.forEach(d => bCount += d.internshipsCount);
+        a.departments.forEach((d: any) => aCount += d.internshipsCount);
+        b.departments.forEach((d: any) => bCount += d.internshipsCount);
         return bCount - aCount;
       } else if (leaderboardMetric === 'placement') {
         return b.placementAnalytics.placementPercentage - a.placementAnalytics.placementPercentage;
       } else {
         // Average programs completion rate
-        const aAvg = a.programs.reduce((acc, curr) => acc + curr.analytics.completionRate, 0) / (a.programs.length || 1);
-        const bAvg = b.programs.reduce((acc, curr) => acc + curr.analytics.completionRate, 0) / (b.programs.length || 1);
+        const aAvg = a.programs.reduce((acc: any, curr: any) => acc + curr.analytics.completionRate, 0) / (a.programs.length || 1);
+        const bAvg = b.programs.reduce((acc: any, curr: any) => acc + curr.analytics.completionRate, 0) / (b.programs.length || 1);
         return bAvg - aAvg;
       }
     }).slice(0, 5);
@@ -220,9 +220,9 @@ export default function OrganizationManagementPage() {
     const dist: Record<string, number> = {
       'CSE': 0, 'IT': 0, 'AI & DS': 0, 'ECE': 0, 'EEE': 0, 'Mechanical': 0, 'Civil': 0, 'MBA': 0
     };
-    organizations.forEach(org => {
-      org.departments.forEach(dept => {
-        const key = Object.keys(dist).find(k => dept.name.includes(k));
+    organizations.forEach((org: any) => {
+      org.departments.forEach((dept: any) => {
+        const key = Object.keys(dist).find((k: any) => dept.name.includes(k));
         if (key) {
           dist[key] += dept.studentsCount;
         } else {
@@ -236,7 +236,7 @@ export default function OrganizationManagementPage() {
   // Type stats for dashboard distribution
   const typeStats = useMemo(() => {
     const counts: Record<string, number> = {};
-    organizations.forEach(o => {
+    organizations.forEach((o: any) => {
       counts[o.type] = (counts[o.type] || 0) + 1;
     });
     return counts;
@@ -317,7 +317,7 @@ export default function OrganizationManagementPage() {
             description: `Partnership status transitioned manually to: ${partnershipStatusInput}`,
             type: 'renewal'
           });
-          setOrganizations(organizations.map(o => o.id === targetId ? { ...updated } : o));
+          setOrganizations(organizations.map((o: any) => o.id === targetId ? { ...updated } : o));
           showToast(`Updated partnership status of ${updated.name} to ${partnershipStatusInput}`);
         }
       } else if (type === 'coordinator') {
@@ -343,7 +343,7 @@ export default function OrganizationManagementPage() {
               description: `Assigned new coordinator: ${coordinatorNameInput}`,
               type: 'coordinator'
             });
-            setOrganizations(organizations.map(o => o.id === targetId ? { ...updatedOrg } : o));
+            setOrganizations(organizations.map((o: any) => o.id === targetId ? { ...updatedOrg } : o));
             showToast(`Assigned ${coordinatorNameInput} as institutional coordinator.`);
           }
         }
@@ -368,7 +368,7 @@ export default function OrganizationManagementPage() {
               description: `Created new department organization node: ${deptForm.name}`,
               type: 'dept'
             });
-            setOrganizations(organizations.map(o => o.id === targetId ? { ...updatedOrg } : o));
+            setOrganizations(organizations.map((o: any) => o.id === targetId ? { ...updatedOrg } : o));
             showToast(`Created department ${deptForm.name} for ${updatedOrg.name}`);
           }
         }
@@ -392,7 +392,7 @@ export default function OrganizationManagementPage() {
           nationalRanking: Number(collegeForm.nationalRanking)
         });
         if (updated) {
-          setOrganizations(organizations.map(o => o.id === targetId ? { ...updated } : o));
+          setOrganizations(organizations.map((o: any) => o.id === targetId ? { ...updated } : o));
           showToast(`Updated institution profiles of ${updated.name}`);
         }
       } else if (type === 'onboard') {
@@ -433,12 +433,12 @@ export default function OrganizationManagementPage() {
               description: `Uploaded security verification document: ${docTypeInput}`,
               type: 'mou'
             });
-            setOrganizations(organizations.map(o => o.id === targetId ? { ...updatedOrg } : o));
+            setOrganizations(organizations.map((o: any) => o.id === targetId ? { ...updatedOrg } : o));
             showToast(`Uploaded ${docTypeInput} document file.`);
           }
         }
       } else if (type === 'notify') {
-        showToast(`System notification dispatched to coordinators of ${organizations.find(o => o.id === targetId)?.name}: "${notifyMsg}"`, 'info');
+        showToast(`System notification dispatched to coordinators of ${organizations.find((o: any) => o.id === targetId)?.name}: "${notifyMsg}"`, 'info');
       }
     } catch (err) {
       console.error(err);
@@ -454,7 +454,7 @@ export default function OrganizationManagementPage() {
     try {
       if (type === 'partnership') {
         await organizationService.bulkUpdatePartnership(selectedIds, partnershipStatusInput);
-        setOrganizations(organizations.map(org => 
+        setOrganizations(organizations.map((org: any) => 
           selectedIds.includes(org.id) 
             ? { ...org, partnershipStatus: partnershipStatusInput, status: (partnershipStatusInput === 'Active' || partnershipStatusInput === 'Pending Verification') ? 'Active' : 'Inactive', timeline: [
                 { date: new Date().toISOString().split('T')[0], title: 'Bulk Partnership Update', description: `Partnership status bulk-updated to ${partnershipStatusInput}`, type: 'renewal' },
@@ -465,7 +465,7 @@ export default function OrganizationManagementPage() {
         showToast(`Bulk updated partnership status to ${partnershipStatusInput} for ${selectedIds.length} institutions`);
       } else if (type === 'coordinator') {
         await organizationService.bulkAssignCoordinator(selectedIds, coordinatorNameInput);
-        setOrganizations(organizations.map(org => {
+        setOrganizations(organizations.map((org: any) => {
           if (selectedIds.includes(org.id)) {
             const newCoord = {
               id: `coord-${Date.now()}`,
@@ -503,24 +503,24 @@ export default function OrganizationManagementPage() {
 
   // Toggle checklist selectors
   const toggleSelect = (id: string) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    setSelectedIds((prev: any) => 
+      prev.includes(id) ? prev.filter((x: any) => x !== id) : [...prev, id]
     );
   };
 
   const toggleSelectAll = () => {
-    const filteredIds = filteredOrganizations.map(o => o.id);
-    const allSelected = filteredIds.every(id => selectedIds.includes(id));
+    const filteredIds = filteredOrganizations.map((o: any) => o.id);
+    const allSelected = filteredIds.every((id: any) => selectedIds.includes(id));
     if (allSelected) {
-      setSelectedIds(prev => prev.filter(id => !filteredIds.includes(id)));
+      setSelectedIds((prev: any) => prev.filter((id: any) => !filteredIds.includes(id)));
     } else {
-      setSelectedIds(prev => Array.from(new Set([...prev, ...filteredIds])));
+      setSelectedIds((prev: any) => Array.from(new Set([...prev, ...filteredIds])));
     }
   };
 
   // Document verification actions
   const handleVerifyDocument = async (orgId: string, docIndex: number, newStatus: 'Verified' | 'Rejected') => {
-    const org = organizations.find(o => o.id === orgId);
+    const org = organizations.find((o: any) => o.id === orgId);
     if (!org) return;
 
     const docs = [...org.documents];
@@ -539,7 +539,7 @@ export default function OrganizationManagementPage() {
           description: `Accreditation document ${docs[docIndex].type} status set to ${newStatus}.`,
           type: 'mou'
         });
-        setOrganizations(organizations.map(o => o.id === orgId ? { ...updated } : o));
+        setOrganizations(organizations.map((o: any) => o.id === orgId ? { ...updated } : o));
         showToast(`MoU Document verified as ${newStatus}`);
       }
     } catch (err) {
@@ -550,7 +550,7 @@ export default function OrganizationManagementPage() {
   // CSV Data Export of College Directory
   const handleExportData = () => {
     const headers = ['ID', 'College Name', 'Code', 'Type', 'University', 'Location', 'Students Count', 'Status'];
-    const rows = organizations.map(org => [
+    const rows = organizations.map((org: any) => [
       org.id,
       org.name,
       org.code,
@@ -561,7 +561,7 @@ export default function OrganizationManagementPage() {
       org.partnershipStatus
     ]);
     const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -660,7 +660,7 @@ export default function OrganizationManagementPage() {
               { label: 'Internship Programs', val: kpiStats.programsCount, icon: Briefcase, color: 'bg-amber-50 text-amber-600 border-amber-100', filter: { name: 'status', val: 'all' } },
               { label: 'Inactive / Expired', val: kpiStats.inactive, icon: XCircle, color: 'bg-rose-50 text-rose-600 border-rose-100', filter: { name: 'status', val: 'Partnership Expired' } },
               { label: 'New This Month', val: 1, icon: Calendar, color: 'bg-slate-100 text-text-primary border-border', filter: { name: 'status', val: 'all' } }
-            ].map((kpi, idx) => (
+            ].map((kpi: any, idx: any) => (
               <div 
                 key={idx}
                 onClick={() => {
@@ -700,7 +700,7 @@ export default function OrganizationManagementPage() {
                   { type: 'Management Colleges', count: typeStats['Management'] || 0, color: 'bg-purple-600' },
                   { type: 'Arts Colleges', count: typeStats['Arts'] || 0, color: 'bg-amber-500' },
                   { type: 'Polytechnic Colleges', count: typeStats['Polytechnic'] || 0, color: 'bg-cyan-600' }
-                ].map((item, index) => {
+                ].map((item: any, index: any) => {
                   const percent = Math.round((item.count / organizations.length) * 100) || 0;
                   return (
                     <div key={index} className="space-y-1">
@@ -720,7 +720,7 @@ export default function OrganizationManagementPage() {
               <div className="border-t border-border pt-4 space-y-2">
                 <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-2">Student Enrolment by Course Node</div>
                 <div className="grid grid-cols-2 gap-2 text-xs font-bold text-text-primary">
-                  {Object.entries(departmentDistribution).map(([dept, count], idx) => (
+                  {Object.entries(departmentDistribution).map(([dept, count], idx: any) => (
                     <div key={idx} className="bg-slate-50 border border-border rounded-lg p-2 flex justify-between">
                       <span className="text-text-secondary">{dept}</span>
                       <span className="text-text-primary">{count}</span>
@@ -741,7 +741,7 @@ export default function OrganizationManagementPage() {
                 {/* Ranking toggle */}
                 <select 
                   value={leaderboardMetric}
-                  onChange={(e) => setLeaderboardMetric(e.target.value as any)}
+                  onChange={(e: any) => setLeaderboardMetric(e.target.value as any)}
                   className="text-[10px] font-bold border border-border rounded p-1 bg-white focus:outline-none"
                 >
                   <option value="students">Student Count</option>
@@ -752,18 +752,18 @@ export default function OrganizationManagementPage() {
               </div>
 
               <div className="divide-y divide-border">
-                {leaderboardColleges.map((org, index) => {
+                {leaderboardColleges.map((org: any, index: any) => {
                   let scoreLabel = '';
                   if (leaderboardMetric === 'students') {
                     scoreLabel = `${org.students.length} Students`;
                   } else if (leaderboardMetric === 'internships') {
                     let totalInt = 0;
-                    org.departments.forEach(d => totalInt += d.internshipsCount);
+                    org.departments.forEach((d: any) => totalInt += d.internshipsCount);
                     scoreLabel = `${totalInt} Internships`;
                   } else if (leaderboardMetric === 'placement') {
                     scoreLabel = `${org.placementAnalytics.placementPercentage}% Placement`;
                   } else {
-                    const avgComp = Math.round(org.programs.reduce((acc, curr) => acc + curr.analytics.completionRate, 0) / (org.programs.length || 1));
+                    const avgComp = Math.round(org.programs.reduce((acc: any, curr: any) => acc + curr.analytics.completionRate, 0) / (org.programs.length || 1));
                     scoreLabel = `${avgComp}% Completion`;
                   }
 
@@ -798,7 +798,7 @@ export default function OrganizationManagementPage() {
               </h3>
 
               <div className="max-h-[280px] overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                {organizations.flatMap(o => o.coordinators.map(c => ({ collegeName: o.name, ...c }))).slice(0, 6).map((coord, idx) => (
+                {organizations.flatMap((o: any) => o.coordinators.map((c: any) => ({ collegeName: o.name, ...c }))).slice(0, 6).map((coord: any, idx: any) => (
                   <div key={idx} className="bg-slate-50 border border-border rounded-lg p-3 space-y-2">
                     <div className="flex justify-between items-start">
                       <div>
@@ -839,17 +839,17 @@ export default function OrganizationManagementPage() {
             </h3>
 
             <div className="divide-y divide-border max-h-[350px] overflow-y-auto pr-1">
-              {recentActivities.map((act, index) => (
+              {recentActivities.map((act: any, index: any) => (
                 <div 
                   key={index}
                   onClick={() => {
-                    const match = organizations.find(o => o.id === act.orgId);
+                    const match = organizations.find((o: any) => o.id === act.orgId);
                     if (match) handleOpenProfile(match);
                   }}
                   className="py-3 flex items-start gap-4 hover:bg-slate-50/50 px-2 rounded-lg cursor-pointer transition-colors group"
                 >
                   <div className="h-8 w-8 rounded bg-slate-900 text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
-                    {act.orgName.split(' ').map(n => n[0]).join('').slice(0, 3)}
+                    {act.orgName.split(' ').map((n: any) => n[0]).join('').slice(0, 3)}
                   </div>
                   
                   <div className="flex-1 space-y-0.5 text-xs">
@@ -883,7 +883,7 @@ export default function OrganizationManagementPage() {
                   type="text" 
                   placeholder="Search by name, code, dept, coordinator..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: any) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -928,11 +928,11 @@ export default function OrganizationManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Office Location</label>
                   <select 
                     value={filterLoc} 
-                    onChange={(e) => setFilterLoc(e.target.value)}
+                    onChange={(e: any) => setFilterLoc(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Locations</option>
-                    {Array.from(new Set(organizations.map(o => o.location))).map(loc => (
+                    {Array.from(new Set(organizations.map((o: any) => o.location))).map((loc: any) => (
                       <option key={loc} value={loc}>{loc}</option>
                     ))}
                   </select>
@@ -942,7 +942,7 @@ export default function OrganizationManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">College Type</label>
                   <select 
                     value={filterType} 
-                    onChange={(e) => setFilterType(e.target.value)}
+                    onChange={(e: any) => setFilterType(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Types</option>
@@ -956,7 +956,7 @@ export default function OrganizationManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">NAAC Grade</label>
                   <select 
                     value={filterAccreditation} 
-                    onChange={(e) => setFilterAccreditation(e.target.value)}
+                    onChange={(e: any) => setFilterAccreditation(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Grades</option>
@@ -969,7 +969,7 @@ export default function OrganizationManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Partnership Status</label>
                   <select 
                     value={filterStatus} 
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    onChange={(e: any) => setFilterStatus(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Statuses</option>
@@ -992,7 +992,7 @@ export default function OrganizationManagementPage() {
                     <th className="px-4 py-3 w-8">
                       <input 
                         type="checkbox" 
-                        checked={filteredOrganizations.length > 0 && filteredOrganizations.every(o => selectedIds.includes(o.id))}
+                        checked={filteredOrganizations.length > 0 && filteredOrganizations.every((o: any) => selectedIds.includes(o.id))}
                         onChange={toggleSelectAll}
                         className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
                       />
@@ -1012,7 +1012,7 @@ export default function OrganizationManagementPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filteredOrganizations.length > 0 ? (
-                    filteredOrganizations.map((org) => {
+                    filteredOrganizations.map((org: any) => {
                       const isSelected = selectedIds.includes(org.id);
                       return (
                         <tr 
@@ -1022,7 +1022,7 @@ export default function OrganizationManagementPage() {
                           }`}
                           onClick={() => handleOpenProfile(org)}
                         >
-                          <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-4 py-3" onClick={(e: any) => e.stopPropagation()}>
                             <input 
                               type="checkbox" 
                               checked={isSelected}
@@ -1059,7 +1059,7 @@ export default function OrganizationManagementPage() {
                               {org.partnershipStatus}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
+                          <td className="px-4 py-3 text-right" onClick={(e: any) => e.stopPropagation()}>
                             <div className="flex justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                               <button 
                                 onClick={() => handleOpenProfile(org)}
@@ -1263,7 +1263,7 @@ export default function OrganizationManagementPage() {
                 { id: 'metadata', label: 'Metadata & MoU Center' },
                 { id: 'timeline', label: 'Timeline log' },
                 { id: 'certificates', label: 'Certificate Verification' }
-              ].map((tab) => {
+              ].map((tab: any) => {
                 const isActive = profileTab === tab.id;
                 return (
                   <button
@@ -1305,7 +1305,7 @@ export default function OrganizationManagementPage() {
                           { label: 'Registrar Phone', val: activeProfile.phone },
                           { label: 'Campus Address', val: activeProfile.address },
                           { label: 'Accrediting Board', val: activeProfile.affiliation }
-                        ].map((row, idx) => (
+                        ].map((row: any, idx: any) => (
                           <div key={idx} className="py-2.5 flex justify-between">
                             <span className="text-text-secondary">{row.label}</span>
                             {row.isLink ? (
@@ -1333,10 +1333,10 @@ export default function OrganizationManagementPage() {
                           { label: 'Total Enrolled Students', val: activeProfile.students.length },
                           { label: 'Active Programs Count', val: activeProfile.programs.length },
                           { label: 'Placement Percentage', val: `${activeProfile.placementAnalytics.placementPercentage}%` },
-                          { label: 'Course Completion Rate', val: `${Math.round(activeProfile.programs.reduce((acc, curr) => acc + curr.analytics.completionRate, 0) / (activeProfile.programs.length || 1))}%` },
+                          { label: 'Course Completion Rate', val: `${Math.round(activeProfile.programs.reduce((acc: any, curr: any) => acc + curr.analytics.completionRate, 0) / (activeProfile.programs.length || 1))}%` },
                           { label: 'Assigned Coordinators', val: activeProfile.coordinators.length },
                           { label: 'Departments Count', val: activeProfile.departments.length }
-                        ].map((row, idx) => (
+                        ].map((row: any, idx: any) => (
                           <div key={idx} className="py-2.5 flex justify-between">
                             <span className="text-text-secondary">{row.label}</span>
                             <span className="text-text-primary font-extrabold">{row.val}</span>
@@ -1386,7 +1386,7 @@ export default function OrganizationManagementPage() {
                       </thead>
                       <tbody className="divide-y divide-border">
                         {activeProfile.departments.length > 0 ? (
-                          activeProfile.departments.map((dept, idx) => (
+                          activeProfile.departments.map((dept: any, idx: any) => (
                             <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-4 py-3 font-bold text-text-primary">{dept.name}</td>
                               <td className="px-4 py-3 text-text-secondary font-semibold">{dept.hod}</td>
@@ -1433,7 +1433,7 @@ export default function OrganizationManagementPage() {
 
                   {/* Coordinators Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {activeProfile.coordinators.map((coord) => (
+                    {activeProfile.coordinators.map((coord: any) => (
                       <div key={coord.id} className="bg-white border border-border rounded-xl p-5 shadow-sm space-y-4">
                         <div className="flex justify-between items-start">
                           <div>
@@ -1483,11 +1483,11 @@ export default function OrganizationManagementPage() {
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center">
                     {[
                       { label: 'Total Students', val: activeProfile.students.length },
-                      { label: 'Active Students', val: activeProfile.students.filter(s => s.status === 'Active').length },
-                      { label: 'Completions', val: activeProfile.students.filter(s => s.status === 'Completed').length },
-                      { label: 'Placement Ready', val: activeProfile.students.filter(s => s.status === 'Placement Ready').length },
-                      { label: 'Placed Students', val: activeProfile.students.filter(s => s.status === 'Placed').length }
-                    ].map((card, idx) => (
+                      { label: 'Active Students', val: activeProfile.students.filter((s: any) => s.status === 'Active').length },
+                      { label: 'Completions', val: activeProfile.students.filter((s: any) => s.status === 'Completed').length },
+                      { label: 'Placement Ready', val: activeProfile.students.filter((s: any) => s.status === 'Placement Ready').length },
+                      { label: 'Placed Students', val: activeProfile.students.filter((s: any) => s.status === 'Placed').length }
+                    ].map((card: any, idx: any) => (
                       <div key={idx} className="bg-white border border-border rounded-xl p-3 shadow-sm">
                         <div className="text-lg font-black text-text-primary">{card.val}</div>
                         <div className="text-[8px] font-bold text-text-secondary uppercase tracking-widest mt-1">{card.label}</div>
@@ -1511,7 +1511,7 @@ export default function OrganizationManagementPage() {
                       </thead>
                       <tbody className="divide-y divide-border">
                         {activeProfile.students.length > 0 ? (
-                          activeProfile.students.map((student) => (
+                          activeProfile.students.map((student: any) => (
                             <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-4 py-3 font-mono font-bold text-text-secondary">{student.id}</td>
                               <td className="px-4 py-3 font-bold text-text-primary">{student.name}</td>
@@ -1569,7 +1569,7 @@ export default function OrganizationManagementPage() {
                       </thead>
                       <tbody className="divide-y divide-border">
                         {activeProfile.programs.length > 0 ? (
-                          activeProfile.programs.map((prog, idx) => (
+                          activeProfile.programs.map((prog: any, idx: any) => (
                             <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-4 py-3 font-bold text-text-primary flex items-center gap-1.5">
                                 <Briefcase className="h-3.5 w-3.5 text-blue-600 shrink-0" />
@@ -1617,7 +1617,7 @@ export default function OrganizationManagementPage() {
                       { label: 'Students Placed Count', val: activeProfile.placementAnalytics.studentsPlaced, icon: Users, color: 'text-blue-600 bg-blue-50/40' },
                       { label: 'Hiring Partners', val: activeProfile.placementAnalytics.companiesParticipated, icon: Building2, color: 'text-purple-600 bg-purple-50/40' },
                       { label: 'Average Package LPA', val: activeProfile.placementAnalytics.avgPackage, icon: DollarSign, color: 'text-amber-600 bg-amber-50/40' }
-                    ].map((kpi, idx) => (
+                    ].map((kpi: any, idx: any) => (
                       <div key={idx} className="bg-white border border-border rounded-xl p-4 shadow-sm flex items-center gap-3">
                         <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${kpi.color}`}>
                           <kpi.icon className="h-5 w-5" />
@@ -1662,7 +1662,7 @@ export default function OrganizationManagementPage() {
                             <circle cx="90" cy="30" r="4" fill="#10b981" />
                           </svg>
 
-                          {activeProfile.placementAnalytics.placementTrend.map((t, idx) => (
+                          {activeProfile.placementAnalytics.placementTrend.map((t: any, idx: any) => (
                             <div key={idx} className="z-10 flex flex-col items-center">
                               <span className="text-[10px] font-black text-text-primary bg-white border border-border rounded px-1 shadow-sm mb-1">{t.rate}%</span>
                               <span className="text-[10px] font-bold text-text-secondary">{t.year}</span>
@@ -1677,7 +1677,7 @@ export default function OrganizationManagementPage() {
                       <h5 className="text-xs font-extrabold text-text-secondary uppercase tracking-widest">Top Recruiter Companies</h5>
                       
                       <div className="divide-y divide-border">
-                        {activeProfile.placementAnalytics.companyHiring.map((c, idx) => (
+                        {activeProfile.placementAnalytics.companyHiring.map((c: any, idx: any) => (
                           <div key={idx} className="py-2.5 flex items-center justify-between text-xs font-semibold">
                             <span className="text-text-primary font-extrabold">{c.companyName}</span>
                             <div className="flex gap-4">
@@ -1748,7 +1748,7 @@ export default function OrganizationManagementPage() {
 
                     {/* MoU Documents Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {activeProfile.documents.map((doc, idx) => (
+                      {activeProfile.documents.map((doc: any, idx: any) => (
                         <div 
                           key={idx}
                           onClick={() => setPreviewDoc(doc)}
@@ -1774,7 +1774,7 @@ export default function OrganizationManagementPage() {
 
                           <div className="border-t border-border pt-2 flex justify-between text-[9px] font-semibold text-text-secondary mt-2">
                             <span>Uploaded: {doc.uploadDate}</span>
-                            <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center gap-2" onClick={(e: any) => e.stopPropagation()}>
                               {doc.status !== 'Verified' && (
                                 <button 
                                   onClick={() => handleVerifyDocument(activeProfile.id, idx, 'Verified')}
@@ -1793,7 +1793,7 @@ export default function OrganizationManagementPage() {
                               )}
                               <a 
                                 href="#" 
-                                onClick={e => {
+                                onClick={(e: any) => {
                                   e.preventDefault();
                                   showToast(`Downloading: ${doc.name}`);
                                 }}
@@ -1847,7 +1847,7 @@ export default function OrganizationManagementPage() {
                   </h4>
 
                   <div className="relative border-l-2 border-border pl-6 space-y-6 ml-2 py-2">
-                    {activeProfile.timeline.map((evt, idx) => (
+                    {activeProfile.timeline.map((evt: any, idx: any) => (
                       <div key={idx} className="relative">
                         
                         <div className={`absolute -left-[31px] top-0 h-4 w-4 rounded-full border-2 border-white flex items-center justify-center ${
@@ -1965,7 +1965,7 @@ export default function OrganizationManagementPage() {
                   <label className="block text-text-secondary">Configure Institutional Partnership Status</label>
                   <select
                     value={partnershipStatusInput}
-                    onChange={(e) => setPartnershipStatusInput(e.target.value as any)}
+                    onChange={(e: any) => setPartnershipStatusInput(e.target.value as any)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white font-semibold text-xs focus:outline-none focus:border-primary"
                   >
                     <option value="Active">Active Partner</option>
@@ -2005,7 +2005,7 @@ export default function OrganizationManagementPage() {
                     required
                     placeholder="e.g. Richard Feynman"
                     value={coordinatorNameInput}
-                    onChange={(e) => setCoordinatorNameInput(e.target.value)}
+                    onChange={(e: any) => setCoordinatorNameInput(e.target.value)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   />
                   
@@ -2037,7 +2037,7 @@ export default function OrganizationManagementPage() {
                     rows={3}
                     placeholder="Dispatches global notifications to institutional coordinators..."
                     value={notifyMsg}
-                    onChange={(e) => setNotifyMsg(e.target.value)}
+                    onChange={(e: any) => setNotifyMsg(e.target.value)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none text-xs font-semibold leading-relaxed"
                   />
                   
@@ -2070,7 +2070,7 @@ export default function OrganizationManagementPage() {
                       required
                       placeholder="e.g. Mechanical Engineering"
                       value={deptForm.name}
-                      onChange={(e) => setDeptForm({ ...deptForm, name: e.target.value })}
+                      onChange={(e: any) => setDeptForm({ ...deptForm, name: e.target.value })}
                       className="w-full p-2 border border-border rounded focus:outline-none"
                     />
                   </div>
@@ -2082,7 +2082,7 @@ export default function OrganizationManagementPage() {
                       required
                       placeholder="e.g. Dr. Jane Smith"
                       value={deptForm.hod}
-                      onChange={(e) => setDeptForm({ ...deptForm, hod: e.target.value })}
+                      onChange={(e: any) => setDeptForm({ ...deptForm, hod: e.target.value })}
                       className="w-full p-2 border border-border rounded focus:outline-none"
                     />
                   </div>
@@ -2094,7 +2094,7 @@ export default function OrganizationManagementPage() {
                         type="number" 
                         required
                         value={deptForm.studentsCount}
-                        onChange={(e) => setDeptForm({ ...deptForm, studentsCount: Number(e.target.value) })}
+                        onChange={(e: any) => setDeptForm({ ...deptForm, studentsCount: Number(e.target.value) })}
                         className="w-full p-2 border border-border rounded focus:outline-none"
                       />
                     </div>
@@ -2104,7 +2104,7 @@ export default function OrganizationManagementPage() {
                         type="number" 
                         required
                         value={deptForm.facultyCount}
-                        onChange={(e) => setDeptForm({ ...deptForm, facultyCount: Number(e.target.value) })}
+                        onChange={(e: any) => setDeptForm({ ...deptForm, facultyCount: Number(e.target.value) })}
                         className="w-full p-2 border border-border rounded focus:outline-none"
                       />
                     </div>
@@ -2117,7 +2117,7 @@ export default function OrganizationManagementPage() {
                         type="number" 
                         required
                         value={deptForm.internshipsCount}
-                        onChange={(e) => setDeptForm({ ...deptForm, internshipsCount: Number(e.target.value) })}
+                        onChange={(e: any) => setDeptForm({ ...deptForm, internshipsCount: Number(e.target.value) })}
                         className="w-full p-2 border border-border rounded focus:outline-none"
                       />
                     </div>
@@ -2129,7 +2129,7 @@ export default function OrganizationManagementPage() {
                         min="0"
                         max="100"
                         value={deptForm.placementRate}
-                        onChange={(e) => setDeptForm({ ...deptForm, placementRate: Number(e.target.value) })}
+                        onChange={(e: any) => setDeptForm({ ...deptForm, placementRate: Number(e.target.value) })}
                         className="w-full p-2 border border-border rounded focus:outline-none"
                       />
                     </div>
@@ -2151,7 +2151,7 @@ export default function OrganizationManagementPage() {
                     <label className="block text-text-secondary">Accreditation Document Category</label>
                     <select
                       value={docTypeInput}
-                      onChange={(e) => setDocTypeInput(e.target.value as any)}
+                      onChange={(e: any) => setDocTypeInput(e.target.value as any)}
                       className="w-full p-2 border border-border rounded bg-white focus:outline-none"
                     >
                       <option value="MoU">MoU Agreement</option>
@@ -2168,7 +2168,7 @@ export default function OrganizationManagementPage() {
                       type="text" 
                       placeholder="e.g. affiliation_certificate_2026.pdf"
                       value={docNameInput}
-                      onChange={(e) => setDocNameInput(e.target.value)}
+                      onChange={(e: any) => setDocNameInput(e.target.value)}
                       className="w-full p-2 border border-border rounded focus:outline-none"
                     />
                   </div>
@@ -2198,7 +2198,7 @@ export default function OrganizationManagementPage() {
                           type="text" 
                           required
                           value={collegeForm.name}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, name: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, name: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2209,7 +2209,7 @@ export default function OrganizationManagementPage() {
                           required
                           placeholder="e.g. MIT"
                           value={collegeForm.code}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, code: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, code: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2217,7 +2217,7 @@ export default function OrganizationManagementPage() {
                         <label className="block text-text-secondary text-[10px]">Institution Type</label>
                         <select 
                           value={collegeForm.type}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, type: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, type: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
                           <option value="Engineering">Engineering College</option>
@@ -2231,7 +2231,7 @@ export default function OrganizationManagementPage() {
                           type="text" 
                           required
                           value={collegeForm.university}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, university: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, university: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2241,7 +2241,7 @@ export default function OrganizationManagementPage() {
                           type="text" 
                           required
                           value={collegeForm.location}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, location: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, location: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2251,7 +2251,7 @@ export default function OrganizationManagementPage() {
                           type="number" 
                           required
                           value={collegeForm.establishmentYear}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, establishmentYear: Number(e.target.value) })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, establishmentYear: Number(e.target.value) })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2269,7 +2269,7 @@ export default function OrganizationManagementPage() {
                         <input 
                           type="text" 
                           value={collegeForm.naacGrade}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, naacGrade: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, naacGrade: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2278,7 +2278,7 @@ export default function OrganizationManagementPage() {
                         <input 
                           type="number" 
                           value={collegeForm.nationalRanking}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, nationalRanking: Number(e.target.value) })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, nationalRanking: Number(e.target.value) })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2286,7 +2286,7 @@ export default function OrganizationManagementPage() {
                         <label className="block text-text-secondary text-[10px]">NBA Status</label>
                         <select 
                           value={collegeForm.nbaStatus}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, nbaStatus: e.target.value as any })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, nbaStatus: e.target.value as any })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
                           <option value="Accredited">Accredited</option>
@@ -2298,7 +2298,7 @@ export default function OrganizationManagementPage() {
                         <label className="block text-text-secondary text-[10px]">Autonomous Status</label>
                         <select 
                           value={collegeForm.autonomousStatus}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, autonomousStatus: e.target.value as any })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, autonomousStatus: e.target.value as any })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
                           <option value="Autonomous">Autonomous</option>
@@ -2320,7 +2320,7 @@ export default function OrganizationManagementPage() {
                           type="url" 
                           required
                           value={collegeForm.website}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, website: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, website: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2330,7 +2330,7 @@ export default function OrganizationManagementPage() {
                           type="email" 
                           required
                           value={collegeForm.email}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, email: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, email: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2340,7 +2340,7 @@ export default function OrganizationManagementPage() {
                           type="text" 
                           required
                           value={collegeForm.phone}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, phone: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, phone: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2350,7 +2350,7 @@ export default function OrganizationManagementPage() {
                           type="text" 
                           required
                           value={collegeForm.affiliation}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, affiliation: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, affiliation: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>
@@ -2360,7 +2360,7 @@ export default function OrganizationManagementPage() {
                           type="text" 
                           required
                           value={collegeForm.address}
-                          onChange={(e) => setCollegeForm({ ...collegeForm, address: e.target.value })}
+                          onChange={(e: any) => setCollegeForm({ ...collegeForm, address: e.target.value })}
                           className="w-full p-2 border border-border rounded text-xs focus:outline-none"
                         />
                       </div>

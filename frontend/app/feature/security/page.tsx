@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Shield, ShieldAlert, Key, Activity, AlertTriangle, CheckCircle2, Lock, Monitor, Search, Smartphone, Clock, AlertCircle } from 'lucide-react';
 import { sessionService } from '@/src/services/session.service';
-import { UserSession } from '@/src/data/mock-user-sessions';
+import { UserSession } from '../../../src/types/api/user-session.types';
 
 export default function SecurityCenterPage() {
   const [sessions, setSessions] = useState<UserSession[]>([]);
@@ -33,8 +33,8 @@ export default function SecurityCenterPage() {
     }
   };
 
-  const activeSessions = sessions.filter(s => s.status === 'Active');
-  const filteredSessions = sessions.filter(s => 
+  const activeSessions = sessions.filter((s: any) => s.status === 'Active');
+  const filteredSessions = sessions.filter((s: any) => 
     s.userId.toLowerCase().includes(searchTerm.toLowerCase()) || 
     s.ipAddress.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -62,7 +62,7 @@ export default function SecurityCenterPage() {
           { label: 'Failed Logins (24h)', value: 0, icon: ShieldAlert, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Locked Accounts', value: 0, icon: Lock, color: 'text-red-600', bg: 'bg-red-50' },
           { label: 'Permission Coverage', value: '100%', icon: Shield, color: 'text-blue-600', bg: 'bg-blue-50' }
-        ].map((kpi, idx) => (
+        ].map((kpi: any, idx: any) => (
           <div key={idx} className="bg-white border border-border rounded-xl p-5 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
@@ -84,7 +84,7 @@ export default function SecurityCenterPage() {
             <Activity className="h-4 w-4 text-blue-600" /> Login Activity Trend (Last 7 Days)
           </h3>
           <div className="h-48 flex items-end justify-between gap-2 border-b border-border pb-2">
-            {[45, 52, 38, 65, 59, 48, 62].map((val, idx) => (
+            {[45, 52, 38, 65, 59, 48, 62].map((val: any, idx: any) => (
               <div key={idx} className="w-full relative group flex flex-col items-center justify-end h-full">
                 <div className="opacity-0 group-hover:opacity-100 absolute -top-8 text-xs font-bold text-text-primary bg-white shadow-sm border border-border px-2 py-1 rounded transition-opacity">
                   {val}
@@ -107,7 +107,7 @@ export default function SecurityCenterPage() {
             <ShieldAlert className="h-4 w-4 text-amber-600" /> Failed Logins (Last 7 Days)
           </h3>
           <div className="h-48 flex items-end justify-between gap-2 border-b border-border pb-2">
-            {[2, 0, 1, 4, 0, 0, 0].map((val, idx) => (
+            {[2, 0, 1, 4, 0, 0, 0].map((val: any, idx: any) => (
               <div key={idx} className="w-full relative group flex flex-col items-center justify-end h-full">
                 <div className="opacity-0 group-hover:opacity-100 absolute -top-8 text-xs font-bold text-text-primary bg-white shadow-sm border border-border px-2 py-1 rounded transition-opacity">
                   {val}
@@ -133,7 +133,7 @@ export default function SecurityCenterPage() {
             { msg: 'New device login detected (MacBook Pro, San Francisco)', time: '2 hours ago', icon: Monitor, color: 'text-blue-500', bg: 'bg-blue-50' },
             { msg: 'Super Admin updated role permissions for "Recruiter"', time: '1 day ago', icon: Shield, color: 'text-emerald-500', bg: 'bg-emerald-50' },
             { msg: 'Failed login attempt from IP 192.168.1.100', time: '2 days ago', icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50' }
-          ].map((event, idx) => (
+          ].map((event: any, idx: any) => (
             <div key={idx} className="flex items-start gap-4 p-3 hover:bg-slate-50 rounded-lg transition-colors">
               <div className={`p-2 rounded-lg shrink-0 ${event.bg}`}>
                 <event.icon className={`h-4 w-4 ${event.color}`} />
@@ -160,7 +160,7 @@ export default function SecurityCenterPage() {
               type="text" 
               placeholder="Search by User ID or IP..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e: any) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
@@ -184,7 +184,7 @@ export default function SecurityCenterPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredSessions.map((session) => (
+                {filteredSessions.map((session: any) => (
                   <tr key={session.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-text-primary">{session.userId}</td>
                     <td className="px-6 py-4">

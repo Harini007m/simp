@@ -1,9 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { MOCK_USERS } from '../data/mock-users';
-import { MOCK_ROLES } from '../data/mock-roles';
-import { MOCK_MODULES, Module } from '../data/mock-modules';
+import { Module } from '../types/api/module.types';
 
 export interface AuthUser {
   user_id: string;
@@ -33,10 +31,10 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 function resolveAuthUser(userId: string): AuthUser | null {
-  const mockUser = MOCK_USERS.find(u => u.id === userId);
+  const mockUser = ([] as any[]).find(u => u.id === userId);
   if (!mockUser) return null;
 
-  const role = MOCK_ROLES.find(r => r.id === mockUser.roleId);
+  const role = ([] as any[]).find(r => r.id === mockUser.roleId);
   if (!role) return null;
 
   const isSuperAdmin = role.permissions.includes('all');
@@ -44,13 +42,13 @@ function resolveAuthUser(userId: string): AuthUser | null {
   // Collect module IDs from role + user overrides
   const allowedModuleIds = new Set<string>(role.moduleIds);
   if (mockUser.moduleOverrides) {
-    mockUser.moduleOverrides.forEach(m => allowedModuleIds.add(m));
+    mockUser.moduleOverrides.forEach((m: any) => allowedModuleIds.add(m));
   }
 
   // Resolve modules
   const modules = isSuperAdmin
-    ? MOCK_MODULES.filter(m => m.active)
-    : MOCK_MODULES.filter(m => allowedModuleIds.has(m.id) && m.active);
+    ? ([] as any[]).filter(m => m.active)
+    : ([] as any[]).filter(m => allowedModuleIds.has(m.id) && m.active);
 
   return {
     user_id: mockUser.id,

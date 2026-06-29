@@ -1,23 +1,26 @@
 import { EscalationRule, EscalationLog } from '../types/escalation.types';
-import { MOCK_ESCALATION_RULES, MOCK_ESCALATIONS } from '../data/mock-escalations';
+import { apiClient } from "./api.client";
 
 export const escalationApi = {
   getRules: async (): Promise<EscalationRule[]> => {
-    return Promise.resolve([...MOCK_ESCALATION_RULES]);
+    const res = await apiClient.get<any>('/api/placeholder');
+        return res.data;
   },
   
   getEscalations: async (): Promise<EscalationLog[]> => {
-    return Promise.resolve([...MOCK_ESCALATIONS]);
+    const res = await apiClient.get<any>('/api/placeholder');
+      return res.data;
   },
   
   getEscalationById: async (id: string): Promise<EscalationLog | undefined> => {
-    return Promise.resolve(MOCK_ESCALATIONS.find(e => e.id === id));
+    const res = await apiClient.get<any>('/api/placeholder');
+      return res.data;
   },
   
   updateEscalationStatus: async (id: string, status: 'Pending' | 'Resolved' | 'Ignored'): Promise<void> => {
-    const index = MOCK_ESCALATIONS.findIndex(e => e.id === id);
+    const index = ([] as any[]).findIndex(e => e.id === id);
     if (index !== -1) {
-      MOCK_ESCALATIONS[index].status = status;
+      ([] as any[])[index].status = status;
     }
     return Promise.resolve();
   }

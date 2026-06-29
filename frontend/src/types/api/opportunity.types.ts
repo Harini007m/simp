@@ -38,3 +38,19 @@ export interface OpeningMentorResponse {
   employee_id: string;
   assigned_at: string;
 }
+
+export interface Opportunity {
+  id: string;
+  title: string;
+  status: string;
+  type: string;
+  value: string;
+  mode: string;
+  seats: string;
+  postedDate: string;
+  description: string;
+  eligibility: string;
+  amount?: string;
+  duration: string;
+}
+export interface ExtendedOpening { id: string; title: string; [key: string]: any; }

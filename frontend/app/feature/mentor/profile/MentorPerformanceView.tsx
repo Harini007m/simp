@@ -24,8 +24,8 @@ export default function MentorPerformanceView() {
   const mentorPerformanceData = useMemo(() => {
     const mentorMap = new Map<string, { mentorName: string, batches: any[] }>();
 
-    mappings.forEach(mapping => {
-      const perf = performances.find(p => p.batchId === mapping.batchId);
+    mappings.forEach((mapping: any) => {
+      const perf = performances.find((p: any) => p.batchId === mapping.batchId);
       
       if (!mentorMap.has(mapping.mentorProfileId)) {
         mentorMap.set(mapping.mentorProfileId, {
@@ -45,8 +45,8 @@ export default function MentorPerformanceView() {
 
   const overallAverages = useMemo(() => {
     let totalScore = 0, totalAttendance = 0, totalTaskCompletion = 0, count = 0;
-    mentorPerformanceData.forEach(mentor => {
-      mentor.batches.forEach(batch => {
+    mentorPerformanceData.forEach((mentor: any) => {
+      mentor.batches.forEach((batch: any) => {
         if (batch.performance.average_score > 0) {
           totalScore += batch.performance.average_score;
           totalAttendance += batch.performance.attendance_rate;
@@ -112,7 +112,7 @@ export default function MentorPerformanceView() {
         </div>
 
         <div className="space-y-6">
-          {mentorPerformanceData.map(mentor => (
+          {mentorPerformanceData.map((mentor: any) => (
             <div key={mentor.mentorName} className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
               <div className="px-6 py-4 border-b border-border bg-slate-50/50 flex items-center gap-4">
                 <div className="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
@@ -124,7 +124,7 @@ export default function MentorPerformanceView() {
                 </div>
               </div>
               <div className="divide-y divide-border">
-                {mentor.batches.map(batch => {
+                {mentor.batches.map((batch: any) => {
                   const perf = batch.performance;
                   const isAtRisk = perf.attendance_rate > 0 && perf.attendance_rate < 75;
                   return (

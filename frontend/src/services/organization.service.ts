@@ -1,6 +1,6 @@
 import { organizationApi } from '../api/organization.api';
 import { CollegeCreate, CollegeResponse, DepartmentResponse, CoordinatorResponse } from '../types/api/organization.types';
-import { Organization, MOCK_ORGANIZATIONS } from '../data/mock-organizations';
+import { Organization } from '../types/api/organization.types';
 
 export type ExtendedCollege = CollegeResponse & Organization;
 
@@ -52,21 +52,8 @@ export const organizationService = {
   },
 
   async getOrganizations(): Promise<ExtendedCollege[]> {
-    try {
       const data = await organizationApi.getColleges();
-      if (data && data.length > 0) {
-        return data.map(col => this.mapToExtended(col));
-      }
-    } catch (e) {
-      console.debug("Failed to load organizations from API, falling back to mock data:", e);
-    }
-    return MOCK_ORGANIZATIONS.map((org: any) => ({
-      ...org,
-      college_id: org.id,
-      college_name: org.name,
-      college_code: org.code,
-      designation: 'Organization'
-    })) as ExtendedCollege[];
+      return data.map(col => this.mapToExtended(col));
   },
 
   async getOrganization(id: string): Promise<ExtendedCollege | undefined> {

@@ -47,3 +47,11 @@ export type MentorCreate = Omit<MentorProfile, 'mentor_profile_id' | 'created_at
 export type MentorUpdate = Partial<Pick<MentorProfile, 'mentor_bio' | 'mentor_expertise' | 'years_of_experience' | 'max_student_capacity' | 'is_available'>>;
 export type MentorAssignmentCreate = Omit<MentorAssignment, 'id'>;
 export type MentorBatchMappingCreate = Omit<MentorBatchMapping, 'id'>;
+
+export interface OpeningMentor {
+  id: string;
+  opportunityId: string;
+  mentorId: string;
+  role: string;
+  workload: number;
+}

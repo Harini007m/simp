@@ -95,7 +95,7 @@ export default function ReferralsPage() {
               </h2>
             </div>
             <div className="divide-y divide-border">
-              {referrals.map(ref => (
+              {referrals.map((ref: any) => (
                 <div key={ref.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-text-primary">{ref.candidateName}</h3>
@@ -147,7 +147,7 @@ export default function ReferralsPage() {
           <div className="bg-white rounded-xl border border-border shadow-sm p-5">
             <h2 className="font-bold text-text-primary mb-4">Active Campaigns</h2>
             <div className="space-y-4">
-              {campaigns.map(camp => (
+              {campaigns.map((camp: any) => (
                 <div key={camp.id} className="border border-border rounded-lg p-4 bg-slate-50">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-bold text-text-primary text-sm">{camp.title}</h3>

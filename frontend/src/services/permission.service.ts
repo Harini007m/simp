@@ -1,14 +1,12 @@
-import { MOCK_PERMISSIONS, Permission } from '../data/mock-permissions';
+import { Permission } from '../types/api/permission.types';
+import { permissionApi } from "../api/permission.api";
 
 export const permissionService = {
   async getPermissionsForModule(moduleId: string): Promise<string[]> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return ['View', 'Create', 'Edit', 'Delete'];
-  },
+        return permissionApi.getPermissionsForModule(moduleId);
+    },
 
   async getPermissions(): Promise<Permission[]> {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return MOCK_PERMISSIONS;
+      return permissionApi.getPermissions();
   }
 };

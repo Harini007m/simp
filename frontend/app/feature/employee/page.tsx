@@ -11,7 +11,7 @@ import {
   Lock, CheckSquare
 } from 'lucide-react';
 import { employeeService } from '@/src/services/employee.service';
-import { Employee, EmployeeDocument, TimelineEvent, EmployeeProject } from '@/src/data/mock-employees';
+import { Employee, EmployeeDocument, TimelineEvent, EmployeeProject } from '../../../src/types/api/employee.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { useRouter } from 'next/navigation';
@@ -119,7 +119,7 @@ export default function EmployeeManagementPage() {
 
   // Filtered employees list
   const filteredEmployees = useMemo(() => {
-    return employees.filter(emp => {
+    return employees.filter((emp: any) => {
       const matchesSearch = 
         emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -140,13 +140,13 @@ export default function EmployeeManagementPage() {
   // Strategic KPI Totals
   const kpiStats = useMemo(() => {
     const total = employees.length;
-    const active = employees.filter(e => e.status === 'Active').length;
-    const leave = employees.filter(e => e.status === 'On Leave').length;
-    const probation = employees.filter(e => e.status === 'Probation').length;
-    const mentors = employees.filter(e => e.roleName === 'Mentor').length;
-    const hr = employees.filter(e => e.roleName === 'HR').length;
-    const admins = employees.filter(e => e.roleName === 'Super Admin').length;
-    const inactive = employees.filter(e => e.status === 'Inactive' || e.status === 'Resigned' || e.status === 'Terminated').length;
+    const active = employees.filter((e: any) => e.status === 'Active').length;
+    const leave = employees.filter((e: any) => e.status === 'On Leave').length;
+    const probation = employees.filter((e: any) => e.status === 'Probation').length;
+    const mentors = employees.filter((e: any) => e.roleName === 'Mentor').length;
+    const hr = employees.filter((e: any) => e.roleName === 'HR').length;
+    const admins = employees.filter((e: any) => e.roleName === 'Super Admin').length;
+    const inactive = employees.filter((e: any) => e.status === 'Inactive' || e.status === 'Resigned' || e.status === 'Terminated').length;
     
     return { total, active, leave, probation, mentors, hr, admins, inactive };
   }, [employees]);
@@ -154,7 +154,7 @@ export default function EmployeeManagementPage() {
   // Department distribution numbers
   const deptStats = useMemo(() => {
     const counts: Record<string, number> = {};
-    employees.forEach(e => {
+    employees.forEach((e: any) => {
       counts[e.organizationId] = (counts[e.organizationId] || 0) + 1;
     });
     return counts;
@@ -163,7 +163,7 @@ export default function EmployeeManagementPage() {
   // Location distribution numbers
   const locationStats = useMemo(() => {
     const counts: Record<string, number> = {};
-    employees.forEach(e => {
+    employees.forEach((e: any) => {
       counts[e.location] = (counts[e.location] || 0) + 1;
     });
     return counts;
@@ -172,7 +172,7 @@ export default function EmployeeManagementPage() {
   // Employment Type distribution
   const typeStats = useMemo(() => {
     const counts: Record<string, number> = {};
-    employees.forEach(e => {
+    employees.forEach((e: any) => {
       counts[e.employmentType] = (counts[e.employmentType] || 0) + 1;
     });
     return counts;
@@ -181,7 +181,7 @@ export default function EmployeeManagementPage() {
   // Status distribution numbers (for Donut Chart)
   const statusStats = useMemo(() => {
     const counts: Record<string, number> = {};
-    employees.forEach(e => {
+    employees.forEach((e: any) => {
       counts[e.status] = (counts[e.status] || 0) + 1;
     });
     return counts;
@@ -190,8 +190,8 @@ export default function EmployeeManagementPage() {
   // Aggregated Recent activities
   const recentActivities = useMemo(() => {
     const allEvents: { empId: string; empName: string; empAvatar: string; event: TimelineEvent }[] = [];
-    employees.forEach(emp => {
-      emp.timeline.forEach(evt => {
+    employees.forEach((emp: any) => {
+      emp.timeline.forEach((evt: any) => {
         allEvents.push({
           empId: emp.id,
           empName: emp.name,
@@ -202,7 +202,7 @@ export default function EmployeeManagementPage() {
     });
     // Sort chronologically descending
     return allEvents
-      .sort((a, b) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime())
+      .sort((a: any, b: any) => new Date(b.event.date).getTime() - new Date(a.event.date).getTime())
       .slice(0, 10);
   }, [employees]);
 
@@ -217,7 +217,7 @@ export default function EmployeeManagementPage() {
   // Sync activeProfile state from main employee array
   useEffect(() => {
     if (activeProfile) {
-      const refreshed = employees.find(e => e.id === activeProfile.id);
+      const refreshed = employees.find((e: any) => e.id === activeProfile.id);
       if (refreshed) {
         setActiveProfile(refreshed);
       }
@@ -243,7 +243,7 @@ export default function EmployeeManagementPage() {
             description: `Employee lifecycle stage changed manually to ${statusInput}.`,
             type: 'status'
           });
-          setEmployees(employees.map(emp => emp.id === targetId ? { ...updated } : emp));
+          setEmployees(employees.map((emp: any) => emp.id === targetId ? { ...updated } : emp));
           showToast(`Updated status of ${updated.name} to ${statusInput}`);
         }
       } else if (type === 'dept') {
@@ -255,20 +255,20 @@ export default function EmployeeManagementPage() {
             description: `Transferred to department: ${deptInput}`,
             type: 'transfer'
           });
-          setEmployees(employees.map(emp => emp.id === targetId ? { ...updated } : emp));
+          setEmployees(employees.map((emp: any) => emp.id === targetId ? { ...updated } : emp));
           showToast(`Transferred ${updated.name} to ${deptInput}`);
         }
       } else if (type === 'mentor') {
         const updated = await employeeService.updateEmployee(targetId, { mentorId: mentorInput });
         if (updated) {
-          const mentorName = employees.find(emp => emp.id === mentorInput)?.name || 'None';
+          const mentorName = employees.find((emp: any) => emp.id === mentorInput)?.name || 'None';
           updated.timeline.unshift({
             date: new Date().toISOString().split('T')[0],
             title: 'Mentor Assigned',
             description: `Assigned mentor: ${mentorName}`,
             type: 'mentor'
           });
-          setEmployees(employees.map(emp => emp.id === targetId ? { ...updated } : emp));
+          setEmployees(employees.map((emp: any) => emp.id === targetId ? { ...updated } : emp));
           showToast(`Assigned ${mentorName} as mentor to ${updated.name}`);
         }
       } else if (type === 'promote') {
@@ -283,7 +283,7 @@ export default function EmployeeManagementPage() {
             description: `Promoted to ${promoTitle} (${promoGrade})`,
             type: 'promotion'
           });
-          setEmployees(employees.map(emp => emp.id === targetId ? { ...updated } : emp));
+          setEmployees(employees.map((emp: any) => emp.id === targetId ? { ...updated } : emp));
           showToast(`Promoted ${updated.name} to ${promoTitle}`);
         }
       } else if (type === 'doc') {
@@ -308,7 +308,7 @@ export default function EmployeeManagementPage() {
               description: `Uploaded new document: ${docType}`,
               type: 'document'
             });
-            setEmployees(employees.map(emp => emp.id === targetId ? { ...updatedEmp } : emp));
+            setEmployees(employees.map((emp: any) => emp.id === targetId ? { ...updatedEmp } : emp));
             showToast(`Uploaded ${docType} for ${updatedEmp.name}. Verification pending.`);
           }
         }
@@ -334,7 +334,7 @@ export default function EmployeeManagementPage() {
           shift: editForm.shift,
         });
         if (updated) {
-          setEmployees(employees.map(emp => emp.id === targetId ? { ...updated } : emp));
+          setEmployees(employees.map((emp: any) => emp.id === targetId ? { ...updated } : emp));
           showToast(`Updated profile information for ${updated.name}`);
         }
       } else if (type === 'onboard') {
@@ -352,7 +352,7 @@ export default function EmployeeManagementPage() {
         showToast(`Successfully onboarded ${newEmp.name} as ${newEmp.designation}`);
         router.push(`/feature/users?autofill=true&name=${encodeURIComponent(newEmp.name)}&email=${encodeURIComponent(newEmp.email)}&phone=${encodeURIComponent(newEmp.phone)}&redirect=/feature/employee`);
       } else if (type === 'review') {
-        const emp = employees.find(e => e.id === targetId);
+        const emp = employees.find((e: any) => e.id === targetId);
         if (emp) {
           const newReview = {
             reviewerName: user?.name || 'HR Recruiter',
@@ -380,12 +380,12 @@ export default function EmployeeManagementPage() {
               description: `Submitted review rating: ${reviewForm.score}/5 by ${newReview.reviewerName}.`,
               type: 'review'
             });
-            setEmployees(employees.map(e => e.id === targetId ? { ...updated } : e));
+            setEmployees(employees.map((e: any) => e.id === targetId ? { ...updated } : e));
             showToast(`Submitted review for ${updated.name}`);
           }
         }
       } else if (type === 'notify') {
-        showToast(`Notification sent to ${employees.find(e => e.id === targetId)?.name}: "${notifyMsg}"`, 'info');
+        showToast(`Notification sent to ${employees.find((e: any) => e.id === targetId)?.name}: "${notifyMsg}"`, 'info');
       }
     } catch (err) {
       console.error(err);
@@ -403,7 +403,7 @@ export default function EmployeeManagementPage() {
     try {
       if (type === 'status') {
         await employeeService.bulkChangeStatus(selectedIds, statusInput);
-        setEmployees(employees.map(emp => 
+        setEmployees(employees.map((emp: any) => 
           selectedIds.includes(emp.id) 
             ? { ...emp, status: statusInput, timeline: [
                 { date: new Date().toISOString().split('T')[0], title: 'Bulk Status Change', description: `Lifecycle status bulk updated to ${statusInput}`, type: 'status' },
@@ -414,7 +414,7 @@ export default function EmployeeManagementPage() {
         showToast(`Bulk updated status to ${statusInput} for ${selectedIds.length} employees`);
       } else if (type === 'dept') {
         await employeeService.bulkTransferDepartment(selectedIds, deptInput);
-        setEmployees(employees.map(emp => 
+        setEmployees(employees.map((emp: any) => 
           selectedIds.includes(emp.id) 
             ? { ...emp, organizationId: deptInput, timeline: [
                 { date: new Date().toISOString().split('T')[0], title: 'Bulk Department Transfer', description: `Bulk transferred to department: ${deptInput}`, type: 'transfer' },
@@ -425,8 +425,8 @@ export default function EmployeeManagementPage() {
         showToast(`Bulk transferred ${selectedIds.length} employees to ${deptInput}`);
       } else if (type === 'mentor') {
         await employeeService.bulkAssignMentor(selectedIds, mentorInput);
-        const mentorName = employees.find(e => e.id === mentorInput)?.name || 'Selected Mentor';
-        setEmployees(employees.map(emp => 
+        const mentorName = employees.find((e: any) => e.id === mentorInput)?.name || 'Selected Mentor';
+        setEmployees(employees.map((emp: any) => 
           selectedIds.includes(emp.id) 
             ? { ...emp, mentorId: mentorInput, timeline: [
                 { date: new Date().toISOString().split('T')[0], title: 'Bulk Mentor Assignment', description: `Bulk assigned mentor: ${mentorName}`, type: 'mentor' },
@@ -448,25 +448,25 @@ export default function EmployeeManagementPage() {
 
   // Toggle checkbox selection of employee row
   const toggleSelect = (id: string) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    setSelectedIds((prev: any) => 
+      prev.includes(id) ? prev.filter((x: any) => x !== id) : [...prev, id]
     );
   };
 
   // Toggle selection of all filtered employees
   const toggleSelectAll = () => {
-    const filteredIds = filteredEmployees.map(e => e.id);
-    const allSelected = filteredIds.every(id => selectedIds.includes(id));
+    const filteredIds = filteredEmployees.map((e: any) => e.id);
+    const allSelected = filteredIds.every((id: any) => selectedIds.includes(id));
     if (allSelected) {
-      setSelectedIds(prev => prev.filter(id => !filteredIds.includes(id)));
+      setSelectedIds((prev: any) => prev.filter((id: any) => !filteredIds.includes(id)));
     } else {
-      setSelectedIds(prev => Array.from(new Set([...prev, ...filteredIds])));
+      setSelectedIds((prev: any) => Array.from(new Set([...prev, ...filteredIds])));
     }
   };
 
   // Document verification updates
   const handleVerifyDocument = async (empId: string, docIndex: number, newStatus: 'Verified' | 'Rejected') => {
-    const emp = employees.find(e => e.id === empId);
+    const emp = employees.find((e: any) => e.id === empId);
     if (!emp) return;
 
     const docs = [...emp.documents];
@@ -485,7 +485,7 @@ export default function EmployeeManagementPage() {
           description: `Verification status of ${docs[docIndex].type} changed to ${newStatus}.`,
           type: 'document'
         });
-        setEmployees(employees.map(e => e.id === empId ? { ...updated } : e));
+        setEmployees(employees.map((e: any) => e.id === empId ? { ...updated } : e));
         showToast(`Document ${docs[docIndex].type} marked as ${newStatus}`);
       }
     } catch (err) {
@@ -542,7 +542,7 @@ export default function EmployeeManagementPage() {
   // Export Roster (CSV)
   const handleExportRoster = () => {
     const headers = ['ID', 'Name', 'Email', 'Phone', 'Department', 'Designation', 'Joining Date', 'Status', 'Location'];
-    const rows = employees.map(emp => [
+    const rows = employees.map((emp: any) => [
       emp.id,
       emp.name,
       emp.email,
@@ -554,7 +554,7 @@ export default function EmployeeManagementPage() {
       emp.location
     ]);
     const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      + [headers.join(','), ...rows.map((r: any) => r.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -669,7 +669,7 @@ export default function EmployeeManagementPage() {
               { label: 'HR Staff Operations', val: kpiStats.hr, icon: Building, color: 'bg-indigo-50 text-indigo-600 border-indigo-100', filter: { name: 'role', val: 'HR' } },
               { label: 'Super Administrators', val: kpiStats.admins, icon: Shield, color: 'bg-slate-100 text-text-primary border-border', filter: { name: 'role', val: 'Super Admin' } },
               { label: 'Inactive / Exited', val: kpiStats.inactive, icon: XCircle, color: 'bg-rose-50 text-rose-600 border-rose-100', filter: { name: 'status', val: 'Notice Period' } },
-            ].map((kpi, idx) => (
+            ].map((kpi: any, idx: any) => (
               <div 
                 key={idx}
                 onClick={() => {
@@ -710,7 +710,7 @@ export default function EmployeeManagementPage() {
                   { dept: 'HR / Operations (org-1)', count: deptStats['org-1'] || 0, color: 'bg-blue-600' },
                   { dept: 'Mentors / Engineering (org-2)', count: deptStats['org-2'] || 0, color: 'bg-emerald-600' },
                   { dept: 'Coordination / Relations (org-3)', count: deptStats['org-3'] || 0, color: 'bg-purple-600' },
-                ].map((item, index) => {
+                ].map((item: any, index: any) => {
                   const percent = Math.round((item.count / employees.length) * 100) || 0;
                   return (
                     <div key={index} className="space-y-1">
@@ -729,7 +729,7 @@ export default function EmployeeManagementPage() {
               <div className="border-t border-border pt-4 space-y-3">
                 <div className="text-xs font-bold text-text-secondary uppercase tracking-widest">Employment Type</div>
                 <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(typeStats).map(([type, val], idx) => (
+                  {Object.entries(typeStats).map(([type, val], idx: any) => (
                     <div key={idx} className="bg-slate-50 p-2.5 rounded-lg border border-border flex items-center justify-between">
                       <span className="text-xs font-semibold text-text-secondary">{type}</span>
                       <span className="text-xs font-extrabold text-text-primary">{val}</span>
@@ -785,7 +785,7 @@ export default function EmployeeManagementPage() {
                     { label: 'Probation', count: statusStats['Probation'] || 0, color: 'bg-purple-500' },
                     { label: 'Notice Period', count: statusStats['Notice Period'] || 0, color: 'bg-rose-500' },
                     { label: 'Training', count: statusStats['Training'] || 0, color: 'bg-cyan-500' },
-                  ].map((status, idx) => (
+                  ].map((status: any, idx: any) => (
                     <div key={idx} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 font-medium text-text-secondary">
                         <span className={`h-2.5 w-2.5 rounded-full ${status.color}`} />
@@ -806,7 +806,7 @@ export default function EmployeeManagementPage() {
               </h3>
               
               <div className="max-h-[120px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
-                {Object.entries(locationStats).map(([loc, count], idx) => {
+                {Object.entries(locationStats).map(([loc, count], idx: any) => {
                   const pct = Math.round((count / employees.length) * 100);
                   return (
                     <div key={idx} className="flex items-center justify-between text-xs bg-slate-50 px-2.5 py-1.5 rounded-lg border border-border">
@@ -820,8 +820,8 @@ export default function EmployeeManagementPage() {
               <div className="border-t border-border pt-3">
                 <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-2">Experience Levels</div>
                 <div className="flex flex-wrap gap-1.5">
-                  {['Intern', 'Junior', 'Mid', 'Senior', 'Lead', 'Director'].map((lvl) => {
-                    const count = employees.filter(e => e.experienceLevel === lvl).length;
+                  {['Intern', 'Junior', 'Mid', 'Senior', 'Lead', 'Director'].map((lvl: any) => {
+                    const count = employees.filter((e: any) => e.experienceLevel === lvl).length;
                     if (count === 0) return null;
                     return (
                       <span key={lvl} className="inline-flex items-center gap-1 bg-slate-100 text-text-primary text-[10px] font-bold px-2 py-1 rounded">
@@ -851,11 +851,11 @@ export default function EmployeeManagementPage() {
             </div>
 
             <div className="divide-y divide-border max-h-[400px] overflow-y-auto pr-1">
-              {recentActivities.map((act, index) => (
+              {recentActivities.map((act: any, index: any) => (
                 <div 
                   key={index}
                   onClick={() => {
-                    const empObj = employees.find(e => e.id === act.empId);
+                    const empObj = employees.find((e: any) => e.id === act.empId);
                     if (empObj) handleOpenProfile(empObj);
                   }}
                   className="py-3 flex items-start gap-4 hover:bg-slate-50/50 px-2 rounded-lg cursor-pointer transition-colors group"
@@ -897,7 +897,7 @@ export default function EmployeeManagementPage() {
                   type="text" 
                   placeholder="Search by name, ID, phone, email..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: any) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -942,7 +942,7 @@ export default function EmployeeManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Department</label>
                   <select 
                     value={filterDept} 
-                    onChange={(e) => setFilterDept(e.target.value)}
+                    onChange={(e: any) => setFilterDept(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Departments</option>
@@ -956,7 +956,7 @@ export default function EmployeeManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Status</label>
                   <select 
                     value={filterStatus} 
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    onChange={(e: any) => setFilterStatus(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Statuses</option>
@@ -975,11 +975,11 @@ export default function EmployeeManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Location</label>
                   <select 
                     value={filterLocation} 
-                    onChange={(e) => setFilterLocation(e.target.value)}
+                    onChange={(e: any) => setFilterLocation(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Locations</option>
-                    {Array.from(new Set(employees.map(e => e.location))).map(loc => (
+                    {Array.from(new Set(employees.map((e: any) => e.location))).map((loc: any) => (
                       <option key={loc} value={loc}>{loc}</option>
                     ))}
                   </select>
@@ -989,7 +989,7 @@ export default function EmployeeManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Exp Level</label>
                   <select 
                     value={filterExperience} 
-                    onChange={(e) => setFilterExperience(e.target.value)}
+                    onChange={(e: any) => setFilterExperience(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Experience Levels</option>
@@ -1006,7 +1006,7 @@ export default function EmployeeManagementPage() {
                   <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Employment Type</label>
                   <select 
                     value={filterType} 
-                    onChange={(e) => setFilterType(e.target.value)}
+                    onChange={(e: any) => setFilterType(e.target.value)}
                     className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
                   >
                     <option value="all">All Types</option>
@@ -1030,7 +1030,7 @@ export default function EmployeeManagementPage() {
                     <th className="px-4 py-3 w-8">
                       <input 
                         type="checkbox" 
-                        checked={filteredEmployees.length > 0 && filteredEmployees.every(e => selectedIds.includes(e.id))}
+                        checked={filteredEmployees.length > 0 && filteredEmployees.every((e: any) => selectedIds.includes(e.id))}
                         onChange={toggleSelectAll}
                         className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
                       />
@@ -1050,14 +1050,14 @@ export default function EmployeeManagementPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filteredEmployees.length > 0 ? (
-                    filteredEmployees.map((emp) => {
+                    filteredEmployees.map((emp: any) => {
                       const isSelected = selectedIds.includes(emp.id);
                       
                       // Find reporting manager name
-                      const managerName = employees.find(e => e.id === emp.managerId)?.name || 'None';
+                      const managerName = employees.find((e: any) => e.id === emp.managerId)?.name || 'None';
                       
                       // Find mentor name
-                      const mentorName = employees.find(e => e.id === emp.mentorId)?.name || 'None';
+                      const mentorName = employees.find((e: any) => e.id === emp.mentorId)?.name || 'None';
 
                       return (
                         <tr 
@@ -1067,7 +1067,7 @@ export default function EmployeeManagementPage() {
                           }`}
                           onClick={() => handleOpenProfile(emp)}
                         >
-                          <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-4 py-3" onClick={(e: any) => e.stopPropagation()}>
                             <input 
                               type="checkbox" 
                               checked={isSelected}
@@ -1117,7 +1117,7 @@ export default function EmployeeManagementPage() {
                               {emp.status}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-4 py-3 text-right" onClick={(e: any) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                               <button 
                                 onClick={() => handleOpenProfile(emp)}
@@ -1334,7 +1334,7 @@ export default function EmployeeManagementPage() {
                 { id: 'performance', label: 'Performance Center' },
                 { id: 'projects', label: 'Projects & Work' },
                 { id: 'timeline', label: 'Timeline History' },
-              ].map((tab) => {
+              ].map((tab: any) => {
                 // Check if mentor role
                 if (tab.mentorOnly && activeProfile.roleName !== 'Mentor') return null;
                 // Check if admin only
@@ -1381,7 +1381,7 @@ export default function EmployeeManagementPage() {
                           { label: 'Date of Birth', val: activeProfile.dob },
                           { label: 'Gender', val: activeProfile.gender },
                           { label: 'Current Address', val: activeProfile.address },
-                        ].map((row, rIdx) => (
+                        ].map((row: any, rIdx: any) => (
                           <div key={rIdx} className="py-2.5 flex justify-between text-xs font-semibold">
                             <span className="text-text-secondary">{row.label}</span>
                             <span className="text-text-primary text-right">{row.val}</span>
@@ -1404,7 +1404,7 @@ export default function EmployeeManagementPage() {
                           { label: 'Employment Level', val: activeProfile.experienceLevel },
                           { label: 'Employment Type', val: activeProfile.employmentType },
                           { label: 'Joining Date', val: activeProfile.joinDate },
-                        ].map((row, rIdx) => (
+                        ].map((row: any, rIdx: any) => (
                           <div key={rIdx} className="py-2.5 flex justify-between text-xs font-semibold">
                             <span className="text-text-secondary">{row.label}</span>
                             <span className="text-text-primary">{row.val}</span>
@@ -1451,7 +1451,7 @@ export default function EmployeeManagementPage() {
                         { title: 'Probation', date: activeProfile.status === 'Probation' ? 'Current' : 'Completed', active: activeProfile.status !== 'Training' },
                         { title: 'Active Duty', date: activeProfile.status === 'Active' ? 'Current' : '', active: activeProfile.status === 'Active' || activeProfile.status === 'Notice Period' },
                         { title: 'Exit', date: activeProfile.status === 'Notice Period' ? 'In notice' : '', active: activeProfile.status === 'Notice Period' || activeProfile.status === 'Resigned' }
-                      ].map((stage, sIdx) => (
+                      ].map((stage: any, sIdx: any) => (
                         <div key={sIdx} className="flex flex-col items-center z-10">
                           <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 ${
                             stage.active 
@@ -1498,9 +1498,9 @@ export default function EmployeeManagementPage() {
                       'Resume', 'Offer Letter', 'Government ID', 'PAN Card', 
                       'Aadhaar', 'Degree Certificates', 'Experience Certificates', 
                       'NDA', 'Employment Agreement'
-                    ].map((type) => {
+                    ].map((type: any) => {
                       // Find if employee has this doc uploaded
-                      const doc = activeProfile.documents.find(d => d.type === type);
+                      const doc = activeProfile.documents.find((d: any) => d.type === type);
 
                       return (
                         <div 
@@ -1543,12 +1543,12 @@ export default function EmployeeManagementPage() {
                           <div className="flex items-center justify-between border-t border-border pt-2.5 mt-2 text-[10px] font-semibold text-text-secondary">
                             <span>{doc ? `v${doc.version} - ${doc.uploadDate}` : 'No date'}</span>
                             {doc && (
-                              <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                              <div className="flex items-center gap-1.5" onClick={(e: any) => e.stopPropagation()}>
                                 {/* Verify actions */}
                                 {doc.status !== 'Verified' && (
                                   <button 
                                     onClick={() => {
-                                      const docIdx = activeProfile.documents.findIndex(d => d.type === type);
+                                      const docIdx = activeProfile.documents.findIndex((d: any) => d.type === type);
                                       handleVerifyDocument(activeProfile.id, docIdx, 'Verified');
                                     }}
                                     className="p-1 hover:bg-slate-100 rounded text-emerald-600 hover:text-emerald-700 cursor-pointer"
@@ -1561,7 +1561,7 @@ export default function EmployeeManagementPage() {
                                   <PermissionGuard required="employee.edit">
                                     <button 
                                       onClick={() => {
-                                        const docIdx = activeProfile.documents.findIndex(d => d.type === type);
+                                        const docIdx = activeProfile.documents.findIndex((d: any) => d.type === type);
                                         handleVerifyDocument(activeProfile.id, docIdx, 'Rejected');
                                       }}
                                       className="p-1 hover:bg-slate-100 rounded text-rose-600 hover:text-rose-700 cursor-pointer"
@@ -1573,7 +1573,7 @@ export default function EmployeeManagementPage() {
                                 )}
                                 <a 
                                   href="#" 
-                                  onClick={(e) => {
+                                  onClick={(e: any) => {
                                     e.preventDefault();
                                     showToast(`Downloading file: ${doc.name}`);
                                   }}
@@ -1731,7 +1731,7 @@ export default function EmployeeManagementPage() {
                       { label: 'Assigned Employees', val: activeProfile.mentorMetrics.assignedEmployees, color: 'text-emerald-600 bg-emerald-50/40' },
                       { label: 'Active Projects', val: activeProfile.mentorMetrics.activeProjects, color: 'text-purple-600 bg-purple-50/40' },
                       { label: 'Training Sessions', val: activeProfile.mentorMetrics.trainingSessions, color: 'text-cyan-600 bg-cyan-50/40' },
-                    ].map((kpi, idx) => (
+                    ].map((kpi: any, idx: any) => (
                       <div key={idx} className={`p-4 rounded-xl border border-border shadow-sm ${kpi.color}`}>
                         <div className="text-2xl font-black">{kpi.val}</div>
                         <div className="text-[9px] font-bold text-text-secondary uppercase tracking-wider mt-1">{kpi.label}</div>
@@ -1746,11 +1746,11 @@ export default function EmployeeManagementPage() {
                     <div className="bg-white border border-border rounded-xl p-5 shadow-sm space-y-3">
                       <h5 className="text-xs font-extrabold text-text-secondary uppercase tracking-widest">Assigned Interns</h5>
                       <div className="divide-y divide-border max-h-[200px] overflow-y-auto pr-1">
-                        {activeProfile.mentorMetrics.interns.map((intern) => (
+                        {activeProfile.mentorMetrics.interns.map((intern: any) => (
                           <div 
                             key={intern.id} 
                             onClick={() => {
-                              const matchObj = employees.find(e => e.id === intern.id);
+                              const matchObj = employees.find((e: any) => e.id === intern.id);
                               if (matchObj) handleOpenProfile(matchObj);
                             }}
                             className="py-2.5 flex justify-between items-center text-xs font-semibold hover:text-blue-600 cursor-pointer"
@@ -1766,11 +1766,11 @@ export default function EmployeeManagementPage() {
                     <div className="bg-white border border-border rounded-xl p-5 shadow-sm space-y-3">
                       <h5 className="text-xs font-extrabold text-text-secondary uppercase tracking-widest">Assigned Employees</h5>
                       <div className="divide-y divide-border max-h-[200px] overflow-y-auto pr-1">
-                        {activeProfile.mentorMetrics.employees.map((staff) => (
+                        {activeProfile.mentorMetrics.employees.map((staff: any) => (
                           <div 
                             key={staff.id} 
                             onClick={() => {
-                              const matchObj = employees.find(e => e.id === staff.id);
+                              const matchObj = employees.find((e: any) => e.id === staff.id);
                               if (matchObj) handleOpenProfile(matchObj);
                             }}
                             className="py-2.5 flex justify-between items-center text-xs font-semibold hover:text-blue-600 cursor-pointer"
@@ -1836,7 +1836,7 @@ export default function EmployeeManagementPage() {
                       <div className="space-y-1.5">
                         <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Assigned Permissions</div>
                         <div className="flex flex-wrap gap-1.5">
-                          {activeProfile.accessControl.permissions.map((p, idx) => (
+                          {activeProfile.accessControl.permissions.map((p: any, idx: any) => (
                             <span key={idx} className="bg-slate-100 text-text-primary text-[10px] font-bold px-2 py-0.5 rounded">
                               {p}
                             </span>
@@ -1847,7 +1847,7 @@ export default function EmployeeManagementPage() {
                       <div className="space-y-1.5 pt-2">
                         <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Allowed ERP Modules</div>
                         <div className="flex flex-wrap gap-1.5">
-                          {activeProfile.accessControl.moduleAccess.map((m, idx) => (
+                          {activeProfile.accessControl.moduleAccess.map((m: any, idx: any) => (
                             <span key={idx} className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-100">
                               {m}
                             </span>
@@ -1865,7 +1865,7 @@ export default function EmployeeManagementPage() {
                     </h4>
 
                     <div className="divide-y divide-border">
-                      {activeProfile.auditTrail?.map((entry) => (
+                      {activeProfile.auditTrail?.map((entry: any) => (
                         <div key={entry.id} className="py-2.5 text-xs">
                           <div className="flex justify-between items-center font-bold text-text-primary">
                             <span>{entry.action}</span>
@@ -1901,7 +1901,7 @@ export default function EmployeeManagementPage() {
                           { label: 'Technical Depth', val: activeProfile.performanceMetrics.technical, color: 'bg-cyan-500' },
                           { label: 'Work Attendance', val: activeProfile.performanceMetrics.attendance, color: 'bg-teal-500' },
                           { label: 'Learning Progress Rate', val: activeProfile.performanceMetrics.learningProgress, color: 'bg-indigo-500' },
-                        ].map((metric, idx) => (
+                        ].map((metric: any, idx: any) => (
                           <div key={idx} className="space-y-1">
                             <div className="flex justify-between text-xs font-semibold text-text-primary">
                               <span>{metric.label}</span>
@@ -1944,7 +1944,7 @@ export default function EmployeeManagementPage() {
                             const spacingX = 100 / Math.max(1, pts.length - 1);
                             // Map rating (0-5) to Y (90 to 10)
                             const getY = (rating: number) => 90 - (rating / 5) * 80;
-                            const pathData = pts.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${i * spacingX},${getY(pt.rating)}`).join(' ');
+                            const pathData = pts.map((pt: any, i: any) => `${i === 0 ? 'M' : 'L'} ${i * spacingX},${getY(pt.rating)}`).join(' ');
                             return (
                               <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
                                 {/* Path representing rating scores */}
@@ -1971,7 +1971,7 @@ export default function EmployeeManagementPage() {
                             );
                           })()}
 
-                          {activeProfile.performanceTrend.map((t, idx) => (
+                          {activeProfile.performanceTrend.map((t: any, idx: any) => (
                             <div key={idx} className="z-10 flex flex-col items-center">
                               <span className="text-[10px] font-black text-text-primary bg-white border border-border rounded px-1 shadow-sm mb-1">{t.rating}</span>
                               <span className="text-[10px] font-bold text-text-secondary">{t.month}</span>
@@ -2001,7 +2001,7 @@ export default function EmployeeManagementPage() {
                     </div>
 
                     <div className="space-y-4">
-                      {activeProfile.performanceReviews?.map((rev, idx) => (
+                      {activeProfile.performanceReviews?.map((rev: any, idx: any) => (
                         <div key={idx} className="bg-slate-50 border border-border rounded-xl p-3.5 text-xs">
                           <div className="flex justify-between items-center font-bold text-text-primary">
                             <span className="text-text-primary">{rev.reviewerName} ({rev.role})</span>
@@ -2046,7 +2046,7 @@ export default function EmployeeManagementPage() {
                       </thead>
                       <tbody className="divide-y divide-border">
                         {activeProfile.projects && activeProfile.projects.length > 0 ? (
-                          activeProfile.projects.map((proj, idx) => (
+                          activeProfile.projects.map((proj: any, idx: any) => (
                             <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                               <td className="px-4 py-3 font-bold text-text-primary flex items-center gap-1.5">
                                 <Briefcase className="h-3.5 w-3.5 text-blue-600 shrink-0" />
@@ -2092,7 +2092,7 @@ export default function EmployeeManagementPage() {
                   </h4>
 
                   <div className="relative border-l-2 border-border pl-6 space-y-6 ml-2 py-2">
-                    {activeProfile.timeline.map((evt, idx) => (
+                    {activeProfile.timeline.map((evt: any, idx: any) => (
                       <div key={idx} className="relative">
                         
                         {/* Dot indicator matching event type */}
@@ -2185,7 +2185,7 @@ export default function EmployeeManagementPage() {
                   <label className="block text-text-secondary">Select lifecycle state status</label>
                   <select
                     value={statusInput}
-                    onChange={(e) => setStatusInput(e.target.value as any)}
+                    onChange={(e: any) => setStatusInput(e.target.value as any)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white font-semibold text-xs focus:outline-none focus:border-primary"
                   >
                     <option value="Active">Active Duty</option>
@@ -2223,7 +2223,7 @@ export default function EmployeeManagementPage() {
                   <label className="block text-text-secondary">Target Organization Department Code</label>
                   <select
                     value={deptInput}
-                    onChange={(e) => setDeptInput(e.target.value)}
+                    onChange={(e: any) => setDeptInput(e.target.value)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white font-semibold text-xs focus:outline-none focus:border-primary"
                   >
                     <option value="org-1">HR / Operations (org-1)</option>
@@ -2256,11 +2256,11 @@ export default function EmployeeManagementPage() {
                   <label className="block text-text-secondary">Select Professional Mentor</label>
                   <select
                     value={mentorInput}
-                    onChange={(e) => setMentorInput(e.target.value)}
+                    onChange={(e: any) => setMentorInput(e.target.value)}
                     className="w-full p-2.5 border border-border rounded-lg bg-white font-semibold text-xs focus:outline-none focus:border-primary"
                   >
                     <option value="">No Assigned Mentor (Clear mentor)</option>
-                    {employees.filter(e => e.roleName === 'Mentor').map(m => (
+                    {employees.filter((e: any) => e.roleName === 'Mentor').map((m: any) => (
                       <option key={m.id} value={m.id}>{m.name} ({m.designation})</option>
                     ))}
                   </select>
@@ -2293,7 +2293,7 @@ export default function EmployeeManagementPage() {
                       type="text" 
                       required
                       value={promoTitle}
-                      onChange={(e) => setPromoTitle(e.target.value)}
+                      onChange={(e: any) => setPromoTitle(e.target.value)}
                       className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none"
                     />
                   </div>
@@ -2302,7 +2302,7 @@ export default function EmployeeManagementPage() {
                     <label className="block text-text-secondary">New Salary Grade Band</label>
                     <select
                       value={promoGrade}
-                      onChange={(e) => setPromoGrade(e.target.value)}
+                      onChange={(e: any) => setPromoGrade(e.target.value)}
                       className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none"
                     >
                       <option value="Grade 1">Grade 1 (Intern)</option>
@@ -2331,7 +2331,7 @@ export default function EmployeeManagementPage() {
                     <label className="block text-text-secondary">Select Document Category Type</label>
                     <select
                       value={docType}
-                      onChange={(e) => setDocType(e.target.value)}
+                      onChange={(e: any) => setDocType(e.target.value)}
                       className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none"
                     >
                       <option value="Resume">Resume</option>
@@ -2352,7 +2352,7 @@ export default function EmployeeManagementPage() {
                       type="text" 
                       placeholder="e.g. adhaar_scan_final.pdf"
                       value={docName}
-                      onChange={(e) => setDocName(e.target.value)}
+                      onChange={(e: any) => setDocName(e.target.value)}
                       className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none"
                     />
                   </div>
@@ -2383,7 +2383,7 @@ export default function EmployeeManagementPage() {
                     max="5" 
                     step="1"
                     value={reviewForm.score}
-                    onChange={(e) => setReviewForm({ ...reviewForm, score: Number(e.target.value) })}
+                    onChange={(e: any) => setReviewForm({ ...reviewForm, score: Number(e.target.value) })}
                     className="w-full accent-blue-600 cursor-pointer"
                   />
 
@@ -2391,7 +2391,7 @@ export default function EmployeeManagementPage() {
                     <label className="block text-text-secondary">Reviewer Perspective Role</label>
                     <select
                       value={reviewForm.role}
-                      onChange={(e) => setReviewForm({ ...reviewForm, role: e.target.value as any })}
+                      onChange={(e: any) => setReviewForm({ ...reviewForm, role: e.target.value as any })}
                       className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none"
                     >
                       <option value="HR">HR Feedback</option>
@@ -2407,7 +2407,7 @@ export default function EmployeeManagementPage() {
                       rows={3}
                       placeholder="Input comprehensive feedback about productivity, leadership, and technical contribution."
                       value={reviewForm.comment}
-                      onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                      onChange={(e: any) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                       className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none font-semibold text-xs leading-relaxed"
                     />
                   </div>
@@ -2431,7 +2431,7 @@ export default function EmployeeManagementPage() {
                       rows={3}
                       placeholder="Input employee dashboard notification details..."
                       value={notifyMsg}
-                      onChange={(e) => setNotifyMsg(e.target.value)}
+                      onChange={(e: any) => setNotifyMsg(e.target.value)}
                       className="w-full p-2.5 border border-border rounded-lg bg-white focus:outline-none font-semibold text-xs"
                     />
                   </div>
@@ -2471,7 +2471,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.name}
-                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, name: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2481,7 +2481,7 @@ export default function EmployeeManagementPage() {
                           type="email" 
                           required
                           value={editForm.email}
-                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, email: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2491,7 +2491,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.phone}
-                          onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, phone: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2501,7 +2501,7 @@ export default function EmployeeManagementPage() {
                           type="date" 
                           required
                           value={editForm.dob}
-                          onChange={(e) => setEditForm({ ...editForm, dob: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, dob: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2509,7 +2509,7 @@ export default function EmployeeManagementPage() {
                         <label className="block text-text-secondary text-[10px]">Gender</label>
                         <select 
                           value={editForm.gender}
-                          onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, gender: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
                           <option value="Male">Male</option>
@@ -2523,7 +2523,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.location}
-                          onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, location: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2533,7 +2533,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.address}
-                          onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, address: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2552,7 +2552,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.designation}
-                          onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, designation: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2560,7 +2560,7 @@ export default function EmployeeManagementPage() {
                         <label className="block text-text-secondary text-[10px]">Employment Type</label>
                         <select 
                           value={editForm.employmentType}
-                          onChange={(e) => setEditForm({ ...editForm, employmentType: e.target.value as any })}
+                          onChange={(e: any) => setEditForm({ ...editForm, employmentType: e.target.value as any })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
                           <option value="Full-time">Full-time</option>
@@ -2576,7 +2576,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.salaryGrade}
-                          onChange={(e) => setEditForm({ ...editForm, salaryGrade: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, salaryGrade: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2586,7 +2586,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.band}
-                          onChange={(e) => setEditForm({ ...editForm, band: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, band: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2596,7 +2596,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.shift}
-                          onChange={(e) => setEditForm({ ...editForm, shift: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, shift: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2604,7 +2604,7 @@ export default function EmployeeManagementPage() {
                         <label className="block text-text-secondary text-[10px]">Experience Level</label>
                         <select 
                           value={editForm.experienceLevel}
-                          onChange={(e) => setEditForm({ ...editForm, experienceLevel: e.target.value as any })}
+                          onChange={(e: any) => setEditForm({ ...editForm, experienceLevel: e.target.value as any })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         >
                           <option value="Intern">Intern</option>
@@ -2630,7 +2630,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.emergencyName}
-                          onChange={(e) => setEditForm({ ...editForm, emergencyName: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, emergencyName: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2640,7 +2640,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.emergencyRelation}
-                          onChange={(e) => setEditForm({ ...editForm, emergencyRelation: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, emergencyRelation: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>
@@ -2650,7 +2650,7 @@ export default function EmployeeManagementPage() {
                           type="text" 
                           required
                           value={editForm.emergencyPhone}
-                          onChange={(e) => setEditForm({ ...editForm, emergencyPhone: e.target.value })}
+                          onChange={(e: any) => setEditForm({ ...editForm, emergencyPhone: e.target.value })}
                           className="w-full p-2 border border-border rounded bg-white text-xs focus:outline-none"
                         />
                       </div>

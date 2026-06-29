@@ -25,7 +25,7 @@ export function PermissionGuard({
 
   if (Array.isArray(required)) {
     if (requireAll) {
-      isAuthorized = required.every(p => hasPermission(p));
+      isAuthorized = required.every((p: any) => hasPermission(p));
     } else {
       isAuthorized = hasAnyPermission(required);
     }

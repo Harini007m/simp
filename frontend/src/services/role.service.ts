@@ -1,85 +1,30 @@
-import { Role, MOCK_ROLES } from '../data/mock-roles';
+
 import { roleApi } from '../api/role.api';
+import { Role } from '../types/api/role.types';
 
 export const roleService = {
   async getRoles(): Promise<Role[]> {
-    try {
-      const data = await roleApi.getRoles();
-      if (data && data.length > 0) return data;
-    } catch (e) {
-      console.debug(e);
-    }
-    return [...MOCK_ROLES];
-  },
+        const data = await roleApi.getRoles();
+        return data;
+    },
 
   async getRole(id: string): Promise<Role | undefined> {
-    try {
       const data = await roleApi.getRoleById(id);
-      if (data) return data;
-    } catch (e) {
-      console.debug(e);
-    }
-    return MOCK_ROLES.find(r => r.id === id);
+      return data;
   },
 
   async createRole(role: Omit<Role, 'id' | 'modulesCount' | 'usersCount' | 'color' | 'bg'> & { color?: string, bg?: string }): Promise<Role> {
-    try {
-      const data = await roleApi.createRole(role);
-      if (data) return data;
-    } catch (e) {
-      console.debug(e);
-    }
-    const randomColors = [
-      { color: 'text-purple-600', bg: 'bg-purple-100' },
-      { color: 'text-indigo-600', bg: 'bg-indigo-100' },
-      { color: 'text-teal-600', bg: 'bg-teal-100' },
-      { color: 'text-rose-600', bg: 'bg-rose-100' },
-      { color: 'text-violet-600', bg: 'bg-violet-100' },
-    ];
-    const colorPair = randomColors[MOCK_ROLES.length % randomColors.length];
-    const newRole: Role = {
-      ...role,
-      id: `role-${MOCK_ROLES.length + 1}`,
-      modulesCount: role.moduleIds.length,
-      usersCount: 0,
-      color: role.color || colorPair.color,
-      bg: role.bg || colorPair.bg,
-    };
-    MOCK_ROLES.push(newRole);
-    return newRole;
+      const data = await roleApi.createRole(role as any);
+      return data;
   },
 
   async updateRole(id: string, updatedData: Partial<Role>): Promise<Role | undefined> {
-    try {
       const data = await roleApi.updateRole(id, updatedData);
-      if (data) return data;
-    } catch (e) {
-      console.debug(e);
-    }
-    const idx = MOCK_ROLES.findIndex(r => r.id === id);
-    if (idx !== -1) {
-      MOCK_ROLES[idx] = {
-        ...MOCK_ROLES[idx],
-        ...updatedData,
-        modulesCount: updatedData.moduleIds ? updatedData.moduleIds.length : MOCK_ROLES[idx].modulesCount
-      };
-      return MOCK_ROLES[idx];
-    }
-    return undefined;
+      return data;
   },
 
   async deleteRole(id: string): Promise<boolean> {
-    try {
       const success = await roleApi.deleteRole(id);
-      if (success !== undefined) return success;
-    } catch (e) {
-      console.debug(e);
-    }
-    const idx = MOCK_ROLES.findIndex(r => r.id === id);
-    if (idx !== -1) {
-      MOCK_ROLES.splice(idx, 1);
-      return true;
-    }
-    return false;
+      return success;
   }
 };

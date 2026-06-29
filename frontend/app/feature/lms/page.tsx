@@ -106,7 +106,7 @@ export default function LMSDashboardPage() {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('pinesphere_courses');
       if (stored) {
-        setBatches(prev => prev.map(b => {
+        setBatches((prev: any) => prev.map((b: any) => {
           if (b.id === 'batch-ai-2026') {
             return {
               ...b,
@@ -119,8 +119,8 @@ export default function LMSDashboardPage() {
     }
   }, []);
 
-  const totalCourses = batches.reduce((sum, b) => sum + b.courses.length, 0);
-  const totalResources = batches.reduce((sum, b) => sum + b.resourcesCount, 0);
+  const totalCourses = batches.reduce((sum: any, b: any) => sum + b.courses.length, 0);
+  const totalResources = batches.reduce((sum: any, b: any) => sum + b.resourcesCount, 0);
   const avgCompletionRate = 81;
 
   return (
@@ -161,7 +161,7 @@ export default function LMSDashboardPage() {
           <div className="space-y-4">
             <h3 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Curriculum Progress by Batch</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {batches.map(b => (
+              {batches.map((b: any) => (
                 <div 
                   key={b.id}
                   onClick={() => setSelectedBatch(b)}
@@ -202,7 +202,7 @@ export default function LMSDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {selectedBatch.courses.map(crs => (
+            {selectedBatch.courses.map((crs: any) => (
               <div 
                 key={crs.id}
                 onClick={() => setSelectedCourse(crs)}
@@ -244,7 +244,7 @@ export default function LMSDashboardPage() {
           </div>
 
           <div className="space-y-6 max-w-4xl">
-            {selectedCourse.modules.map(mod => (
+            {selectedCourse.modules.map((mod: any) => (
               <div key={mod.id} className="border border-slate-150 rounded-2xl overflow-hidden shadow-sm bg-slate-50/20">
                 <div className="bg-slate-50 px-5 py-3 border-b flex justify-between items-center text-xs font-bold text-text-primary">
                   <span>{mod.title}</span>
@@ -252,7 +252,7 @@ export default function LMSDashboardPage() {
                 </div>
                 
                 <div className="divide-y divide-border bg-white">
-                  {mod.submodules.map(sub => (
+                  {mod.submodules.map((sub: any) => (
                     <div key={sub.id} className="p-4 flex items-center justify-between text-xs hover:bg-slate-50/40">
                       <div className="flex items-center gap-3 font-semibold text-text-primary">
                         {sub.type === 'Video' ? (

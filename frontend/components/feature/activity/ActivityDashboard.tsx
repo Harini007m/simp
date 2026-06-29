@@ -27,7 +27,7 @@ function SkeletonCard() {
 function SkeletonTable() {
   return (
     <div className="animate-pulse">
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 8 }).map((_: any, i: any) => (
         <div key={i} className="flex gap-4 px-5 py-4 border-b border-border">
           <div className="h-4 w-24 bg-slate-200 rounded" />
           <div className="h-4 w-20 bg-slate-200 rounded" />
@@ -110,7 +110,7 @@ export default function ActivityDashboard() {
         ]);
         setStats(s);
         // Sort newest first
-        setActivities(a.sort((x, y) => new Date(y.timestamp).getTime() - new Date(x.timestamp).getTime()));
+        setActivities(a.sort((x: any, y: any) => new Date(y.timestamp).getTime() - new Date(x.timestamp).getTime()));
       } catch (e) {
         console.error(e);
       } finally {
@@ -121,7 +121,7 @@ export default function ActivityDashboard() {
   }, []);
 
   const filteredActivities = useMemo(() => {
-    return activities.filter(a => {
+    return activities.filter((a: any) => {
       const matchesSearch = !search || a.userName.toLowerCase().includes(search.toLowerCase()) || a.action.toLowerCase().includes(search.toLowerCase()) || a.description.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === 'All' || a.status === statusFilter;
       const matchesModule = moduleFilter === 'All' || a.module === moduleFilter;
@@ -176,9 +176,9 @@ export default function ActivityDashboard() {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+          Array.from({ length: 4 }).map((_: any, i: any) => <SkeletonCard key={i} />)
         ) : (
-          statCards.map((c, i) => (
+          statCards.map((c: any, i: any) => (
             <div key={i} className="bg-white/80 backdrop-blur-xl border border-white/40 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group">
               <div className="flex justify-between items-start mb-4">
                 <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${c.bg} ${c.color} group-hover:scale-110 transition-transform duration-300`}>
@@ -208,7 +208,7 @@ export default function ActivityDashboard() {
                 type="text"
                 placeholder="Search by user, action, or description..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e: any) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 text-sm border border-border rounded-xl bg-slate-50 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary transition-all outline-none"
               />
               {search && (
@@ -230,7 +230,7 @@ export default function ActivityDashboard() {
             {/* Status pills */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Status</span>
-              {statusOptions.map(opt => (
+              {statusOptions.map((opt: any) => (
                 <button
                   key={opt}
                   onClick={() => setStatusFilter(opt)}
@@ -249,10 +249,10 @@ export default function ActivityDashboard() {
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Module</span>
               <select
                 value={moduleFilter}
-                onChange={e => setModuleFilter(e.target.value as ModuleFilter)}
+                onChange={(e: any) => setModuleFilter(e.target.value as ModuleFilter)}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-slate-50 text-text-secondary outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               >
-                {moduleOptions.map(opt => (
+                {moduleOptions.map((opt: any) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
@@ -260,7 +260,7 @@ export default function ActivityDashboard() {
             {/* Severity pills */}
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase text-text-secondary mr-1">Severity</span>
-              {severityOptions.map(opt => (
+              {severityOptions.map((opt: any) => (
                 <button
                   key={opt}
                   onClick={() => setSeverityFilter(opt)}
@@ -302,7 +302,7 @@ export default function ActivityDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-text-secondary">
-                {paginatedActivities.map(a => (
+                {paginatedActivities.map((a: any) => (
                   <tr key={a.id} className="hover:bg-slate-50/80 transition-colors cursor-pointer" onClick={() => handleView(a)}>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-1.5 text-text-secondary">
@@ -313,7 +313,7 @@ export default function ActivityDashboard() {
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2.5">
                         <div className="h-7 w-7 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-[10px] font-bold">
-                          {a.userName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          {a.userName.split(' ').map((n: any) => n[0]).join('').slice(0, 2)}
                         </div>
                         <div>
                           <span className="font-semibold text-text-primary text-xs">{a.userName}</span>
@@ -345,7 +345,7 @@ export default function ActivityDashboard() {
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <button
-                        onClick={e => { e.stopPropagation(); handleView(a); }}
+                        onClick={(e: any) => { e.stopPropagation(); handleView(a); }}
                         className="text-indigo-600 hover:text-indigo-800 font-medium text-xs flex items-center gap-1 ml-auto"
                       >
                         <Eye className="w-3.5 h-3.5" />
@@ -367,13 +367,13 @@ export default function ActivityDashboard() {
             </span>
             <div className="flex items-center gap-1">
               <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage((p: any) => Math.max(1, p - 1))}
                 disabled={page === 1}
                 className="h-8 w-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+              {Array.from({ length: Math.min(5, totalPages) }).map((_: any, i: any) => {
                 let p: number;
                 if (totalPages <= 5) {
                   p = i + 1;
@@ -397,7 +397,7 @@ export default function ActivityDashboard() {
                 );
               })}
               <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setPage((p: any) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
                 className="h-8 w-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
               >
@@ -415,7 +415,7 @@ export default function ActivityDashboard() {
             {/* Activity Header */}
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-lg font-bold shadow-lg">
-                {selectedActivity.userName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                {selectedActivity.userName.split(' ').map((n: any) => n[0]).join('').slice(0, 2)}
               </div>
               <div>
                 <h3 className="text-lg font-bold text-text-primary">{selectedActivity.userName}</h3>

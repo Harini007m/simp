@@ -75,7 +75,7 @@ export default function AnnouncementTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {announcements.slice(0, 50).map((a) => (
+            {announcements.slice(0, 50).map((a: any) => (
               <tr 
                 key={a.id} 
                 className="hover:bg-slate-50/70 transition-colors cursor-pointer"
@@ -98,7 +98,7 @@ export default function AnnouncementTable() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex flex-wrap gap-1 max-w-[150px]">
-                    {a.audience.map(aud => (
+                    {a.audience.map((aud: any) => (
                       <span key={aud} className="px-2 py-1 bg-gray-100 text-text-primary text-[10px] font-medium rounded">
                         {aud}
                       </span>

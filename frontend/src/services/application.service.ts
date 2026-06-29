@@ -1,6 +1,6 @@
 import { applicationApi } from '../api/application.api';
 import { ApplicationCreate, ApplicationResponse, ApplicationReviewRequest } from '../types/api/application.types';
-import { Application } from '../data/mock-applications';
+import { Application } from '../types/api/application.types';
 
 export type ExtendedApplication = ApplicationResponse & Application;
 

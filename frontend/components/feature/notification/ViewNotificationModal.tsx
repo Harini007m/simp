@@ -105,7 +105,7 @@ export default function ViewNotificationModal({ isOpen, onClose, data }: ViewNot
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-text-secondary">Sent via:</span>
                   <div className="flex gap-2">
-                    {data.channels.map(ch => (
+                    {data.channels.map((ch: any) => (
                       <span key={ch} className="px-2 py-1 bg-teal-50 border border-teal-150 text-teal-700 font-semibold rounded-lg">
                         {ch}
                       </span>
@@ -125,7 +125,7 @@ export default function ViewNotificationModal({ isOpen, onClose, data }: ViewNot
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-semibold text-text-secondary">Audience:</span>
                   <div className="flex gap-1">
-                    {data.audience.map(aud => (
+                    {data.audience.map((aud: any) => (
                       <span key={aud} className="px-2 py-0.5 bg-slate-100 border border-border text-text-secondary font-bold rounded">
                         {aud}
                       </span>

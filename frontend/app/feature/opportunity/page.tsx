@@ -9,13 +9,13 @@ import {
 } from 'lucide-react';
 
 import { opportunitiesService } from '@/src/services/opportunities.service';
-import { Opportunity } from '@/src/data/mock-opportunities';
+import { Opportunity } from '@/src/types/api/opportunity.types';
 import { CreateOpportunityWizard } from '@/components/feature/opportunity/CreateOpportunityWizard';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { applicationService } from '@/src/services/application.service';
-import { Application } from '@/src/data/mock-applications';
+import { Application } from '@/src/types/api/application.types';
 import { openingMentorsService } from '@/src/services/opening-mentors.service';
-import { OpeningMentor } from '@/src/data/mock-opening-mentors';
+import { OpeningMentor } from '@/src/types/api/mentor.types';
 import { mentorService } from '@/src/services/mentor.service';
 import { MentorProfile } from '@/src/types/api/mentor.types';
 
@@ -106,18 +106,18 @@ export default function OpportunityPage() {
 
   // KPIs
   const totalOpenings = opportunities.length;
-  const openOpenings = opportunities.filter(o => o.status === 'Open').length;
-  const closedOpenings = opportunities.filter(o => o.status === 'Closed').length;
+  const openOpenings = opportunities.filter((o: any) => o.status === 'Open').length;
+  const closedOpenings = opportunities.filter((o: any) => o.status === 'Closed').length;
   const totalApplications = applications.length;
   
-  const totalSeats = opportunities.reduce((acc, curr) => acc + (parseInt(curr.seats) || 0), 0);
-  const selectedApps = applications.filter(a => a.status === 'Selected').length;
+  const totalSeats = opportunities.reduce((acc: any, curr: any) => acc + (parseInt(curr.seats) || 0), 0);
+  const selectedApps = applications.filter((a: any) => a.status === 'Selected').length;
   const fillRate = totalSeats > 0 ? Math.round((selectedApps / totalSeats) * 100) : 0;
   
-  const opportunitiesWithMentors = new Set(opportunityMentors.map(m => m.opportunityId)).size;
+  const opportunitiesWithMentors = new Set(opportunityMentors.map((m: any) => m.opportunityId)).size;
   const mentorCoverage = totalOpenings > 0 ? Math.round((opportunitiesWithMentors / totalOpenings) * 100) : 0;
 
-  const filteredOpportunities = opportunities.filter(opp => 
+  const filteredOpportunities = opportunities.filter((opp: any) => 
     opp.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
     opp.mode.toLowerCase().includes(searchTerm.toLowerCase()) ||
     opp.type.toLowerCase().includes(searchTerm.toLowerCase())
@@ -141,7 +141,7 @@ export default function OpportunityPage() {
           { label: 'Open Opportunities', value: openOpenings, icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'Total Applications', value: totalApplications, icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
           { label: 'Fill Rate', value: `${fillRate}%`, icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-50' }
-        ].map((kpi, idx) => (
+        ].map((kpi: any, idx: any) => (
           <div key={idx} className="bg-white border border-border rounded-xl p-5 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
@@ -163,10 +163,10 @@ export default function OpportunityPage() {
           <div className="space-y-4">
             {[
               { label: 'Applied', value: applications.length, color: 'bg-blue-500' },
-              { label: 'Reviewing', value: applications.filter(a => a.status === 'Under Review').length, color: 'bg-indigo-500' },
-              { label: 'Shortlisted', value: applications.filter(a => a.status === 'Shortlisted').length, color: 'bg-amber-500' },
+              { label: 'Reviewing', value: applications.filter((a: any) => a.status === 'Under Review').length, color: 'bg-indigo-500' },
+              { label: 'Shortlisted', value: applications.filter((a: any) => a.status === 'Shortlisted').length, color: 'bg-amber-500' },
               { label: 'Selected', value: selectedApps, color: 'bg-emerald-500' }
-            ].map((step, idx) => (
+            ].map((step: any, idx: any) => (
               <div key={idx} className="flex items-center gap-4">
                 <div className="w-24 text-sm font-medium text-text-secondary">{step.label}</div>
                 <div className="flex-1">
@@ -191,7 +191,7 @@ export default function OpportunityPage() {
               { label: 'Open', value: openOpenings, color: 'bg-emerald-500' },
               { label: 'Closed', value: closedOpenings, color: 'bg-slate-400' },
               { label: 'Draft', value: opportunities.length - openOpenings - closedOpenings, color: 'bg-amber-400' }
-            ].map((bar, idx) => (
+            ].map((bar: any, idx: any) => (
               <div key={idx} className="flex-1 flex flex-col justify-end items-center gap-2 group">
                 <div className="text-xs font-bold text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity">{bar.value}</div>
                 <div 
@@ -216,7 +216,7 @@ export default function OpportunityPage() {
             type="text" 
             placeholder="Search by title, mode, or type..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e: any) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
@@ -239,7 +239,7 @@ export default function OpportunityPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {filteredOpportunities.map(opp => (
+            {filteredOpportunities.map((opp: any) => (
               <tr key={opp.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -396,7 +396,7 @@ export default function OpportunityPage() {
                 { id: 'applications', label: 'Applications', icon: FileText },
                 { id: 'analytics', label: 'Analytics', icon: BarChart3 },
                 { id: 'timeline', label: 'Timeline', icon: Activity }
-              ].map(t => (
+              ].map((t: any) => (
                 <button
                   key={t.id}
                   onClick={() => setDrawerTab(t.id as DrawerTabType)}
@@ -461,11 +461,11 @@ export default function OpportunityPage() {
                           <select 
                             required
                             value={assignForm.mentorId}
-                            onChange={(e) => setAssignForm({...assignForm, mentorId: e.target.value})}
+                            onChange={(e: any) => setAssignForm({...assignForm, mentorId: e.target.value})}
                             className="w-full text-sm p-2 border border-border rounded-lg focus:outline-none focus:border-primary"
                           >
                             <option value="">-- Choose Mentor --</option>
-                            {availableMentors.map(m => (
+                            {availableMentors.map((m: any) => (
                               <option key={m.mentor_profile_id} value={m.mentor_profile_id}>
                                 {m.employeeName} ({m.employee_id})
                               </option>
@@ -477,7 +477,7 @@ export default function OpportunityPage() {
                           <select 
                             required
                             value={assignForm.role}
-                            onChange={(e) => setAssignForm({...assignForm, role: e.target.value})}
+                            onChange={(e: any) => setAssignForm({...assignForm, role: e.target.value})}
                             className="w-full text-sm p-2 border border-border rounded-lg focus:outline-none focus:border-primary"
                           >
                             <option value="Lead Mentor">Lead Mentor</option>
@@ -491,7 +491,7 @@ export default function OpportunityPage() {
                             required
                             min={1}
                             value={assignForm.workload}
-                            onChange={(e) => setAssignForm({...assignForm, workload: Number(e.target.value)})}
+                            onChange={(e: any) => setAssignForm({...assignForm, workload: Number(e.target.value)})}
                             className="w-full text-sm p-2 border border-border rounded-lg focus:outline-none focus:border-primary"
                           />
                         </div>
@@ -507,7 +507,7 @@ export default function OpportunityPage() {
                   
                   {opportunityMentors.length > 0 ? (
                     <div className="space-y-3">
-                      {opportunityMentors.map(mentor => (
+                      {opportunityMentors.map((mentor: any) => (
                         <div key={mentor.id} className="bg-white p-4 rounded-xl border border-border flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="h-10 w-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold">
@@ -535,8 +535,8 @@ export default function OpportunityPage() {
 
               {drawerTab === 'applications' && (
                 <div className="space-y-4">
-                  {applications.filter(a => a.opportunityId === selectedOpportunity.id).length > 0 ? (
-                    applications.filter(a => a.opportunityId === selectedOpportunity.id).map(app => (
+                  {applications.filter((a: any) => a.opportunityId === selectedOpportunity.id).length > 0 ? (
+                    applications.filter((a: any) => a.opportunityId === selectedOpportunity.id).map((app: any) => (
                       <div key={app.id} className="bg-white p-4 rounded-xl border border-border flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 bg-slate-100 text-text-secondary rounded-full flex items-center justify-center font-bold">
@@ -605,7 +605,7 @@ export default function OpportunityPage() {
                     { title: 'Opportunity Posted', date: selectedOpportunity.postedDate, desc: 'Created by Admin', icon: Plus, color: 'text-blue-500', bg: 'bg-blue-100' },
                     { title: 'First Application', date: '2 days after posting', desc: 'System log', icon: FileText, color: 'text-emerald-500', bg: 'bg-emerald-100' },
                     { title: 'Mentor Assigned', date: '1 week after posting', desc: 'Assigned Lead Mentor', icon: ShieldCheck, color: 'text-indigo-500', bg: 'bg-indigo-100' },
-                  ].map((event, idx) => (
+                  ].map((event: any, idx: any) => (
                     <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active py-4">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-100 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
                         <event.icon className={`h-4 w-4 ${event.color}`} />

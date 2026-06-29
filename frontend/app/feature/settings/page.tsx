@@ -24,7 +24,7 @@ export default function SettingsPage() {
             { id: 'notifications', label: 'Notifications', icon: Bell, active: false },
             { id: 'security', label: 'Security', icon: Shield, active: false },
             { id: 'appearance', label: 'Appearance', icon: Palette, active: false }
-          ].map(tab => (
+          ].map((tab: any) => (
             <button 
               key={tab.id}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-colors cursor-pointer ${

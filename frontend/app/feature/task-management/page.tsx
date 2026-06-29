@@ -123,7 +123,7 @@ export default function TaskManagementPage() {
       const storedTasks = localStorage.getItem('pinesphere_created_tasks');
       if (storedTasks) {
         const parsed = JSON.parse(storedTasks) as { batchId: string; task: LocalTask }[];
-        const filtered = parsed.filter(x => x.batchId === 'batch-ai-2026').map(x => x.task);
+        const filtered = parsed.filter((x: any) => x.batchId === 'batch-ai-2026').map((x: any) => x.task);
         setTasks([...INITIAL_TASKS, ...filtered]);
       }
 
@@ -131,7 +131,7 @@ export default function TaskManagementPage() {
       const storedSubs = localStorage.getItem('pinesphere_task_submissions');
       if (storedSubs) {
         const parsed = JSON.parse(storedSubs) as { taskId: string; submission: StudentSubmission }[];
-        const filtered = parsed.filter(x => x.taskId === selectedTaskId).map(x => x.submission);
+        const filtered = parsed.filter((x: any) => x.taskId === selectedTaskId).map((x: any) => x.submission);
         setSubmissions([...DEFAULT_SUBMISSIONS, ...filtered]);
       } else {
         setSubmissions(DEFAULT_SUBMISSIONS);
@@ -143,7 +143,7 @@ export default function TaskManagementPage() {
     e.preventDefault();
     if (!selectedSub) return;
 
-    const updated = submissions.map(sub => {
+    const updated = submissions.map((sub: any) => {
       if (sub.studentId === selectedSub.studentId) {
         return {
           ...sub,
@@ -201,7 +201,7 @@ export default function TaskManagementPage() {
       starterCode: 'codebase_archive.zip'
     };
 
-    setTasks(prev => [...prev, created]);
+    setTasks((prev: any) => [...prev, created]);
 
     if (typeof window !== 'undefined') {
       const savedTasksStr = localStorage.getItem('pinesphere_created_tasks') || '[]';
@@ -243,7 +243,7 @@ export default function TaskManagementPage() {
                 type="text" 
                 required
                 value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
+                onChange={(e: any) => setNewTaskTitle(e.target.value)}
                 placeholder="e.g. Build Backend Auth Middleware"
                 className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2.5 text-xs text-text-primary outline-none focus:border-primary focus:bg-white"
               />
@@ -255,7 +255,7 @@ export default function TaskManagementPage() {
                 rows={3} 
                 required
                 value={newTaskDesc}
-                onChange={(e) => setNewTaskDesc(e.target.value)}
+                onChange={(e: any) => setNewTaskDesc(e.target.value)}
                 placeholder="Detail core requirements, routing specs, and testing criteria."
                 className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2.5 text-xs text-text-primary outline-none resize-none leading-relaxed focus:border-primary focus:bg-white"
               />
@@ -267,7 +267,7 @@ export default function TaskManagementPage() {
                 type="date" 
                 required
                 value={newDueDate}
-                onChange={(e) => setNewDueDate(e.target.value)}
+                onChange={(e: any) => setNewDueDate(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-3.5 py-2 text-xs font-bold text-text-primary outline-none cursor-pointer"
               />
             </div>
@@ -281,13 +281,13 @@ export default function TaskManagementPage() {
                 { label: 'Video Walkthrough', active: reqVideo, setter: setReqVideo },
                 { label: 'Build ZIP Package', active: reqZip, setter: setReqZip },
                 { label: 'Screenshots Attachment', active: reqScreenshot, setter: setReqScreenshot }
-              ].map((item, idx) => (
+              ].map((item: any, idx: any) => (
                 <div key={idx} className="flex items-center gap-2 text-xs">
                   <input 
                     type="checkbox" 
                     id={`req_${idx}`}
                     checked={item.active} 
-                    onChange={(e) => item.setter(e.target.checked)}
+                    onChange={(e: any) => item.setter(e.target.checked)}
                     className="h-3.5 w-3.5 text-indigo-650 rounded border-border cursor-pointer" 
                   />
                   <label htmlFor={`req_${idx}`} className="font-bold text-label cursor-pointer select-none">{item.label}</label>
@@ -313,10 +313,10 @@ export default function TaskManagementPage() {
                 <span className="text-[10px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-sm uppercase tracking-wide">SUBMISSIONS ASSIGNED</span>
                 <select 
                   value={selectedTaskId}
-                  onChange={(e) => { setSelectedTaskId(e.target.value); setSelectedSub(null); }}
+                  onChange={(e: any) => { setSelectedTaskId(e.target.value); setSelectedSub(null); }}
                   className="block mt-2 bg-slate-50 border border-border rounded-xl px-4 py-2 text-xs font-bold text-text-primary outline-none cursor-pointer"
                 >
-                  {tasks.map(t => (
+                  {tasks.map((t: any) => (
                     <option key={t.id} value={t.id}>{t.title} ({t.id})</option>
                   ))}
                 </select>
@@ -329,7 +329,7 @@ export default function TaskManagementPage() {
               <div className="space-y-3">
                 <span className="block text-[10px] font-bold text-text-secondary uppercase tracking-wider">Candidate Submissions</span>
                 
-                {submissions.map(sub => (
+                {submissions.map((sub: any) => (
                   <div 
                     key={sub.studentId}
                     onClick={() => { setSelectedSub(sub); setInputScore(sub.score || 0); setInputFeedback(sub.feedback || ''); }}
@@ -403,7 +403,7 @@ export default function TaskManagementPage() {
                           max={100}
                           required
                           value={inputScore}
-                          onChange={(e) => setInputScore(parseInt(e.target.value) || 0)}
+                          onChange={(e: any) => setInputScore(parseInt(e.target.value) || 0)}
                           className="w-full bg-white border border-border rounded-lg px-3 py-2 text-xs font-bold text-text-primary outline-none"
                         />
                       </div>
@@ -414,7 +414,7 @@ export default function TaskManagementPage() {
                           rows={2} 
                           required
                           value={inputFeedback}
-                          onChange={(e) => setInputFeedback(e.target.value)}
+                          onChange={(e: any) => setInputFeedback(e.target.value)}
                           placeholder="e.g. Beautiful layout styling, clean middleware routers."
                           className="w-full bg-white border border-border rounded-lg px-3 py-2 text-xs text-text-primary outline-none resize-none leading-relaxed"
                         />

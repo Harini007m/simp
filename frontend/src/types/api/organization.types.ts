@@ -70,3 +70,4 @@ export interface CoordinatorResponse {
   is_active: boolean;
   created_at: string;
 }
+export interface Organization { id: string; name: string; [key: string]: any; }

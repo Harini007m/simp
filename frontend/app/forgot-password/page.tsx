@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
   const showToast = (title: string, message: string, type: ToastType) => {
     setToastConfig({ show: true, title, message, type });
     setTimeout(() => {
-      setToastConfig(prev => ({ ...prev, show: false }));
+      setToastConfig((prev: any) => ({ ...prev, show: false }));
     }, 5000);
   };
 
@@ -79,7 +79,7 @@ export default function ForgotPasswordPage() {
     }
 
     const interval = setInterval(() => {
-      setTimerCount((prev) => {
+      setTimerCount((prev: any) => {
         if (prev <= 1) {
           clearInterval(interval);
           setCanResend(true);
@@ -228,7 +228,7 @@ export default function ForgotPasswordPage() {
                       id="username"
                       required
                       value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      onChange={(e: any) => setUsername(e.target.value)}
                       className="block w-full rounded-xl border border-slate-350 px-4 py-3.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-400 text-text-primary transition-all" 
                       placeholder="E.g. admin" 
                     />
@@ -263,7 +263,7 @@ export default function ForgotPasswordPage() {
                       pattern="\d{6}"
                       inputMode="numeric"
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
+                      onChange={(e: any) => setOtp(e.target.value)}
                       className="block w-full rounded-xl border border-slate-350 px-4 py-3.5 text-sm tracking-[0.5em] text-center font-bold focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white placeholder-slate-300 text-text-primary transition-all" 
                       placeholder="••••••" 
                     />
@@ -329,7 +329,7 @@ export default function ForgotPasswordPage() {
                       required
                       minLength={6}
                       value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      onChange={(e: any) => setNewPassword(e.target.value)}
                       className="block w-full rounded-xl border border-slate-350 px-4 py-3.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white text-text-primary transition-all" 
                       placeholder="••••••••" 
                     />
@@ -342,7 +342,7 @@ export default function ForgotPasswordPage() {
                       id="confirmPassword"
                       required
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onChange={(e: any) => setConfirmPassword(e.target.value)}
                       className="block w-full rounded-xl border border-slate-350 px-4 py-3.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-white text-text-primary transition-all" 
                       placeholder="••••••••" 
                     />
@@ -404,7 +404,7 @@ export default function ForgotPasswordPage() {
           title={toastConfig.title}
           message={toastConfig.message}
           type={toastConfig.type}
-          onClose={() => setToastConfig(prev => ({ ...prev, show: false }))} 
+          onClose={() => setToastConfig((prev: any) => ({ ...prev, show: false }))} 
         />
       )}
     </div>

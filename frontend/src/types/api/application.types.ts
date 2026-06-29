@@ -76,3 +76,13 @@ export interface ApplicationReviewRequest {
   application_status: string;
   remarks: string;
 }
+
+export interface Application {
+  id: string;
+  opportunityId: string;
+  candidateName: string;
+  appliedDate: string;
+  status: string;
+}
+export interface ApplicationWithOpp { id: string; candidateName: string; appliedDate: string; status: string; email?: string; phone?: string; opportunityId?: string; opportunityData?: any; }
+export type ApplicationStatus = "Pending" | "Accepted" | "Rejected";

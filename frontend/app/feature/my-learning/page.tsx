@@ -106,10 +106,10 @@ export default function MyLearningPage() {
       
       // Update overall progress percentage of courses
       if (selectedCourse) {
-        const totalSubs = selectedCourse.modules.reduce((sum, m) => sum + m.submodules.length, 0);
+        const totalSubs = selectedCourse.modules.reduce((sum: any, m: any) => sum + m.submodules.length, 0);
         if (totalSubs > 0) {
-          const completedCount = selectedCourse.modules.reduce((sum, m) => 
-            sum + m.submodules.filter(s => updatedProgress[s.id]).length, 0
+          const completedCount = selectedCourse.modules.reduce((sum: any, m: any) => 
+            sum + m.submodules.filter((s: any) => updatedProgress[s.id]).length, 0
           );
           const newRate = Math.round((completedCount / totalSubs) * 100);
           
@@ -117,7 +117,7 @@ export default function MyLearningPage() {
           const updatedCourse = { ...selectedCourse, progressRate: newRate };
           setSelectedCourse(updatedCourse);
           
-          const updatedCourses = courses.map(c => c.id === selectedCourse.id ? updatedCourse : c);
+          const updatedCourses = courses.map((c: any) => c.id === selectedCourse.id ? updatedCourse : c);
           setCourses(updatedCourses);
           localStorage.setItem('pinesphere_courses', JSON.stringify(updatedCourses));
         }
@@ -130,7 +130,7 @@ export default function MyLearningPage() {
     let interval: any;
     if (activeSub && (activeSub.type === 'PDF' || activeSub.type === 'Reading') && pdfTimer > 0) {
       interval = setInterval(() => {
-        setPdfTimer(prev => {
+        setPdfTimer((prev: any) => {
           if (prev <= 1) {
             clearInterval(interval);
             setIsPdfCompleteEnabled(true);
@@ -149,7 +149,7 @@ export default function MyLearningPage() {
     let playInterval: any;
     if (activeSub && activeSub.type === 'Video' && isExamActiveState()) {
       playInterval = setInterval(() => {
-        setVideoCurrentTime(prev => {
+        setVideoCurrentTime((prev: any) => {
           const newTime = prev + 1;
           const duration = activeSub.videoDuration || 600;
 
@@ -180,7 +180,7 @@ export default function MyLearningPage() {
         });
 
         // Track inactivity
-        setIdleTimerCount(prev => {
+        setIdleTimerCount((prev: any) => {
           const newCount = prev + 1;
           const maxIdle = activeSub.idleTimeout || 30;
           if (newCount >= maxIdle) {
@@ -210,7 +210,7 @@ export default function MyLearningPage() {
 
     // Trigger secondary warning countdown
     warningCountdownRef.current = setInterval(() => {
-      setIdleWarningCountdown(prev => {
+      setIdleWarningCountdown((prev: any) => {
         if (prev <= 1) {
           clearInterval(warningCountdownRef.current);
           handleIdleReset();
@@ -332,7 +332,7 @@ export default function MyLearningPage() {
       {!selectedCourse ? (
         /* Course Grid View */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {courses.map(crs => {
+          {courses.map((crs: any) => {
             const isCertified = crs.progressRate === 100;
             return (
               <div 
@@ -404,11 +404,11 @@ export default function MyLearningPage() {
               <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest border-b pb-2">Course syllabus</h3>
               
               <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar">
-                {selectedCourse.modules.map((mod, mIdx) => (
+                {selectedCourse.modules.map((mod: any, mIdx: any) => (
                   <div key={mod.id} className="space-y-2">
                     <h4 className="text-xs font-bold text-text-primary leading-tight">{mod.title}</h4>
                     <div className="space-y-1.5 pl-2 border-l border-border">
-                      {mod.submodules.map(sub => {
+                      {mod.submodules.map((sub: any) => {
                         const isDone = completedSubmodules[sub.id];
                         const isPlaying = activeSub?.id === sub.id;
 
@@ -490,7 +490,7 @@ export default function MyLearningPage() {
                             <h4 className="text-xs font-bold text-white leading-normal">{activeSub.checkpointMcq.question}</h4>
                             
                             <div className="grid grid-cols-2 gap-2 text-xs">
-                              {activeSub.checkpointMcq.options.map((opt, idx) => {
+                              {activeSub.checkpointMcq.options.map((opt: any, idx: any) => {
                                 const optChar = String.fromCharCode(65 + idx);
                                 return (
                                   <button

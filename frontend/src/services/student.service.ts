@@ -1,6 +1,6 @@
 import { studentApi } from '../api/student.api';
 import { StudentCreate, StudentResponse, StudentUpdate } from '../types/api/student.types';
-import { Student, MOCK_STUDENTS } from '../data/mock-students';
+import { Student } from '../types/api/student.types';
 
 export type ExtendedStudent = StudentResponse & Student & {
   name?: string;
@@ -95,25 +95,8 @@ export const studentService = {
   },
 
   async getStudents(): Promise<ExtendedStudent[]> {
-    try {
       const data = await studentApi.getStudents();
-      if (data && data.length > 0) {
-        return data.map(stu => this.mapToExtended(stu));
-      }
-    } catch (e) {
-      console.debug("Failed to load students from API, falling back to mock data:", e);
-    }
-    return MOCK_STUDENTS.map((stu: any) => ({
-      ...stu,
-      student_id: stu.id,
-      student_status: stu.status,
-      // mapping for user page matching
-      name: stu.personalInfo?.name || '',
-      email: stu.personalInfo?.email || '',
-      phone: stu.personalInfo?.phone || '',
-      official_email: stu.personalInfo?.email || '',
-      designation: 'Student'
-    })) as ExtendedStudent[];
+      return data.map(stu => this.mapToExtended(stu));
   },
 
   async getStudent(id: string): Promise<ExtendedStudent | undefined> {

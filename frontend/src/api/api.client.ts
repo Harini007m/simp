@@ -11,10 +11,7 @@ export const apiClient: AxiosInstance = axios.create({
 
 // Request Interceptor
 apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // Immediately reject to simulate offline backend and remove latency
-    return Promise.reject(new axios.Cancel("Backend connection disabled"));
-  },
+  (config) => config,
   (error: AxiosError) => {
     return Promise.reject(error);
   }

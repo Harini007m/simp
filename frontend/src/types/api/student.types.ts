@@ -18,3 +18,7 @@ export interface StudentResponse {
 export interface StudentUpdate {
   student_status: string;
 }
+export interface Student { id: string; name: string; email: string; [key: string]: any; }
+export interface StudentDocument { id: string; [key: string]: any; }
+export interface StudentTimelineEvent { id: string; [key: string]: any; }
+export interface StudentBatch { id: string; [key: string]: any; }
