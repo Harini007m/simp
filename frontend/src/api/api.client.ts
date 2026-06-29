@@ -1,35 +1,25 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-const BASE_URL = 'http://localhost:8000'//process.env.NEXT_PUBLIC_API_URL || 'http://13.60.249.106:8000' || 'http://localhost:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.60.249.106:8000';
+const ACCESS_TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
+const AUTH_USER_KEY = 'auth_user';
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
 });
 
-// // Request Interceptor
-// apiClient.interceptors.request.use(
-//   (config: InternalAxiosRequestConfig) => {
-//     // Immediately reject to simulate offline backend and remove latency
-//     return Promise.reject(new axios.Cancel("Backend connection disabled"));
-//   },
-//   (error: AxiosError) => {
-//     return Promise.reject(error);
-//   }
-// );
-// Request Interceptor
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add auth token if available
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("access_token")
-        : null;
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+      if (token) {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      }
     }
 
     return config;
@@ -37,24 +27,17 @@ apiClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// Response Interceptor
 apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config;
-    
-    // Implementation for refresh token would go here if needed:
-    // if (error.response?.status === 401 && !originalRequest._retry) {
-    //   originalRequest._retry = true;
-    //   const refreshToken = localStorage.getItem('refresh_token');
-    //   if (refreshToken) {
-    //       ... call refresh endpoint ...
-    //   }
-    // }
-    
-    // Log error cleanly or let services handle it
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.removeItem(AUTH_USER_KEY);
+    }
+
     return Promise.reject(error);
   }
 );
