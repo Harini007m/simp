@@ -23,12 +23,6 @@ export const roleService = {
   },
 
   async createRole(role: Omit<Role, 'id' | 'modulesCount' | 'usersCount' | 'color' | 'bg'> & { color?: string, bg?: string }): Promise<Role> {
-    try {
-      const data = await roleApi.createRole(role);
-      if (data) return data;
-    } catch (e) {
-      console.debug(e);
-    }
     const randomColors = [
       { color: 'text-purple-600', bg: 'bg-purple-100' },
       { color: 'text-indigo-600', bg: 'bg-indigo-100' },
@@ -37,13 +31,25 @@ export const roleService = {
       { color: 'text-violet-600', bg: 'bg-violet-100' },
     ];
     const colorPair = randomColors[MOCK_ROLES.length % randomColors.length];
-    const newRole: Role = {
+    
+    const apiRoleData = {
       ...role,
+      color: role.color || colorPair.color,
+      bg: role.bg || colorPair.bg,
+    };
+
+    try {
+      const data = await roleApi.createRole(apiRoleData);
+      if (data) return data;
+    } catch (e) {
+      console.debug(e);
+    }
+
+    const newRole: Role = {
+      ...apiRoleData,
       id: `role-${MOCK_ROLES.length + 1}`,
       modulesCount: role.moduleIds.length,
       usersCount: 0,
-      color: role.color || colorPair.color,
-      bg: role.bg || colorPair.bg,
     };
     MOCK_ROLES.push(newRole);
     return newRole;

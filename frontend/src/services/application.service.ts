@@ -1,6 +1,6 @@
 import { applicationApi } from '../api/application.api';
 import { ApplicationCreate, ApplicationResponse, ApplicationReviewRequest } from '../types/api/application.types';
-import { Application } from '../data/mock-applications';
+import { Application, MOCK_APPLICATIONS } from '../data/mock-applications';
 
 export type ExtendedApplication = ApplicationResponse & Application;
 
@@ -51,21 +51,25 @@ export const applicationService = {
   async getApplications(): Promise<ExtendedApplication[]> {
     try {
       const data = await applicationApi.getAllApplications();
-      return data.map(app => this.mapToExtended(app));
+      if (data && data.length > 0) {
+        return data.map(app => this.mapToExtended(app));
+      }
     } catch (e) {
-      console.debug(e);
-      return [];
+      console.debug('Failed to fetch applications, falling back to mock data', e);
     }
+    return MOCK_APPLICATIONS as unknown as ExtendedApplication[];
   },
 
   async getApplication(id: string): Promise<ExtendedApplication | undefined> {
     try {
       const app = await applicationApi.getApplication(id);
-      return this.mapToExtended(app);
+      if (app) {
+        return this.mapToExtended(app);
+      }
     } catch (e) {
-      console.debug(e);
-      return undefined;
+      console.debug('Failed to fetch application, falling back to mock data', e);
     }
+    return MOCK_APPLICATIONS.find(a => a.id === id) as unknown as ExtendedApplication;
   },
 
   async getApplicationsByOpportunity(oppId: string): Promise<ExtendedApplication[]> {
