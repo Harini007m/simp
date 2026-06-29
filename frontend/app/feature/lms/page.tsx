@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, Play, FileText, Award, ChevronRight, Users, UserCheck
 } from 'lucide-react';
+import { ExtendedStudent } from '@/src/services/student.service';
 
 interface Submodule {
   id: string;
@@ -41,23 +42,14 @@ interface BatchLms {
   courses: CourseItem[];
 }
 
-interface Student {
-  id: string;
-  personalInfo: {
-    name: string;
-  };
-  [key: string]: any;
-}
-
-// Mock data removed
-
 export default function LMSDashboardPage() {
   const [batches, setBatches] = useState<BatchLms[]>([]);
+  const [students, setStudents] = useState<ExtendedStudent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Drill-down states
   const [selectedBatch, setSelectedBatch] = useState<BatchLms | null>(null);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<ExtendedStudent | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
 
   useEffect(() => {
@@ -65,8 +57,15 @@ export default function LMSDashboardPage() {
       setIsLoading(true);
       try {
         const { lmsService } = await import('@/src/services/lms.service');
-        const data = await lmsService.getModules(); // Or specific get LMS endpoint
-        setBatches(data as any || []);
+        const { studentService } = await import('@/src/services/student.service');
+        
+        const [lmsData, studentData] = await Promise.all([
+          lmsService.getModules(), // Or specific get LMS endpoint
+          studentService.getStudents()
+        ]);
+        
+        setBatches(lmsData as any || []);
+        setStudents(studentData || []);
       } catch (err) {
         console.error("Failed to load LMS data", err);
       } finally {
@@ -79,6 +78,9 @@ export default function LMSDashboardPage() {
   const totalCourses = batches.reduce((sum: any, b: any) => sum + b.courses.length, 0);
   const totalResources = batches.reduce((sum: any, b: any) => sum + b.resourcesCount, 0);
   const avgCompletionRate = 81;
+
+  // Filter students for batch (simulated fallback to first 5 for demo if no real mapping)
+  const batchStudents = selectedBatch ? students.slice(0, 5) : [];
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -143,114 +145,134 @@ export default function LMSDashboardPage() {
             </div>
           </div>
         </>
-      ) : !selectedStudent ? (
-        /* Students inside Batch */
-        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b pb-4">
-            <div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Students Column (Left) */}
+          <div className="lg:col-span-1 bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="border-b pb-3">
               <button 
-                onClick={() => setSelectedBatch(null)} 
-                className="text-xs font-bold text-indigo-600 hover:underline mb-1 block"
+                onClick={() => { setSelectedBatch(null); setSelectedStudent(null); setSelectedCourse(null); }} 
+                className="text-[10px] font-bold text-indigo-600 hover:underline block"
               >
                 ← Back to Cohorts
               </button>
-              <h3 className="text-lg font-black text-text-primary">{selectedBatch.name} - Students</h3>
+              <h3 className="text-sm font-black text-text-primary mt-1">{selectedBatch.name} Candidates</h3>
+            </div>
+
+            <div className="space-y-2">
+              {batchStudents.map(student => (
+                <div 
+                  key={student.id}
+                  onClick={() => setSelectedStudent(student)}
+                  className={`p-3 border rounded-xl cursor-pointer transition-all flex items-center justify-between ${
+                    selectedStudent?.id === student.id 
+                      ? 'bg-slate-900 border-slate-850 text-white shadow' 
+                      : 'bg-slate-50 border-border hover:border-secondary text-text-primary'
+                  }`}
+                >
+                  <span className="text-xs font-bold">{student.personalInfo?.name || student.name}</span>
+                  <span className={`text-[10px] font-black ${
+                    selectedStudent?.id === student.id ? 'text-emerald-300' : 'text-emerald-600'
+                  }`}>
+                    {selectedBatch.completedRate}% Done
+                  </span>
+                </div>
+              ))}
+              {batchStudents.length === 0 && (
+                <p className="text-xs text-text-secondary italic text-center py-12">No students found.</p>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-              <div className="text-center p-4 text-text-secondary">No students data available.</div>
-          </div>
-        </div>
-      ) : !selectedCourse ? (
-        /* Courses inside Batch for Selected Student */
-        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b pb-4">
-            <div>
-              <button 
-                onClick={() => setSelectedStudent(null)} 
-                className="text-xs font-bold text-indigo-600 hover:underline mb-1 block"
-              >
-                ← Back to Students
-              </button>
-              <h3 className="text-lg font-black text-text-primary">{selectedStudent.personalInfo.name}'s LMS Progress</h3>
-              <p className="text-xs text-text-secondary mt-1">{selectedBatch.name}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            {selectedBatch.courses.map((crs: any) => (
-              <div 
-                key={crs.id}
-                onClick={() => setSelectedCourse(crs)}
-                className="p-5 border border-border hover:border-secondary hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-              >
-                <div className="flex items-start gap-4">
-                  <img src={crs.thumbnail} alt={crs.title} className="h-16 w-24 rounded-lg object-cover bg-slate-100 border shrink-0" />
-                  <div className="space-y-1.5">
-                    <h4 className="text-base font-black text-text-primary">{crs.title}</h4>
-                    <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">{crs.description}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 shrink-0 text-xs font-bold text-text-secondary">
-                  <div className="text-right">
-                    <span>Completion: <strong className="text-indigo-600">{crs.progressRate}%</strong></span>
-                  </div>
-                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
-                    View Modules
-                  </button>
-                </div>
+          {/* Context Details (Right) */}
+          <div className="lg:col-span-2 space-y-6">
+            {!selectedStudent ? (
+              <div className="bg-white border border-border rounded-2xl p-16 text-center text-text-secondary italic shadow-sm">
+                Select a candidate from the left panel to review their LMS curriculum progress.
               </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        /* Syllabus modules */
-        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b pb-5">
-            <div>
-              <button 
-                onClick={() => setSelectedCourse(null)} 
-                className="text-xs font-bold text-indigo-650 hover:underline mb-1 block"
-              >
-                ← Back to {selectedStudent.personalInfo.name}'s Courses
-              </button>
-              <h3 className="text-lg font-black text-text-primary">{selectedCourse.title}</h3>
-            </div>
-          </div>
-
-          <div className="space-y-6 max-w-4xl">
-            {selectedCourse.modules.map((mod: any) => (
-              <div key={mod.id} className="border border-slate-150 rounded-2xl overflow-hidden shadow-sm bg-slate-50/20">
-                <div className="bg-slate-50 px-5 py-3 border-b flex justify-between items-center text-xs font-bold text-text-primary">
-                  <span>{mod.title}</span>
-                  <span className="text-[10px] text-text-secondary">{mod.submodules.length} Assets</span>
+            ) : !selectedCourse ? (
+              /* Courses inside Batch for Selected Student */
+              <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-black text-text-primary">{(selectedStudent.personalInfo?.name || selectedStudent.name)}'s LMS Progress</h3>
+                  <p className="text-xs text-text-secondary mt-1">{selectedBatch.name}</p>
                 </div>
-                
-                <div className="divide-y divide-border bg-white">
-                  {mod.submodules.map((sub: any) => (
-                    <div key={sub.id} className="p-4 flex items-center justify-between text-xs hover:bg-slate-50/40">
-                      <div className="flex items-center gap-3 font-semibold text-text-primary">
-                        {sub.type === 'Video' ? (
-                          <Play className="h-4.5 w-4.5 text-rose-500" />
-                        ) : (
-                          <FileText className="h-4.5 w-4.5 text-blue-500" />
-                        )}
-                        <span>{sub.title}</span>
+
+                <div className="grid grid-cols-1 gap-4">
+                  {selectedBatch.courses.map((crs: any) => (
+                    <div 
+                      key={crs.id}
+                      onClick={() => setSelectedCourse(crs)}
+                      className="p-5 border border-border hover:border-secondary hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    >
+                      <div className="flex items-start gap-4">
+                        <img src={crs.thumbnail} alt={crs.title} className="h-16 w-24 rounded-lg object-cover bg-slate-100 border shrink-0" />
+                        <div className="space-y-1.5">
+                          <h4 className="text-base font-black text-text-primary">{crs.title}</h4>
+                          <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">{crs.description}</p>
+                        </div>
                       </div>
-                      <span className="bg-indigo-50 border border-indigo-100 text-indigo-650 font-bold px-2 py-0.5 rounded text-[9px] uppercase">
-                        Active
-                      </span>
+
+                      <div className="flex items-center gap-6 shrink-0 text-xs font-bold text-text-secondary">
+                        <div className="text-right">
+                          <span>Completion: <strong className="text-indigo-600">{crs.progressRate}%</strong></span>
+                        </div>
+                        <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
+                          View Modules
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-            ))}
+            ) : (
+              /* Syllabus modules */
+              <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
+                <div className="flex items-center justify-between border-b pb-5">
+                  <div>
+                    <button 
+                      onClick={() => setSelectedCourse(null)} 
+                      className="text-xs font-bold text-indigo-650 hover:underline mb-1 block"
+                    >
+                      ← Back to Courses
+                    </button>
+                    <h3 className="text-lg font-black text-text-primary mt-1">{selectedCourse.title}</h3>
+                  </div>
+                </div>
+
+                <div className="space-y-6 max-w-4xl">
+                  {selectedCourse.modules.map((mod: any) => (
+                    <div key={mod.id} className="border border-slate-150 rounded-2xl overflow-hidden shadow-sm bg-slate-50/20">
+                      <div className="bg-slate-50 px-5 py-3 border-b flex justify-between items-center text-xs font-bold text-text-primary">
+                        <span>{mod.title}</span>
+                        <span className="text-[10px] text-text-secondary">{mod.submodules.length} Assets</span>
+                      </div>
+                      
+                      <div className="divide-y divide-border bg-white">
+                        {mod.submodules.map((sub: any) => (
+                          <div key={sub.id} className="p-4 flex items-center justify-between text-xs hover:bg-slate-50/40">
+                            <div className="flex items-center gap-3 font-semibold text-text-primary">
+                              {sub.type === 'Video' ? (
+                                <Play className="h-4.5 w-4.5 text-rose-500" />
+                              ) : (
+                                <FileText className="h-4.5 w-4.5 text-blue-500" />
+                              )}
+                              <span>{sub.title}</span>
+                            </div>
+                            <span className="bg-indigo-50 border border-indigo-100 text-indigo-650 font-bold px-2 py-0.5 rounded text-[9px] uppercase">
+                              Active
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
-
     </div>
   );
 }
