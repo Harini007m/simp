@@ -163,13 +163,21 @@ const INITIAL_BATCH_ASSESSMENTS: BatchAssessments[] = [
   }
 ];
 
+interface ComputedStudent {
+  id: string;
+  name: string;
+  avgScore: number;
+  attemptsCount: number;
+  passedCount: number;
+}
+
 export default function AssessmentDashboardPage() {
   const [batches, setBatches] = useState<BatchAssessments[]>(INITIAL_BATCH_ASSESSMENTS);
 
   // Drill-down states
   const [selectedBatch, setSelectedBatch] = useState<BatchAssessments | null>(null);
-  const [selectedAsm, setSelectedAsm] = useState<AssessmentItem | null>(null);
-  const [selectedAttempt, setSelectedAttempt] = useState<StudentAttempt | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedAsmId, setSelectedAsmId] = useState<string | null>(null);
 
   // Sync candidate score records
   useEffect(() => {
@@ -210,6 +218,49 @@ export default function AssessmentDashboardPage() {
 
   const activeCount = batches.reduce((sum, b) => sum + b.assessments.length, 0);
   const totalSubCount = batches.reduce((sum, b) => sum + b.assessments.reduce((s, a) => s + a.attempts.length, 0), 0);
+
+  // Derive students for the selected batch
+  let batchStudents: ComputedStudent[] = [];
+  if (selectedBatch) {
+    const studentMap = new Map<string, { name: string, totalScore: number, attempts: number, passed: number }>();
+    selectedBatch.assessments.forEach(asm => {
+      asm.attempts.forEach(att => {
+        if (!studentMap.has(att.studentId)) {
+          studentMap.set(att.studentId, { name: att.studentName, totalScore: 0, attempts: 0, passed: 0 });
+        }
+        const data = studentMap.get(att.studentId)!;
+        data.totalScore += att.score;
+        data.attempts += 1;
+        if (att.passed) data.passed += 1;
+      });
+    });
+    batchStudents = Array.from(studentMap.entries()).map(([id, data]) => ({
+      id,
+      name: data.name,
+      avgScore: Math.round(data.totalScore / data.attempts),
+      attemptsCount: data.attempts,
+      passedCount: data.passed
+    }));
+  }
+
+  const selectedStudent = batchStudents.find(s => s.id === selectedStudentId);
+
+  // Derive exam attempts for selected student
+  let studentAttemptsData: { asm: AssessmentItem, attempt: StudentAttempt | null }[] = [];
+  let selectedAttemptData: { asm: AssessmentItem, attempt: StudentAttempt } | null = null;
+  
+  if (selectedBatch && selectedStudentId) {
+    studentAttemptsData = selectedBatch.assessments.map(asm => {
+      const att = asm.attempts.find(a => a.studentId === selectedStudentId);
+      return { asm, attempt: att || null };
+    });
+    if (selectedAsmId) {
+      const match = studentAttemptsData.find(d => d.asm.id === selectedAsmId && d.attempt);
+      if (match && match.attempt) {
+        selectedAttemptData = { asm: match.asm, attempt: match.attempt };
+      }
+    }
+  }
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -271,8 +322,8 @@ export default function AssessmentDashboardPage() {
             </div>
           </div>
         </>
-      ) : !selectedAsm ? (
-        /* Exams under batch */
+      ) : !selectedStudentId ? (
+        /* Candidates list under batch */
         <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b pb-4">
             <div>
@@ -282,148 +333,163 @@ export default function AssessmentDashboardPage() {
               >
                 ← Back to Cohorts
               </button>
-              <h3 className="text-lg font-black text-text-primary">{selectedBatch.name} Exams</h3>
+              <h3 className="text-lg font-black text-text-primary">{selectedBatch.name} - Candidates</h3>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {selectedBatch.assessments.map(asm => (
+            {batchStudents.map(student => (
               <div 
-                key={asm.id}
-                onClick={() => setSelectedAsm(asm)}
+                key={student.id}
+                onClick={() => setSelectedStudentId(student.id)}
                 className="p-5 border border-border hover:border-secondary hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-text-secondary">{asm.id}</span>
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-350" />
-                    <span className="text-[10px] font-bold text-indigo-650 bg-indigo-55/15 px-2 py-0.2 rounded">{asm.type}</span>
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm shrink-0">
+                    {student.name.split(' ').map(n => n[0]).join('')}
                   </div>
-                  <h4 className="text-base font-black text-text-primary">{asm.title}</h4>
-                  <p className="text-xs text-text-secondary">Passing Threshold: {asm.passingMarks}% • Passing Duration: {asm.duration} mins</p>
+                  <div>
+                    <h4 className="text-base font-black text-text-primary">{student.name}</h4>
+                    <p className="text-xs text-text-secondary">{student.id}</p>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-6 shrink-0">
-                  <span className="text-xs font-semibold text-text-secondary">Attempts recorded: {asm.attempts.length}</span>
+                  <div className="text-right text-xs font-bold text-text-secondary">
+                    <div>Average Score: <strong className="text-indigo-600">{student.avgScore}%</strong></div>
+                    <div className="mt-0.5 opacity-80">Passed: {student.passedCount} / {selectedBatch.assessments.length}</div>
+                  </div>
                   <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
-                    View Roster
+                    View Exams
                   </button>
                 </div>
               </div>
             ))}
+            {batchStudents.length === 0 && (
+              <p className="text-sm text-text-secondary text-center py-10">No students found with attempts in this cohort.</p>
+            )}
           </div>
         </div>
       ) : (
-        /* Candidates list and Question stats reviews */
+        /* Student's Exams and Trace View */
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Candidates */}
+          {/* Left Panel: List of Exams */}
           <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4">
             <div className="border-b pb-3">
               <button 
-                onClick={() => { setSelectedAsm(null); setSelectedAttempt(null); }} 
+                onClick={() => { setSelectedStudentId(null); setSelectedAsmId(null); }} 
                 className="text-[10px] font-bold text-indigo-600 hover:underline block"
               >
-                ← Back to Exams
+                ← Back to Candidates
               </button>
-              <h4 className="text-sm font-black text-text-primary mt-1">{selectedAsm.title}</h4>
+              <h4 className="text-sm font-black text-text-primary mt-1">{selectedStudent?.name}'s Exams</h4>
             </div>
 
             <div className="space-y-2">
-              {selectedAsm.attempts.map(att => (
+              {studentAttemptsData.map(({asm, attempt}) => (
                 <div 
-                  key={att.studentId}
-                  onClick={() => setSelectedAttempt(att)}
-                  className={`p-3 border rounded-xl cursor-pointer transition-all ${
-                    selectedAttempt?.studentId === att.studentId 
-                      ? 'bg-slate-900 border-slate-850 text-white shadow' 
-                      : 'bg-slate-50 border-border hover:border-secondary text-text-primary'
+                  key={asm.id}
+                  onClick={() => {
+                    if (attempt) setSelectedAsmId(asm.id);
+                  }}
+                  className={`p-3 border rounded-xl transition-all ${
+                    !attempt ? 'bg-slate-50 border-border opacity-70 cursor-not-allowed' :
+                    selectedAsmId === asm.id 
+                      ? 'bg-slate-900 border-slate-850 text-white shadow cursor-pointer' 
+                      : 'bg-slate-50 border-border hover:border-secondary text-text-primary cursor-pointer'
                   }`}
                 >
                   <div className="flex justify-between items-center text-xs font-bold">
-                    <span>{att.studentName}</span>
-                    <span className={`text-[8px] font-black px-2 py-0.5 rounded border ${
-                      att.passed ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'
-                    }`}>
-                      {att.passed ? 'PASS' : 'FAIL'}
-                    </span>
+                    <span className="truncate pr-2">{asm.title}</span>
+                    {attempt ? (
+                      <span className={`text-[8px] font-black px-2 py-0.5 rounded border shrink-0 ${
+                        attempt.passed ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'
+                      }`}>
+                        {attempt.passed ? 'PASS' : 'FAIL'}
+                      </span>
+                    ) : (
+                      <span className="text-[8px] font-black px-2 py-0.5 rounded border bg-slate-100 text-slate-500 shrink-0">
+                        MISSED
+                      </span>
+                    )}
                   </div>
-                  <div className="flex justify-between text-[10px] mt-2 opacity-85">
-                    <span>Score: {att.score}%</span>
-                    <span>Attempt #{att.attempts}</span>
-                  </div>
+                  {attempt && (
+                    <div className="flex justify-between text-[10px] mt-2 opacity-85">
+                      <span>Score: {attempt.score}%</span>
+                      <span>Attempt #{attempt.attempts}</span>
+                    </div>
+                  )}
                 </div>
               ))}
-              {selectedAsm.attempts.length === 0 && (
-                <p className="text-xs text-text-secondary italic text-center py-12">No submissions recorded.</p>
-              )}
             </div>
           </div>
 
           {/* Report Trace */}
           <div className="lg:col-span-2 space-y-6">
-            {selectedAttempt ? (
+            {selectedAttemptData ? (
               <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
                 <div className="border-b pb-4 flex justify-between items-start gap-4">
                   <div>
                     <span className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-sm uppercase tracking-wider">PAPER COMPLIANCE REPORT</span>
-                    <h3 className="text-lg font-black text-text-primary mt-2">{selectedAttempt.studentName}</h3>
-                    <p className="text-xs text-text-secondary">Grading Score: <strong>{selectedAttempt.score}%</strong></p>
+                    <h3 className="text-lg font-black text-text-primary mt-2">{selectedAttemptData.asm.title}</h3>
+                    <p className="text-xs text-text-secondary mt-1">Grading Score: <strong>{selectedAttemptData.attempt.score}%</strong></p>
                   </div>
                   
                   <span className={`text-xs font-extrabold px-3 py-1 rounded-xl uppercase ${
-                    selectedAttempt.passed ? 'bg-emerald-55/15 text-emerald-700 border' : 'bg-rose-55/15 text-rose-700 border'
+                    selectedAttemptData.attempt.passed ? 'bg-emerald-55/15 text-emerald-700 border' : 'bg-rose-55/15 text-rose-700 border'
                   }`}>
-                    {selectedAttempt.passed ? 'Passed Exam' : 'Failed'}
+                    {selectedAttemptData.attempt.passed ? 'Passed Exam' : 'Failed Exam'}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-center">
-                    <span className="block text-xl font-black text-emerald-700">{selectedAttempt.questionAnalysis.correctCount}</span>
+                    <span className="block text-xl font-black text-emerald-700">{selectedAttemptData.attempt.questionAnalysis.correctCount}</span>
                     <span className="text-[10px] text-text-secondary font-bold uppercase">Correct answers</span>
                   </div>
                   <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-center">
-                    <span className="block text-xl font-black text-rose-700">{selectedAttempt.questionAnalysis.wrongCount}</span>
+                    <span className="block text-xl font-black text-rose-700">{selectedAttemptData.attempt.questionAnalysis.wrongCount}</span>
                     <span className="text-[10px] text-text-secondary font-bold uppercase">Wrong answers</span>
                   </div>
                   <div className="p-4 bg-slate-50 border border-border rounded-2xl text-center">
-                    <span className="block text-xl font-black text-text-primary">{selectedAttempt.questionAnalysis.skippedCount}</span>
+                    <span className="block text-xl font-black text-text-primary">{selectedAttemptData.attempt.questionAnalysis.skippedCount}</span>
                     <span className="text-[10px] text-text-secondary font-bold uppercase">Skipped</span>
                   </div>
                   <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center">
-                    <span className="block text-xl font-black text-amber-700">-{selectedAttempt.questionAnalysis.negativeMarks}</span>
+                    <span className="block text-xl font-black text-amber-700">-{selectedAttemptData.attempt.questionAnalysis.negativeMarks}</span>
                     <span className="text-[10px] text-text-secondary font-bold uppercase">Negative Penalties</span>
                   </div>
                 </div>
 
                 {/* trace questions list */}
-                <div className="space-y-3.5">
-                  <h4 className="font-bold text-xs text-slate-455 uppercase tracking-widest">Question trace detail</h4>
-                  <div className="space-y-2">
-                    {selectedAttempt.questionAnalysis.detailed.map((det, idx) => (
-                      <div key={idx} className="p-3 bg-slate-50 border border-slate-150 rounded-xl flex items-center justify-between text-xs font-semibold">
-                        <span className="text-slate-750 truncate mr-4">{det.question}</span>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
-                            det.correct ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
-                            det.skipped ? 'bg-slate-100 text-slate-655 border border-border' :
-                            'bg-rose-50 text-rose-700 border border-rose-150'
-                          }`}>
-                            {det.correct ? 'Correct' : det.skipped ? 'Skipped' : 'Wrong'}
-                          </span>
-                          <span className="font-mono font-bold text-text-primary">
-                            {det.marksGained > 0 ? `+${det.marksGained}` : det.marksGained} marks
-                          </span>
+                {selectedAttemptData.attempt.questionAnalysis.detailed.length > 0 && (
+                  <div className="space-y-3.5">
+                    <h4 className="font-bold text-xs text-slate-455 uppercase tracking-widest">Question trace detail</h4>
+                    <div className="space-y-2">
+                      {selectedAttemptData.attempt.questionAnalysis.detailed.map((det, idx) => (
+                        <div key={idx} className="p-3 bg-slate-50 border border-slate-150 rounded-xl flex items-center justify-between text-xs font-semibold">
+                          <span className="text-slate-750 truncate mr-4">{det.question}</span>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                              det.correct ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                              det.skipped ? 'bg-slate-100 text-slate-655 border border-border' :
+                              'bg-rose-50 text-rose-700 border border-rose-150'
+                            }`}>
+                              {det.correct ? 'Correct' : det.skipped ? 'Skipped' : 'Wrong'}
+                            </span>
+                            <span className="font-mono font-bold text-text-primary">
+                              {det.marksGained > 0 ? `+${det.marksGained}` : det.marksGained} marks
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-
+                )}
               </div>
             ) : (
               <div className="bg-white border border-border rounded-2xl p-16 text-center text-text-secondary italic shadow-sm">
-                Select a student attempt card from the left panel to review score details and negative marking audits.
+                Select an exam attempt card from the left panel to review score details and negative marking audits.
               </div>
             )}
           </div>

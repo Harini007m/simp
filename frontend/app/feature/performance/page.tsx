@@ -6,7 +6,7 @@ import {
   CheckSquare, ClipboardList, Activity, Eye, FileText
 } from 'lucide-react';
 import { performanceService } from '@/src/services/performance.service';
-import { StudentPerformance, BatchPerformance } from '@/src/data/mock-performance';
+import { StudentPerformance, BatchPerformance } from '@/src/types/api/performance.types';
 import { Drawer } from '@/components/feature/ui/Drawer';
 
 export default function PerformanceManagementPage() {

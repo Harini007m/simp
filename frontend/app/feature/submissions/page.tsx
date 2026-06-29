@@ -7,7 +7,7 @@ import { AlertTriangle,
   CheckSquare
  } from 'lucide-react';
 import { submissionService } from '@/src/services/submission.service';
-import { Submission } from '@/src/data/mock-submissions';
+import { Submission } from '@/src/types/api/submission.types';
 import { studentService, ExtendedStudent } from '@/src/services/student.service';
 import { Drawer } from '@/components/feature/ui/Drawer';
 

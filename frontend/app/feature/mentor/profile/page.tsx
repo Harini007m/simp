@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, User, Eye, Plus, Clock, Briefcase } from 'lucide-react';
 import { mentorService } from '@/src/services/mentor.service';
-import { MentorProfile } from '@/src/data/mock-mentors';
+import { MentorProfile } from '@/src/types/api/mentor.types';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import BatchMappingView from './BatchMappingView';
 import MentorPerformanceView from './MentorPerformanceView';

@@ -5,6 +5,14 @@ import {
   CheckSquare, FileText, Clock, AlertTriangle, ChevronRight, TrendingUp, BarChart2, CheckCircle
 } from 'lucide-react';
 
+interface TaskSubmission {
+  studentId: string;
+  studentName: string;
+  status: 'Submitted' | 'Overdue' | 'Pending';
+  score?: number;
+  submittedAt?: string;
+}
+
 interface LocalTask {
   id: string;
   title: string;
@@ -12,46 +20,140 @@ interface LocalTask {
   dueDate: string;
   attempts: number;
   requirements: string[];
+  submissions: TaskSubmission[];
 }
 
-const INITIAL_TASKS: LocalTask[] = [
+interface BatchTasks {
+  id: string;
+  name: string;
+  totalTasks: number;
+  overallSubmissionRate: number;
+  overdueCount: number;
+  tasks: LocalTask[];
+}
+
+const INITIAL_BATCH_TASKS: BatchTasks[] = [
   {
-    id: 'TSK-201',
-    title: 'Portfolio Website',
-    description: 'Design and deploy a professional developer portfolio showcasing your projects and resume details.',
-    dueDate: '2026-06-20',
-    attempts: 1,
-    requirements: ['Github Link', 'Deployment URL', 'Screenshot']
-  },
-  {
-    id: 'TSK-202',
-    title: 'Attendance API Endpoints',
-    description: 'Implement backend REST endpoints for clock-in, clock-out, and monthly logs using Express and MongoDB.',
-    dueDate: '2026-06-25',
-    attempts: 2,
-    requirements: ['Github Link', 'Video']
+    id: 'batch-ai-2026',
+    name: 'AI Batch 2026',
+    totalTasks: 2,
+    overallSubmissionRate: 92,
+    overdueCount: 1,
+    tasks: [
+      {
+        id: 'TSK-201',
+        title: 'Portfolio Website',
+        description: 'Design and deploy a professional developer portfolio showcasing your projects and resume details.',
+        dueDate: '2026-06-20',
+        attempts: 1,
+        requirements: ['Github Link', 'Deployment URL', 'Screenshot'],
+        submissions: [
+          { studentId: 'stu-harini', studentName: 'Harini Sundar', status: 'Submitted', score: 95, submittedAt: '2026-06-18' },
+          { studentId: 'stu-arun', studentName: 'Arun Kumar', status: 'Overdue' },
+          { studentId: 'stu-rahul', studentName: 'Rahul Sen', status: 'Submitted', score: 88, submittedAt: '2026-06-19' }
+        ]
+      },
+      {
+        id: 'TSK-202',
+        title: 'Attendance API Endpoints',
+        description: 'Implement backend REST endpoints for clock-in, clock-out, and monthly logs using Express and MongoDB.',
+        dueDate: '2026-06-25',
+        attempts: 2,
+        requirements: ['Github Link', 'Video'],
+        submissions: [
+          { studentId: 'stu-harini', studentName: 'Harini Sundar', status: 'Submitted', score: 90, submittedAt: '2026-06-24' },
+          { studentId: 'stu-arun', studentName: 'Arun Kumar', status: 'Pending' },
+          { studentId: 'stu-rahul', studentName: 'Rahul Sen', status: 'Submitted', score: 92, submittedAt: '2026-06-24' }
+        ]
+      }
+    ]
   }
 ];
 
+interface ComputedStudent {
+  id: string;
+  name: string;
+  submittedCount: number;
+  overdueCount: number;
+  pendingCount: number;
+}
+
 export default function TaskDashboardPage() {
-  const [tasks, setTasks] = useState<LocalTask[]>(INITIAL_TASKS);
+  const [batches, setBatches] = useState<BatchTasks[]>(INITIAL_BATCH_TASKS);
+
+  // Drill-down states
+  const [selectedBatch, setSelectedBatch] = useState<BatchTasks | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     // Load created tasks from local storage
     if (typeof window !== 'undefined') {
       const storedTasks = localStorage.getItem('pinesphere_created_tasks');
       if (storedTasks) {
-        const parsed = JSON.parse(storedTasks) as { batchId: string; task: LocalTask }[];
-        const filtered = parsed.filter(x => x.batchId === 'batch-ai-2026').map(x => x.task);
-        setTasks([...INITIAL_TASKS, ...filtered]);
+        const parsed = JSON.parse(storedTasks) as { batchId: string; task: any }[];
+        setBatches(prev => prev.map(b => {
+          const newTasks = parsed.filter(x => x.batchId === b.id).map(x => ({
+            ...x.task,
+            submissions: [] // new tasks have no submissions initially
+          }));
+          return {
+            ...b,
+            tasks: [...b.tasks, ...newTasks],
+            totalTasks: b.tasks.length + newTasks.length
+          };
+        }));
       }
     }
   }, []);
 
-  // Stats calculation
-  const totalTasks = tasks.length;
-  const submissionRate = 92; // Mock statistic
-  const overdueCount = tasks.filter(t => new Date(t.dueDate).getTime() < Date.now()).length;
+  // Calculate totals
+  const totalPublishedTasks = batches.reduce((sum, b) => sum + b.totalTasks, 0);
+  const avgSubmissionRate = 92; // Mock statistic
+  const globalOverdueCount = batches.reduce((sum, b) => sum + b.overdueCount, 0);
+
+  // Derive students for the selected batch
+  let batchStudents: ComputedStudent[] = [];
+  if (selectedBatch) {
+    const studentMap = new Map<string, { name: string, sub: number, over: number, pend: number }>();
+    selectedBatch.tasks.forEach(task => {
+      task.submissions.forEach(sub => {
+        if (!studentMap.has(sub.studentId)) {
+          studentMap.set(sub.studentId, { name: sub.studentName, sub: 0, over: 0, pend: 0 });
+        }
+        const data = studentMap.get(sub.studentId)!;
+        if (sub.status === 'Submitted') data.sub += 1;
+        if (sub.status === 'Overdue') data.over += 1;
+        if (sub.status === 'Pending') data.pend += 1;
+      });
+    });
+    batchStudents = Array.from(studentMap.entries()).map(([id, data]) => ({
+      id,
+      name: data.name,
+      submittedCount: data.sub,
+      overdueCount: data.over,
+      pendingCount: data.pend
+    }));
+  }
+
+  const selectedStudent = batchStudents.find(s => s.id === selectedStudentId);
+
+  // Derive task submissions for selected student
+  let studentTasksData: { task: LocalTask, submission: TaskSubmission | null }[] = [];
+  let selectedSubmissionData: { task: LocalTask, submission: TaskSubmission } | null = null;
+  
+  if (selectedBatch && selectedStudentId) {
+    studentTasksData = selectedBatch.tasks.map(task => {
+      const sub = task.submissions.find(s => s.studentId === selectedStudentId);
+      return { task, submission: sub || null };
+    });
+    if (selectedTaskId) {
+      const match = studentTasksData.find(d => d.task.id === selectedTaskId && d.submission);
+      if (match && match.submission) {
+        selectedSubmissionData = { task: match.task, submission: match.submission };
+      }
+    }
+  }
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -62,56 +164,215 @@ export default function TaskDashboardPage() {
         <p className="text-sm text-text-secondary mt-1">Audit published assignments, track student submission percentages, and monitor overdue milestones.</p>
       </div>
 
-      {/* KPI Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Total Published Milestones</span>
-          <h3 className="text-3xl font-black text-text-primary mt-1">{totalTasks} Tasks</h3>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Overall Submission Rate</span>
-          <h3 className="text-3xl font-black text-emerald-600 mt-1">{submissionRate}%</h3>
-        </div>
-        <div className="bg-white p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Overdue Tasks</span>
-          <h3 className="text-3xl font-black text-rose-600 mt-1">{overdueCount}</h3>
-        </div>
-      </div>
+      {!selectedBatch ? (
+        <>
+          {/* KPI Cards Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
+              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Total Published Milestones</span>
+              <h3 className="text-3xl font-black text-text-primary mt-1">{totalPublishedTasks} Tasks</h3>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
+              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Overall Submission Rate</span>
+              <h3 className="text-3xl font-black text-emerald-600 mt-1">{avgSubmissionRate}%</h3>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-border shadow-sm flex flex-col justify-between">
+              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Overdue Tasks</span>
+              <h3 className="text-3xl font-black text-rose-600 mt-1">{globalOverdueCount}</h3>
+            </div>
+          </div>
 
-      {/* Published Tasks Directory */}
-      <div className="space-y-4">
-        <h3 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Milestones Directory</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tasks.map(task => {
-            const isOverdue = new Date(task.dueDate).getTime() < Date.now();
-            return (
-              <div 
-                key={task.id}
-                className="bg-white p-6 rounded-2xl border border-border shadow-sm hover:border-secondary transition-all flex flex-col justify-between space-y-4"
-              >
-                <div>
+          {/* Published Tasks Directory / Batch list */}
+          <div className="space-y-4">
+            <h3 className="font-bold text-xs text-text-secondary uppercase tracking-widest">Milestones Directory by Cohort</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {batches.map(b => (
+                <div 
+                  key={b.id}
+                  onClick={() => setSelectedBatch(b)}
+                  className="bg-white p-6 rounded-2xl border border-border hover:border-secondary transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg flex flex-col justify-between space-y-4"
+                >
                   <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-bold text-indigo-650 bg-indigo-55/15 px-2.5 py-0.5 rounded uppercase">
-                      {task.id}
-                    </span>
-                    <span className={`text-[10px] font-bold ${isOverdue ? 'text-rose-600' : 'text-text-secondary'}`}>
-                      Due: {task.dueDate}
+                    <div>
+                      <span className="text-[9px] font-bold text-text-secondary uppercase">COHORT</span>
+                      <h4 className="text-lg font-black text-text-primary mt-1">{b.name}</h4>
+                    </div>
+                    <span className="bg-indigo-55/15 text-indigo-650 font-black px-3 py-1 rounded-full text-xs">
+                      {b.totalTasks} Tasks
                     </span>
                   </div>
-                  <h4 className="text-base font-black text-text-primary mt-3">{task.title}</h4>
-                  <p className="text-xs text-helper mt-1 leading-relaxed line-clamp-2">{task.description}</p>
+
+                  <div className="flex justify-between items-center text-xs font-bold text-text-secondary pt-2 border-t border-border">
+                    <span>Submission Rate: <strong className="text-emerald-600">{b.overallSubmissionRate}%</strong></span>
+                    <span>Overdue: <strong className="text-rose-600">{b.overdueCount}</strong></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : !selectedStudentId ? (
+        /* Candidates list under batch */
+        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b pb-4">
+            <div>
+              <button 
+                onClick={() => setSelectedBatch(null)} 
+                className="text-xs font-bold text-indigo-600 hover:underline mb-1 block"
+              >
+                ← Back to Cohorts
+              </button>
+              <h3 className="text-lg font-black text-text-primary">{selectedBatch.name} - Candidates</h3>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {batchStudents.map(student => (
+              <div 
+                key={student.id}
+                onClick={() => setSelectedStudentId(student.id)}
+                className="p-5 border border-border hover:border-secondary hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm shrink-0">
+                    {student.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <h4 className="text-base font-black text-text-primary">{student.name}</h4>
+                    <p className="text-xs text-text-secondary">{student.id}</p>
+                  </div>
                 </div>
 
-                <div className="pt-3 border-t border-border flex justify-between items-center text-[10px] font-bold text-text-secondary">
-                  <span>Required: {task.requirements.join(', ')}</span>
-                  <span>Attempts: {task.attempts}</span>
+                <div className="flex items-center gap-6 shrink-0">
+                  <div className="text-right text-xs font-bold text-text-secondary">
+                    <div>Submitted: <strong className="text-emerald-600">{student.submittedCount}</strong></div>
+                    <div className="mt-0.5 opacity-80">Overdue: <strong className="text-rose-600">{student.overdueCount}</strong></div>
+                  </div>
+                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
+                    View Tasks
+                  </button>
                 </div>
               </div>
-            );
-          })}
+            ))}
+            {batchStudents.length === 0 && (
+              <p className="text-sm text-text-secondary text-center py-10">No students found with tasks in this cohort.</p>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Student's Tasks and Trace View */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Panel: List of Tasks */}
+          <div className="bg-white border border-border rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="border-b pb-3">
+              <button 
+                onClick={() => { setSelectedStudentId(null); setSelectedTaskId(null); }} 
+                className="text-[10px] font-bold text-indigo-600 hover:underline block"
+              >
+                ← Back to Candidates
+              </button>
+              <h4 className="text-sm font-black text-text-primary mt-1">{selectedStudent?.name}'s Tasks</h4>
+            </div>
 
+            <div className="space-y-2">
+              {studentTasksData.map(({task, submission}) => (
+                <div 
+                  key={task.id}
+                  onClick={() => {
+                    if (submission) setSelectedTaskId(task.id);
+                  }}
+                  className={`p-3 border rounded-xl transition-all ${
+                    !submission ? 'bg-slate-50 border-border opacity-70 cursor-not-allowed' :
+                    selectedTaskId === task.id 
+                      ? 'bg-slate-900 border-slate-850 text-white shadow cursor-pointer' 
+                      : 'bg-slate-50 border-border hover:border-secondary text-text-primary cursor-pointer'
+                  }`}
+                >
+                  <div className="flex justify-between items-center text-xs font-bold">
+                    <span className="truncate pr-2">{task.title}</span>
+                    {submission ? (
+                      <span className={`text-[8px] font-black px-2 py-0.5 rounded border shrink-0 uppercase ${
+                        submission.status === 'Submitted' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 
+                        submission.status === 'Overdue' ? 'bg-rose-50 text-rose-700 border-rose-100' :
+                        'bg-amber-50 text-amber-700 border-amber-100'
+                      }`}>
+                        {submission.status}
+                      </span>
+                    ) : (
+                      <span className="text-[8px] font-black px-2 py-0.5 rounded border bg-slate-100 text-slate-500 shrink-0">
+                        N/A
+                      </span>
+                    )}
+                  </div>
+                  {submission && submission.score !== undefined && (
+                    <div className="flex justify-between text-[10px] mt-2 opacity-85">
+                      <span>Score: {submission.score}/100</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Report Trace */}
+          <div className="lg:col-span-2 space-y-6">
+            {selectedSubmissionData ? (
+              <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-6">
+                <div className="border-b pb-4 flex justify-between items-start gap-4">
+                  <div>
+                    <span className="text-[9px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-sm uppercase tracking-wider">TASK SUBMISSION DETAIL</span>
+                    <h3 className="text-lg font-black text-text-primary mt-2">{selectedSubmissionData.task.title}</h3>
+                    <p className="text-xs text-text-secondary mt-1">Due: {selectedSubmissionData.task.dueDate}</p>
+                  </div>
+                  
+                  <span className={`text-xs font-extrabold px-3 py-1 rounded-xl uppercase border ${
+                    selectedSubmissionData.submission.status === 'Submitted' ? 'bg-emerald-55/15 text-emerald-700 border-emerald-200' : 
+                    selectedSubmissionData.submission.status === 'Overdue' ? 'bg-rose-55/15 text-rose-700 border-rose-200' :
+                    'bg-amber-55/15 text-amber-700 border-amber-200'
+                  }`}>
+                    {selectedSubmissionData.submission.status}
+                  </span>
+                </div>
+
+                <div className="space-y-4 text-sm text-text-primary">
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-455 uppercase tracking-widest mb-2">Description</h4>
+                    <p className="text-text-secondary">{selectedSubmissionData.task.description}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-455 uppercase tracking-widest mb-2">Requirements</h4>
+                    <ul className="list-disc pl-5 space-y-1 text-text-secondary">
+                      {selectedSubmissionData.task.requirements.map(req => (
+                        <li key={req}>{req}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="pt-4 border-t border-border mt-4">
+                    <h4 className="font-bold text-xs text-slate-455 uppercase tracking-widest mb-3">Grading & Analytics</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-slate-50 border border-slate-150 rounded-xl">
+                        <span className="block text-xl font-black text-text-primary">{selectedSubmissionData.submission.score !== undefined ? selectedSubmissionData.submission.score : 'Pending'}</span>
+                        <span className="text-[10px] text-text-secondary font-bold uppercase">Awarded Score</span>
+                      </div>
+                      <div className="p-4 bg-slate-50 border border-slate-150 rounded-xl">
+                        <span className="block text-xl font-black text-text-primary">{selectedSubmissionData.submission.submittedAt || 'N/A'}</span>
+                        <span className="text-[10px] text-text-secondary font-bold uppercase">Submitted On</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              <div className="bg-white border border-border rounded-2xl p-16 text-center text-text-secondary italic shadow-sm">
+                Select a task card from the left panel to review submission details and grading.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

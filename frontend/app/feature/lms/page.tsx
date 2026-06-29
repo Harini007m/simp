@@ -28,9 +28,10 @@ interface CourseItem {
   program: string;
   description: string;
   thumbnail: string;
-  progressRate: number;
+  progressRate: number; // overall global progress
   studentsCompleted: number;
   modules: Module[];
+  studentProgress?: { studentId: string; completionRate: number }[]; // Track individual progress
 }
 
 interface BatchLms {
@@ -58,6 +59,12 @@ const INITIAL_BATCH_LMS: BatchLms[] = [
         thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&auto=format&fit=crop',
         progressRate: 92,
         studentsCompleted: 38,
+        studentProgress: [
+          { studentId: 'stu-1', completionRate: 100 },
+          { studentId: 'stu-2', completionRate: 100 },
+          { studentId: 'stu-3', completionRate: 80 },
+          { studentId: 'stu-4', completionRate: 95 }
+        ],
         modules: [
           {
             id: 'MOD-501-1',
@@ -90,6 +97,12 @@ const INITIAL_BATCH_LMS: BatchLms[] = [
         thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=500&auto=format&fit=crop',
         progressRate: 75,
         studentsCompleted: 28,
+        studentProgress: [
+          { studentId: 'stu-1', completionRate: 85 },
+          { studentId: 'stu-2', completionRate: 100 },
+          { studentId: 'stu-3', completionRate: 40 },
+          { studentId: 'stu-4', completionRate: 75 }
+        ],
         modules: []
       }
     ]
@@ -124,6 +137,12 @@ export default function LMSDashboardPage() {
   const totalCourses = batches.reduce((sum, b) => sum + b.courses.length, 0);
   const totalResources = batches.reduce((sum, b) => sum + b.resourcesCount, 0);
   const avgCompletionRate = 81;
+
+  const getStudentCourseProgress = (course: CourseItem, studentId: string) => {
+    if (!course.studentProgress) return 0;
+    const progress = course.studentProgress.find(p => p.studentId === studentId);
+    return progress ? progress.completionRate : 0;
+  };
 
   return (
     <div className="space-y-6 animate-slide-in select-none">
@@ -248,30 +267,33 @@ export default function LMSDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {selectedBatch.courses.map(crs => (
-              <div 
-                key={crs.id}
-                onClick={() => setSelectedCourse(crs)}
-                className="p-5 border border-border hover:border-secondary hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-              >
-                <div className="flex items-start gap-4">
-                  <img src={crs.thumbnail} alt={crs.title} className="h-16 w-24 rounded-lg object-cover bg-slate-100 border shrink-0" />
-                  <div className="space-y-1.5">
-                    <h4 className="text-base font-black text-text-primary">{crs.title}</h4>
-                    <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">{crs.description}</p>
+            {selectedBatch.courses.map(crs => {
+              const studentProgressRate = getStudentCourseProgress(crs, selectedStudent.id);
+              return (
+                <div 
+                  key={crs.id}
+                  onClick={() => setSelectedCourse(crs)}
+                  className="p-5 border border-border hover:border-secondary hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                >
+                  <div className="flex items-start gap-4">
+                    <img src={crs.thumbnail} alt={crs.title} className="h-16 w-24 rounded-lg object-cover bg-slate-100 border shrink-0" />
+                    <div className="space-y-1.5">
+                      <h4 className="text-base font-black text-text-primary">{crs.title}</h4>
+                      <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed">{crs.description}</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-6 shrink-0 text-xs font-bold text-text-secondary">
-                  <div className="text-right">
-                    <span>Completion: <strong className="text-indigo-600">{crs.progressRate}%</strong></span>
+                  <div className="flex items-center gap-6 shrink-0 text-xs font-bold text-text-secondary">
+                    <div className="text-right">
+                      <span>Completion: <strong className="text-indigo-600">{studentProgressRate}%</strong></span>
+                    </div>
+                    <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
+                      View Modules
+                    </button>
                   </div>
-                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
-                    View Modules
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : (
@@ -316,6 +338,9 @@ export default function LMSDashboardPage() {
                 </div>
               </div>
             ))}
+            {selectedCourse.modules.length === 0 && (
+              <div className="text-sm text-text-secondary text-center py-10">No modules found for this course.</div>
+            )}
           </div>
         </div>
       )}
