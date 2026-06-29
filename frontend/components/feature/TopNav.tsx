@@ -130,7 +130,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
           />
           <input
             id="search-field"
-            className="block h-full w-full border-0 py-0 pl-8 pr-0 text-text-primary placeholder:text-placeholder focus:ring-0 sm:text-sm bg-transparent outline-none"
+            className="block h-full w-full border-b-2 border-transparent focus:border-primary py-0 pl-8 pr-0 text-text-primary placeholder:text-placeholder focus:ring-0 sm:text-sm bg-transparent outline-none"
             placeholder="Search modules..."
             type="text"
             value={searchQuery}
@@ -151,7 +151,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
 
           {/* Search Dropdown */}
           {showDropdown && searchQuery.length > 0 && (
-            <div className="absolute top-14 left-0 w-full max-w-lg bg-white border border-border shadow-xl rounded-xl overflow-hidden z-50">
+            <div className="absolute top-14 left-0 w-full max-w-lg bg-white border border-border shadow-xl rounded-lg overflow-hidden z-50">
               <div className="p-2 border-b border-border bg-slate-50 text-xs font-bold text-text-secondary uppercase tracking-wider">
                 Quick Navigation
               </div>
@@ -165,7 +165,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
                           setShowDropdown(false);
                           setSearchQuery('');
                         }}
-                        className="w-full text-left flex items-center justify-between px-4 py-3 hover:bg-slate-50 border-b border-border transition-colors last:border-0"
+                        className="w-full text-left flex items-center justify-between px-4 py-3 hover:bg-selected/60 border-b border-border transition-colors last:border-0"
                       >
                         <div>
                           <div className="text-sm font-bold text-text-primary">{route.name}</div>
@@ -208,7 +208,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
             </button>
 
             {showNotifDropdown && (
-              <div className="absolute right-0 mt-3 z-50 w-96 rounded-3xl bg-white/95 backdrop-blur-xl border border-border/60 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-300 font-premium">
+              <div className="absolute right-0 mt-3 z-50 w-96 rounded-xl bg-white/95 backdrop-blur-xl border border-border/60 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-300 font-premium">
                 <div className="px-5 py-4 border-b border-border/80 bg-slate-50/40 flex justify-between items-center">
                   <span className="font-extrabold text-text-primary text-sm tracking-tight font-display-premium">Notifications</span>
                   <span className="text-[10px] font-bold bg-indigo-50 text-indigo-650 border border-indigo-100 px-2.5 py-0.5 rounded-full tracking-wide">
@@ -249,7 +249,7 @@ export function TopNav({ setMobileOpen }: TopNavProps) {
                           }`}
                         >
                           <div className="relative shrink-0 mt-0.5">
-                            <div className={`h-10 w-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${ch.bgGradient} border ${ch.borderClass} shadow-[0_2px_8px_rgba(0,0,0,0.02)] shrink-0`}>
+                            <div className={`h-10 w-10 rounded-lg flex items-center justify-center bg-gradient-to-br ${ch.bgGradient} border ${ch.borderClass} shadow-[0_2px_8px_rgba(0,0,0,0.02)] shrink-0`}>
                               <ChIcon className={`w-4 h-4 ${ch.iconColor}`} />
                             </div>
                             {isUnread && (

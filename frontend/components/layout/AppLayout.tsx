@@ -30,7 +30,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   }, []);
 
   return (
-    <div className="flex h-screen bg-[var(--background)] font-[family-name:var(--font-work-sans)] text-[var(--foreground)] overflow-hidden">
+    <div className="flex h-screen bg-[var(--background)] font-sans text-[var(--foreground)] overflow-hidden">
       {/* Unified Sidebar Navigation */}
       <Sidebar 
         isMobileOpen={sidebarOpen} 

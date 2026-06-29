@@ -187,7 +187,7 @@ const LoginPage = () => {
         <div className="flex w-full flex-col lg:w-1/2 bg-white justify-between">
           <div className="flex flex-1 flex-col justify-center px-4 sm:px-16 lg:px-24">
             <div className="mx-auto w-full max-w-sm">
-              <h2 className="text-2xl font-extrabold text-text-primary tracking-tight font-[family-name:var(--font-outfit)]">Welcome Back</h2>
+              <h2 className="text-3xl font-extrabold text-text-primary tracking-tight font-display-premium">Welcome Back</h2>
               <p className="mt-1.5 text-sm text-text-secondary/70">Sign in to continue to your workspace</p>
 
               {/* Form */}
@@ -201,7 +201,7 @@ const LoginPage = () => {
                       required 
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="block w-full rounded-none border border-border px-4 py-3 text-sm focus:border-orange-500 focus:outline-none focus:ring-0 transition-all placeholder-sky-300 bg-white" 
+                      className="block w-full rounded-md border border-border px-4 py-3 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder-slate-400 bg-white" 
                     />
                   </div>
                 </div>
@@ -209,7 +209,7 @@ const LoginPage = () => {
                 <div>
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-bold uppercase tracking-wider text-label">Password</label>
-                    <Link href="/forgot-password" className="text-xs font-bold text-orange-600 hover:text-orange-500 transition-colors">Forgot Password?</Link>
+                    <Link href="/forgot-password" className="text-xs font-bold text-primary hover:text-primary-hover transition-colors">Forgot Password?</Link>
                   </div>
                   <div className="relative mt-2">
                     <input 
@@ -218,20 +218,20 @@ const LoginPage = () => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full rounded-none border border-border px-4 py-3 text-sm focus:border-orange-500 focus:outline-none focus:ring-0 transition-all placeholder-sky-300 bg-white" 
+                      className="block w-full rounded-md border border-border px-4 py-3 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder-slate-400 bg-white" 
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center">
-                  <input id="remember-me" type="checkbox" className="h-4 w-4 rounded-none border-border text-orange-600 focus:ring-orange-500" />
+                  <input id="remember-me" type="checkbox" className="h-4 w-4 rounded-md border-border text-primary focus:ring-primary/50" />
                   <label htmlFor="remember-me" className="ml-2 block text-xs font-semibold text-label select-none">Remember Me</label>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex w-full justify-center rounded-none bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed px-4 py-3 text-sm font-semibold text-white shadow-sm hover:shadow transition-all duration-200 active:scale-[0.98] font-[family-name:var(--font-outfit)]"
+                  className="flex w-full justify-center rounded-md bg-primary hover:bg-primary-hover disabled:bg-primary/50 disabled:cursor-not-allowed px-4 py-3 text-sm font-semibold text-white shadow-sm hover:shadow transition-all duration-200 active:scale-[0.98] font-display-premium"
                 >
                   {isSubmitting ? 'Signing In...' : 'Sign In'} <span className="ml-2">→</span>
                 </button>

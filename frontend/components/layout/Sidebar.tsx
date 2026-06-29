@@ -80,7 +80,6 @@ export function Sidebar({ isMobileOpen, setMobileOpen, isCollapsed, setCollapsed
           </button>
         </div>
 
-        {/* Dynamic Sidebar Links */}
         <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-1 font-sans select-none custom-scrollbar">
           {filteredItems.map((item) => {
             const IconComponent = item.icon;
@@ -91,7 +90,7 @@ export function Sidebar({ isMobileOpen, setMobileOpen, isCollapsed, setCollapsed
                 href={item.route}
                 onClick={() => setMobileOpen(false)}
                 className={`
-                  group flex items-center justify-between rounded-xl px-3 py-2.5 transition-all duration-200 cursor-pointer
+                  group flex items-center justify-between rounded-lg px-3 py-2.5 transition-all duration-200 cursor-pointer
                   ${active 
                     ? 'bg-selected text-primary shadow-sm shadow-primary/5 font-bold' 
                     : 'text-text-secondary hover:bg-selected/60 hover:text-primary-hover font-medium'}
@@ -110,7 +109,7 @@ export function Sidebar({ isMobileOpen, setMobileOpen, isCollapsed, setCollapsed
 
         {/* Sidebar Footer / User section */}
         <div className="p-4 border-t border-border shrink-0">
-          <div className={`flex items-center justify-between ${isCollapsed ? 'flex-col gap-2' : 'px-2 py-2'}`}>
+          <div className={`flex items-center ${isCollapsed ? 'flex-col gap-2' : 'justify-between px-2 py-2'}`}>
             <div className="flex items-center gap-x-3 overflow-hidden">
               <div className="h-9 w-9 shrink-0 rounded-full bg-selected border border-border shadow-sm flex items-center justify-center overflow-hidden">
                 <img 
@@ -119,7 +118,7 @@ export function Sidebar({ isMobileOpen, setMobileOpen, isCollapsed, setCollapsed
                   className="h-full w-full object-cover" 
                 />
               </div>
-              <div className={`overflow-hidden animate-fade-in font-[family-name:var(--font-outfit)] ${isCollapsed && !isMobileOpen ? 'hidden' : 'block'}`}>
+              <div className={`overflow-hidden animate-fade-in font-premium ${isCollapsed && !isMobileOpen ? 'hidden' : 'block'}`}>
                 <p className="text-sm font-bold text-text-primary truncate leading-tight">{user?.name || "User"}</p>
                 <p className="text-[9px] font-bold uppercase tracking-wider text-text-secondary truncate mt-0.5">{user?.roleName || "Role"}</p>
               </div>
