@@ -1,26 +1,21 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { 
-  Package, Search, Filter, Plus, ChevronRight, Calendar, Users, FileDown,
+  Package, Plus, ChevronRight, Calendar, Users, FileDown,
   GraduationCap, CheckCircle2, XCircle, AlertCircle, Award, FileText, 
   Building, Clock, TrendingUp, Download, RefreshCw, UserCheck, MapPin, 
   Activity, Mail, Phone, Shield, Printer, QrCode, Briefcase, UserX, 
-  ListFilter, Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock,
+  Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock,
   PlusSquare, ArrowRight, Layers
 } from 'lucide-react';
 import { batchService } from '@/src/services/batch.service';
 import { Batch, BatchStudent, BatchTimelineEvent, BatchProject } from '@/src/data/mock-batches';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
-import { Pagination } from "@/components/common/Pagination";
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 export default function BatchManagementPage() {
-
-      // Pagination State
-      const [currentPage, setCurrentPage] = React.useState(1);
-      const itemsPerPage = 10;
-
   const { user } = useAuth();
   
   // App views: dashboard, directory
@@ -44,15 +39,8 @@ export default function BatchManagementPage() {
     batchId?: string;
   } | null>(null);
   
-  // Search & Filter State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterProgram, setFilterProgram] = useState<string>('all');
-  const [filterType, setFilterType] = useState<string>('all');
+  // Filter State (for dashboard KPI click integration)
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterMentor, setFilterMentor] = useState<string>('all');
-  const [filterCapacity, setFilterCapacity] = useState<string>('all');
-  const [filterCompletion, setFilterCompletion] = useState<string>('all');
-  const [showFilters, setShowFilters] = useState(false);
 
   // Forms state
   const [editForm, setEditForm] = useState({
@@ -120,69 +108,23 @@ export default function BatchManagementPage() {
   }, []);
 
   // Keyboard listener
-  const searchInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsProfileDrawerOpen(false);
         setActiveActionModal(null);
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        if (activeView === 'directory' && searchInputRef.current) {
-          e.preventDefault();
-          searchInputRef.current.focus();
-        }
-      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeView]);
+  }, []);
 
-  // Derived Filter Lists
-  const programsList = useMemo(() => {
-    const programs = new Set(batches.map(b => b.programName));
-    return Array.from(programs);
-  }, [batches]);
-
-  const mentorsList = useMemo(() => {
-    const mentors = new Set(batches.map(b => b.mentor.name).filter(Boolean));
-    return Array.from(mentors);
-  }, [batches]);
-
-  // Filtered Batches logic
+  // Filtered Batches logic (for dashboard KPI click integration)
   const filteredBatches = useMemo(() => {
     return batches.filter(b => {
-      const q = searchTerm.toLowerCase();
-      const matchesSearch = 
-        b.name.toLowerCase().includes(q) ||
-        b.code.toLowerCase().includes(q) ||
-        b.programName.toLowerCase().includes(q) ||
-        (b.mentor && b.mentor.name.toLowerCase().includes(q));
-
-      const matchesProgram = filterProgram === 'all' || b.programName === filterProgram;
-      const matchesType = filterType === 'all' || b.internshipType === filterType;
-      const matchesStatus = filterStatus === 'all' || b.status === filterStatus;
-      const matchesMentor = filterMentor === 'all' || b.mentor.name === filterMentor;
-      
-      let matchesCapacity = true;
-      if (filterCapacity !== 'all') {
-        const util = (b.students.length / b.capacity) * 100;
-        if (filterCapacity === 'full') matchesCapacity = util >= 100;
-        else if (filterCapacity === 'high') matchesCapacity = util >= 80 && util < 100;
-        else if (filterCapacity === 'low') matchesCapacity = util < 50;
-      }
-
-      let matchesCompletion = true;
-      if (filterCompletion !== 'all') {
-        const rate = b.completionRate;
-        if (filterCompletion === 'high') matchesCompletion = rate >= 90;
-        else if (filterCompletion === 'mid') matchesCompletion = rate >= 60 && rate < 90;
-        else if (filterCompletion === 'low') matchesCompletion = rate < 60;
-      }
-
-      return matchesSearch && matchesProgram && matchesType && matchesStatus && matchesMentor && matchesCapacity && matchesCompletion;
+      return filterStatus === 'all' || b.status === filterStatus;
     });
-  }, [batches, searchTerm, filterProgram, filterType, filterStatus, filterMentor, filterCapacity, filterCompletion]);
+  }, [batches, filterStatus]);
 
   // Dashboard calculations
   const dashboardStats = useMemo(() => {
@@ -968,292 +910,113 @@ export default function BatchManagementPage() {
       {/* VIEW 2: BATCH DIRECTORY TABLE */}
       {activeView === 'directory' && (
         <div className="bg-white border border-border rounded-xl shadow-xs overflow-hidden">
-          
-          {/* Filtering and Toolbar */}
-          <div className="p-4 border-b border-border bg-slate-50/50 space-y-4">
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-              
-              {/* Search Bar */}
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-                <input 
-                  type="text" 
-                  ref={searchInputRef}
-                  placeholder="Search batches (Name, Code, Program, Mentor)... [Ctrl+F]"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              {/* Filters trigger */}
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 border rounded-lg text-xs font-bold shadow-xs transition-all ${showFilters ? 'bg-blue-50 text-blue-700 border-blue-300' : 'bg-white border-border text-text-primary hover:bg-slate-50'}`}
-                >
-                  <ListFilter className="h-3.5 w-3.5" />
-                  <span>{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
-                </button>
-
-                {(filterProgram !== 'all' || filterType !== 'all' || filterStatus !== 'all' || filterMentor !== 'all' || filterCapacity !== 'all' || filterCompletion !== 'all') && (
-                  <button 
-                    onClick={() => {
-                      setFilterProgram('all');
-                      setFilterType('all');
-                      setFilterStatus('all');
-                      setFilterMentor('all');
-                      setFilterCapacity('all');
-                      setFilterCompletion('all');
-                      showToast('Cleared directory filters');
-                    }}
-                    className="px-3.5 py-2 border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg text-xs font-bold transition-all"
-                  >
-                    Reset All
-                  </button>
-                )}
-              </div>
-
-            </div>
-
-            {/* Filter Panels */}
-            {showFilters && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 bg-white border border-border p-4 rounded-lg shadow-sm">
-                
-                {/* Program filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Internship Program</label>
-                  <select 
-                    value={filterProgram}
-                    onChange={(e) => setFilterProgram(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Programs</option>
-                    {programsList.map((p, idx) => <option key={idx} value={p}>{p}</option>)}
-                  </select>
-                </div>
-
-                {/* Status filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Batch Status</label>
-                  <select 
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="Draft">Draft</option>
-                    <option value="Upcoming">Upcoming</option>
-                    <option value="Enrollment Open">Enrollment Open</option>
-                    <option value="Active">Active</option>
-                    <option value="On Hold">On Hold</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Archived">Archived</option>
-                  </select>
-                </div>
-
-                {/* Mentor filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Cohort Coach</label>
-                  <select 
-                    value={filterMentor}
-                    onChange={(e) => setFilterMentor(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Mentors</option>
-                    {mentorsList.map((m, idx) => <option key={idx} value={m}>{m}</option>)}
-                  </select>
-                </div>
-
-                {/* Capacity utilization filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Seats Utilization</label>
-                  <select 
-                    value={filterCapacity}
-                    onChange={(e) => setFilterCapacity(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Levels</option>
-                    <option value="full">At Capacity (100%+)</option>
-                    <option value="high">High Seats (80%-99%)</option>
-                    <option value="low">Under Allocated (Below 50%)</option>
-                  </select>
-                </div>
-
-                {/* Completion rate filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Completion Rates</label>
-                  <select 
-                    value={filterCompletion}
-                    onChange={(e) => setFilterCompletion(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Ranges</option>
-                    <option value="high">Top Out (90%+)</option>
-                    <option value="mid">Standard (60%-89%)</option>
-                    <option value="low">Underachieving (Below 60%)</option>
-                  </select>
-                </div>
-
-                {/* Internship Type filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Internship Type</label>
-                  <select 
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="Free Internship">Free Internship</option>
-                    <option value="Paid Internship">Paid Internship</option>
-                    <option value="Stipend Internship">Stipend Internship</option>
-                    <option value="Industrial Internship">Industrial Internship</option>
-                    <option value="Research Internship">Research Internship</option>
-                    <option value="Corporate Internship">Corporate Internship</option>
-                  </select>
-                </div>
-
-              </div>
-            )}
-
-          </div>
-
-          {/* High Density Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs whitespace-nowrap">
-              <thead className="bg-slate-50 border-b border-border font-bold uppercase text-text-secondary">
-                <tr>
-                  <th className="px-4 py-3 text-center w-10">
-                    <input 
-                      type="checkbox"
-                      checked={filteredBatches.length > 0 && selectedIds.length === filteredBatches.length}
-                      onChange={handleToggleSelectAll}
-                      className="rounded border-border text-blue-600 focus:ring-primary"
-                    />
-                  </th>
-                  <th className="px-4 py-3">Batch Name</th>
-                  <th className="px-4 py-3">Batch Code</th>
-                  <th className="px-4 py-3">Internship Program</th>
-                  <th className="px-4 py-3">Lead Mentor</th>
-                  <th className="px-4 py-3">Seat Allocations</th>
-                  <th className="px-4 py-3">Timeline Dates</th>
-                  <th className="px-4 py-3">Completion %</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border font-medium">
-                {filteredBatches.length > 0 ? (
-                  filteredBatches.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(b => {
-                    const isSelected = selectedIds.includes(b.id);
-                    const utilPct = Math.round((b.students.length / b.capacity) * 100) || 0;
-
-                    return (
-                      <tr 
-                        key={b.id}
-                        className={`hover:bg-slate-50/50 transition-colors ${isSelected ? 'bg-blue-50/30' : ''}`}
-                      >
-                        <td className="px-4 py-3 text-center">
-                          <input 
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleToggleSelectRow(b.id)}
-                            className="rounded border-border text-blue-600 focus:ring-primary"
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <div 
-                            onClick={() => handleOpenProfile(b)}
-                            className="font-extrabold text-text-primary hover:text-blue-600 cursor-pointer flex items-center gap-1.5"
-                          >
-                            <Package className="h-3.5 w-3.5 text-text-secondary shrink-0" />
-                            {b.name}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 font-mono font-bold text-text-secondary">{b.code}</td>
-                        <td className="px-4 py-3 text-text-secondary truncate max-w-[150px]" title={b.programName}>{b.programName}</td>
-                        <td className="px-4 py-3">
-                          {b.mentor.name ? (
-                            <span className="font-semibold text-text-primary flex items-center gap-1">
-                              <Shield className="h-3 w-3 text-text-secondary" />
-                              {b.mentor.name}
-                            </span>
-                          ) : (
-                            <span className="italic text-rose-600 font-bold">Unassigned</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1.5">
-                            <span className={`font-black ${utilPct >= 100 ? 'text-rose-600' : 'text-text-primary'}`}>
-                              {b.students.length} / {b.capacity}
-                            </span>
-                            <span className="text-[10px] text-text-secondary">({utilPct}%)</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-text-secondary">{b.startDate} to {b.endDate}</td>
-                        <td className="px-4 py-3 font-black text-text-primary">{b.completionRate}%</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
-                            b.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            b.status === 'Completed' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
-                            b.status === 'Upcoming' || b.status === 'Enrollment Open' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                            b.status === 'On Hold' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-text-secondary'
-                          }`}>
-                            {b.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button 
-                              onClick={() => handleOpenProfile(b)}
-                              className="p-1 hover:text-blue-600 hover:bg-slate-100 rounded text-text-secondary transition-colors"
-                              title="Cohort Command Drawer"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </button>
-                            <button 
-                              onClick={() => openEditModal(b)}
-                              className="p-1 hover:text-amber-600 hover:bg-slate-100 rounded text-text-secondary transition-colors"
-                              title="Edit Cohort Parameters"
-                            >
-                              <PlusCircle className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={10} className="px-4 py-12 text-center text-text-secondary">
-                      <Package className="h-12 w-12 text-slate-200 mx-auto mb-3" />
-                      <p className="text-sm font-extrabold text-text-secondary">No batches match filters</p>
-                      <p className="text-xs text-text-secondary mt-0.5">Try altering the search terms or department queries.</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={Math.ceil((filteredBatches.length || 0) / itemsPerPage)} 
-          onPageChange={setCurrentPage} 
-        />
-
-          <div className="p-4 border-t border-border bg-slate-50/50 flex justify-between items-center text-xs font-bold text-text-secondary">
-            <div>
-              Showing {filteredBatches.length} of {batches.length} cohorts
-            </div>
-            <div>
-              {selectedIds.length > 0 && (
-                <span className="text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
-                  {selectedIds.length} batches selected for batch scaling
-                </span>
-              )}
-            </div>
-          </div>
-
+          <EnhancedTable<Batch>
+            data={filteredBatches}
+            searchPlaceholder="Search batches (Name, Code, Program, Mentor)..."
+            itemsPerPage={10}
+            columns={[
+              {
+                key: 'select',
+                label: '',
+                render: (b) => (
+                  <input 
+                    type="checkbox"
+                    checked={selectedIds.includes(b.id)}
+                    onChange={() => handleToggleSelectRow(b.id)}
+                    className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
+                  />
+                ),
+              },
+              {
+                key: 'name',
+                label: 'Batch Name',
+                render: (b) => (
+                  <div onClick={() => handleOpenProfile(b)} className="font-extrabold text-text-primary hover:text-blue-600 cursor-pointer flex items-center gap-1.5">
+                    <Package className="h-3.5 w-3.5 text-text-secondary shrink-0" />
+                    {b.name}
+                  </div>
+                ),
+              },
+              {
+                key: 'code',
+                label: 'Batch Code',
+                render: (b) => <span className="font-mono font-bold text-text-secondary">{b.code}</span>,
+              },
+              {
+                key: 'programName',
+                label: 'Internship Program',
+                render: (b) => <span className="text-text-secondary truncate max-w-[150px]" title={b.programName}>{b.programName}</span>,
+              },
+              {
+                key: 'mentor',
+                label: 'Lead Mentor',
+                render: (b) => (
+                  b.mentor.name ? (
+                    <span className="font-semibold text-text-primary flex items-center gap-1">
+                      <Shield className="h-3 w-3 text-text-secondary" />
+                      {b.mentor.name}
+                    </span>
+                  ) : (
+                    <span className="italic text-rose-600 font-bold">Unassigned</span>
+                  )
+                ),
+              },
+              {
+                key: 'seats',
+                label: 'Seat Allocations',
+                render: (b) => {
+                  const utilPct = Math.round((b.students.length / b.capacity) * 100) || 0;
+                  return (
+                    <div className="flex items-center gap-1.5">
+                      <span className={`font-black ${utilPct >= 100 ? 'text-rose-600' : 'text-text-primary'}`}>
+                        {b.students.length} / {b.capacity}
+                      </span>
+                      <span className="text-[10px] text-text-secondary">({utilPct}%)</span>
+                    </div>
+                  );
+                },
+              },
+              {
+                key: 'dates',
+                label: 'Timeline Dates',
+                render: (b) => <span className="text-text-secondary">{b.startDate} to {b.endDate}</span>,
+              },
+              {
+                key: 'completionRate',
+                label: 'Completion %',
+                render: (b) => <span className="font-black text-text-primary">{b.completionRate}%</span>,
+              },
+              {
+                key: 'status',
+                label: 'Status',
+                render: (b) => (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                    b.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                    b.status === 'Completed' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                    b.status === 'Upcoming' || b.status === 'Enrollment Open' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                    b.status === 'On Hold' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-text-secondary'
+                  }`}>
+                    {b.status}
+                  </span>
+                ),
+              },
+              {
+                key: 'actions',
+                label: 'Actions',
+                className: 'text-right',
+                render: (b) => (
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button onClick={() => handleOpenProfile(b)} className="p-1 hover:text-blue-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="Cohort Command Drawer">
+                      <Eye className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => openEditModal(b)} className="p-1 hover:text-amber-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="Edit Cohort Parameters">
+                      <PlusCircle className="h-4 w-4" />
+                    </button>
+                  </div>
+                ),
+              },
+            ]}
+          />
         </div>
       )}
 
@@ -1515,44 +1278,48 @@ export default function BatchManagementPage() {
                     </button>
                   </div>
 
-                  {activeProfile.students.length > 0 ? (
-                    <div className="border border-border rounded-lg overflow-hidden">
-                      <table className="w-full text-left text-xs whitespace-nowrap">
-                        <thead className="bg-slate-50 border-b border-border font-bold text-text-secondary">
-                          <tr>
-                            <th className="px-4 py-2">Candidate</th>
-                            <th className="px-4 py-2">Intern ID</th>
-                            <th className="px-4 py-2">College / Dept</th>
-                            <th className="px-4 py-2">GPA Score</th>
-                            <th className="px-4 py-2 text-right">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border font-semibold text-text-primary">
-                          {activeProfile.students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(stu => (
-                            <tr key={stu.id} className="hover:bg-slate-50/50">
-                              <td className="px-4 py-2.5 font-extrabold text-text-primary">{stu.name}</td>
-                              <td className="px-4 py-2.5 font-mono text-text-secondary font-bold">{stu.internId}</td>
-                              <td className="px-4 py-2.5 text-text-secondary">{stu.college} ({stu.department})</td>
-                              <td className="px-4 py-2.5 font-black text-text-primary">{stu.performanceScore}%</td>
-                              <td className="px-4 py-2.5 text-right">
-                                <button
-                                  onClick={() => handleRemoveStudentFromBatch(stu.id)}
-                                  className="p-1 hover:text-red-600 rounded text-text-secondary transition"
-                                  title="Deallocate student from cohort batch roster"
-                                >
-                                  ✕ Remove
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-10 border border-dashed border-border rounded-lg text-xs text-text-secondary">
-                      No students are currently allocated to this batch cohort.
-                    </div>
-                  )}
+                  <EnhancedTable<BatchStudent>
+                    data={activeProfile.students}
+                    searchPlaceholder="Search students..."
+                    itemsPerPage={10}
+                    emptyMessage="No students are currently allocated to this batch cohort."
+                    columns={[
+                      {
+                        key: 'name',
+                        label: 'Candidate',
+                        render: (stu) => <span className="font-extrabold text-text-primary">{stu.name}</span>,
+                      },
+                      {
+                        key: 'internId',
+                        label: 'Intern ID',
+                        render: (stu) => <span className="font-mono font-bold text-text-secondary">{stu.internId}</span>,
+                      },
+                      {
+                        key: 'college',
+                        label: 'College / Dept',
+                        render: (stu) => <span className="text-text-secondary">{stu.college} ({stu.department})</span>,
+                      },
+                      {
+                        key: 'performanceScore',
+                        label: 'GPA Score',
+                        render: (stu) => <span className="font-black text-text-primary">{stu.performanceScore}%</span>,
+                      },
+                      {
+                        key: 'actions',
+                        label: 'Actions',
+                        className: 'text-right',
+                        render: (stu) => (
+                          <button
+                            onClick={() => handleRemoveStudentFromBatch(stu.id)}
+                            className="p-1 hover:text-red-600 rounded text-text-secondary transition"
+                            title="Deallocate student from cohort batch roster"
+                          >
+                            ✕ Remove
+                          </button>
+                        ),
+                      },
+                    ]}
+                  />
                 </div>
 
               </div>

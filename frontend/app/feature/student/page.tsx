@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { 
-  Users, Search, Filter, Plus, ChevronRight, FileDown, MoreVertical, 
+  Users, Plus, ChevronRight, FileDown, MoreVertical, 
   GraduationCap, CheckCircle2, XCircle, AlertCircle, Calendar, Award, 
   FileText, Building, Clock, TrendingUp, Download, RefreshCw, UserCheck, 
   MapPin, Activity, Mail, Phone, Shield, Printer, QrCode, Briefcase, 
-  UserX, ListFilter, Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock
+  UserX, Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock
 } from 'lucide-react';
 import { studentService } from '@/src/services/student.service';
 import { Student, StudentDocument, StudentTimelineEvent, StudentBatch } from '@/src/data/mock-students';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
-import { Pagination } from '@/components/common/Pagination';
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 export default function StudentLifecycleManagementPage() {
   const { user } = useAuth();
@@ -39,17 +39,9 @@ export default function StudentLifecycleManagementPage() {
     studentId?: string;
   } | null>(null);
   
-  // Search & Filter State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterProgram, setFilterProgram] = useState<string>('all');
-  const [filterDept, setFilterDept] = useState<string>('all');
-  const [filterCollege, setFilterCollege] = useState<string>('all');
-  const [filterBatch, setFilterBatch] = useState<string>('all');
-  const [filterMentor, setFilterMentor] = useState<string>('all');
+  // Search & Filter State (for dashboard KPI click integration)
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPlacement, setFilterPlacement] = useState<string>('all');
-  const [filterPerformance, setFilterPerformance] = useState<string>('all');
-  const [showFilters, setShowFilters] = useState(false);
 
   // Forms state
   const [editForm, setEditForm] = useState({
@@ -127,87 +119,26 @@ export default function StudentLifecycleManagementPage() {
     loadData();
   }, []);
 
-  // Keyboard Shortcuts listener (Esc to close, Ctrl+F to focus search)
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  // Keyboard Shortcuts listener (Esc to close)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsProfileDrawerOpen(false);
         setActiveActionModal(null);
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        if (activeView === 'directory' && searchInputRef.current) {
-          e.preventDefault();
-          searchInputRef.current.focus();
-        }
-      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeView]);
+  }, []);
 
-  // Derived Filter Lists
-  const collegesList = useMemo(() => {
-    const colleges = new Set(students.map(s => s.academicInfo.college));
-    return Array.from(colleges);
-  }, [students]);
-
-  const programsList = useMemo(() => {
-    const programs = new Set(students.map(s => s.internshipInfo.program));
-    return Array.from(programs);
-  }, [students]);
-
-  const batchesList = useMemo(() => {
-    const batches = new Set(students.map(s => s.internshipInfo.batchName).filter(Boolean));
-    return Array.from(batches);
-  }, [students]);
-
-  const mentorsList = useMemo(() => {
-    const mentors = new Set(students.map(s => s.internshipInfo.mentorName).filter(Boolean));
-    return Array.from(mentors);
-  }, [students]);
-
-  // Filtered Students logic
+  // Filtered Students logic (for dashboard KPI click integration)
   const filteredStudents = useMemo(() => {
     return students.filter(s => {
-      // Global text query search (ID, Name, Email, Phone, College)
-      const q = searchTerm.toLowerCase();
-      const matchesSearch = 
-        s.personalInfo.name.toLowerCase().includes(q) ||
-        s.internId.toLowerCase().includes(q) ||
-        s.personalInfo.email.toLowerCase().includes(q) ||
-        s.personalInfo.phone.toLowerCase().includes(q) ||
-        s.academicInfo.college.toLowerCase().includes(q);
-
-      const matchesProgram = filterProgram === 'all' || s.internshipInfo.program === filterProgram;
-      const matchesDept = filterDept === 'all' || s.academicInfo.department === filterDept;
-      const matchesCollege = filterCollege === 'all' || s.academicInfo.college === filterCollege;
-      const matchesBatch = filterBatch === 'all' || s.internshipInfo.batchName === filterBatch;
-      const matchesMentor = filterMentor === 'all' || s.internshipInfo.mentorName === filterMentor;
       const matchesStatus = filterStatus === 'all' || s.status === filterStatus;
       const matchesPlacement = filterPlacement === 'all' || s.placement.status === filterPlacement;
-      
-      let matchesPerformance = true;
-      if (filterPerformance !== 'all') {
-        const perf = s.performance.overallPerformance;
-        if (filterPerformance === 'high') matchesPerformance = perf >= 90;
-        else if (filterPerformance === 'mid') matchesPerformance = perf >= 75 && perf < 90;
-        else if (filterPerformance === 'low') matchesPerformance = perf < 75;
-      }
-
-      return matchesSearch && matchesProgram && matchesDept && matchesCollege && matchesBatch && matchesMentor && matchesStatus && matchesPlacement && matchesPerformance;
+      return matchesStatus && matchesPlacement;
     });
-  }, [students, searchTerm, filterProgram, filterDept, filterCollege, filterBatch, filterMentor, filterStatus, filterPlacement, filterPerformance]);
-
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const paginatedStudents = filteredStudents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  // Reset pagination on filter change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterProgram, filterDept, filterCollege, filterBatch, filterMentor, filterStatus, filterPlacement, filterPerformance]);
+  }, [students, filterStatus, filterPlacement]);
 
   // Executive Dashboard KPIs
   const dashboardStats = useMemo(() => {
@@ -288,6 +219,75 @@ export default function StudentLifecycleManagementPage() {
       });
     });
     return feed.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 7);
+  }, [students]);
+
+  // Filter configs for EnhancedTable
+  const filterConfigs = useMemo(() => {
+    const programs = [...new Set(students.map(s => s.internshipInfo.program))].filter(Boolean);
+    const departments = [...new Set(students.map(s => s.academicInfo.department))].filter(Boolean);
+    const colleges = [...new Set(students.map(s => s.academicInfo.college))].filter(Boolean);
+    const batches = [...new Set(students.map(s => s.internshipInfo.batchName).filter(Boolean))];
+    const mentors = [...new Set(students.map(s => s.internshipInfo.mentorName).filter(Boolean))];
+    const statuses = [...new Set(students.map(s => s.status))];
+    const placements = [...new Set(students.map(s => s.placement.status))];
+
+    return [
+      {
+        key: 'program',
+        label: 'Program',
+        type: 'select' as const,
+        options: programs,
+        onFilter: (data: Student[], value: string) => data.filter(s => s.internshipInfo.program === value),
+      },
+      {
+        key: 'department',
+        label: 'Department',
+        type: 'select' as const,
+        options: departments,
+        onFilter: (data: Student[], value: string) => data.filter(s => s.academicInfo.department === value),
+      },
+      {
+        key: 'college',
+        label: 'College',
+        type: 'select' as const,
+        options: colleges,
+        onFilter: (data: Student[], value: string) => data.filter(s => s.academicInfo.college === value),
+      },
+      {
+        key: 'batch',
+        label: 'Batch Cohort',
+        type: 'select' as const,
+        options: batches,
+        onFilter: (data: Student[], value: string) => data.filter(s => s.internshipInfo.batchName === value),
+      },
+      {
+        key: 'mentor',
+        label: 'Mentor',
+        type: 'select' as const,
+        options: mentors,
+        onFilter: (data: Student[], value: string) => data.filter(s => s.internshipInfo.mentorName === value),
+      },
+      {
+        key: 'status',
+        label: 'Status',
+        type: 'select' as const,
+        options: statuses,
+        onFilter: (data: Student[], value: string) => data.filter(s => s.status === value),
+      },
+      {
+        key: 'placement_status',
+        label: 'Placement Stage',
+        type: 'select' as const,
+        options: placements,
+        onFilter: (data: Student[], value: string) => data.filter(s => s.placement.status === value),
+      },
+      {
+        key: 'min_performance',
+        label: 'Min Performance',
+        type: 'text' as const,
+        onFilter: (data: Student[], value: string) => data.filter(s => s.performance.overallPerformance >= Number(value)),
+      },
+    ];
   }, [students]);
 
   // Click handler to open Drawer and sync the active profile
@@ -1075,355 +1075,140 @@ export default function StudentLifecycleManagementPage() {
       {/* VIEW 2: STUDENT DIRECTORY */}
       {activeView === 'directory' && (
         <div className="bg-white border border-border rounded-xl shadow-xs overflow-hidden">
-          
-          {/* Filters & Search Toolbar */}
-          <div className="p-4 border-b border-border bg-slate-50/50 space-y-4">
-            <div className="flex flex-col md:flex-row justify-between gap-4">
-              
-              {/* Query Input */}
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-                <input 
-                  type="text" 
-                  ref={searchInputRef}
-                  placeholder="Search students (Name, ID, Email, Phone, College)... [Ctrl+F]"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              {/* Toggles */}
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 border rounded-lg text-xs font-bold shadow-xs transition-all ${showFilters ? 'bg-blue-50 text-blue-700 border-blue-300' : 'bg-white border-border text-text-primary hover:bg-slate-50'}`}
-                >
-                  <ListFilter className="h-3.5 w-3.5" />
-                  <span>{showFilters ? 'Hide Filters' : 'Advanced Filters'}</span>
-                </button>
-
-                {(filterProgram !== 'all' || filterDept !== 'all' || filterCollege !== 'all' || filterBatch !== 'all' || filterMentor !== 'all' || filterStatus !== 'all' || filterPlacement !== 'all' || filterPerformance !== 'all') && (
-                  <button 
-                    onClick={() => {
-                      setFilterProgram('all');
-                      setFilterDept('all');
-                      setFilterCollege('all');
-                      setFilterBatch('all');
-                      setFilterMentor('all');
-                      setFilterStatus('all');
-                      setFilterPlacement('all');
-                      setFilterPerformance('all');
-                      showToast('Cleared all directories filters');
-                    }}
-                    className="px-3.5 py-2 border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg text-xs font-bold transition-all"
-                  >
-                    Reset All
-                  </button>
-                )}
-              </div>
-
-            </div>
-
-            {/* Dynamic Multi-Filter Panels */}
-            {showFilters && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-white border border-border p-4 rounded-lg shadow-sm">
-                
-                {/* Program filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Internship Program</label>
-                  <select 
-                    value={filterProgram}
-                    onChange={(e) => setFilterProgram(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Programs</option>
-                    {programsList.map((p, idx) => <option key={idx} value={p}>{p}</option>)}
-                  </select>
-                </div>
-
-                {/* Status filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Lifecycle Status</label>
-                  <select 
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="Applied">Applied</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Enrolled">Enrolled</option>
-                    <option value="Active">Active</option>
-                    <option value="On Hold">On Hold</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Certified">Certified</option>
-                    <option value="Placed">Placed</option>
-                    <option value="Dropped">Dropped</option>
-                    <option value="Suspended">Suspended</option>
-                  </select>
-                </div>
-
-                {/* College filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Institution College</label>
-                  <select 
-                    value={filterCollege}
-                    onChange={(e) => setFilterCollege(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Colleges</option>
-                    {collegesList.map((c, idx) => <option key={idx} value={c}>{c}</option>)}
-                  </select>
-                </div>
-
-                {/* Department filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Department</label>
-                  <select 
-                    value={filterDept}
-                    onChange={(e) => setFilterDept(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Departments</option>
-                    <option value="CSE">CSE</option>
-                    <option value="IT">IT</option>
-                    <option value="AI & DS">AI & DS</option>
-                    <option value="ECE">ECE</option>
-                    <option value="EEE">EEE</option>
-                    <option value="Mechanical">Mechanical</option>
-                    <option value="Civil">Civil</option>
-                    <option value="MBA">MBA</option>
-                  </select>
-                </div>
-
-                {/* Batch filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Batch Cohort</label>
-                  <select 
-                    value={filterBatch}
-                    onChange={(e) => setFilterBatch(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Batches</option>
-                    {batchesList.map((b, idx) => <option key={idx} value={b}>{b}</option>)}
-                  </select>
-                </div>
-
-                {/* Mentor filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Mentor Assigned</label>
-                  <select 
-                    value={filterMentor}
-                    onChange={(e) => setFilterMentor(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Mentors</option>
-                    {mentorsList.map((m, idx) => <option key={idx} value={m}>{m}</option>)}
-                  </select>
-                </div>
-
-                {/* Placement Stage filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Placement Stage</label>
-                  <select 
-                    value={filterPlacement}
-                    onChange={(e) => setFilterPlacement(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Placement Stages</option>
-                    <option value="Not Eligible">Not Eligible</option>
-                    <option value="Eligible">Eligible</option>
-                    <option value="Placement Ready">Placement Ready</option>
-                    <option value="Interview Scheduled">Interview Scheduled</option>
-                    <option value="Offer Received">Offer Received</option>
-                    <option value="Placed">Placed</option>
-                  </select>
-                </div>
-
-                {/* Performance level filter */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-secondary">Overall Performance</label>
-                  <select 
-                    value={filterPerformance}
-                    onChange={(e) => setFilterPerformance(e.target.value)}
-                    className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary"
-                  >
-                    <option value="all">All Ranges</option>
-                    <option value="high">High Performers (90%+)</option>
-                    <option value="mid">Mid Performers (75%-89%)</option>
-                    <option value="low">At Risk (Below 75%)</option>
-                  </select>
-                </div>
-
-              </div>
-            )}
-
-          </div>
-
-          {/* High Density React Data Grid */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs whitespace-nowrap">
-              <thead className="bg-slate-50 border-b border-border font-bold uppercase text-text-secondary">
-                <tr>
-                  <th className="px-4 py-3 text-center w-10">
-                    <input 
-                      type="checkbox"
-                      checked={filteredStudents.length > 0 && selectedIds.length === filteredStudents.length}
-                      onChange={handleToggleSelectAll}
-                      className="rounded border-border text-blue-600 focus:ring-primary"
-                    />
-                  </th>
-                  <th className="px-4 py-3">Intern ID</th>
-                  <th className="px-4 py-3">Student Name</th>
-                  <th className="px-4 py-3">College</th>
-                  <th className="px-4 py-3">Department</th>
-                  <th className="px-4 py-3">Batch Cohort</th>
-                  <th className="px-4 py-3">Internship Program</th>
-                  <th className="px-4 py-3">Mentor Mapping</th>
-                  <th className="px-4 py-3">Score</th>
-                  <th className="px-4 py-3">Hiring Stage</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border font-medium">
-                {paginatedStudents.length > 0 ? (
-                  paginatedStudents.map((s) => {
-                    const isSelected = selectedIds.includes(s.id);
-                    return (
-                      <tr 
-                        key={s.id} 
-                        className={`hover:bg-slate-50/50 transition-colors ${isSelected ? 'bg-blue-50/30' : ''}`}
-                      >
-                        <td className="px-4 py-3 text-center">
-                          <input 
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleToggleSelectRow(s.id)}
-                            className="rounded border-border text-blue-600 focus:ring-primary"
-                          />
-                        </td>
-                        <td className="px-4 py-3 font-mono text-text-secondary font-semibold">{s.internId}</td>
-                        <td className="px-4 py-3">
-                          <div 
-                            onClick={() => handleOpenProfile(s)}
-                            className="flex items-center gap-2 cursor-pointer group"
-                          >
-                            <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:scale-105 transition-transform">
-                              {s.personalInfo.avatar}
-                            </div>
-                            <div>
-                              <div className="font-extrabold text-text-primary group-hover:text-blue-600 transition-colors">{s.personalInfo.name}</div>
-                              <div className="text-[10px] text-text-secondary font-bold">{s.personalInfo.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-text-secondary">{s.academicInfo.college}</td>
-                        <td className="px-4 py-3 text-text-secondary">{s.academicInfo.department}</td>
-                        <td className="px-4 py-3 text-text-secondary">{s.internshipInfo.batchName || <span className="italic text-slate-300">TBA</span>}</td>
-                        <td className="px-4 py-3 text-text-secondary truncate max-w-[150px]">{s.internshipInfo.program}</td>
-                        <td className="px-4 py-3">
-                          {s.internshipInfo.mentorName ? (
-                            <span className="text-text-primary font-semibold flex items-center gap-1">
-                              <Shield className="h-3 w-3 text-text-secondary" />
-                              {s.internshipInfo.mentorName}
-                            </span>
-                          ) : (
-                            <span className="text-rose-600 font-bold italic flex items-center gap-1">
-                              <AlertCircle className="h-3 w-3" />
-                              Unassigned
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`font-black px-1.5 py-0.5 rounded ${s.performance.overallPerformance >= 90 ? 'text-emerald-700 bg-emerald-50' : s.performance.overallPerformance >= 75 ? 'text-blue-700 bg-blue-50' : 'text-rose-700 bg-rose-50'}`}>
-                            {s.performance.overallPerformance}%
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
-                            s.placement.status === 'Placed' ? 'bg-teal-50 text-teal-700 border border-teal-200' :
-                            s.placement.status === 'Offer Received' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            s.placement.status === 'Interview Scheduled' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            s.placement.status === 'Placement Ready' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-text-secondary'
-                          }`}>
-                            {s.placement.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
-                            s.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            s.status === 'Completed' || s.status === 'Certified' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
-                            s.status === 'Placed' ? 'bg-teal-50 text-teal-700 border border-teal-200' :
-                            s.status === 'On Hold' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'
-                          }`}>
-                            {s.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button 
-                              onClick={() => handleOpenProfile(s)}
-                              className="p-1 hover:text-blue-600 hover:bg-slate-100 rounded text-text-secondary transition-colors"
-                              title="View Profile Workspace"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </button>
-                            <PermissionGuard required="student.edit">
-                              <button 
-                                onClick={() => openEditModal(s)}
-                                className="p-1 hover:text-amber-600 hover:bg-slate-100 rounded text-text-secondary transition-colors"
-                                title="Edit Personal/Academic Info"
-                              >
-                                <PlusCircle className="h-4 w-4" />
-                              </button>
-                            </PermissionGuard>
-                            <button 
-                              onClick={() => handleGenerateCertificate(s.id)}
-                              className="p-1 hover:text-emerald-600 hover:bg-slate-100 rounded text-text-secondary transition-colors"
-                              title="Generate Certificates"
-                            >
-                              <Award className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={12} className="px-4 py-12 text-center text-text-secondary">
-                      <Users className="h-12 w-12 text-slate-200 mx-auto mb-3" />
-                      <p className="text-sm font-extrabold text-text-secondary">No student records found</p>
-                      <p className="text-xs text-text-secondary mt-0.5">Adjust filter conditions or search query keywords.</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Roster Table Pagination Summary */}
-          <div className="p-4 border-t border-border bg-slate-50/50 flex justify-between items-center text-xs font-bold text-text-secondary">
-            <div>
-              Showing {filteredStudents.length} of {students.length} students
-            </div>
-            <div>
-              {selectedIds.length > 0 && (
-                <span className="text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
-                  {selectedIds.length} items checked for bulk processing
-                </span>
-              )}
-            </div>
-          </div>
-          {filteredStudents.length > itemsPerPage && (
-            <Pagination 
-              currentPage={currentPage} 
-              totalPages={Math.ceil(filteredStudents.length / itemsPerPage)} 
-              onPageChange={setCurrentPage} 
-            />
-          )}
+          <EnhancedTable<Student>
+            data={filteredStudents}
+            searchPlaceholder="Search students (Name, ID, Email, Phone, College)..."
+            itemsPerPage={10}
+            filters={filterConfigs}
+            columns={[
+              {
+                key: 'select',
+                label: '',
+                render: (s) => (
+                  <input 
+                    type="checkbox"
+                    checked={selectedIds.includes(s.id)}
+                    onChange={() => handleToggleSelectRow(s.id)}
+                    className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
+                  />
+                ),
+              },
+              {
+                key: 'internId',
+                label: 'Intern ID',
+                render: (s) => <span className="font-mono text-text-secondary font-semibold">{s.internId}</span>,
+              },
+              {
+                key: 'name',
+                label: 'Student Name',
+                render: (s) => (
+                  <div onClick={() => handleOpenProfile(s)} className="flex items-center gap-2 cursor-pointer group">
+                    <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0 group-hover:scale-105 transition-transform">
+                      {s.personalInfo.avatar}
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-text-primary group-hover:text-blue-600 transition-colors">{s.personalInfo.name}</div>
+                      <div className="text-[10px] text-text-secondary font-bold">{s.personalInfo.email}</div>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: 'college',
+                label: 'College',
+                render: (s) => <span className="text-text-secondary">{s.academicInfo.college}</span>,
+              },
+              {
+                key: 'department',
+                label: 'Department',
+                render: (s) => <span className="text-text-secondary">{s.academicInfo.department}</span>,
+              },
+              {
+                key: 'batch',
+                label: 'Batch Cohort',
+                render: (s) => <span className="text-text-secondary">{s.internshipInfo.batchName || <span className="italic text-slate-300">TBA</span>}</span>,
+              },
+              {
+                key: 'program',
+                label: 'Internship Program',
+                render: (s) => <span className="text-text-secondary truncate max-w-[150px]">{s.internshipInfo.program}</span>,
+              },
+              {
+                key: 'mentor',
+                label: 'Mentor Mapping',
+                render: (s) => (
+                  s.internshipInfo.mentorName ? (
+                    <span className="text-text-primary font-semibold flex items-center gap-1">
+                      <Shield className="h-3 w-3 text-text-secondary" />
+                      {s.internshipInfo.mentorName}
+                    </span>
+                  ) : (
+                    <span className="text-rose-600 font-bold italic flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      Unassigned
+                    </span>
+                  )
+                ),
+              },
+              {
+                key: 'score',
+                label: 'Score',
+                render: (s) => (
+                  <span className={`font-black px-1.5 py-0.5 rounded ${s.performance.overallPerformance >= 90 ? 'text-emerald-700 bg-emerald-50' : s.performance.overallPerformance >= 75 ? 'text-blue-700 bg-blue-50' : 'text-rose-700 bg-rose-50'}`}>
+                    {s.performance.overallPerformance}%
+                  </span>
+                ),
+              },
+              {
+                key: 'placementStatus',
+                label: 'Hiring Stage',
+                render: (s) => (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                    s.placement.status === 'Placed' ? 'bg-teal-50 text-teal-700 border border-teal-200' :
+                    s.placement.status === 'Offer Received' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                    s.placement.status === 'Interview Scheduled' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                    s.placement.status === 'Placement Ready' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-text-secondary'
+                  }`}>
+                    {s.placement.status}
+                  </span>
+                ),
+              },
+              {
+                key: 'status',
+                label: 'Status',
+                render: (s) => (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                    s.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                    s.status === 'Completed' || s.status === 'Certified' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                    s.status === 'Placed' ? 'bg-teal-50 text-teal-700 border border-teal-200' :
+                    s.status === 'On Hold' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'
+                  }`}>
+                    {s.status}
+                  </span>
+                ),
+              },
+              {
+                key: 'actions',
+                label: 'Actions',
+                className: 'text-right',
+                render: (s) => (
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button onClick={() => handleOpenProfile(s)} className="p-1 hover:text-blue-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="View Profile Workspace">
+                      <Eye className="h-4 w-4" />
+                    </button>
+                    <PermissionGuard required="student.edit">
+                      <button onClick={() => openEditModal(s)} className="p-1 hover:text-amber-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="Edit Personal/Academic Info">
+                        <PlusCircle className="h-4 w-4" />
+                      </button>
+                    </PermissionGuard>
+                    <button onClick={() => handleGenerateCertificate(s.id)} className="p-1 hover:text-emerald-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="Generate Certificates">
+                      <Award className="h-4 w-4" />
+                    </button>
+                  </div>
+                ),
+              },
+            ]}
+          />
         </div>
       )}
 

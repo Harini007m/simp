@@ -42,3 +42,5 @@ export function TableCell({ className = '', ...props }: React.TdHTMLAttributes<H
     />
   );
 }
+
+export { EnhancedTable } from './EnhancedTable';

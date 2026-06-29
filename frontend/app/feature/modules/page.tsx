@@ -1,22 +1,18 @@
 "use client";
-import React, { useEffect, useState, useMemo } from 'react';
-import { Card, CardContent } from '@/components/feature/ui/Card';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/feature/ui/Button';
 import { Badge } from '@/components/feature/ui/Badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/feature/ui/Table';
-import { Search, Plus, Settings, Eye, Edit, ToggleLeft, ToggleRight, Info } from 'lucide-react';
+import { EnhancedTable } from '@/components/feature/ui/Table';
+import { Plus, Settings, ToggleLeft, ToggleRight } from 'lucide-react';
 import { moduleService } from '@/src/services/module.service';
 import { Module } from '@/src/data/mock-modules';
-import { Pagination } from '@/components/common/Pagination';
 import { FEATURE_REGISTRY } from '@/src/core/features/feature-registry';
 
 export default function ModuleRegistryPage() {
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Form fields for new module
   const [modId, setModId] = useState('');
   const [modCode, setModCode] = useState('');
   const [modName, setModName] = useState('');
@@ -42,7 +38,6 @@ export default function ModuleRegistryPage() {
   const handleToggleStatus = async (module: Module) => {
     const newStatus = !module.active;
     try {
-      // Optimistic update
       setModules(prev => prev.map(m => m.id === module.id ? { ...m, active: newStatus } : m));
       await moduleService.updateModule(module.id, { active: newStatus });
     } catch (err) {
@@ -87,26 +82,6 @@ export default function ModuleRegistryPage() {
     }
   };
 
-  const filteredModules = useMemo(() => {
-    return modules.filter(m => {
-      const search = searchTerm.toLowerCase();
-      const nameVal = m.name.toLowerCase();
-      const codeVal = m.code.toLowerCase();
-      const routeVal = m.route.toLowerCase();
-      const idVal = m.id.toLowerCase();
-      return nameVal.includes(search) || codeVal.includes(search) || routeVal.includes(search) || idVal.includes(search);
-    });
-  }, [modules, searchTerm]);
-
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  // Reset pagination on search
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -124,107 +99,59 @@ export default function ModuleRegistryPage() {
         </Button>
       </div>
 
-      <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-border shadow-sm">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-          <input 
-            type="text" 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search modules..." 
-            className="w-full rounded-md border border-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-        </div>
-      </div>
+      <EnhancedTable<Module>
+        data={modules}
+        searchPlaceholder="Search modules..."
+        loading={loading}
+        emptyMessage="No modules registered."
+        columns={[
+          {
+            key: 'name',
+            label: 'Module Name',
+            render: (m) => (
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded bg-slate-100 flex items-center justify-center font-bold text-text-primary">
+                  {(() => {
+                    const feature = FEATURE_REGISTRY.find(f => f.moduleId === m.id);
+                    if (feature && feature.icon) {
+                      const Icon = feature.icon;
+                      return <Icon className="h-4 w-4 text-primary" />;
+                    }
+                    return m.name.slice(0, 2).toUpperCase();
+                  })()}
+                </div>
+                <div>
+                  <span className="font-semibold text-text-primary block">{m.name}</span>
+                  <span className="text-[11px] text-text-secondary block max-w-[200px] truncate">{m.desc || 'No description provided.'}</span>
+                </div>
+              </div>
+            )
+          },
+          { key: 'id', label: 'Module ID', render: (m) => <span className="font-mono text-xs text-text-primary">{m.id}</span> },
+          { key: 'code', label: 'Code', render: (m) => <Badge variant="secondary">{m.code}</Badge> },
+          { key: 'route', label: 'Route Path', render: (m) => <span className="font-mono text-xs text-text-secondary">{m.route}</span> },
+          {
+            key: 'active',
+            label: 'Status',
+            render: (m) => <Badge variant={m.active ? "success" : "secondary"}>{m.active ? "Enabled" : "Disabled"}</Badge>
+          },
+          {
+            key: 'actions',
+            label: 'Actions',
+            className: 'text-right',
+            render: (m) => (
+              <button
+                onClick={() => handleToggleStatus(m)}
+                className={`p-1 transition-colors inline-flex items-center justify-center ${m.active ? 'text-emerald-600 hover:text-red-500' : 'text-text-secondary hover:text-emerald-500'}`}
+                title={m.active ? "Disable Module" : "Enable Module"}
+              >
+                {m.active ? <ToggleRight className="h-6 w-6" /> : <ToggleLeft className="h-6 w-6" />}
+              </button>
+            )
+          },
+        ]}
+      />
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Module Name</TableHead>
-                <TableHead>Module ID</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Route Path</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-text-secondary">
-                    Loading modules registry...
-                  </TableCell>
-                </TableRow>
-              ) : filteredModules.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-text-secondary">
-                    No modules registered.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredModules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(m => (
-                  <TableRow key={m.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded bg-slate-100 flex items-center justify-center font-bold text-text-primary">
-                          {(() => {
-                            const feature = FEATURE_REGISTRY.find(f => f.moduleId === m.id);
-                            if (feature && feature.icon) {
-                              const Icon = feature.icon;
-                              return <Icon className="h-4 w-4 text-primary" />;
-                            }
-                            return m.name.slice(0, 2).toUpperCase();
-                          })()}
-                        </div>
-                        <div>
-                          <span className="font-semibold text-text-primary block">{m.name}</span>
-                          <span className="text-[11px] text-text-secondary block max-w-[200px] truncate">{m.desc || 'No description provided.'}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-mono text-xs text-text-primary">{m.id}</span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{m.code}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-mono text-xs text-text-secondary">{m.route}</span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={m.active ? "success" : "secondary"}>
-                        {m.active ? "Enabled" : "Disabled"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <button
-                        onClick={() => handleToggleStatus(m)}
-                        className={`p-1 transition-colors inline-flex items-center justify-center ${m.active ? 'text-emerald-600 hover:text-red-500' : 'text-text-secondary hover:text-emerald-500'}`}
-                        title={m.active ? "Disable Module" : "Enable Module"}
-                      >
-                        {m.active ? <ToggleRight className="h-6 w-6" /> : <ToggleLeft className="h-6 w-6" />}
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          {filteredModules.length > itemsPerPage && (
-            <div className="mt-4">
-              <Pagination 
-                currentPage={currentPage} 
-                totalPages={Math.ceil(filteredModules.length / itemsPerPage)} 
-                onPageChange={setCurrentPage} 
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Register Module Drawer/Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg border border-border overflow-hidden animate-slide-in">

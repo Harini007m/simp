@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { 
-  GraduationCap, Search, Filter, Plus, ChevronRight, Clock, Building2, 
+  GraduationCap, Plus, ChevronRight, Clock, Building2, 
   Users, Activity, FileText, Check, ExternalLink, AlertCircle, Layers, 
   Award, Shield, Calendar, DollarSign, MapPin, TrendingUp, CheckCircle2, 
   XCircle, AlertTriangle, ArrowUpRight, Send, Trash, Eye, Download, 
@@ -16,17 +16,13 @@ import { Organization } from '@/src/data/mock-organizations';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
-import { Pagination } from "@/components/common/Pagination";
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 interface ProgramWithOrg extends Program {
   organizationData?: Organization;
 }
 
 export default function ProgramManagementPage() {
-
-      // Pagination State
-      const [currentPage, setCurrentPage] = React.useState(1);
-      const itemsPerPage = 10;
 
   const { user } = useAuth();
   
@@ -47,18 +43,13 @@ export default function ProgramManagementPage() {
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
   
   // Popovers & Modals
-  const [showFilters, setShowFilters] = useState(false);
   const [activeActionModal, setActiveActionModal] = useState<{
     type: 'status' | 'mentor' | 'module' | 'edit' | 'onboard' | 'notify' | 'bulkStatus' | 'bulkMentor' | 'bulkNotify' | 'bulkCert';
     progId?: string;
   } | null>(null);
   
   // Filter state variables
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterDuration, setFilterDuration] = useState<string>('all');
-  const [filterDomain, setFilterDomain] = useState<string>('all');
   
   // Input fields for actions
   const [statusInput, setStatusInput] = useState<Program['status']>('Active');
@@ -153,28 +144,12 @@ export default function ProgramManagementPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Filtered programs calculation
+  // Filtered programs calculation (for dashboard KPI click integration)
   const filteredPrograms = useMemo(() => {
     return programs.filter(prog => {
-      const matchesSearch = 
-        prog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prog.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prog.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prog.metadata.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prog.mentors.some(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
-        
-      const matchesType = filterType === 'all' ? true : prog.type === filterType;
-      const matchesStatus = filterStatus === 'all' ? true : prog.status === filterStatus;
-      const matchesDomain = filterDomain === 'all' ? true : prog.metadata.domain === filterDomain;
-      
-      let matchesDuration = true;
-      if (filterDuration === 'short') matchesDuration = prog.durationWeeks <= 8;
-      else if (filterDuration === 'medium') matchesDuration = prog.durationWeeks > 8 && prog.durationWeeks <= 16;
-      else if (filterDuration === 'long') matchesDuration = prog.durationWeeks > 16;
-      
-      return matchesSearch && matchesType && matchesStatus && matchesDomain && matchesDuration;
+      return filterStatus === 'all' || prog.status === filterStatus;
     });
-  }, [programs, searchTerm, filterType, filterStatus, filterDomain, filterDuration]);
+  }, [programs, filterStatus]);
 
   // Strategic KPI indicators
   const kpiStats = useMemo(() => {
@@ -946,245 +921,105 @@ export default function ProgramManagementPage() {
 
       {/* ------------------ VIEW 2: PROGRAM DIRECTORY ------------------ */}
       {activeView === 'directory' && (
-        <div className="space-y-4 animate-fade-in">
-          
-          {/* Query search and advanced filters */}
-          <div className="bg-white border border-border rounded-xl p-4 shadow-sm space-y-3">
-            <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-              
-              {/* Search bar */}
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-                <input 
-                  type="text" 
-                  placeholder="Search by name, code, mentor, tech, domain..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              {/* Advanced filter toggler */}
-              <div className="flex items-center gap-2 justify-end w-full md:w-auto">
-                {searchTerm || filterType !== 'all' || filterStatus !== 'all' || filterDuration !== 'all' || filterDomain !== 'all' ? (
-                  <button 
-                    onClick={() => {
-                      setSearchTerm('');
-                      setFilterType('all');
-                      setFilterStatus('all');
-                      setFilterDuration('all');
-                      setFilterDomain('all');
-                      showToast('Cleared all filters', 'info');
-                    }}
-                    className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline mr-2"
-                  >
-                    Clear Filters
-                  </button>
-                ) : null}
-
-                <button 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
-                    showFilters 
-                      ? 'border-blue-600 bg-blue-50/50 text-blue-600' 
-                      : 'border-border bg-white text-text-secondary hover:bg-slate-50'
-                  }`}
-                >
-                  <Filter className="h-3.5 w-3.5" />
-                  <span>Advanced Filters</span>
-                </button>
-              </div>
-
-            </div>
-
-            {/* Filter expansion grid */}
-            {showFilters && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-border animate-slide-down">
-                <div>
-                  <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Program Type</label>
-                  <select 
-                    value={filterType} 
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="Free Internship">Free Internship</option>
-                    <option value="Paid Internship">Paid Internship</option>
-                    <option value="Stipend Internship">Stipend Internship</option>
-                    <option value="Corporate Sponsored">Corporate Sponsored</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Status</label>
-                  <select 
-                    value={filterStatus} 
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="Draft">Draft</option>
-                    <option value="Upcoming">Upcoming</option>
-                    <option value="Active">Active</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Duration weeks</label>
-                  <select 
-                    value={filterDuration} 
-                    onChange={(e) => setFilterDuration(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none"
-                  >
-                    <option value="all">All Durations</option>
-                    <option value="short">Short (≤ 8 weeks)</option>
-                    <option value="medium">Medium (8 - 16 weeks)</option>
-                    <option value="long">Long (&gt; 16 weeks)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Domain</label>
-                  <select 
-                    value={filterDomain} 
-                    onChange={(e) => setFilterDomain(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none"
-                  >
-                    <option value="all">All Domains</option>
-                    {Array.from(new Set(programs.map(p => p.metadata.domain))).map(dom => (
-                      <option key={dom} value={dom}>{dom}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Directory data table grid */}
-          <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs whitespace-nowrap">
-                <thead className="bg-slate-50 border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 w-8">
-                      <input 
-                        type="checkbox" 
-                        checked={filteredPrograms.length > 0 && filteredPrograms.every(p => selectedIds.includes(p.id))}
-                        onChange={toggleSelectAll}
-                        className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
-                      />
-                    </th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Program Name</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Program Code</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Program Type</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Duration</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Start Date</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">End Date</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Students Enrolled</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Mentors Assigned</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Completion Rate</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Status</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredPrograms.length > 0 ? (
-                    filteredPrograms.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((prog) => {
-                      const isSelected = selectedIds.includes(prog.id);
-                      return (
-                        <tr 
-                          key={prog.id} 
-                          className={`hover:bg-slate-50/50 transition-colors cursor-pointer group ${
-                            isSelected ? 'bg-blue-50/20' : ''
-                          }`}
-                          onClick={() => handleOpenProfile(prog)}
-                        >
-                          <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                            <input 
-                              type="checkbox" 
-                              checked={isSelected}
-                              onChange={() => toggleSelect(prog.id)}
-                              className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
-                            />
-                          </td>
-                          
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2.5">
-                              <div className="h-8 w-8 rounded bg-blue-50 text-blue-600 font-extrabold text-xs flex items-center justify-center shrink-0">
-                                {prog.code.slice(0, 3)}
-                              </div>
-                              <div>
-                                <div className="font-bold text-text-primary group-hover:text-blue-600 transition-colors">{prog.title}</div>
-                                <div className="text-[10px] text-text-secondary">{prog.metadata.category}</div>
-                              </div>
-                            </div>
-                          </td>
-                          
-                          <td className="px-4 py-3 font-mono font-bold text-text-secondary">{prog.code}</td>
-                          <td className="px-4 py-3 text-text-primary font-bold">{prog.type}</td>
-                          <td className="px-4 py-3 text-text-secondary font-medium">{prog.durationWeeks} Weeks</td>
-                          <td className="px-4 py-3 text-text-secondary font-semibold">{prog.startDate}</td>
-                          <td className="px-4 py-3 text-text-secondary font-semibold">{prog.endDate}</td>
-                          <td className="px-4 py-3 text-text-primary font-bold">{prog.studentsEnrolled}</td>
-                          <td className="px-4 py-3 text-text-primary font-bold">{prog.mentorsAssigned}</td>
-                          <td className="px-4 py-3 text-blue-600 font-extrabold">{prog.completionRate}%</td>
-                          
-                          <td className="px-4 py-3">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black ${
-                              prog.status === 'Active' 
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                                : prog.status === 'Completed'
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                : prog.status === 'Draft'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : 'bg-slate-100 text-text-secondary border border-border'
-                            }`}>
-                              {prog.status}
-                            </span>
-                          </td>
-
-                          <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
-                            <div className="flex justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <button 
-                                onClick={() => handleOpenProfile(prog)}
-                                className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer"
-                                title="Open Profile Program"
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                              </button>
-                              <PermissionGuard required="program.edit">
-                                <button 
-                                  onClick={() => openEditModal(prog)}
-                                  className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer"
-                                  title="Edit Program Details"
-                                >
-                                  <Edit className="h-3.5 w-3.5" />
-                                </button>
-                              </PermissionGuard>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={12} className="px-4 py-12 text-center text-text-secondary bg-white">
-                        <GraduationCap className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                        <p className="text-sm font-bold text-text-secondary">No programs match this selection</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={Math.ceil((filteredPrograms.length || 0) / itemsPerPage)} 
-          onPageChange={setCurrentPage} 
-        />
-          </div>
-
+        <div className="bg-white border border-border rounded-xl shadow-xs overflow-hidden">
+          <EnhancedTable<ProgramWithOrg>
+            data={filteredPrograms}
+            searchPlaceholder="Search programs (Name, Code, Type, Domain, Mentor)..."
+            itemsPerPage={10}
+            columns={[
+              {
+                key: 'select',
+                label: '',
+                render: (prog) => (
+                  <input 
+                    type="checkbox"
+                    checked={selectedIds.includes(prog.id)}
+                    onChange={() => toggleSelect(prog.id)}
+                    className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
+                  />
+                ),
+              },
+              {
+                key: 'name',
+                label: 'Program Name',
+                render: (prog) => (
+                  <div onClick={() => handleOpenProfile(prog)} className="flex items-center gap-2.5 cursor-pointer">
+                    <div className="h-8 w-8 rounded bg-blue-50 text-blue-600 font-extrabold text-xs flex items-center justify-center shrink-0">
+                      {prog.code.slice(0, 3)}
+                    </div>
+                    <div>
+                      <div className="font-bold text-text-primary hover:text-blue-600 transition-colors">{prog.title}</div>
+                      <div className="text-[10px] text-text-secondary">{prog.metadata.category}</div>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: 'code',
+                label: 'Program Code',
+                render: (prog) => <span className="font-mono font-bold text-text-secondary">{prog.code}</span>,
+              },
+              {
+                key: 'type',
+                label: 'Program Type',
+                render: (prog) => <span className="text-text-primary font-bold">{prog.type}</span>,
+              },
+              {
+                key: 'duration',
+                label: 'Duration',
+                render: (prog) => <span className="text-text-secondary font-medium">{prog.durationWeeks} Weeks</span>,
+              },
+              {
+                key: 'dates',
+                label: 'Start - End',
+                render: (prog) => <span className="text-text-secondary">{prog.startDate} to {prog.endDate}</span>,
+              },
+              {
+                key: 'studentsEnrolled',
+                label: 'Enrolled',
+                render: (prog) => <span className="text-text-primary font-bold">{prog.studentsEnrolled}</span>,
+              },
+              {
+                key: 'completionRate',
+                label: 'Completion %',
+                render: (prog) => <span className="text-blue-600 font-extrabold">{prog.completionRate}%</span>,
+              },
+              {
+                key: 'status',
+                label: 'Status',
+                render: (prog) => (
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black ${
+                    prog.status === 'Active' 
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                      : prog.status === 'Completed'
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                      : prog.status === 'Draft'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      : 'bg-slate-100 text-text-secondary border border-border'
+                  }`}>
+                    {prog.status}
+                  </span>
+                ),
+              },
+              {
+                key: 'actions',
+                label: 'Actions',
+                className: 'text-right',
+                render: (prog) => (
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button onClick={() => handleOpenProfile(prog)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Open Profile Program">
+                      <Eye className="h-4 w-4" />
+                    </button>
+                    <PermissionGuard required="program.edit">
+                      <button onClick={() => openEditModal(prog)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Edit Program Details">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                    </PermissionGuard>
+                  </div>
+                ),
+              },
+            ]}
+          />
         </div>
       )}
 
@@ -1797,7 +1632,7 @@ export default function ProgramManagementPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {activeProfile.enrollments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((enr) => {
+                        {activeProfile.enrollments.slice(0, 10).map((enr) => {
                           const issuedCert = activeProfile.certifications.list.find(c => c.studentName === enr.name);
                           return (
                             <tr key={enr.id} className="hover:bg-slate-50/50 transition-colors">

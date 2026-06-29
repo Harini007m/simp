@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { 
-  FileText, Search, Filter, Plus, ChevronRight, Briefcase, User, 
+  FileText, Plus, ChevronRight, Briefcase, User, 
   CheckCircle2, XCircle, AlertTriangle, TrendingUp, Download, 
   ExternalLink, FileSpreadsheet, Check, Users, BarChart3, 
   Sparkles, MapPin, GraduationCap, Eye, BookOpen, AlertCircle, Layers
@@ -15,15 +15,11 @@ import { AddCandidateDrawer } from '@/components/feature/application/AddCandidat
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { useRouter } from 'next/navigation';
 import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
-import { Pagination } from "@/components/common/Pagination";
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 type TabType = 'dashboard' | 'applications' | 'pipeline' | 'reports';
 
 export default function ApplicationPage() {
-
-      // Pagination State
-      const [currentPage, setCurrentPage] = React.useState(1);
-      const itemsPerPage = 10;
 
   const router = useRouter();
 
@@ -40,15 +36,7 @@ export default function ApplicationPage() {
   const [reviewApp, setReviewApp] = useState<Application | null>(null);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   
-  // Filters State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showFiltersPopover, setShowFiltersPopover] = useState(false);
-  const [filterType, setFilterType] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterCgpa, setFilterCgpa] = useState<string>('all');
-  const [filterReviewer, setFilterReviewer] = useState<string>('all');
-  const [filterPayment, setFilterPayment] = useState<string>('all');
-  const [filterCollege, setFilterCollege] = useState<string>('all');
+  // Filters State (removed - handled by EnhancedTable)
 
   // Evaluation Workspace State
   const [techScore, setTechScore] = useState<number>(5);
@@ -235,36 +223,7 @@ export default function ApplicationPage() {
     }
   };
 
-  // Filtered Applications Calculation
-  const filteredApplications = useMemo(() => {
-    return applications.filter(app => {
-      const matchesSearch = 
-        app.candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.college.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.skills.some(s => s.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (app.researchArea && app.researchArea.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      const matchesType = filterType === 'all' ? true : app.internshipType === filterType;
-      const matchesStatus = filterStatus === 'all' ? true : app.status === filterStatus;
-      const matchesReviewer = filterReviewer === 'all' ? true : app.assignedReviewer === filterReviewer;
-      const matchesCollege = filterCollege === 'all' ? true : app.college === filterCollege;
-      
-      let matchesCgpa = true;
-      if (filterCgpa === '9+') matchesCgpa = app.cgpa >= 9.0;
-      else if (filterCgpa === '8-9') matchesCgpa = app.cgpa >= 8.0 && app.cgpa < 9.0;
-      else if (filterCgpa === 'sub8') matchesCgpa = app.cgpa < 8.0;
-
-      let matchesPayment = true;
-      if (filterPayment === 'verified') matchesPayment = app.paymentVerified === 'Verified';
-      else if (filterPayment === 'pending') matchesPayment = app.paymentVerified === 'Pending';
-      else if (filterPayment === 'rejected') matchesPayment = app.paymentVerified === 'Rejected';
-
-      return matchesSearch && matchesType && matchesStatus && matchesCgpa && matchesReviewer && matchesPayment && matchesCollege;
-    });
-  }, [applications, searchTerm, filterType, filterStatus, filterCgpa, filterReviewer, filterPayment, filterCollege]);
+  // Filtered Applications (no page-level filtering - handled by EnhancedTable)
 
   // Statistics Calculation
   const stats = useMemo(() => {
@@ -311,12 +270,7 @@ export default function ApplicationPage() {
     };
   }, [applications]);
 
-  // Unique reviewers & colleges for filter options
-  const filterOptions = useMemo(() => {
-    const reviewers = Array.from(new Set(applications.map(a => a.assignedReviewer))).filter(Boolean);
-    const colleges = Array.from(new Set(applications.map(a => a.college))).filter(Boolean);
-    return { reviewers, colleges };
-  }, [applications]);
+
 
   if (loading) {
     return (
@@ -594,324 +548,157 @@ export default function ApplicationPage() {
       {/* VIEW 2: APPLICATIONS LIST VIEW */}
       {activeTab === 'applications' && (
         <div className="space-y-4 animate-slide-in">
-          {/* Filters, Search & Toolbar Area */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-border p-3 rounded-xl shadow-sm">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-              <input 
-                type="text" 
-                placeholder="Search candidates, skills, colleges, etc..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-medium placeholder-slate-400"
-              />
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <button 
-                  onClick={() => setShowFiltersPopover(!showFiltersPopover)}
-                  className={`flex items-center gap-1.5 px-3 py-2 border border-border rounded-lg text-xs font-bold shadow-sm transition-colors cursor-pointer bg-white ${
-                    showFiltersPopover ? 'bg-slate-50 text-blue-600 border-blue-300' : 'text-text-secondary hover:bg-slate-50'
-                  }`}
-                >
-                  <Filter className="h-3.5 w-3.5" />
-                  <span>Advanced Filters</span>
-                  {(filterType !== 'all' || filterStatus !== 'all' || filterCgpa !== 'all' || filterReviewer !== 'all' || filterPayment !== 'all' || filterCollege !== 'all') && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0 ml-0.5"></span>
-                  )}
-                </button>
-                
-                {/* Advanced Filters Panel */}
-                {showFiltersPopover && (
-                  <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-border rounded-xl shadow-2xl z-40 p-4 space-y-3.5 animate-slide-in">
-                    <div className="flex items-center justify-between border-b border-border pb-2">
-                      <span className="text-[10px] font-black text-text-secondary uppercase tracking-wider">Refine Pipeline</span>
+          <div className="bg-white border border-border rounded-xl shadow-xs overflow-hidden">
+            <EnhancedTable<Application>
+              data={applications}
+              searchPlaceholder="Search candidates, skills, colleges, etc..."
+              itemsPerPage={10}
+              columns={[
+                {
+                  key: 'select',
+                  label: '',
+                  render: (app) => (
+                    <input 
+                      type="checkbox"
+                      checked={selectedIds.includes(app.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds([...selectedIds, app.id]);
+                        } else {
+                          setSelectedIds(selectedIds.filter(id => id !== app.id));
+                        }
+                      }}
+                      className="rounded border-border text-blue-600 focus:ring-primary cursor-pointer h-3.5 w-3.5"
+                    />
+                  ),
+                },
+                {
+                  key: 'applicant',
+                  label: 'Applicant',
+                  render: (app) => (
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-full bg-slate-100 text-text-primary flex items-center justify-center font-black shrink-0">
+                        {app.candidateName.charAt(0)}
+                      </div>
+                      <div>
+                        <span className="font-bold text-text-primary block leading-tight">{app.candidateName}</span>
+                        <span className="text-[10px] text-blue-600 font-semibold block mt-0.5">
+                          {opportunities.find(o => o.id === app.opportunityId)?.title || app.opportunityId}
+                        </span>
+                        <span className="text-[10px] text-text-secondary block mt-0.5">{app.email}</span>
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'college',
+                  label: 'Academic Details',
+                  render: (app) => (
+                    <div>
+                      <span className="font-semibold text-text-primary block leading-tight truncate max-w-[180px]">{app.college}</span>
+                      <span className="text-[10px] text-text-secondary block mt-0.5">{app.department}</span>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'internshipType',
+                  label: 'Internship Type',
+                  render: (app) => (
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
+                      app.internshipType === 'research' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                      app.internshipType === 'paid' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                      app.internshipType === 'stipend' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                      app.internshipType === 'industrial' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                      'bg-slate-50 text-text-primary border border-border'
+                    }`}>
+                      {app.internshipType}
+                    </span>
+                  ),
+                },
+                {
+                  key: 'cgpa',
+                  label: 'CGPA',
+                  render: (app) => (
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded font-mono font-bold ${
+                      app.cgpa >= 9.0 ? 'bg-emerald-50 text-emerald-700' :
+                      app.cgpa >= 8.0 ? 'bg-blue-50 text-blue-700' : 'bg-slate-50 text-text-secondary'
+                    }`}>
+                      {app.cgpa.toFixed(2)}
+                    </span>
+                  ),
+                },
+                {
+                  key: 'resume',
+                  label: 'Resume',
+                  render: (app) => (
+                    <div className="flex items-center gap-1 text-[10px] font-semibold text-text-secondary">
+                      <FileText className={`h-4 w-4 shrink-0 ${app.resumeUrl ? 'text-emerald-500' : 'text-rose-500'}`} />
+                      <span>{app.resumeUrl ? 'Attached' : 'Missing'}</span>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'reviewScore',
+                  label: 'Score',
+                  className: 'text-center',
+                  render: (app) => (
+                    app.reviewScore ? (
+                      <span className={`font-mono font-bold ${
+                        app.reviewScore >= 85 ? 'text-emerald-600' :
+                        app.reviewScore >= 70 ? 'text-blue-600' : 'text-amber-600'
+                      }`}>
+                        {app.reviewScore}
+                      </span>
+                    ) : (
+                      <span className="text-text-secondary font-bold italic">-</span>
+                    )
+                  ),
+                },
+                {
+                  key: 'status',
+                  label: 'Status',
+                  render: (app) => (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
+                      app.status === 'Accepted' || app.status === 'Selected' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      app.status === 'Pending' || app.status === 'New' ? 'bg-slate-50 text-text-primary border-border' :
+                      app.status === 'Under Review' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                      app.status === 'Shortlisted' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                      app.status === 'Interview Scheduled' || app.status === 'Interview' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
+                      app.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                      app.status === 'Payment Verification Pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-amber-50 text-amber-700 border-amber-200'
+                    }`}>
+                      {app.status}
+                    </span>
+                  ),
+                },
+                {
+                  key: 'reviewer',
+                  label: 'Reviewer',
+                  render: (app) => (
+                    <span className="text-text-secondary font-medium">
+                      {app.assignedReviewer || <span className="italic text-text-secondary">Unassigned</span>}
+                    </span>
+                  ),
+                },
+                {
+                  key: 'actions',
+                  label: 'Actions',
+                  className: 'text-right',
+                  render: (app) => (
+                    <PermissionGuard required="application.review">
                       <button 
-                        onClick={() => {
-                          setFilterType('all');
-                          setFilterStatus('all');
-                          setFilterCgpa('all');
-                          setFilterReviewer('all');
-                          setFilterPayment('all');
-                          setFilterCollege('all');
-                          setShowFiltersPopover(false);
-                          triggerToast('Filters Cleared', 'Reset all pipeline options to default.', 'info');
-                        }}
-                        className="text-[10px] text-blue-600 hover:text-blue-800 font-bold"
+                        onClick={() => handleOpenReview(app)}
+                        className="text-blue-600 hover:text-blue-800 font-black text-xs cursor-pointer inline-flex items-center gap-0.5"
                       >
-                        Reset All
+                        <span>Review Workspace</span>
+                        <ChevronRight className="h-3 w-3" />
                       </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Internship Type</label>
-                      <select 
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
-                      >
-                        <option value="all">All Types</option>
-                        <option value="free">Free</option>
-                        <option value="paid">Paid</option>
-                        <option value="stipend">Stipend</option>
-                        <option value="industrial">Industrial</option>
-                        <option value="research">Research</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Status</label>
-                      <select 
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
-                      >
-                        <option value="all">All Statuses</option>
-                        <option value="New">New</option>
-                        <option value="Under Review">Under Review</option>
-                        <option value="Shortlisted">Shortlisted</option>
-                        <option value="Interview Scheduled">Interview Scheduled</option>
-                        <option value="Selected">Selected</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Hold">Hold</option>
-                        <option value="Documents Missing">Documents Missing</option>
-                        <option value="Payment Verification Pending">Payment verification pending</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">CGPA Range</label>
-                      <select 
-                        value={filterCgpa}
-                        onChange={(e) => setFilterCgpa(e.target.value)}
-                        className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
-                      >
-                        <option value="all">All Grades</option>
-                        <option value="9+">Outstanding (&gt;= 9.0)</option>
-                        <option value="8-9">Excellent (8.0 - 9.0)</option>
-                        <option value="sub8">Average (&lt; 8.0)</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Reviewer</label>
-                      <select 
-                        value={filterReviewer}
-                        onChange={(e) => setFilterReviewer(e.target.value)}
-                        className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
-                      >
-                        <option value="all">All Reviewers</option>
-                        {filterOptions.reviewers.map(r => (
-                          <option key={r} value={r}>{r}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">College</label>
-                      <select 
-                        value={filterCollege}
-                        onChange={(e) => setFilterCollege(e.target.value)}
-                        className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white truncate"
-                      >
-                        <option value="all">All Colleges</option>
-                        {filterOptions.colleges.map(c => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Payment Verification</label>
-                      <select 
-                        value={filterPayment}
-                        onChange={(e) => setFilterPayment(e.target.value)}
-                        className="w-full text-xs font-semibold border border-border rounded-lg p-1.5 bg-white"
-                      >
-                        <option value="all">All Payments</option>
-                        <option value="verified">Verified</option>
-                        <option value="pending">Pending</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                    </div>
-
-                    <button 
-                      onClick={() => setShowFiltersPopover(false)}
-                      className="w-full py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold shadow-sm"
-                    >
-                      Apply Filters
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* High Density Candidates Table */}
-          <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs whitespace-nowrap">
-                <thead className="bg-slate-50/80 border-b border-border text-text-secondary font-bold uppercase tracking-wider">
-                  <tr>
-                    <th className="px-4 py-3.5 w-10">
-                      <input 
-                        type="checkbox"
-                        checked={selectedIds.length === filteredApplications.length && filteredApplications.length > 0}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedIds(filteredApplications.map(a => a.id));
-                          } else {
-                            setSelectedIds([]);
-                          }
-                        }}
-                        className="rounded border-border text-blue-600 focus:ring-primary cursor-pointer h-3.5 w-3.5"
-                      />
-                    </th>
-                    <th className="px-4 py-3.5">ID</th>
-                    <th className="px-4 py-3.5">Applicant</th>
-                    <th className="px-4 py-3.5">Academic details</th>
-                    <th className="px-4 py-3.5">Internship Type</th>
-                    <th className="px-4 py-3.5">CGPA</th>
-                    <th className="px-4 py-3.5">Resume</th>
-                    <th className="px-4 py-3.5 text-center">Score</th>
-                    <th className="px-4 py-3.5">Status</th>
-                    <th className="px-4 py-3.5">Reviewer</th>
-                    <th className="px-4 py-3.5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredApplications.length > 0 ? (
-                    filteredApplications.map((app) => {
-                      const isSelected = selectedIds.includes(app.id);
-                      return (
-                        <tr 
-                          key={app.id} 
-                          className={`hover:bg-slate-50/50 transition-colors ${isSelected ? 'bg-blue-50/30' : ''}`}
-                        >
-                          <td className="px-4 py-4">
-                            <input 
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedIds([...selectedIds, app.id]);
-                                } else {
-                                  setSelectedIds(selectedIds.filter(id => id !== app.id));
-                                }
-                              }}
-                              className="rounded border-border text-blue-600 focus:ring-primary cursor-pointer h-3.5 w-3.5"
-                            />
-                          </td>
-                          <td className="px-4 py-4 font-mono font-bold text-text-secondary text-[10px]">
-                            {app.id}
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="h-8 w-8 rounded-full bg-slate-100 text-text-primary flex items-center justify-center font-black shrink-0">
-                                {app.candidateName.charAt(0)}
-                              </div>
-                              <div>
-                                <span className="font-bold text-text-primary block leading-tight">{app.candidateName}</span>
-                                <span className="text-[10px] text-blue-600 font-semibold block mt-0.5">
-                                  {opportunities.find(o => o.id === app.opportunityId)?.title || app.opportunityId}
-                                </span>
-                                <span className="text-[10px] text-text-secondary block mt-0.5">{app.email}</span>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div>
-                              <span className="font-semibold text-text-primary block leading-tight truncate max-w-[180px]">{app.college}</span>
-                              <span className="text-[10px] text-text-secondary block mt-0.5">{app.department}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
-                              app.internshipType === 'research' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
-                              app.internshipType === 'paid' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                              app.internshipType === 'stipend' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                              app.internshipType === 'industrial' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                              'bg-slate-50 text-text-primary border border-border'
-                            }`}>
-                              {app.internshipType}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded font-mono font-bold ${
-                              app.cgpa >= 9.0 ? 'bg-emerald-50 text-emerald-700' :
-                              app.cgpa >= 8.0 ? 'bg-blue-50 text-blue-700' : 'bg-slate-50 text-text-secondary'
-                            }`}>
-                              {app.cgpa.toFixed(2)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-1 text-[10px] font-semibold text-text-secondary">
-                              <FileText className={`h-4 w-4 shrink-0 ${app.resumeUrl ? 'text-emerald-500' : 'text-rose-500'}`} />
-                              <span>{app.resumeUrl ? 'Attached' : 'Missing'}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-center">
-                            {app.reviewScore ? (
-                              <div className="flex items-center justify-center gap-1.5">
-                                <span className={`font-mono font-bold ${
-                                  app.reviewScore >= 85 ? 'text-emerald-600' :
-                                  app.reviewScore >= 70 ? 'text-blue-600' : 'text-amber-600'
-                                }`}>
-                                  {app.reviewScore}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-text-secondary font-bold italic">-</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
-                              app.status === 'Accepted' || app.status === 'Selected' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                              app.status === 'Pending' || app.status === 'New' ? 'bg-slate-50 text-text-primary border-border' :
-                              app.status === 'Under Review' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                              app.status === 'Shortlisted' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                              app.status === 'Interview Scheduled' || app.status === 'Interview' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
-                              app.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                              app.status === 'Payment Verification Pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                              'bg-amber-50 text-amber-700 border-amber-200'
-                            }`}>
-                              {app.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4 text-text-secondary font-medium">
-                            {app.assignedReviewer || <span className="italic text-text-secondary">Unassigned</span>}
-                          </td>
-                          <td className="px-4 py-4 text-right">
-                            <PermissionGuard required="application.review">
-                              <button 
-                                onClick={() => handleOpenReview(app)}
-                                className="text-blue-600 hover:text-blue-800 font-black text-xs cursor-pointer inline-flex items-center gap-0.5"
-                              >
-                                <span>Review Workspace</span>
-                                <ChevronRight className="h-3 w-3" />
-                              </button>
-                            </PermissionGuard>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={11} className="px-6 py-16 text-center text-text-secondary bg-white">
-                        <div className="max-w-sm mx-auto space-y-3">
-                          <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto text-text-secondary">
-                            <Search className="h-6 w-6" />
-                          </div>
-                          <h4 className="font-bold text-text-primary text-sm">No Applicants Match the Filter Query</h4>
-                          <p className="text-xs text-text-secondary">Try adjusting your advanced filter metrics or resetting search parameters.</p>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    </PermissionGuard>
+                  ),
+                },
+              ]}
+            />
           </div>
 
           {/* Sticky Bulk Action Panel */}
@@ -1119,7 +906,7 @@ export default function ApplicationPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {['Alice Vance', 'David Miller', 'Sarah Connor'].slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(rev => {
+                    {['Alice Vance', 'David Miller', 'Sarah Connor'].map(rev => {
                       const revApps = applications.filter(a => a.assignedReviewer === rev);
                       const scores = revApps.map(a => a.reviewScore).filter(Boolean) as number[];
                       const avg = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b, 0) / scores.length) : '-';

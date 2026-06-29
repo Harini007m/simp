@@ -2,18 +2,18 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { 
-  Building2, Users, Search, Filter, Plus, ChevronRight, FileDown, 
+  Building2, Users, Plus, ChevronRight, FileDown, 
   Activity, FileText, Check, ExternalLink, Clock, BookOpen, AlertCircle, 
   Layers, Award, Shield, ShieldCheck, Calendar, DollarSign, MapPin, TrendingUp, 
   CheckCircle2, XCircle, AlertTriangle, ArrowUpRight, Send, Trash, Eye, 
   Download, Upload, Briefcase, Star, Edit, Lock, PlusCircle, UserCheck, 
-  MoreVertical, RefreshCw
+  MoreVertical, RefreshCw, Search
 } from 'lucide-react';
 import { organizationService } from '@/src/services/organization.service';
 import { Organization, OrganizationDepartment, OrganizationCoordinator, OrganizationStudent, OrganizationProgram, OrganizationDocument, OrganizationTimelineEvent } from '@/src/data/mock-organizations';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
-import { Pagination } from '@/components/common/Pagination';
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 export default function OrganizationManagementPage() {
   const { user } = useAuth();
@@ -34,17 +34,12 @@ export default function OrganizationManagementPage() {
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
   
   // Popovers & Modals
-  const [showFilters, setShowFilters] = useState(false);
   const [activeActionModal, setActiveActionModal] = useState<{
     type: 'partnership' | 'coordinator' | 'department' | 'edit' | 'onboard' | 'notify' | 'bulkPartnership' | 'bulkCoordinator' | 'bulkNotify' | 'uploadDoc';
     orgId?: string;
   } | null>(null);
   
-  // Filter state variables
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterLoc, setFilterLoc] = useState<string>('all');
-  const [filterType, setFilterType] = useState<string>('all');
-  const [filterAccreditation, setFilterAccreditation] = useState<string>('all');
+  // Filter state for dashboard KPI integration
   const [filterStatus, setFilterStatus] = useState<string>('all');
   
   // Input fields for actions
@@ -138,24 +133,13 @@ export default function OrganizationManagementPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeActionModal]);
 
-  // Filtered organizations calculation
+  // Filtered organizations calculation (for dashboard KPI click integration)
   const filteredOrganizations = useMemo(() => {
     return organizations.filter(org => {
-      const matchesSearch = 
-        org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        org.coordinators.some(c => c.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        org.departments.some(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()));
-        
-      const matchesLoc = filterLoc === 'all' ? true : org.location.includes(filterLoc);
-      const matchesType = filterType === 'all' ? true : org.type === filterType;
-      const matchesAccreditation = filterAccreditation === 'all' ? true : org.naacGrade === filterAccreditation;
       const matchesStatus = filterStatus === 'all' ? true : org.partnershipStatus === filterStatus;
-      
-      return matchesSearch && matchesLoc && matchesType && matchesAccreditation && matchesStatus;
+      return matchesStatus;
     });
-  }, [organizations, searchTerm, filterLoc, filterType, filterAccreditation, filterStatus]);
+  }, [organizations, filterStatus]);
 
   // Strategic KPI indicators
   const kpiStats = useMemo(() => {
@@ -573,15 +557,6 @@ export default function OrganizationManagementPage() {
     showToast('Partnership directory CSV downloaded successfully');
   };
 
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  
-  // Reset pagination on filter change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterLoc, filterType, filterAccreditation, filterStatus]);
-
   return (
     <div className={`space-y-6 select-none ${
       (activeActionModal?.type === 'edit' || activeActionModal?.type === 'onboard') 
@@ -881,235 +856,111 @@ export default function OrganizationManagementPage() {
       {/* ------------------ VIEW 2: COLLEGE DIRECTORY ------------------ */}
       {activeView === 'directory' && (
         <div className="space-y-4 animate-fade-in">
-          
-          {/* Query search and advanced filter bars */}
-          <div className="bg-white border border-border rounded-xl p-4 shadow-sm space-y-3">
-            <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-              
-              {/* Search bar */}
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-                <input 
-                  type="text" 
-                  placeholder="Search by name, code, dept, coordinator..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              {/* Advanced filter toggle button */}
-              <div className="flex items-center gap-2 justify-end w-full md:w-auto">
-                {searchTerm || filterLoc !== 'all' || filterType !== 'all' || filterAccreditation !== 'all' || filterStatus !== 'all' ? (
-                  <button 
-                    onClick={() => {
-                      setSearchTerm('');
-                      setFilterLoc('all');
-                      setFilterType('all');
-                      setFilterAccreditation('all');
-                      setFilterStatus('all');
-                      showToast('Cleared all active filters', 'info');
-                    }}
-                    className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline mr-2"
-                  >
-                    Clear Filters
-                  </button>
-                ) : null}
-
-                <button 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
-                    showFilters 
-                      ? 'border-blue-600 bg-blue-50/50 text-blue-600' 
-                      : 'border-border bg-white text-text-secondary hover:bg-slate-50'
-                  }`}
-                >
-                  <Filter className="h-3.5 w-3.5" />
-                  <span>Advanced Filters</span>
-                </button>
-              </div>
-
-            </div>
-
-            {/* Filter expansion cards */}
-            {showFilters && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-border animate-slide-down">
-                <div>
-                  <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Office Location</label>
-                  <select 
-                    value={filterLoc} 
-                    onChange={(e) => setFilterLoc(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Locations</option>
-                    {Array.from(new Set(organizations.map(o => o.location))).map(loc => (
-                      <option key={loc} value={loc}>{loc}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">College Type</label>
-                  <select 
-                    value={filterType} 
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Science">Science</option>
-                    <option value="Management">Management</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">NAAC Grade</label>
-                  <select 
-                    value={filterAccreditation} 
-                    onChange={(e) => setFilterAccreditation(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Grades</option>
-                    <option value="A++">A++ Grade</option>
-                    <option value="A+">A+ Grade</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-extrabold text-text-secondary uppercase tracking-wider mb-1">Partnership Status</label>
-                  <select 
-                    value={filterStatus} 
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full text-xs font-semibold p-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="Active">Active Partner</option>
-                    <option value="Pending Verification">Pending Verification</option>
-                    <option value="Partnership Expired">Partnership Expired</option>
-                    <option value="Blacklisted">Blacklisted</option>
-                  </select>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Directory data table grid */}
-          <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs whitespace-nowrap">
-                <thead className="bg-slate-50 border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 w-8">
-                      <input 
-                        type="checkbox" 
-                        checked={filteredOrganizations.length > 0 && filteredOrganizations.every(o => selectedIds.includes(o.id))}
-                        onChange={toggleSelectAll}
-                        className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
-                      />
-                    </th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Logo</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">College Name</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">College Code</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Institution Type</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">University Affiliation</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Location</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Departments</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Students Enrolled</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Coordinators</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Partnership Status</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredOrganizations.length > 0 ? (
-                    filteredOrganizations.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((org) => {
-                      const isSelected = selectedIds.includes(org.id);
-                      return (
-                        <tr 
-                          key={org.id} 
-                          className={`hover:bg-slate-50/50 transition-colors cursor-pointer group ${
-                            isSelected ? 'bg-blue-50/20' : ''
-                          }`}
-                          onClick={() => handleOpenProfile(org)}
-                        >
-                          <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                            <input 
-                              type="checkbox" 
-                              checked={isSelected}
-                              onChange={() => toggleSelect(org.id)}
-                              className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="h-7 w-7 rounded bg-slate-900 text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
-                              {org.logo}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="font-extrabold text-text-primary group-hover:text-blue-600 transition-colors">{org.name}</div>
-                            <div className="text-[10px] text-text-secondary font-semibold">{org.website}</div>
-                          </td>
-                          <td className="px-4 py-3 font-mono font-bold text-text-secondary">{org.code}</td>
-                          <td className="px-4 py-3 text-text-primary font-bold">{org.type}</td>
-                          <td className="px-4 py-3 text-text-secondary font-medium">{org.university}</td>
-                          <td className="px-4 py-3 text-text-secondary font-medium">{org.location}</td>
-                          <td className="px-4 py-3 text-text-primary font-bold">{org.departments.length}</td>
-                          <td className="px-4 py-3 text-text-primary font-bold">{org.students.length || org.headcount}</td>
-                          <td className="px-4 py-3 text-text-primary font-bold">{org.coordinators.length}</td>
-                          <td className="px-4 py-3">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black ${
-                              org.partnershipStatus === 'Active' 
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                                : org.partnershipStatus === 'Pending Verification'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : org.partnershipStatus === 'Partnership Expired'
-                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                : 'bg-slate-100 text-text-secondary border border-border'
-                            }`}>
-                              {org.partnershipStatus}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
-                            <div className="flex justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <button 
-                                onClick={() => handleOpenProfile(org)}
-                                className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer"
-                                title="Open Profile File"
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                              </button>
-                              <button 
-                                onClick={() => openEditModal(org)}
-                                className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer"
-                                title="Edit Organization"
-                              >
-                                <Edit className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={12} className="px-4 py-12 text-center text-text-secondary bg-white">
-                        <Building2 className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                        <p className="text-sm font-bold text-text-secondary">No institutions match this search query</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            {filteredOrganizations.length > itemsPerPage && (
-              <Pagination 
-                currentPage={currentPage} 
-                totalPages={Math.ceil(filteredOrganizations.length / itemsPerPage)} 
-                onPageChange={setCurrentPage} 
-              />
-            )}
-          </div>
-
+          <EnhancedTable<Organization>
+            data={filteredOrganizations}
+            searchPlaceholder="Search by name, code, dept, coordinator..."
+            itemsPerPage={10}
+            columns={[
+              {
+                key: 'select',
+                label: '',
+                render: (org) => (
+                  <input 
+                    type="checkbox"
+                    checked={selectedIds.includes(org.id)}
+                    onChange={() => toggleSelect(org.id)}
+                    className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
+                  />
+                ),
+              },
+              {
+                key: 'logo',
+                label: 'Logo',
+                render: (org) => (
+                  <div className="h-7 w-7 rounded bg-slate-900 text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                    {org.logo}
+                  </div>
+                ),
+              },
+              {
+                key: 'name',
+                label: 'College Name',
+                render: (org) => (
+                  <div className="cursor-pointer" onClick={() => handleOpenProfile(org)}>
+                    <div className="font-extrabold text-text-primary hover:text-blue-600 transition-colors">{org.name}</div>
+                    <div className="text-[10px] text-text-secondary font-semibold">{org.website}</div>
+                  </div>
+                ),
+              },
+              {
+                key: 'code',
+                label: 'College Code',
+                render: (org) => <span className="font-mono font-bold text-text-secondary">{org.code}</span>,
+              },
+              {
+                key: 'type',
+                label: 'Institution Type',
+                render: (org) => <span className="text-text-primary font-bold">{org.type}</span>,
+              },
+              {
+                key: 'university',
+                label: 'University Affiliation',
+                render: (org) => <span className="text-text-secondary font-medium">{org.university}</span>,
+              },
+              {
+                key: 'location',
+                label: 'Location',
+                render: (org) => <span className="text-text-secondary font-medium">{org.location}</span>,
+              },
+              {
+                key: 'departments',
+                label: 'Departments',
+                render: (org) => <span className="text-text-primary font-bold">{org.departments.length}</span>,
+              },
+              {
+                key: 'studentsCount',
+                label: 'Students Enrolled',
+                render: (org) => <span className="text-text-primary font-bold">{org.students.length || org.headcount}</span>,
+              },
+              {
+                key: 'coordinators',
+                label: 'Coordinators',
+                render: (org) => <span className="text-text-primary font-bold">{org.coordinators.length}</span>,
+              },
+              {
+                key: 'partnershipStatus',
+                label: 'Partnership Status',
+                render: (org) => (
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-black ${
+                    org.partnershipStatus === 'Active' 
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                      : org.partnershipStatus === 'Pending Verification'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      : org.partnershipStatus === 'Partnership Expired'
+                      ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                      : 'bg-slate-100 text-text-secondary border border-border'
+                  }`}>
+                    {org.partnershipStatus}
+                  </span>
+                ),
+              },
+              {
+                key: 'actions',
+                label: 'Actions',
+                className: 'text-right',
+                render: (org) => (
+                  <div className="flex justify-end gap-1.5">
+                    <button onClick={() => handleOpenProfile(org)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Open Profile File">
+                      <Eye className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => openEditModal(org)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Edit Organization">
+                      <Edit className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ),
+              },
+            ]}
+          />
         </div>
       )}
 
@@ -1388,41 +1239,20 @@ export default function OrganizationManagementPage() {
                     </button>
                   </div>
 
-                  {/* Departments Table */}
-                  <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-                    <table className="w-full text-left text-xs whitespace-nowrap">
-                      <thead className="bg-slate-50 border-b border-border">
-                        <tr>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Department Name</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Head of Department (HOD)</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Students Count</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Faculty Count</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Active Internships</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary text-right">Placement Rate</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {activeProfile.departments.length > 0 ? (
-                          activeProfile.departments.map((dept, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3 font-bold text-text-primary">{dept.name}</td>
-                              <td className="px-4 py-3 text-text-secondary font-semibold">{dept.hod}</td>
-                              <td className="px-4 py-3 text-text-primary font-bold">{dept.studentsCount}</td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">{dept.facultyCount}</td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">{dept.internshipsCount}</td>
-                              <td className="px-4 py-3 text-right font-black text-blue-600">{dept.placementRate}%</td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={6} className="px-4 py-6 text-center text-text-secondary bg-white">
-                              No departments configured for this college.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  <EnhancedTable<OrganizationDepartment>
+                    data={activeProfile.departments}
+                    columns={[
+                      { key: 'name', label: 'Department Name', render: (dept) => <span className="font-bold text-text-primary">{dept.name}</span> },
+                      { key: 'hod', label: 'Head of Department (HOD)', render: (dept) => <span className="text-text-secondary font-semibold">{dept.hod}</span> },
+                      { key: 'studentsCount', label: 'Students Count', render: (dept) => <span className="text-text-primary font-bold">{dept.studentsCount}</span> },
+                      { key: 'facultyCount', label: 'Faculty Count', render: (dept) => <span className="text-text-secondary font-medium">{dept.facultyCount}</span> },
+                      { key: 'internshipsCount', label: 'Active Internships', render: (dept) => <span className="text-text-secondary font-medium">{dept.internshipsCount}</span> },
+                      { key: 'placementRate', label: 'Placement Rate', className: 'text-right', render: (dept) => <span className="font-black text-blue-600">{dept.placementRate}%</span> },
+                    ]}
+                    searchPlaceholder="Search departments..."
+                    itemsPerPage={5}
+                    emptyMessage="No departments configured for this college."
+                  />
 
                 </div>
               )}
@@ -1512,53 +1342,31 @@ export default function OrganizationManagementPage() {
                     ))}
                   </div>
 
-                  {/* Students Table */}
-                  <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-                    <table className="w-full text-left text-xs whitespace-nowrap">
-                      <thead className="bg-slate-50 border-b border-border">
-                        <tr>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Student ID</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Student Name</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Department</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Academic Year</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Internship Program</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Status</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary text-right">Liaison</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {activeProfile.students.length > 0 ? (
-                          activeProfile.students.map((student) => (
-                            <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3 font-mono font-bold text-text-secondary">{student.id}</td>
-                              <td className="px-4 py-3 font-bold text-text-primary">{student.name}</td>
-                              <td className="px-4 py-3 text-text-secondary font-semibold">{student.department}</td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">Year {student.year}</td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">{student.program}</td>
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
-                                  student.status === 'Placed' 
-                                    ? 'bg-emerald-50 text-emerald-700' 
-                                    : student.status === 'Placement Ready'
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'bg-amber-50 text-amber-700'
-                                }`}>
-                                  {student.status}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-right text-text-secondary font-semibold">{student.coordinatorName}</td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={7} className="px-4 py-6 text-center text-text-secondary bg-white">
-                              No students registered to this institution account.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  <EnhancedTable<OrganizationStudent>
+                    data={activeProfile.students}
+                    columns={[
+                      { key: 'id', label: 'Student ID', render: (student) => <span className="font-mono font-bold text-text-secondary">{student.id}</span> },
+                      { key: 'name', label: 'Student Name', render: (student) => <span className="font-bold text-text-primary">{student.name}</span> },
+                      { key: 'department', label: 'Department', render: (student) => <span className="text-text-secondary font-semibold">{student.department}</span> },
+                      { key: 'year', label: 'Academic Year', render: (student) => <span className="text-text-secondary font-medium">Year {student.year}</span> },
+                      { key: 'program', label: 'Internship Program', render: (student) => <span className="text-text-secondary font-medium">{student.program}</span> },
+                      { key: 'status', label: 'Status', render: (student) => (
+                        <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                          student.status === 'Placed' 
+                            ? 'bg-emerald-50 text-emerald-700' 
+                            : student.status === 'Placement Ready'
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'bg-amber-50 text-amber-700'
+                        }`}>
+                          {student.status}
+                        </span>
+                      )},
+                      { key: 'coordinatorName', label: 'Liaison', className: 'text-right', render: (student) => <span className="text-text-secondary font-semibold">{student.coordinatorName}</span> },
+                    ]}
+                    searchPlaceholder="Search students..."
+                    itemsPerPage={5}
+                    emptyMessage="No students registered to this institution account."
+                  />
 
                 </div>
               )}
@@ -1571,54 +1379,37 @@ export default function OrganizationManagementPage() {
                     University Placement Programs
                   </h4>
 
-                  <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-                    <table className="w-full text-left text-xs whitespace-nowrap">
-                      <thead className="bg-slate-50 border-b border-border">
-                        <tr>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Program Course Name</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Duration</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Students Enrolled</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Program Status</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Completion Rate</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Attendance Health</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary text-right">Satisfaction</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {activeProfile.programs.length > 0 ? (
-                          activeProfile.programs.map((prog, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3 font-bold text-text-primary flex items-center gap-1.5">
-                                <Briefcase className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                                {prog.name}
-                              </td>
-                              <td className="px-4 py-3 text-text-secondary font-semibold">{prog.duration}</td>
-                              <td className="px-4 py-3 text-text-primary font-extrabold">{prog.enrolledCount}</td>
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                  prog.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-text-secondary'
-                                }`}>
-                                  {prog.status}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 font-black text-text-primary">{prog.analytics.completionRate}%</td>
-                              <td className="px-4 py-3 font-black text-text-primary">{prog.analytics.attendanceRate}%</td>
-                              <td className="px-4 py-3 text-right font-bold text-amber-500 flex items-center justify-end gap-0.5">
-                                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                                {prog.analytics.satisfactionScore} / 5
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={7} className="px-4 py-6 text-center text-text-secondary bg-white">
-                              No active programs registered.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  <EnhancedTable<OrganizationProgram>
+                    data={activeProfile.programs}
+                    columns={[
+                      { key: 'name', label: 'Program Course Name', render: (prog) => (
+                        <span className="font-bold text-text-primary flex items-center gap-1.5">
+                          <Briefcase className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                          {prog.name}
+                        </span>
+                      )},
+                      { key: 'duration', label: 'Duration', render: (prog) => <span className="text-text-secondary font-semibold">{prog.duration}</span> },
+                      { key: 'enrolledCount', label: 'Students Enrolled', render: (prog) => <span className="text-text-primary font-extrabold">{prog.enrolledCount}</span> },
+                      { key: 'status', label: 'Program Status', render: (prog) => (
+                        <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                          prog.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-text-secondary'
+                        }`}>
+                          {prog.status}
+                        </span>
+                      )},
+                      { key: 'completionRate', label: 'Completion Rate', render: (prog) => <span className="font-black text-text-primary">{prog.analytics.completionRate}%</span> },
+                      { key: 'attendanceRate', label: 'Attendance Health', render: (prog) => <span className="font-black text-text-primary">{prog.analytics.attendanceRate}%</span> },
+                      { key: 'satisfaction', label: 'Satisfaction', className: 'text-right', render: (prog) => (
+                        <span className="font-bold text-amber-500 flex items-center justify-end gap-0.5">
+                          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                          {prog.analytics.satisfactionScore} / 5
+                        </span>
+                      )},
+                    ]}
+                    searchPlaceholder="Search programs..."
+                    itemsPerPage={5}
+                    emptyMessage="No active programs registered."
+                  />
 
                 </div>
               )}

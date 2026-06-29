@@ -4,17 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { Shield, ShieldAlert, Key, Activity, AlertTriangle, CheckCircle2, Lock, Monitor, Search, Smartphone, Clock, AlertCircle } from 'lucide-react';
 import { sessionService } from '@/src/services/session.service';
 import { UserSession } from '@/src/data/mock-user-sessions';
-import { Pagination } from "@/components/common/Pagination";
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 export default function SecurityCenterPage() {
 
-      // Pagination State
-      const [currentPage, setCurrentPage] = React.useState(1);
-      const itemsPerPage = 10;
-
   const [sessions, setSessions] = useState<UserSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
 
   const loadData = async () => {
     try {
@@ -40,10 +35,6 @@ export default function SecurityCenterPage() {
   };
 
   const activeSessions = sessions.filter(s => s.status === 'Active');
-  const filteredSessions = sessions.filter(s => 
-    s.userId.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    s.ipAddress.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="space-y-6 animate-slide-in">
@@ -61,7 +52,6 @@ export default function SecurityCenterPage() {
         </div>
       </div>
 
-      {/* KPIs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
           { label: 'Active Sessions', value: loading ? '-' : activeSessions.length, icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -84,7 +74,6 @@ export default function SecurityCenterPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Login Activity Chart (Mock) */}
         <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
             <Activity className="h-4 w-4 text-blue-600" /> Login Activity Trend (Last 7 Days)
@@ -107,7 +96,6 @@ export default function SecurityCenterPage() {
           </div>
         </div>
 
-        {/* Failed Login Trend */}
         <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
             <ShieldAlert className="h-4 w-4 text-amber-600" /> Failed Logins (Last 7 Days)
@@ -131,7 +119,6 @@ export default function SecurityCenterPage() {
         </div>
       </div>
 
-      {/* Recent Security Events */}
       <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
         <h3 className="text-sm font-semibold text-text-primary mb-4">Recent Security Events</h3>
         <div className="space-y-4">
@@ -153,96 +140,79 @@ export default function SecurityCenterPage() {
         </div>
       </div>
 
-      {/* Session Monitoring Table (Integrated) */}
       <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border bg-slate-50/50 flex flex-col sm:flex-row justify-between gap-4">
+        <div className="p-4 border-b border-border bg-slate-50/50">
           <div>
             <h3 className="font-semibold text-text-primary">Active User Sessions</h3>
             <p className="text-xs text-helper mt-1">Monitor and manage current user logins across the platform.</p>
           </div>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-            <input 
-              type="text" 
-              placeholder="Search by User ID or IP..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-          </div>
         </div>
-
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex h-32 items-center justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600"></div>
-            </div>
-          ) : (
-            <table className="w-full text-left text-sm text-text-secondary">
-              <thead className="bg-slate-50 text-xs uppercase font-semibold text-text-secondary border-b border-border">
-                <tr>
-                  <th className="px-6 py-3">User</th>
-                  <th className="px-6 py-3">Device & Browser</th>
-                  <th className="px-6 py-3">Location & IP</th>
-                  <th className="px-6 py-3">Last Activity</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredSessions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((session) => (
-                  <tr key={session.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-text-primary">{session.userId}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        {session.device.includes('iPhone') || session.device.includes('Mobile') ? <Smartphone className="h-4 w-4 text-text-secondary" /> : <Monitor className="h-4 w-4 text-text-secondary" />}
-                        <div>
-                          <div className="text-text-primary">{session.device}</div>
-                          <div className="text-xs text-text-secondary">{session.os} • {session.browser}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-text-primary">{session.location}</span>
-                        <span className="text-xs text-text-secondary font-mono">{session.ipAddress}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 text-text-secondary">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>{new Date(session.lastActivity).toLocaleString()}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${session.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-text-primary'}`}>
-                        {session.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {session.status === 'Active' && (
-                        <button 
-                          onClick={() => handleTerminate(session.id)}
-                          className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
-                        >
-                          Force Logout
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {filteredSessions.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-text-secondary">
-                      <AlertCircle className="h-8 w-8 mx-auto text-slate-300 mb-2" />
-                      <p>No sessions found.</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
+        <EnhancedTable<UserSession>
+          data={sessions}
+          searchPlaceholder="Search by User ID or IP..."
+          loading={loading}
+          emptyMessage="No sessions found."
+          columns={[
+            { key: 'userId', label: 'User', render: (s) => <span className="font-medium text-text-primary">{s.userId}</span> },
+            {
+              key: 'device',
+              label: 'Device & Browser',
+              render: (s) => (
+                <div className="flex items-center gap-2">
+                  {s.device.includes('iPhone') || s.device.includes('Mobile') ? <Smartphone className="h-4 w-4 text-text-secondary" /> : <Monitor className="h-4 w-4 text-text-secondary" />}
+                  <div>
+                    <div className="text-text-primary">{s.device}</div>
+                    <div className="text-xs text-text-secondary">{s.os} • {s.browser}</div>
+                  </div>
+                </div>
+              )
+            },
+            {
+              key: 'location',
+              label: 'Location & IP',
+              render: (s) => (
+                <div className="flex flex-col gap-1">
+                  <span className="text-text-primary">{s.location}</span>
+                  <span className="text-xs text-text-secondary font-mono">{s.ipAddress}</span>
+                </div>
+              )
+            },
+            {
+              key: 'lastActivity',
+              label: 'Last Activity',
+              render: (s) => (
+                <div className="flex items-center gap-1 text-text-secondary">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>{new Date(s.lastActivity).toLocaleString()}</span>
+                </div>
+              )
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              render: (s) => (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${s.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-text-primary'}`}>
+                  {s.status}
+                </span>
+              )
+            },
+            {
+              key: 'actions',
+              label: 'Actions',
+              className: 'text-right',
+              render: (s) => (
+                s.status === 'Active' ? (
+                  <button 
+                    onClick={() => handleTerminate(s.id)}
+                    className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
+                  >
+                    Force Logout
+                  </button>
+                ) : null
+              )
+            },
+          ]}
+        />
       </div>
     </div>
   );
