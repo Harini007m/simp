@@ -1,35 +1,22 @@
 import { EmailTemplate, EmailHistory } from '../types/email.types';
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { apiClient } from './api.client';
 
 export const emailApi = {
   getTemplates: async (): Promise<EmailTemplate[]> => {
-    await delay(500);
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<EmailTemplate[]>('/emails/templates');
+    return res.data;
   },
   getHistory: async (): Promise<EmailHistory[]> => {
-    await delay(700);
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<EmailHistory[]>('/emails/history');
+    return res.data;
   },
   saveTemplate: async (data: Partial<EmailTemplate>): Promise<EmailTemplate> => {
-    await delay(400);
-    let template = ([] as any[]).find(t => t.id === data.id);
-    if (template) {
-      Object.assign(template, { ...data, lastUpdated: new Date().toISOString(), version: template.version + 1 });
+    if (data.id) {
+      const res = await apiClient.put<EmailTemplate>(`/emails/templates/${data.id}`, data);
+      return res.data;
     } else {
-      template = {
-        id: `tpl-${([] as any[]).length + 1}`,
-        name: data.name || '',
-        category: data.category || 'General' as any,
-        subject: data.subject || '',
-        htmlBody: data.htmlBody || '',
-        variables: data.variables || [],
-        status: data.status || 'Draft',
-        createdBy: data.createdBy || 'Current User',
-        version: 1,
-        lastUpdated: new Date().toISOString()
-      };
-      ([] as any[]).push(template);
+      const res = await apiClient.post<EmailTemplate>('/emails/templates', data);
+      return res.data;
     }
-    return template;
   }
 };

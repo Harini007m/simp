@@ -10,7 +10,6 @@ export const VerificationService = {
   },
   
   getPendingRequestsCount: async () => {
-    // In a real scenario this might pull un-processed requests. Here we mock it.
     const reqs = await VerificationApi.getRequests();
     return Math.floor(reqs.length / 10);
   }

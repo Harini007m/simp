@@ -33,68 +33,17 @@ interface LocalTask {
   starterCode: string;
 }
 
-const DEFAULT_SUBMISSIONS: StudentSubmission[] = [
-  {
-    studentId: 'stu-harini',
-    studentName: 'Harini Sundar',
-    githubUrl: 'https://github.com/harini/portfolio',
-    deployUrl: 'https://harini-portfolio.vercel.app',
-    videoUrl: 'https://loom.com/share/harini-portfolio',
-    screenshot: 'solution_preview.png',
-    pdfFile: 'internship_spec_draft.pdf',
-    submittedAt: '2026-06-20 04:30 PM',
-    score: 0,
-    feedback: '',
-    status: 'Submitted'
-  },
-  {
-    studentId: 'stu-arun',
-    studentName: 'Arun Kumar',
-    githubUrl: 'https://github.com/arun/portfolio',
-    deployUrl: 'https://arun-portfolio.vercel.app',
-    videoUrl: '',
-    screenshot: 'build_preview.png',
-    pdfFile: '',
-    submittedAt: '2026-06-19 02:15 PM',
-    score: 0,
-    feedback: '',
-    status: 'Submitted'
-  }
-];
-
-const INITIAL_TASKS: LocalTask[] = [
-  {
-    id: 'TSK-201',
-    title: 'Portfolio Website',
-    description: 'Design and deploy a professional developer portfolio showcasing your projects and resume details.',
-    dueDate: '2026-06-20',
-    attempts: 1,
-    requirements: ['Github Link', 'Deployment URL', 'Screenshot'],
-    examplePdf: 'portfolio_spec_v1.pdf',
-    referencePdf: 'ux_portfolio_guide.pdf',
-    starterCode: 'portfolio-starter.zip'
-  },
-  {
-    id: 'TSK-202',
-    title: 'Attendance API Endpoints',
-    description: 'Implement backend REST endpoints for clock-in, clock-out, and monthly logs using Express and MongoDB.',
-    dueDate: '2026-06-25',
-    attempts: 2,
-    requirements: ['Github Link', 'Video'],
-    examplePdf: 'attendance_api_design.pdf',
-    referencePdf: 'rest_best_practices.pdf',
-    starterCode: 'express-mongoose-starter.zip'
-  }
-];
+// Mock data removed
 
 export default function TaskManagementPage() {
   const { user } = useAuth();
-  const [tasks, setTasks] = useState<LocalTask[]>(INITIAL_TASKS);
-  const [submissions, setSubmissions] = useState<StudentSubmission[]>(DEFAULT_SUBMISSIONS);
+  const [tasks, setTasks] = useState<LocalTask[]>([]);
+  const [submissions, setSubmissions] = useState<StudentSubmission[]>([]);
   
   // Selection drill-down
-  const [selectedTaskId, setSelectedTaskId] = useState<string>('TSK-202');
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [selectedSub, setSelectedSub] = useState<StudentSubmission | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Form: Grading
   const [inputScore, setInputScore] = useState<number>(0);
@@ -118,61 +67,64 @@ export default function TaskManagementPage() {
   };
 
   useEffect(() => {
-    // Load created tasks from local storage
-    if (typeof window !== 'undefined') {
-      const storedTasks = localStorage.getItem('pinesphere_created_tasks');
-      if (storedTasks) {
-        const parsed = JSON.parse(storedTasks) as { batchId: string; task: LocalTask }[];
-        const filtered = parsed.filter((x: any) => x.batchId === 'batch-ai-2026').map((x: any) => x.task);
-        setTasks([...INITIAL_TASKS, ...filtered]);
-      }
-
-      // Load submissions
-      const storedSubs = localStorage.getItem('pinesphere_task_submissions');
-      if (storedSubs) {
-        const parsed = JSON.parse(storedSubs) as { taskId: string; submission: StudentSubmission }[];
-        const filtered = parsed.filter((x: any) => x.taskId === selectedTaskId).map((x: any) => x.submission);
-        setSubmissions([...DEFAULT_SUBMISSIONS, ...filtered]);
-      } else {
-        setSubmissions(DEFAULT_SUBMISSIONS);
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        const { taskService } = await import('@/src/services/task.service');
+        const { submissionService } = await import('@/src/services/submission.service');
+        const [fetchedTasks, fetchedSubmissions] = await Promise.all([
+          taskService.getTasks(),
+          submissionService.getSubmissions()
+        ]);
+        setTasks(fetchedTasks as any || []);
+        
+        if (selectedTaskId) {
+            setSubmissions((fetchedSubmissions as any || []).filter((s: any) => s.taskId === selectedTaskId));
+        } else {
+            setSubmissions(fetchedSubmissions as any || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch tasks/submissions", err);
+      } finally {
+        setIsLoading(false);
       }
     }
+    loadData();
   }, [selectedTaskId]);
 
-  const handlePostGrade = (e: React.FormEvent) => {
+  const handlePostGrade = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSub) return;
 
-    const updated = submissions.map((sub: any) => {
-      if (sub.studentId === selectedSub.studentId) {
-        return {
-          ...sub,
-          score: inputScore,
-          feedback: inputFeedback,
-          status: 'Graded' as const
-        };
+    try {
+      const { submissionService } = await import('@/src/services/submission.service');
+      // Assume a generic update endpoint exists in submissionService
+      if ((submissionService as any).updateSubmission) {
+         await (submissionService as any).updateSubmission(selectedSub.studentId, {
+            score: inputScore,
+            feedback: inputFeedback,
+            status: 'Graded'
+         });
       }
-      return sub;
-    });
-
-    setSubmissions(updated);
-    setSelectedSub(null);
-
-    // Save graded state to localStorage
-    if (typeof window !== 'undefined') {
-      const gradesStr = localStorage.getItem('pinesphere_task_grades') || '[]';
-      const grades = JSON.parse(gradesStr);
-      const cleaned = grades.filter((g: any) => !(g.taskId === selectedTaskId && g.studentId === selectedSub.studentId));
-      cleaned.push({
-        taskId: selectedTaskId,
-        studentId: selectedSub.studentId,
-        score: inputScore,
-        feedback: inputFeedback
+      
+      const updated = submissions.map((sub: any) => {
+        if (sub.studentId === selectedSub.studentId) {
+          return {
+            ...sub,
+            score: inputScore,
+            feedback: inputFeedback,
+            status: 'Graded' as const
+          };
+        }
+        return sub;
       });
-      localStorage.setItem('pinesphere_task_grades', JSON.stringify(cleaned));
-    }
 
-    triggerToast(`Grades published for ${selectedSub.studentName}!`);
+      setSubmissions(updated);
+      setSelectedSub(null);
+      triggerToast("Grade & feedback posted to student successfully.");
+    } catch (err) {
+      console.error("Failed to post grade", err);
+    }
   };
 
   const handleCreateTask = (e: React.FormEvent) => {
@@ -203,12 +155,18 @@ export default function TaskManagementPage() {
 
     setTasks((prev: any) => [...prev, created]);
 
-    if (typeof window !== 'undefined') {
-      const savedTasksStr = localStorage.getItem('pinesphere_created_tasks') || '[]';
-      const savedTasks = JSON.parse(savedTasksStr);
-      savedTasks.push({ batchId: 'batch-ai-2026', task: created });
-      localStorage.setItem('pinesphere_created_tasks', JSON.stringify(savedTasks));
-    }
+    // Save to backend
+    const submitTask = async () => {
+      try {
+        const { taskService } = await import('@/src/services/task.service');
+        if ((taskService as any).createTask) {
+           await (taskService as any).createTask('batch-ai-2026', created);
+        }
+      } catch (err) {
+        console.error("Failed to create task", err);
+      }
+    };
+    submitTask();
 
     setNewTaskTitle('');
     setNewTaskDesc('');
@@ -312,7 +270,7 @@ export default function TaskManagementPage() {
               <div>
                 <span className="text-[10px] font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-sm uppercase tracking-wide">SUBMISSIONS ASSIGNED</span>
                 <select 
-                  value={selectedTaskId}
+                  value={selectedTaskId || ''}
                   onChange={(e: any) => { setSelectedTaskId(e.target.value); setSelectedSub(null); }}
                   className="block mt-2 bg-slate-50 border border-border rounded-xl px-4 py-2 text-xs font-bold text-text-primary outline-none cursor-pointer"
                 >

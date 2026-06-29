@@ -60,18 +60,38 @@ export const employeeService = {
   },
   
   async updateEmployee(id: string, updates: Partial<ExtendedEmployee>): Promise<ExtendedEmployee | undefined> {
-    return undefined;
+    try {
+      const res = await employeeApi.updateEmployee(id, updates);
+      return this.mapToExtended(res);
+    } catch {
+      return undefined;
+    }
   },
 
   async bulkAssignMentor(ids: string[], mentorId: string): Promise<boolean> {
-    return true;
+    try {
+      await Promise.all(ids.map(id => employeeApi.updateEmployee(id, { mentorId })));
+      return true;
+    } catch {
+      return false;
+    }
   },
 
   async bulkChangeStatus(ids: string[], status: string): Promise<boolean> {
-    return true;
+    try {
+      await Promise.all(ids.map(id => employeeApi.updateEmployee(id, { employee_status: status })));
+      return true;
+    } catch {
+      return false;
+    }
   },
 
   async bulkTransferDepartment(ids: string[], department: string): Promise<boolean> {
-    return true;
+    try {
+      await Promise.all(ids.map(id => employeeApi.updateEmployee(id, { department })));
+      return true;
+    } catch {
+      return false;
+    }
   }
 };

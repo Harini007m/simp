@@ -1,12 +1,16 @@
+import { apiClient } from './api.client';
 import { AnalyticsSummary, AnalyticsDataPoint, AnalyticsDimension } from '../types/analytics.types';
 export const AnalyticsApi = {
   getSummary: async (): Promise<AnalyticsSummary> => {
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<AnalyticsSummary>('/analytics/summary');
+    return res.data;
   },
   getAttendanceTrend: async (): Promise<AnalyticsDataPoint[]> => {
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<AnalyticsDataPoint[]>('/analytics/attendance-trend');
+    return res.data;
   },
   getTopPrograms: async (): Promise<AnalyticsDimension[]> => {
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<AnalyticsDimension[]>('/analytics/top-programs');
+    return res.data;
   }
 };

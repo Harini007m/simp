@@ -26,7 +26,6 @@ export class RelationshipResolver {
     context: { batchId?: string; collegeId?: string }
   ): RelationshipHierarchy {
     
-    // In Phase 2 frontend mapping, we resolve based on the provided context (from mock data)
     const hierarchy: RelationshipHierarchy = {
       studentId,
       batchId: context.batchId,

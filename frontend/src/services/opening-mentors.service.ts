@@ -1,4 +1,4 @@
-import { OpeningMentor } from '../types/api/opening-mentor.types';
+import { OpeningMentor } from '../types/api/mentor.types';
 import { openingMentorsApi } from "../api/opening-mentors.api";
 
 class OpeningMentorsService {

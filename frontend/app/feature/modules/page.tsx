@@ -6,6 +6,7 @@ import { Badge } from '@/components/feature/ui/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/feature/ui/Table';
 import { Search, Plus, Settings, Eye, Edit, ToggleLeft, ToggleRight, Info } from 'lucide-react';
 import { moduleService } from '@/src/services/module.service';
+import { Module } from '@/src/types/api/module.types';
 
 export default function ModuleRegistryPage() {
   const [modules, setModules] = useState<Module[]>([]);

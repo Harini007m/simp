@@ -35,9 +35,9 @@ function generateVerificationHash(cert: Certificate): string {
 export default function CollegeCertificateDashboard() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCollege, setSelectedCollege] = useState<string>('Stanford University'); // Mock logged in college
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedStudent, setExpandedStudent] = useState<string | null>(null);
+  const [selectedCollege, setSelectedCollege] = useState<string>('Stanford University');
 
   // Verification drawer
   const [verifyDrawerOpen, setVerifyDrawerOpen] = useState(false);

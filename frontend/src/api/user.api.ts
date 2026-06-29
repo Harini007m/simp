@@ -7,23 +7,23 @@ export const userApi = {
         return response.data;
     },
     async getUser(id: string): Promise<User | undefined> {
-        const response = await apiClient.get('/user');
+        const response = await apiClient.get(`/user/${id}`);
         return response.data;
     },
     async getUserByEmail(email: string): Promise<User | undefined> {
-        const response = await apiClient.get('/user');
+        const response = await apiClient.get(`/user?email=${email}`);
         return response.data;
     },
     async createUser(user: Omit<User, 'id' | 'date' | 'avatar'> & { avatar?: string }): Promise<User> {
-        const response = await apiClient.get('/user');
+        const response = await apiClient.post('/user', user);
         return response.data;
     },
     async updateUser(id: string, updatedData: Partial<User>): Promise<User | undefined> {
-        const response = await apiClient.get('/user');
+        const response = await apiClient.put(`/user/${id}`, updatedData);
         return response.data;
     },
     async deleteUser(id: string): Promise<boolean> {
-        const response = await apiClient.get('/user');
-        return response.data;
+        await apiClient.delete(`/user/${id}`);
+        return true;
     }
 };

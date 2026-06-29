@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { API_ENDPOINTS } from '@/src/config';
+
 
 import { 
   User, 
@@ -244,53 +244,14 @@ function ApplicationFormContent() {
   const dragRefPhoto = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
-  // Load draft from localStorage on mount/type change
+  // Draft loading removed
   useEffect(() => {
-    const savedDraft = localStorage.getItem(`pinesphere_internship_draft_${internshipType}`);
-    if (savedDraft) {
-      try {
-        const parsed = JSON.parse(savedDraft);
-        setFormState((prev: any) => ({
-          ...prev,
-          personalInformation: { ...prev.personalInformation, ...parsed.personalInformation },
-          academicInformation: { ...prev.academicInformation, ...parsed.academicInformation },
-          professionalInformation: { ...prev.professionalInformation, ...parsed.professionalInformation },
-          internshipSpecificData: { ...prev.internshipSpecificData, ...parsed.internshipSpecificData },
-          documents: { ...prev.documents, ...parsed.documents },
-          motivation: { ...prev.motivation, ...parsed.motivation }
-        }));
-      } catch (err) {
-        console.error("Failed to parse saved draft", err);
-      }
-    }
+    // API logic for drafts could go here in the future
   }, [internshipType]);
 
-  // Save draft to localStorage on state change
+  // Draft saving removed
   useEffect(() => {
     if (formState !== initialFormState) {
-      // Strip out file data to prevent QuotaExceededError in localStorage
-      const stateToSave = {
-        ...formState,
-        personalInformation: {
-          ...formState.personalInformation,
-          photo: null,
-        },
-        internshipSpecificData: {
-          ...formState.internshipSpecificData,
-          paymentScreenshot: null,
-        },
-        documents: {
-          resume: null,
-          passbook: null,
-        }
-      };
-      
-      try {
-        localStorage.setItem(`pinesphere_internship_draft_${internshipType}`, JSON.stringify(stateToSave));
-      } catch (err) {
-        console.error("Failed to save draft to localStorage", err);
-      }
-      
       setIsSaved(true);
       const timer = setTimeout(() => setIsSaved(false), 1200);
       return () => clearTimeout(timer);
@@ -644,13 +605,11 @@ function ApplicationFormContent() {
     });
     setTimeout(() => {
       setIsSimulatingPayment(false);
-      const mockTxnId = `UPI-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
       setFormState((prev: any) => ({
         ...prev,
         internshipSpecificData: {
           ...prev.internshipSpecificData,
           upiPaid: true,
-          transactionId: mockTxnId,
         }
       }));
     }, 1500);
@@ -666,15 +625,11 @@ function ApplicationFormContent() {
     });
     setTimeout(() => {
       setIsSimulatingPayment(false);
-      const mockTxnId = `CARD-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
-      const mockAuthCode = `AUTH-${Math.floor(100000 + Math.random() * 900000)}`;
       setFormState((prev: any) => ({
         ...prev,
         internshipSpecificData: {
           ...prev.internshipSpecificData,
           cardPaid: true,
-          authCode: mockAuthCode,
-          transactionId: mockTxnId,
         }
       }));
     }, 1500);
@@ -754,7 +709,6 @@ function ApplicationFormContent() {
         const { applicationService } = await import('@/src/services/application.service');
         const response = await applicationService.createApplication(payload as any);
         
-        // Mocking delay for UX if API is too fast
         await new Promise((resolve: any) => setTimeout(resolve, 500));
 
         localStorage.setItem('pinesphere_submitted_photo', formState.personalInformation.photo?.base64 || '');

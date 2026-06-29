@@ -17,5 +17,9 @@ export const programApi = {
   createProgram: async (data: ProgramCreate): Promise<ProgramResponse> => {
     const res = await apiClient.post<ProgramResponse>('/programs', data);
     return res.data;
+  },
+  updateProgram: async (id: string, data: any): Promise<ProgramResponse> => {
+    const res = await apiClient.put<ProgramResponse>(`/programs/${id}`, data);
+    return res.data;
   }
 };

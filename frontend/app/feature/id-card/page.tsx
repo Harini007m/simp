@@ -516,9 +516,9 @@ export default function IDCardPage() {
   const [backBg, setBackBg] = useState<BackgroundConfig>({ type: 'solid', color1: '#ffffff', color2: '#f3f4f6', angle: 180 });
 
   const generateFallbackCard = (activeUser: { name: string; roleName: string; user_id?: string }): DigitalIDCard => {
-    const savedPhoto = typeof window !== 'undefined' ? localStorage.getItem('pinesphere_submitted_photo') : null;
-    const savedName = typeof window !== 'undefined' ? localStorage.getItem('pinesphere_submitted_name') : null;
-    const savedProgram = typeof window !== 'undefined' ? localStorage.getItem('pinesphere_submitted_program') : null;
+    const savedPhoto = null;
+    const savedName = null;
+    const savedProgram = null;
 
     const isStudent = activeUser.roleName === 'Student';
     const idVal = activeUser.user_id || '99';
@@ -614,14 +614,6 @@ export default function IDCardPage() {
       let data = await IDCardService.getMyIDCard(user.user_id);
       if (!data) {
         data = generateFallbackCard(user);
-      } else {
-        // Override with submitted application details if present in localStorage
-        const savedPhoto = localStorage.getItem('pinesphere_submitted_photo');
-        const savedName = localStorage.getItem('pinesphere_submitted_name');
-        const savedProgram = localStorage.getItem('pinesphere_submitted_program');
-        if (savedPhoto) data.photoUrl = savedPhoto;
-        if (savedName) data.studentName = savedName;
-        if (savedProgram) data.program = savedProgram;
       }
       setCard(data);
     } catch (e) {

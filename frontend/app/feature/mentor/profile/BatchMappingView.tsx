@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, Plus, Package, Link2, Users } from 'lucide-react';
 import { mentorService } from '@/src/services/mentor.service';
+import { MentorBatchMapping } from '@/src/types/api/mentor.types';
 
 export default function MentorBatchMappingPage() {
   const [mappings, setMappings] = useState<MentorBatchMapping[]>([]);

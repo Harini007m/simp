@@ -29,17 +29,26 @@ class OpportunitiesService {
   }
 
   async getOpportunities(): Promise<ExtendedOpening[]> {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      throw new Error('Backend implementation pending or failed');
+    try {
+      const data = await opportunityApi.getOpenings();
+      return data.map((opp: any) => this.mapToExtended(opp));
+    } catch {
+      return [];
+    }
   }
 
   async getOpportunity(id: string): Promise<ExtendedOpening | undefined> {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      throw new Error('Backend implementation pending or failed');
+    try {
+      const opp = await opportunityApi.getOpening(id);
+      return this.mapToExtended(opp);
+    } catch {
+      return undefined;
+    }
   }
 
   async createOpportunity(opp: OpeningCreate): Promise<ExtendedOpening> {
-      return opportunitiesApi.createOpportunity(opp);
+      const response = await opportunitiesApi.createOpportunity(opp);
+      return this.mapToExtended(response);
   }
 }
 

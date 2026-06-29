@@ -57,156 +57,33 @@ interface BatchAssessments {
   assessments: AssessmentItem[];
 }
 
-const INITIAL_BATCH_ASSESSMENTS: BatchAssessments[] = [
-  {
-    id: 'batch-ai-2026',
-    name: 'AI Batch 2026',
-    assessmentsCount: 2,
-    completedCount: '38/42',
-    averageScore: 84,
-    assessments: [
-      {
-        id: 'ASM-401',
-        title: 'Python Essentials Quiz',
-        type: 'MCQ',
-        duration: 30,
-        passingMarks: 70,
-        negativeMarking: true,
-        securitySettings: {
-          secureBrowser: true,
-          disableCopy: true,
-          disableRightClick: true,
-          fullscreenOnly: true,
-          disableTabSwitch: true,
-          cameraRequired: true,
-          microphoneRequired: true
-        },
-        questions: [
-          { text: 'Which of the following is an immutable sequence in Python?', options: ['List', 'Tuple', 'Set', 'Dictionary'], answer: 'B', marks: 10 }
-        ],
-        attempts: [
-          {
-            studentId: 'stu-harini',
-            studentName: 'Harini Sundar',
-            attempts: 1,
-            score: 90,
-            status: 'Completed',
-            passed: true,
-            questionAnalysis: {
-              correctCount: 9,
-              wrongCount: 1,
-              skippedCount: 0,
-              negativeMarks: 1,
-              detailed: [
-                { question: 'Q1: Immutable sequences in Python?', correct: true, skipped: false, marksGained: 10 },
-                { question: 'Q2: Global interpreter lock purpose?', correct: true, skipped: false, marksGained: 10 },
-                { question: 'Q3: Lambda expression definition?', correct: false, skipped: false, marksGained: -1 }
-              ]
-            }
-          },
-          {
-            studentId: 'stu-arun',
-            studentName: 'Arun Kumar',
-            attempts: 1,
-            score: 78,
-            status: 'Completed',
-            passed: true,
-            questionAnalysis: {
-              correctCount: 8,
-              wrongCount: 2,
-              skippedCount: 0,
-              negativeMarks: 2,
-              detailed: [
-                { question: 'Q1: Immutable sequences in Python?', correct: true, skipped: false, marksGained: 10 },
-                { question: 'Q2: Global interpreter lock purpose?', correct: false, skipped: false, marksGained: -1 }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        id: 'ASM-402',
-        title: 'AI Fundamentals Exam',
-        type: 'Mixed',
-        duration: 60,
-        passingMarks: 60,
-        negativeMarking: false,
-        securitySettings: {
-          secureBrowser: true,
-          disableCopy: true,
-          disableRightClick: true,
-          fullscreenOnly: true,
-          disableTabSwitch: true,
-          cameraRequired: false,
-          microphoneRequired: false
-        },
-        questions: [],
-        attempts: [
-          {
-            studentId: 'stu-rahul',
-            studentName: 'Rahul Sen',
-            attempts: 1,
-            score: 82,
-            status: 'Completed',
-            passed: true,
-            questionAnalysis: {
-              correctCount: 8,
-              wrongCount: 1,
-              skippedCount: 1,
-              negativeMarks: 0,
-              detailed: []
-            }
-          }
-        ]
-      }
-    ]
-  }
-];
-
 export default function AssessmentDashboardPage() {
-  const [batches, setBatches] = useState<BatchAssessments[]>(INITIAL_BATCH_ASSESSMENTS);
+  const [batches, setBatches] = useState<BatchAssessments[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Drill-down states
   const [selectedBatch, setSelectedBatch] = useState<BatchAssessments | null>(null);
   const [selectedAsm, setSelectedAsm] = useState<AssessmentItem | null>(null);
   const [selectedAttempt, setSelectedAttempt] = useState<StudentAttempt | null>(null);
 
-  // Sync candidate score records
+  // Fetch assessments from backend
   useEffect(() => {
-    const syncSubmissions = () => {
-      if (typeof window !== 'undefined') {
-        const storedStr = localStorage.getItem('pinesphere_quiz_submissions');
-        if (storedStr) {
-          const parsed = JSON.parse(storedStr) as { asmId: string; attempt: StudentAttempt }[];
-          setBatches((prev: any) => prev.map((b: any) => {
-            const updatedAsms = b.assessments.map((a: any) => {
-              const matches = parsed.filter((p: any) => p.asmId === a.id).map((p: any) => p.attempt);
-              if (matches.length > 0) {
-                const merged = [...a.attempts];
-                matches.forEach((newAttempt: any) => {
-                  const idx = merged.findIndex((x: any) => x.studentId === newAttempt.studentId);
-                  if (idx >= 0) {
-                    merged[idx] = { ...merged[idx], ...newAttempt };
-                  } else {
-                    merged.push(newAttempt);
-                  }
-                });
-                return { ...a, attempts: merged };
-              }
-              return a;
-            });
-            return {
-              ...b,
-              assessments: updatedAsms
-            };
-          }));
-        }
+    async function loadAssessments() {
+      setIsLoading(true);
+      try {
+        const { assessmentService } = await import('@/src/services/assessment.service');
+        const data = await assessmentService.getAssessments();
+        setBatches(data as any || []);
+      } catch (error) {
+        console.error("Failed to fetch assessments", error);
+      } finally {
+        setIsLoading(false);
       }
-    };
-    syncSubmissions();
-    window.addEventListener('storage', syncSubmissions);
-    return () => window.removeEventListener('storage', syncSubmissions);
+    }
+    loadAssessments();
   }, []);
+
+  // Submissions are now fetched directly from the backend via assessmentService
 
   const activeCount = batches.reduce((sum: any, b: any) => sum + b.assessments.length, 0);
   const totalSubCount = batches.reduce((sum: any, b: any) => sum + b.assessments.reduce((s: any, a: any) => s + a.attempts.length, 0), 0);

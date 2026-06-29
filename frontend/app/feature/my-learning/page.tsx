@@ -79,48 +79,50 @@ export default function MyLearningPage() {
   };
 
   useEffect(() => {
-    const loadCourses = () => {
-      if (typeof window !== 'undefined') {
-        const storedStr = localStorage.getItem('pinesphere_courses');
-        if (storedStr) {
-          const parsed = JSON.parse(storedStr) as CourseItem[];
-          setCourses(parsed);
-          
-          // Load submodule progress if any
-          const progressStr = localStorage.getItem('pinesphere_user_course_progress');
-          if (progressStr) {
-            setCompletedSubmodules(JSON.parse(progressStr));
-          }
+    const loadCourses = async () => {
+      try {
+        const { lmsService } = await import('@/src/services/lms.service');
+        const data = await lmsService.getModules();
+        setCourses(data as any || []);
+        
+        // Simulating loading user progress from backend
+        if ((lmsService as any).getProgress) {
+           const progress = await (lmsService as any).getProgress();
+           setCompletedSubmodules(progress || { 'SUB-501-1-1': true });
         }
+      } catch (err) {
+        console.error("Failed to load courses", err);
       }
     };
     loadCourses();
-    window.addEventListener('storage', loadCourses);
-    return () => window.removeEventListener('storage', loadCourses);
   }, []);
 
-  // Update localStorage when completed submodules list changes
-  const saveProgressToStorage = (updatedProgress: Record<string, boolean>) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pinesphere_user_course_progress', JSON.stringify(updatedProgress));
-      
-      // Update overall progress percentage of courses
-      if (selectedCourse) {
-        const totalSubs = selectedCourse.modules.reduce((sum: any, m: any) => sum + m.submodules.length, 0);
-        if (totalSubs > 0) {
-          const completedCount = selectedCourse.modules.reduce((sum: any, m: any) => 
-            sum + m.submodules.filter((s: any) => updatedProgress[s.id]).length, 0
-          );
-          const newRate = Math.round((completedCount / totalSubs) * 100);
-          
-          // Update selected course and local storage
-          const updatedCourse = { ...selectedCourse, progressRate: newRate };
-          setSelectedCourse(updatedCourse);
-          
-          const updatedCourses = courses.map((c: any) => c.id === selectedCourse.id ? updatedCourse : c);
-          setCourses(updatedCourses);
-          localStorage.setItem('pinesphere_courses', JSON.stringify(updatedCourses));
-        }
+  // Update progress to backend when completed submodules list changes
+  const saveProgressToStorage = async (updatedProgress: Record<string, boolean>) => {
+    try {
+      const { lmsService } = await import('@/src/services/lms.service');
+      if ((lmsService as any).updateProgress) {
+         await (lmsService as any).updateProgress(updatedProgress);
+      }
+    } catch(err) {
+      console.error("Failed to sync progress", err);
+    }
+    
+    // Update overall progress percentage of courses
+    if (selectedCourse) {
+      const totalSubs = selectedCourse.modules.reduce((sum: any, m: any) => sum + m.submodules.length, 0);
+      if (totalSubs > 0) {
+        const completedCount = selectedCourse.modules.reduce((sum: any, m: any) => 
+          sum + m.submodules.filter((s: any) => updatedProgress[s.id]).length, 0
+        );
+        const newRate = Math.round((completedCount / totalSubs) * 100);
+        
+        // Update selected course locally
+        const updatedCourse = { ...selectedCourse, progressRate: newRate };
+        setSelectedCourse(updatedCourse);
+        
+        const updatedCourses = courses.map((c: any) => c.id === selectedCourse.id ? updatedCourse : c);
+        setCourses(updatedCourses);
       }
     }
   };

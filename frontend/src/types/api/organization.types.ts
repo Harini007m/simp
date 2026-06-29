@@ -71,3 +71,10 @@ export interface CoordinatorResponse {
   created_at: string;
 }
 export interface Organization { id: string; name: string; [key: string]: any; }
+
+export interface OrganizationDepartment { id?: string; [key: string]: any; }
+export interface OrganizationCoordinator { id?: string; [key: string]: any; }
+export interface OrganizationStudent { id?: string; [key: string]: any; }
+export interface OrganizationProgram { id?: string; [key: string]: any; }
+export interface OrganizationDocument { id?: string; [key: string]: any; }
+export interface OrganizationTimelineEvent { id?: string; [key: string]: any; }

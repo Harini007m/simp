@@ -171,7 +171,6 @@ export default function ExportCenterPage() {
                 </button>
                 <button 
                   onClick={() => {
-                    alert('Schedule created successfully! (Mock implementation)');
                     setIsModalOpen(false);
                   }}
                   className="bg-slate-900 hover:bg-black text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"

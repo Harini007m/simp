@@ -22,32 +22,7 @@ interface Recommendation {
   category: 'Academics' | 'Attendance' | 'Placement';
 }
 
-const INITIAL_RECOMMENDATIONS: Recommendation[] = [
-  { 
-    id: 'rec_1', 
-    title: 'Schedule remedial assessments for low performance students', 
-    description: 'AI detected 15 students who scored below 60% in JavaScript basics. Providing a refresher will raise overall placement readiness by 8%.', 
-    impact: 'High Impact', 
-    status: 'Pending', 
-    category: 'Academics' 
-  },
-  { 
-    id: 'rec_2', 
-    title: 'Trigger automated warning SMS for attendance defaulters', 
-    description: 'Attendance rates for the Engineering batch dropped by 12% last week. Activating attendance counseling is expected to restore rates back to 90%+', 
-    impact: 'Medium Impact', 
-    status: 'Pending', 
-    category: 'Attendance' 
-  },
-  { 
-    id: 'rec_3', 
-    title: 'Conduct resume building workshop for placement batch', 
-    description: 'AI prediction shows 22 students are at risk of missing the upcoming placement drive due to incomplete profiles.', 
-    impact: 'Critical Impact', 
-    status: 'Pending', 
-    category: 'Placement' 
-  }
-];
+// Mock data removed
 
 function ForecastChart({ forecast }: { forecast: InsightForecast }) {
   const allValues = [...forecast.historicalValues, ...forecast.predictedValues];
@@ -236,7 +211,7 @@ export default function PredictiveInsightsPage() {
   const [selectedForecastIndex, setSelectedForecastIndex] = useState(0);
 
   // Recommendations state
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(INITIAL_RECOMMENDATIONS);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [applyingRecId, setApplyingRecId] = useState<string | null>(null);
 
   // Search & Filter state for risk directory

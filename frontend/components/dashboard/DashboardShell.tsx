@@ -14,7 +14,6 @@ import {
   Trophy, LifeBuoy, Gift, Store, CreditCard, Bookmark, Flag, Briefcase
 } from 'lucide-react';
 
-// --- MOCK WIDGET COMPONENTS ---
 
 const SystemHealthWidget = () => (
   <Card className="border-emerald-200 bg-emerald-50 h-full">
@@ -38,7 +37,6 @@ const RecentActivityWidget = () => (
       <h3 className="font-bold text-text-primary">Recent Platform Activity</h3>
     </div>
     <CardContent className="p-4">
-      <p className="text-sm text-text-secondary">System-wide activity log mock data...</p>
     </CardContent>
   </Card>
 );

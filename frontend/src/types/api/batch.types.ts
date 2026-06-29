@@ -23,9 +23,13 @@ export interface BatchResponse {
 }
 
 export interface BatchStudentCreate {
+  batch_id: string;
   student_id: string;
   assigned_by: string;
 }
+export interface BatchStudent { id: string; [key: string]: any; }
+export interface BatchTimelineEvent { id: string; [key: string]: any; }
+export interface BatchProject { id: string; [key: string]: any; }
 
 export interface BatchStudentResponse {
   batch_student_id: string;

@@ -81,11 +81,6 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
     }
   };
 
-  const handleAttachMockFile = () => {
-    const files = ['resume_draft.pdf', 'screenshot_bug.png', 'payment_receipt.png', 'completion_certificate.pdf'];
-    const randomFile = files[Math.floor(Math.random() * files.length)];
-    setAttachedFile(randomFile);
-  };
 
   const handleSelectEmoji = (emoji: string) => {
     setInputText((prev: any) => prev + emoji);
@@ -256,7 +251,6 @@ export default function ChatWindow({ conversationId }: { conversationId: string 
             />
             <button 
               type="button"
-              onClick={handleAttachMockFile}
               className="text-text-secondary hover:text-text-secondary p-2 cursor-pointer"
             >
               <Paperclip className="h-5 w-5" />

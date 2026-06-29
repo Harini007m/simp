@@ -363,7 +363,6 @@ export default function EmployeeManagementPage() {
           };
           const reviews = [...(emp.performanceReviews || []), newReview];
           
-          // Re-calculate mock productivity/leadership scores slightly based on reviews
           const perf = emp.performanceMetrics ? {
             ...emp.performanceMetrics,
             productivity: Math.min(100, Math.round(emp.performanceMetrics.productivity * 0.95 + reviewForm.score * 10 * 0.05))

@@ -94,10 +94,21 @@ export const applicationService = {
   },
 
   async bulkUpdateStatus(ids: string[], newStatus: string): Promise<ExtendedApplication[]> {
-    return [];
+    try {
+      const results = await Promise.all(ids.map(id => this.updateApplicationStatus(id, newStatus)));
+      return results.filter((res): res is ExtendedApplication => res !== undefined);
+    } catch {
+      return [];
+    }
   },
 
   async bulkAssignReviewer(ids: string[], reviewer: string): Promise<ExtendedApplication[]> {
-    return [];
+    // Requires a real endpoint for assigning reviewers. Stubbing with returning current apps for now.
+    try {
+      const results = await Promise.all(ids.map(id => this.getApplication(id)));
+      return results.filter((res): res is ExtendedApplication => res !== undefined);
+    } catch {
+      return [];
+    }
   }
 };

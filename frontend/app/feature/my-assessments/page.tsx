@@ -30,53 +30,10 @@ interface StudentQuiz {
   attempts?: number;
 }
 
-const DEFAULT_QUIZZES: StudentQuiz[] = [
-  {
-    id: 'ASM-401',
-    title: 'Python Essentials Quiz',
-    type: 'MCQ',
-    duration: 10,
-    passingMarks: 70,
-    negativeMarking: true,
-    securitySettings: {
-      secureBrowser: true,
-      disableCopy: true,
-      disableRightClick: true,
-      fullscreenOnly: true,
-      disableTabSwitch: true,
-      cameraRequired: true,
-      microphoneRequired: true
-    },
-    questions: [
-      { text: 'Which of the following is an immutable sequence in Python?', options: ['List', 'Tuple', 'Set', 'Dictionary'], answer: 'B', marks: 10 },
-      { text: 'What is the purpose of the Global Interpreter Lock (GIL) in Python?', options: ['Secure network traffic', 'Prevent multithreading thread safety locks', 'Limit thread execution to one core to prevent racing', 'Encrypt Python bytecode'], answer: 'C', marks: 10 },
-      { text: 'Which keyword is used to define anonymous/inline functions in Python?', options: ['anonymous', 'def', 'inline', 'lambda'], answer: 'D', marks: 10 },
-    ],
-    status: 'Active'
-  },
-  {
-    id: 'ASM-402',
-    title: 'AI Fundamentals Exam',
-    type: 'Mixed',
-    duration: 60,
-    passingMarks: 60,
-    negativeMarking: false,
-    securitySettings: {
-      secureBrowser: true,
-      disableCopy: true,
-      disableRightClick: true,
-      fullscreenOnly: true,
-      disableTabSwitch: true,
-      cameraRequired: false,
-      microphoneRequired: false
-    },
-    questions: [],
-    status: 'Upcoming'
-  }
-];
+// Mock data removed
 
 export default function MyAssessmentsPage() {
-  const [quizzes, setQuizzes] = useState<StudentQuiz[]>(DEFAULT_QUIZZES);
+  const [quizzes, setQuizzes] = useState<StudentQuiz[]>([]);
   const [selectedQuiz, setSelectedQuiz] = useState<StudentQuiz | null>(null);
   
   // Interactive Secure Browser state
@@ -95,45 +52,14 @@ export default function MyAssessmentsPage() {
   };
 
   useEffect(() => {
-    const loadQuizzes = () => {
-      let combined = [...DEFAULT_QUIZZES];
-      if (typeof window !== 'undefined') {
-        const storedStr = localStorage.getItem('pinesphere_created_assessments');
-        if (storedStr) {
-          const parsed = JSON.parse(storedStr) as { batchId: string; assessment: any }[];
-          const filtered = parsed
-            .filter((x: any) => x.batchId === 'batch-ai-2026')
-            .map((x: any) => ({
-              ...x.assessment,
-              status: 'Active' as const
-            }));
-          
-          filtered.forEach((cq: any) => {
-            if (!combined.some((t: any) => t.id === cq.id)) {
-              combined.push(cq);
-            }
-          });
-        }
-
-        // Load quiz submissions statuses
-        const submissionsStr = localStorage.getItem('pinesphere_quiz_submissions');
-        if (submissionsStr) {
-          const parsed = JSON.parse(submissionsStr) as { asmId: string; attempt: any }[];
-          combined = combined.map((q: any) => {
-            const match = parsed.find((x: any) => x.asmId === q.id && x.attempt.studentId === 'stu-12');
-            if (match) {
-              return {
-                ...q,
-                status: 'Completed',
-                score: match.attempt.score,
-                passed: match.attempt.passed
-              };
-            }
-            return q;
-          });
-        }
+    const loadQuizzes = async () => {
+      try {
+        const { assessmentService } = await import('@/src/services/assessment.service');
+        const data = await assessmentService.getAssessmentsByBatch('batch-ai-2026');
+        setQuizzes(data as any || []);
+      } catch (err) {
+        console.error("Failed to fetch quizzes", err);
       }
-      setQuizzes(combined);
     };
 
     loadQuizzes();
@@ -218,7 +144,7 @@ export default function MyAssessmentsPage() {
     }
   };
 
-  const handleAutoSubmit = (reason: string) => {
+  const handleAutoSubmit = async (reason: string) => {
     setIsExamActive(false);
     
     // Clean handlers
@@ -267,12 +193,14 @@ export default function MyAssessmentsPage() {
         }
       };
 
-      // Save to localStorage
-      if (typeof window !== 'undefined') {
-        const storedStr = localStorage.getItem('pinesphere_quiz_submissions') || '[]';
-        const stored = JSON.parse(storedStr);
-        stored.push({ asmId: selectedQuiz.id, attempt: submissionAttempt });
-        localStorage.setItem('pinesphere_quiz_submissions', JSON.stringify(stored));
+      // Save to backend via API
+      try {
+        const { assessmentService } = await import('@/src/services/assessment.service');
+        if ((assessmentService as any).submitAssessment) {
+           await (assessmentService as any).submitAssessment(selectedQuiz.id, submissionAttempt);
+        }
+      } catch(err) {
+        console.error("Error submitting assessment", err);
       }
 
       setQuizzes((prev: any) => prev.map((q: any) => q.id === selectedQuiz.id ? { ...q, status: 'Completed', score, passed: isPassed } : q));
@@ -446,7 +374,6 @@ export default function MyAssessmentsPage() {
             {/* Left: Questions navigations & streams */}
             <div className="space-y-6 flex flex-col justify-between h-full lg:col-span-1 min-h-0">
               
-              {/* Video Monitor Stream Mockup */}
               {selectedQuiz?.securitySettings.cameraRequired && (
                 <div className="bg-[#1e293b] border border-[#334155] rounded-2xl p-4 flex flex-col items-center justify-center text-center space-y-2 relative overflow-hidden h-44 shrink-0 shadow-inner">
                   {/* Fake camera green dot */}

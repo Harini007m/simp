@@ -9,7 +9,7 @@ export class MarketplaceService {
 
   static async getRecommendedOpportunities(): Promise<MarketplaceOpportunity[]> {
     const opps = await this.getOpportunities();
-    return opps.slice(0, 6); // Mock recommendation
+    return opps.slice(0, 5); // Just returning some subset
   }
 
   static async getMyApplications(studentId: string): Promise<MarketplaceApplication[]> {

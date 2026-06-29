@@ -64,14 +64,30 @@ export const programService = {
   },
 
   async updateProgram(id: string, updates: Partial<ExtendedProgram>): Promise<ExtendedProgram | undefined> {
-    return undefined;
+    try {
+      const res = await programApi.updateProgram(id, updates);
+      return this.mapToExtended(res);
+    } catch {
+      return undefined;
+    }
   },
 
   async bulkUpdateStatus(ids: string[], status: string): Promise<boolean> {
-    return true;
+    try {
+      await Promise.all(ids.map(id => programApi.updateProgram(id, { status })));
+      return true;
+    } catch {
+      return false;
+    }
   },
 
   async bulkAssignMentor(ids: string[], mentorId: string): Promise<boolean> {
-    return true;
+    try {
+      // Assuming program update takes mentor assignments
+      await Promise.all(ids.map(id => programApi.updateProgram(id, { mentorId })));
+      return true;
+    } catch {
+      return false;
+    }
   }
 };

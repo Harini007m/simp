@@ -83,6 +83,7 @@ export interface Application {
   candidateName: string;
   appliedDate: string;
   status: string;
+  [key: string]: any;
 }
-export interface ApplicationWithOpp { id: string; candidateName: string; appliedDate: string; status: string; email?: string; phone?: string; opportunityId?: string; opportunityData?: any; }
-export type ApplicationStatus = "Pending" | "Accepted" | "Rejected";
+export interface ApplicationWithOpp { id: string; candidateName: string; appliedDate: string; status: string; email?: string; phone?: string; opportunityId?: string; opportunityData?: any; [key: string]: any; }
+export type ApplicationStatus = "Pending" | "Accepted" | "Rejected" | "Selected" | "Interview" | "Under Review" | "Hold" | "Shortlisted" | "Interview Scheduled" | string;

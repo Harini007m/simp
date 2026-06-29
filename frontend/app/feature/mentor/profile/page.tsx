@@ -8,6 +8,7 @@ import BatchMappingView from './BatchMappingView';
 import MentorPerformanceView from './MentorPerformanceView';
 
 import { employeeService } from '@/src/services/employee.service';
+import { MentorProfile } from '@/src/types/api/mentor.types';
 export default function MentorProfilePage() {
   const [profiles, setProfiles] = useState<MentorProfile[]>([]);
   const [selected, setSelected] = useState<MentorProfile | null>(null);

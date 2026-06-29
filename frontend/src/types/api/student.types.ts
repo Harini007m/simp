@@ -16,7 +16,8 @@ export interface StudentResponse {
 }
 
 export interface StudentUpdate {
-  student_status: string;
+  student_status?: string;
+  current_batch_id?: string;
 }
 export interface Student { id: string; name: string; email: string; [key: string]: any; }
 export interface StudentDocument { id: string; [key: string]: any; }

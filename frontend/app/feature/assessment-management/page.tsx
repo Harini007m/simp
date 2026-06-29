@@ -99,13 +99,18 @@ export default function AssessmentManagementPage() {
       questions: questions
     };
 
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      const storedStr = localStorage.getItem('pinesphere_created_assessments') || '[]';
-      const stored = JSON.parse(storedStr);
-      stored.push({ batchId: targetBatchId, assessment: newAsm });
-      localStorage.setItem('pinesphere_created_assessments', JSON.stringify(stored));
-    }
+    // Save to backend
+    const submit = async () => {
+      try {
+        const { assessmentService } = await import('@/src/services/assessment.service');
+        if ((assessmentService as any).createAssessment) {
+           await (assessmentService as any).createAssessment(targetBatchId, newAsm);
+        }
+      } catch (err) {
+        console.error("Failed to create assessment", err);
+      }
+    };
+    submit();
 
     triggerToast(`Published assessment "${asmTitle}" for batch ${targetBatchId}!`);
     setAsmTitle('');

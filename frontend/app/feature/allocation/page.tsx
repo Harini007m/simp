@@ -291,7 +291,6 @@ export default function AllocationManagementPage() {
 
   const programAllocationStats = useMemo(() => {
     const stats = { 'With Students': 0, 'Without Students': 0, 'Without Mentors': 0, 'Fully Allocated': 0 };
-    // MOCK programs metrics
     batches.forEach((b: any) => {
       if (b.students.length > 0) stats['With Students']++;
       else stats['Without Students']++;

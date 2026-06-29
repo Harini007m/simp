@@ -14,44 +14,34 @@ interface LocalTask {
   requirements: string[];
 }
 
-const INITIAL_TASKS: LocalTask[] = [
-  {
-    id: 'TSK-201',
-    title: 'Portfolio Website',
-    description: 'Design and deploy a professional developer portfolio showcasing your projects and resume details.',
-    dueDate: '2026-06-20',
-    attempts: 1,
-    requirements: ['Github Link', 'Deployment URL', 'Screenshot']
-  },
-  {
-    id: 'TSK-202',
-    title: 'Attendance API Endpoints',
-    description: 'Implement backend REST endpoints for clock-in, clock-out, and monthly logs using Express and MongoDB.',
-    dueDate: '2026-06-25',
-    attempts: 2,
-    requirements: ['Github Link', 'Video']
-  }
-];
+// Mock data removed
 
 export default function TaskDashboardPage() {
-  const [tasks, setTasks] = useState<LocalTask[]>(INITIAL_TASKS);
+  const [tasks, setTasks] = useState<LocalTask[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load created tasks from local storage
-    if (typeof window !== 'undefined') {
-      const storedTasks = localStorage.getItem('pinesphere_created_tasks');
-      if (storedTasks) {
-        const parsed = JSON.parse(storedTasks) as { batchId: string; task: LocalTask }[];
-        const filtered = parsed.filter((x: any) => x.batchId === 'batch-ai-2026').map((x: any) => x.task);
-        setTasks([...INITIAL_TASKS, ...filtered]);
+    async function loadTasks() {
+      setIsLoading(true);
+      try {
+        const { taskService } = await import('@/src/services/task.service');
+        const data = await taskService.getTasks();
+        setTasks(data as any || []);
+      } catch (err) {
+        console.error("Failed to fetch tasks", err);
+      } finally {
+        setIsLoading(false);
       }
     }
+    loadTasks();
   }, []);
 
   // Stats calculation
   const totalTasks = tasks.length;
-  const submissionRate = 92; // Mock statistic
   const overdueCount = tasks.filter((t: any) => new Date(t.dueDate).getTime() < Date.now()).length;
+  const submissionRate = tasks.length > 0 
+    ? Math.round((tasks.filter((t: any) => t.status !== 'pending').length / tasks.length) * 100) 
+    : 0;
 
   return (
     <div className="space-y-6 animate-slide-in select-none">

@@ -9,4 +9,8 @@ export interface User {
   moduleOverrides: string[];
   avatar: string;
   date: string;
+  departmentId?: string;
+  collegeId?: string;
+  batchId?: string;
+  organizationId?: string;
 }

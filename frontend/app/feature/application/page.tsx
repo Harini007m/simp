@@ -1490,7 +1490,6 @@ export default function ApplicationPage() {
                     <div className="md:col-span-2 border border-border rounded-xl p-4 bg-slate-100 flex flex-col items-center justify-center min-h-[140px]">
                       <FileText className="h-12 w-12 text-slate-300" />
                       <span className="font-bold text-text-primary mt-2">{reviewApp.resumeUrl}</span>
-                      <span className="text-[10px] text-text-secondary mt-0.5">Mock Resume Document Attached</span>
                     </div>
 
                     <div className="bg-slate-50 rounded-xl p-3 border border-border space-y-2">

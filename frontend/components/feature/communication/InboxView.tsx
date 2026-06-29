@@ -22,12 +22,6 @@ export default function InboxView() {
   const [initialMessage, setInitialMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const mockUsers = [
-    { id: 'u2', name: 'Alice Smith (Mentor)', role: 'Mentor' },
-    { id: 'u3', name: 'Bob Johnson (HR)', role: 'HR' },
-    { id: 'u4', name: 'Charlie Davis (Coordinator)', role: 'Coordinator' },
-    { id: 'u5', name: 'Diana Prince (Student Lead)', role: 'Student' }
-  ];
 
   useEffect(() => {
     fetchConversations();
@@ -55,10 +49,10 @@ export default function InboxView() {
 
     setIsSubmitting(true);
     try {
-      const userObj = mockUsers.find((u: any) => u.id === selectedUserId);
       const participants = [
         { id: 'u1', name: 'Current User', role: 'Student' }
       ];
+      const userObj = { id: selectedUserId, name: 'Selected User', role: 'Unknown' };
       if (userObj) {
         participants.push({ id: userObj.id, name: userObj.name.split(' (')[0], role: userObj.role });
       }
@@ -267,9 +261,7 @@ export default function InboxView() {
                 onChange={(e: any) => setSelectedUserId(e.target.value)}
                 className="w-full bg-slate-50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-medium text-text-primary cursor-pointer"
               >
-                {mockUsers.map((u: any) => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
+                  <option disabled>No users available</option>
               </select>
             </div>
           )}

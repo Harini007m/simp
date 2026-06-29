@@ -1,9 +1,12 @@
+import { apiClient } from './api.client';
 import { ExecutiveMetric, RiskIndicator } from '../types/executive.types';
 export const ExecutiveApi = {
   getMetrics: async (): Promise<ExecutiveMetric[]> => {
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<ExecutiveMetric[]>('/executive/metrics');
+    return res.data;
   },
   getRiskIndicators: async (): Promise<RiskIndicator[]> => {
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<RiskIndicator[]>('/executive/risks');
+    return res.data;
   }
 };

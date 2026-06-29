@@ -1475,7 +1475,6 @@ export default function AdvancedDesignerPage() {
     }
   };
 
-  // Resolves binding string to actual mock/employee data values
   const resolveBindingText = (element: Element) => {
     if (!element.binding) return element.text || '';
     if (!employee) return element.text || '';

@@ -32,4 +32,9 @@ export interface ProgramResponse {
   certificate_available: boolean;
   status: string;
 }
-export interface Program { id: string; name: string; [key: string]: any; }
+export interface Program { id: string; name: string; status: string; [key: string]: any; }
+export interface CurriculumModule { id?: string; [key: string]: any; }
+export interface ProgramEnrollment { id: string; [key: string]: any; }
+export interface ProgramMentor { id: string; [key: string]: any; }
+export interface ProgramTimelineEvent { id: string; [key: string]: any; }
+export interface ProgramMetadata { [key: string]: any; }

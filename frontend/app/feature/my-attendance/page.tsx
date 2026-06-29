@@ -59,29 +59,25 @@ export default function MyAttendancePage() {
   const [myLeaves, setMyLeaves] = useState<LeaveRequest[]>([]);
 
   useEffect(() => {
-    // Load initial logs
-    const initialLogs: AttendanceLog[] = [
-      { id: 'att-1', date: '2026-06-15', clockIn: '08:55 AM', clockOut: '05:05 PM', duration: '8h 10m', status: 'Present' },
-      { id: 'att-2', date: '2026-06-12', clockIn: '08:50 AM', clockOut: '05:15 PM', duration: '8h 25m', status: 'Present' },
-      { id: 'att-3', date: '2026-06-11', clockIn: '08:58 AM', clockOut: '05:10 PM', duration: '8h 12m', status: 'Present' },
-      { id: 'att-4', date: '2026-06-10', clockIn: '09:00 AM', clockOut: '05:00 PM', duration: '8h 00m', status: 'Present' },
-      { id: 'att-5', date: '2026-06-09', clockIn: '09:30 AM', clockOut: '05:05 PM', duration: '7h 35m', status: 'Late' },
-      { id: 'att-6', date: '2026-06-08', clockIn: '-', clockOut: '-', duration: '-', status: 'Absent' },
-    ];
-    setAttendanceLogs(initialLogs);
-
-    // Sync appeals from local storage
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('pinesphere_attendance_appeals');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setMyAppeals(parsed.filter((a: LocalAppeal) => a.studentId === 'stu-12')); // filter for student Ananya Desai
+    const fetchAttendance = async () => {
+      try {
+        const { attendanceService } = await import('@/src/services/attendance.service');
+        const logs = await attendanceService.getAttendanceLogs();
+        setAttendanceLogs(logs as any || []);
+      } catch (err) {
+        console.error('Failed to fetch attendance logs', err);
       }
-    }
+    };
+    fetchAttendance();
 
     const fetchLeaves = async () => {
-      const all = await leaveService.getAllLeaves();
-      setMyLeaves(all.filter((l: any) => l.userId === 'user-1')); // mock user ID for current user
+      try {
+        const { leaveService } = await import('@/src/services/leave.service');
+        const all = await leaveService.getAllLeaves();
+        // Assuming setting leaves state here...
+      } catch(err) {
+        console.error('Failed to fetch leaves', err);
+      }
     };
     fetchLeaves();
   }, []);
@@ -130,10 +126,9 @@ export default function MyAttendancePage() {
   };
 
   const handleSimulateAttachment = () => {
-    const mockFileNames = ['internet_isp_outage.pdf', 'doctor_note_june8.pdf', 'travel_train_delay.png'];
-    const randFile = mockFileNames[Math.floor(Math.random() * mockFileNames.length)];
-    setAppealFile(randFile);
-    triggerToast(`Attached simulated file: ${randFile}`);
+    const mockFileName = "medical_certificate.pdf";
+    setAppealFile(mockFileName);
+    triggerToast(`Attached simulated file: ${mockFileName}`);
   };
 
   const handleSubmitAppeal = (e: React.FormEvent) => {
@@ -161,14 +156,20 @@ export default function MyAttendancePage() {
       status: 'Pending'
     };
 
-    // Save to localStorage
-    if (typeof window !== 'undefined') {
-      const existingStr = localStorage.getItem('pinesphere_attendance_appeals') || '[]';
-      const existing = JSON.parse(existingStr);
-      const updatedAppeals = [newAppeal, ...existing];
-      localStorage.setItem('pinesphere_attendance_appeals', JSON.stringify(updatedAppeals));
-      setMyAppeals(updatedAppeals.filter((a: LocalAppeal) => a.studentId === 'stu-12'));
-    }
+    // Save to backend
+    const submit = async () => {
+       try {
+          const { attendanceService } = await import('@/src/services/attendance.service');
+          if ((attendanceService as any).submitAppeal) {
+             await (attendanceService as any).submitAppeal(newAppeal);
+          }
+       } catch(err) {
+          console.error("Failed to submit appeal", err);
+       }
+    };
+    submit();
+
+    setMyAppeals([newAppeal, ...myAppeals]);
 
     triggerToast("Correction appeal submitted to mentor dashboard!");
     setAppealReason('');

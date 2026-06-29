@@ -1763,7 +1763,6 @@ export default function StudentLifecycleManagementPage() {
                 {/* ID Card Display */}
                 <div className="bg-slate-50 border border-border rounded-lg p-5 flex flex-col md:flex-row items-center gap-6">
                   
-                  {/* Mock ID Card */}
                   <div className="bg-slate-900 text-white rounded-xl p-4 w-72 h-44 shadow-xl border border-border relative overflow-hidden shrink-0 flex flex-col justify-between font-mono">
                     <div className="absolute top-0 right-0 h-16 w-16 bg-blue-600/30 rounded-bl-full" />
                     

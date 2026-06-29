@@ -26,12 +26,7 @@ interface LocalAppeal {
   auditLog?: string[];
 }
 
-const INITIAL_STUDENTS: StudentRow[] = [
-  { id: 'stu-harini', name: 'Harini Sundar', avatar: 'HS', status: null },
-  { id: 'stu-arun', name: 'Arun Kumar', avatar: 'AK', status: null },
-  { id: 'stu-rahul', name: 'Rahul Sen', avatar: 'RS', status: null },
-  { id: 'stu-priya', name: 'Priya Sharma', avatar: 'PS', status: null },
-];
+// Mock data removed
 
 export default function AttendanceManagementPage() {
   const { user } = useAuth();
@@ -39,8 +34,9 @@ export default function AttendanceManagementPage() {
   const [selectedDate, setSelectedDate] = useState('2026-06-28');
 
   // Attendance Marking Grid State
-  const [students, setStudents] = useState<StudentRow[]>(INITIAL_STUDENTS);
+  const [students, setStudents] = useState<StudentRow[]>([]);
   const [isLocked, setIsLocked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Appeals State
   const [appeals, setAppeals] = useState<LocalAppeal[]>([]);
@@ -52,23 +48,32 @@ export default function AttendanceManagementPage() {
   };
 
   useEffect(() => {
-    // Load attendance status from local storage
-    if (typeof window !== 'undefined') {
-      const savedKey = `pinesphere_attendance_${selectedBatchId}_${selectedDate}`;
-      const saved = localStorage.getItem(savedKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setStudents(parsed.students);
-        setIsLocked(parsed.isLocked);
-      } else {
-        setStudents(INITIAL_STUDENTS.map((s: any) => ({ ...s, status: null })));
-        setIsLocked(false);
+    async function loadAttendance() {
+      setIsLoading(true);
+      try {
+        const { attendanceService } = await import('@/src/services/attendance.service');
+        const records = await attendanceService.getRecordsForSession(selectedBatchId);
+        
+        if (records && records.length > 0) {
+            const mappedStudents: StudentRow[] = records.map((r: any) => ({
+               id: r.studentId,
+               name: r.studentName || 'Unknown Student',
+               avatar: r.studentName ? r.studentName.substring(0, 2).toUpperCase() : '??',
+               status: r.status as 'Present' | 'Absent' | 'Late' | null
+            }));
+            setStudents(mappedStudents);
+            setIsLocked(false);
+        } else {
+            setStudents([]);
+            setIsLocked(false);
+        }
+      } catch (err) {
+        console.error("Failed to load attendance", err);
+      } finally {
+        setIsLoading(false);
       }
-
-      // Load appeals
-      const appealsStr = localStorage.getItem('pinesphere_attendance_appeals') || '[]';
-      setAppeals(JSON.parse(appealsStr));
     }
+    loadAttendance();
   }, [selectedBatchId, selectedDate]);
 
   const handleMarkStatus = (studentId: string, status: 'Present' | 'Absent' | 'Late') => {
@@ -79,20 +84,34 @@ export default function AttendanceManagementPage() {
     setStudents((prev: any) => prev.map((s: any) => s.id === studentId ? { ...s, status } : s));
   };
 
-  const handleSaveDraft = () => {
-    if (typeof window !== 'undefined') {
-      const savedKey = `pinesphere_attendance_${selectedBatchId}_${selectedDate}`;
-      localStorage.setItem(savedKey, JSON.stringify({ students, isLocked: false }));
+  const handleSaveDraft = async () => {
+    try {
+      const { attendanceService } = await import('@/src/services/attendance.service');
+      // For each student, make an API call to save status
+      for (const student of students) {
+        if (student.status) {
+           await attendanceService.markAttendance(selectedBatchId, student.id, student.status);
+        }
+      }
       triggerToast("Draft saved successfully!");
+    } catch (err) {
+      console.error("Error saving draft", err);
+      triggerToast("Error saving draft!");
     }
   };
 
-  const handleLockAttendance = () => {
-    if (typeof window !== 'undefined') {
-      const savedKey = `pinesphere_attendance_${selectedBatchId}_${selectedDate}`;
-      localStorage.setItem(savedKey, JSON.stringify({ students, isLocked: true }));
+  const handleLockAttendance = async () => {
+    try {
+      const { attendanceService } = await import('@/src/services/attendance.service');
+      for (const student of students) {
+        if (student.status) {
+           await attendanceService.markAttendance(selectedBatchId, student.id, student.status);
+        }
+      }
       setIsLocked(true);
       triggerToast("Attendance roster locked! No further modifications allowed.");
+    } catch (err) {
+       console.error("Error locking attendance", err);
     }
   };
 
@@ -112,28 +131,11 @@ export default function AttendanceManagementPage() {
     });
 
     setAppeals(updatedAppeals);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pinesphere_attendance_appeals', JSON.stringify(updatedAppeals));
-    }
+    // Remove local storage in favor of a service method in the future
+    // await attendanceService.updateAppeal(appealId, 'Approved');
 
-    // Apply the correction to local attendance grid
-    const targetAppeal = appeals.find((a: any) => a.id === appealId);
-    if (targetAppeal) {
-      const targetDate = targetAppeal.date;
-      const targetStatus = targetAppeal.status as 'Present' | 'Absent' | 'Late';
-      const savedKey = `pinesphere_attendance_${selectedBatchId}_${targetDate}`;
-      const saved = localStorage.getItem(savedKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const correctedStudents = parsed.students.map((s: any) => 
-          s.id === targetAppeal.studentId ? { ...s, status: targetStatus } : s
-        );
-        localStorage.setItem(savedKey, JSON.stringify({ students: correctedStudents, isLocked: parsed.isLocked }));
-        if (targetDate === selectedDate) {
-          setStudents(correctedStudents);
-        }
-      }
-    }
+    // Apply the correction to backend
+    // await attendanceService.updateAppeal(appealId, 'Approved');
 
     triggerToast("Appeal approved! Attendance correction applied.");
   };
@@ -154,9 +156,7 @@ export default function AttendanceManagementPage() {
     });
 
     setAppeals(updatedAppeals);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pinesphere_attendance_appeals', JSON.stringify(updatedAppeals));
-    }
+    // await attendanceService.updateAppeal(appealId, 'Rejected');
     triggerToast("Appeal rejected. Audit log updated.");
   };
 

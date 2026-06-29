@@ -19,3 +19,6 @@ export interface EmployeeResponse {
   status: string;
 }
 export interface Employee { id: string; name: string; email: string; [key: string]: any; }
+export interface EmployeeDocument { id?: string; [key: string]: any; }
+export interface TimelineEvent { id: string; [key: string]: any; }
+export interface EmployeeProject { id: string; [key: string]: any; }

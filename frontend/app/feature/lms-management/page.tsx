@@ -50,37 +50,25 @@ interface BatchLms {
   courses: CourseItem[];
 }
 
-const INITIAL_COURSES: CourseItem[] = [
-  {
-    id: 'CRS-501',
-    title: 'Python Programming Basics',
-    program: 'Software Engineering',
-    description: 'Master core Python variables, flow control, tuples, dictionaries, and functional patterns.',
-    thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&auto=format&fit=crop',
-    progressRate: 92,
-    studentsCompleted: 38,
-    modules: [
-      {
-        id: 'MOD-501-1',
-        title: 'Module 1: Introduction',
-        description: 'Introduction to standard interpreter setups and scripting.',
-        submodules: [
-          {
-            id: 'SUB-501-1-1',
-            title: 'Python Notes Specification',
-            type: 'PDF',
-            url: 'python_basics_notes.pdf',
-            minReadingTime: 120
-          }
-        ]
-      }
-    ]
-  }
-];
-
 export default function LMSManagementPage() {
   const [viewMode, setViewMode] = useState<'list' | 'create'>('list');
-  const [courses, setCourses] = useState<CourseItem[]>(INITIAL_COURSES);
+  const [courses, setCourses] = useState<CourseItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCourses() {
+      try {
+        const { lmsService } = await import('@/src/services/lms.service');
+        const data = await lmsService.getModules();
+        setCourses(data as any || []);
+      } catch (err) {
+        console.error("Failed to fetch courses", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadCourses();
+  }, []);
   
   // Course creator states
   const [courseName, setCourseName] = useState('');
@@ -136,12 +124,7 @@ export default function LMSManagementPage() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('pinesphere_courses');
-      if (stored) {
-        setCourses(JSON.parse(stored));
-      }
-    }
+    // In the future fetch courses directly from lmsService
   }, []);
 
   const handleCreateCourse = (e: React.FormEvent) => {
@@ -164,10 +147,17 @@ export default function LMSManagementPage() {
 
     const updated = [newCourse, ...courses];
     setCourses(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pinesphere_courses', JSON.stringify(updated));
-    }
-
+    const submit = async () => {
+      try {
+        const { lmsService } = await import('@/src/services/lms.service');
+        if ((lmsService as any).createCourse) {
+           await (lmsService as any).createCourse(newCourse);
+        }
+      } catch (err) {
+        console.error("Failed to create course", err);
+      }
+    };
+    submit();
     triggerToast(`Course "${courseName}" published successfully!`);
     setCourseName('');
     setCourseDesc('');

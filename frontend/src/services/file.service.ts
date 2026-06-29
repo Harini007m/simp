@@ -1,53 +1,36 @@
+import { apiClient } from '../api/api.client';
 import { CommonFile, FileReference } from '../types/api/common-file.types';
 
 class FileService {
-  private files: CommonFile[] = [...([] as any[])];
-  private references: FileReference[] = [...([] as any[])];
+
 
   async getFiles(): Promise<CommonFile[]> {
-    return [...this.files];
+    const res = await apiClient.get<CommonFile[]>('/files');
+    return res.data;
   }
 
   async getFile(fileId: string): Promise<CommonFile | undefined> {
-    return this.files.find(f => f.file_id === fileId);
+    const res = await apiClient.get<CommonFile>(`/files/${fileId}`);
+    return res.data;
   }
 
   async uploadFile(file: Partial<CommonFile>): Promise<CommonFile> {
-    const newFile: CommonFile = {
-      file_id: `file-${Date.now()}`,
-      file_name: file.file_name || 'unnamed_file',
-      mime_type: file.mime_type || 'application/octet-stream',
-      file_type: file.file_type || 'DOCUMENT',
-      file_size: file.file_size || 0,
-      uploaded_by: file.uploaded_by || 'current-user',
-      uploaded_at: new Date().toISOString(),
-      storage_url: file.storage_url || `/mock-storage/file-${Date.now()}`,
-      version: 1,
-      ...file
-    };
-    this.files.push(newFile);
-    return newFile;
+    const res = await apiClient.post<CommonFile>('/files/upload', file);
+    return res.data;
   }
 
   async deleteFile(fileId: string): Promise<void> {
-    this.files = this.files.filter(f => f.file_id !== fileId);
-    this.references = this.references.filter(r => r.file_id !== fileId);
+    await apiClient.delete(`/files/${fileId}`);
   }
 
-  async addReference(fileId: string, entityType: string, entityId: string): Promise<FileReference> {
-    const newRef: FileReference = {
-      id: `ref-${Date.now()}`,
-      file_id: fileId,
-      entity_type: entityType,
-      entity_id: entityId
-    };
-    this.references.push(newRef);
-    return newRef;
+  async linkFileToEntity(fileId: string, entityType: string, entityId: string): Promise<FileReference> {
+    const res = await apiClient.post<FileReference>(`/files/${fileId}/link`, { entityType, entityId });
+    return res.data;
   }
 
   async getReferencesForEntity(entityType: string, entityId: string): Promise<CommonFile[]> {
-    const refs = this.references.filter(r => r.entity_type === entityType && r.entity_id === entityId);
-    return refs.map(r => this.files.find(f => f.file_id === r.file_id)).filter(Boolean) as CommonFile[];
+    const res = await apiClient.get<CommonFile[]>(`/files/entity/${entityType}/${entityId}`);
+    return res.data;
   }
 }
 

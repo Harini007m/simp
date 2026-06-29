@@ -9,5 +9,16 @@ export const employeeApi = {
   createEmployee: async (data: EmployeeCreate): Promise<EmployeeResponse> => {
     const res = await apiClient.post<EmployeeResponse>('/employees', data);
     return res.data;
+  },
+  getEmployee: async (id: string): Promise<EmployeeResponse> => {
+    const res = await apiClient.get<EmployeeResponse>(`/employees/${id}`);
+    return res.data;
+  },
+  updateEmployee: async (id: string, data: any): Promise<EmployeeResponse> => {
+    const res = await apiClient.put<EmployeeResponse>(`/employees/${id}`, data);
+    return res.data;
+  },
+  deleteEmployee: async (id: string): Promise<void> => {
+    await apiClient.delete(`/employees/${id}`);
   }
 };

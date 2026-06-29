@@ -192,8 +192,8 @@ export default function ProgramManagementPage() {
     });
 
     const completionRate = completedCount > 0 ? Math.round(totalCompletion / completedCount) : 0;
-    const placementRate = 92; // default mock conversion
 
+    const placementRate = 0;
     return { total, active, completed, upcoming, studentsCount, activeMentors: mentorsSet.size, completionRate, placementRate };
   }, [programs]);
 

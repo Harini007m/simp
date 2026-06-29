@@ -151,7 +151,6 @@ export default function LandingPage() {
   const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Fetch opportunities from the mock service layer
   useEffect(() => {
     const fetchOpportunities = async () => {
       try {

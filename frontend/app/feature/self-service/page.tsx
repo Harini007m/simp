@@ -120,9 +120,8 @@ export default function SelfServicePage() {
   };
 
   const handleDownload = (fileName: string, typeLabel: string) => {
-    const textContent = `Pinesphere ERP Portal Generated Document\n======================================\nDocument: ${fileName}\nType: ${typeLabel}\nGenerated Date: ${new Date().toLocaleString()}\nVerification Code: PS-${Math.floor(100000 + Math.random() * 900000)}\n\nThis is a certified mock document generated for verification purposes.`;
     const element = document.createElement("a");
-    const file = new Blob([textContent], { type: 'text/plain' });
+    const file = new Blob([`Dummy content for ${typeLabel}`], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = fileName;
     document.body.appendChild(element);
@@ -150,14 +149,12 @@ export default function SelfServicePage() {
     );
   }
 
-  // Submitted documents mock
   const submittedDocs = [
     { name: 'Candidate_Resume.pdf', type: 'Resume', date: '2026-06-01', size: '1.2 MB' },
     { name: 'Bank_Passbook.pdf', type: 'Bank Passbook', date: '2026-06-01', size: '2.4 MB' },
     { name: 'Passport_Size_Photo.png', type: 'Passport Photo', date: '2026-06-27', size: '0.8 MB' }
   ];
 
-  // Portal provided documents mock
   const providedDocs = [
     { name: 'Internship_Offer_Letter.pdf', type: 'Offer Letter', date: '2026-06-05', size: '0.5 MB' },
     { name: 'Internship_Joining_Letter.pdf', type: 'Joining Letter', date: '2026-06-10', size: '1.1 MB' },

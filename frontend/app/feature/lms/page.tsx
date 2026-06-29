@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, Play, FileText, Award, ChevronRight, Users, UserCheck
 } from 'lucide-react';
-import { MOCK_STUDENTS, Student } from '@/src/data/mock-students';
 
 interface Submodule {
   id: string;
@@ -42,62 +41,19 @@ interface BatchLms {
   courses: CourseItem[];
 }
 
-const INITIAL_BATCH_LMS: BatchLms[] = [
-  {
-    id: 'batch-ai-2026',
-    name: 'AI Batch 2026',
-    coursesCount: 2,
-    resourcesCount: 58,
-    completedRate: 81,
-    courses: [
-      {
-        id: 'CRS-501',
-        title: 'Python Programming Basics',
-        program: 'Software Engineering',
-        description: 'Master core Python variables, flow control, tuples, dictionaries, and functional patterns.',
-        thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=500&auto=format&fit=crop',
-        progressRate: 92,
-        studentsCompleted: 38,
-        modules: [
-          {
-            id: 'MOD-501-1',
-            title: 'Module 1: Introduction',
-            description: 'Introduction to standard interpreter setups and scripting.',
-            submodules: [
-              {
-                id: 'SUB-501-1-1',
-                title: 'Python Notes Specification',
-                type: 'PDF',
-                url: 'python_basics_notes.pdf',
-                minReadingTime: 120
-              },
-              {
-                id: 'SUB-501-1-2',
-                title: 'Installing Python & First Script',
-                type: 'Video',
-                url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                videoDuration: 600
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'CRS-502',
-        title: 'AI Fundamentals & Neural Networks',
-        program: 'Artificial Intelligence',
-        description: 'Explore machine learning layers, convolutional layers, perceptrons, and backpropagation calculations.',
-        thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=500&auto=format&fit=crop',
-        progressRate: 75,
-        studentsCompleted: 28,
-        modules: []
-      }
-    ]
-  }
-];
+interface Student {
+  id: string;
+  personalInfo: {
+    name: string;
+  };
+  [key: string]: any;
+}
+
+// Mock data removed
 
 export default function LMSDashboardPage() {
-  const [batches, setBatches] = useState<BatchLms[]>(INITIAL_BATCH_LMS);
+  const [batches, setBatches] = useState<BatchLms[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Drill-down states
   const [selectedBatch, setSelectedBatch] = useState<BatchLms | null>(null);
@@ -105,20 +61,19 @@ export default function LMSDashboardPage() {
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('pinesphere_courses');
-      if (stored) {
-        setBatches((prev: any) => prev.map((b: any) => {
-          if (b.id === 'batch-ai-2026') {
-            return {
-              ...b,
-              courses: JSON.parse(stored)
-            };
-          }
-          return b;
-        }));
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        const { lmsService } = await import('@/src/services/lms.service');
+        const data = await lmsService.getModules(); // Or specific get LMS endpoint
+        setBatches(data as any || []);
+      } catch (err) {
+        console.error("Failed to load LMS data", err);
+      } finally {
+        setIsLoading(false);
       }
     }
+    loadData();
   }, []);
 
   const totalCourses = batches.reduce((sum: any, b: any) => sum + b.courses.length, 0);
@@ -204,31 +159,7 @@ export default function LMSDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {MOCK_STUDENTS.map(student => (
-              <div 
-                key={student.id}
-                onClick={() => setSelectedStudent(student)}
-                className="p-5 border border-border hover:border-secondary hover:shadow-md rounded-2xl transition-all cursor-pointer bg-slate-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-lg">
-                    {student.personalInfo.avatar}
-                  </div>
-                  <div>
-                    <h4 className="text-base font-black text-text-primary">{student.personalInfo.name}</h4>
-                    <p className="text-xs text-text-secondary">{student.academicInfo.college} • {student.academicInfo.department}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6 shrink-0 text-xs font-bold text-text-secondary">
-                  <div className="text-right">
-                    <span>Overall Performance: <strong className="text-indigo-600">{student.performance.overallPerformance}%</strong></span>
-                  </div>
-                  <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-750 text-white font-bold text-xs uppercase tracking-wider rounded-xl">
-                    View LMS Progress
-                  </button>
-                </div>
-              </div>
-            ))}
+              <div className="text-center p-4 text-text-secondary">No students data available.</div>
           </div>
         </div>
       ) : !selectedCourse ? (

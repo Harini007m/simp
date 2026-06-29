@@ -67,14 +67,29 @@ export const organizationService = {
   },
 
   async updateOrganization(id: string, updates: Partial<ExtendedCollege>): Promise<ExtendedCollege | undefined> {
-    return undefined;
+    try {
+      const res = await organizationApi.updateCollege(id, updates);
+      return this.mapToExtended(res);
+    } catch {
+      return undefined;
+    }
   },
 
   async bulkUpdatePartnership(ids: string[], status: string): Promise<boolean> {
-    return true;
+    try {
+      await Promise.all(ids.map(id => organizationApi.updateCollege(id, { status })));
+      return true;
+    } catch {
+      return false;
+    }
   },
 
   async bulkAssignCoordinator(ids: string[], coordinatorName: string): Promise<boolean> {
-    return true;
+    try {
+      await Promise.all(ids.map(id => organizationApi.updateCollege(id, { coordinatorName })));
+      return true;
+    } catch {
+      return false;
+    }
   }
 };

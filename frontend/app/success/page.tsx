@@ -3,7 +3,7 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { API_ENDPOINTS } from '@/src/config';
+
 import Toast, { ToastType } from '../../components/ui/toast';
 
 function SuccessPageContent() {
@@ -22,7 +22,7 @@ function SuccessPageContent() {
   React.useEffect(() => {
     // Optionally fetch or send success data to the backend
     if (type) {
-      fetch(`${API_ENDPOINTS.SUCCESS_DATA}?type=${type}`)
+      fetch(`/api/v1/telemetry/success?type=${type}`)
         .then((res: any) => {
           if (!res.ok) {
             console.warn('Failed to record success data');

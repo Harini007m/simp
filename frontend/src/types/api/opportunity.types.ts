@@ -52,5 +52,6 @@ export interface Opportunity {
   eligibility: string;
   amount?: string;
   duration: string;
+  [key: string]: any;
 }
 export interface ExtendedOpening { id: string; title: string; [key: string]: any; }

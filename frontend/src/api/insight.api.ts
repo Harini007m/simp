@@ -1,9 +1,12 @@
+import { apiClient } from './api.client';
 import { InsightForecast, StudentRisk } from '../types/insight.types';
 export const InsightApi = {
   getForecasts: async (): Promise<InsightForecast[]> => {
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<InsightForecast[]>('/insights/forecasts');
+    return res.data;
   },
   getStudentRisks: async (): Promise<StudentRisk[]> => {
-    throw new Error('Backend implementation pending or failed');
+    const res = await apiClient.get<StudentRisk[]>('/insights/student-risks');
+    return res.data;
   }
 };

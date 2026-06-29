@@ -92,7 +92,6 @@ export default function CreateAnnouncementModal({ isOpen, onClose, onSuccess }: 
         }
       }
 
-      // 2. Save Announcement mock
       const announcementData = {
         title: form.title,
         description: form.description,

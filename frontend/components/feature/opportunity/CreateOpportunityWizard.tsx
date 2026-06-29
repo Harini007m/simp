@@ -58,7 +58,7 @@ export function CreateOpportunityWizard({
       if (opportunityToView) {
         setTitle(opportunityToView.title || '');
         setType(opportunityToView.type || 'Tech');
-        setValue(opportunityToView.value || 'free');
+        setValue((opportunityToView.value || 'free') as any);
         setDescription(opportunityToView.description || '');
         setDuration(opportunityToView.duration || '6 Months');
         setMode(opportunityToView.mode || 'Remote');

@@ -9,6 +9,8 @@ import { Card } from '@/components/feature/ui/Card';
 import { moduleService } from '@/src/services/module.service';
 import { permissionService } from '@/src/services/permission.service';
 import { roleService } from '@/src/services/role.service';
+import { Role } from '@/src/types/api/role.types';
+import { Module } from '@/src/types/api/module.types';
 
 interface CreateRoleWizardProps {
   isOpen: boolean;

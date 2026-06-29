@@ -157,7 +157,6 @@ export default function OpportunityPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Application Funnel Chart (Mock) */}
         <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-text-primary mb-4">Application Funnel</h3>
           <div className="space-y-4">

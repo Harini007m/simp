@@ -6,6 +6,7 @@ import { Button } from '@/components/feature/ui/Button';
 import { Search, Plus, Shield, Users, Edit, Trash, Eye } from 'lucide-react';
 import { CreateRoleWizard } from '../../../components/feature/roles/CreateRoleWizard';
 import { roleService } from '@/src/services/role.service';
+import { Role } from '@/src/types/api/role.types';
 
 export default function RolesPage() {
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
