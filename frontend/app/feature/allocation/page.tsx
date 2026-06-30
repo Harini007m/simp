@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { 
-  Network, Search, Filter, Plus, ChevronRight, Package, Users, 
+  Network, Plus, ChevronRight, Package, Users, 
   GraduationCap, Calendar, CheckCircle2, XCircle, AlertCircle, Award, 
-  FileText, Building, Clock, TrendingUp, Download, RefreshCw, UserCheck, 
+  FileText, Building, Clock, TrendingUp, RefreshCw, UserCheck, 
   MapPin, Activity, Mail, Phone, Shield, Printer, QrCode, Briefcase, 
   UserX, ListFilter, Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock,
   PlusSquare, ArrowRight, Layers, Sliders, ShieldAlert, ArrowLeftRight
@@ -17,15 +17,11 @@ import { batchService } from '@/src/services/batch.service';
 import { Batch } from '@/src/data/mock-batches';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
-import { Pagination } from "@/components/common/Pagination";
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 type AllocationTab = 'dashboard' | 'students' | 'batches' | 'mentors' | 'programs' | 'colleges' | 'capacity' | 'conflicts' | 'rules' | 'timeline';
 
 export default function AllocationManagementPage() {
-
-      // Pagination State
-      const [currentPage, setCurrentPage] = React.useState(1);
-      const itemsPerPage = 10;
 
   const { user } = useAuth();
   
@@ -49,16 +45,6 @@ export default function AllocationManagementPage() {
     type: 'assignProgram' | 'assignBatch' | 'assignMentor' | 'create' | 'edit' | 'bulkProgram' | 'bulkBatch' | 'bulkMentor' | 'bulkNotify' | 'bulkReallocate' | 'bulkStatus';
     allocId?: string;
   } | null>(null);
-  
-  // Search & Filter State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterProgram, setFilterProgram] = useState<string>('all');
-  const [filterBatch, setFilterBatch] = useState<string>('all');
-  const [filterMentor, setFilterMentor] = useState<string>('all');
-  const [filterCollege, setFilterCollege] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterCapacity, setFilterCapacity] = useState<string>('all');
-  const [filterUtilization, setFilterUtilization] = useState<string>('all');
   
   // Forms state
   const [allocForm, setAllocForm] = useState({
@@ -135,35 +121,7 @@ export default function AllocationManagementPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Filters mapping lists
-  const programsList = useMemo(() => Array.from(new Set(allocations.map(a => a.programName))), [allocations]);
-  const batchesList = useMemo(() => Array.from(new Set(allocations.map(a => a.batchName).filter(Boolean))), [allocations]);
-  const mentorsList = useMemo(() => Array.from(new Set(allocations.map(a => a.mentorName).filter(Boolean))), [allocations]);
-  const collegesList = useMemo(() => Array.from(new Set(allocations.map(a => a.collegeName))), [allocations]);
-
-  // Main filtered lists based on global searches and filters
-  const filteredAllocations = useMemo(() => {
-    return allocations.filter(a => {
-      const q = searchTerm.toLowerCase();
-      const matchesSearch = 
-        a.studentName.toLowerCase().includes(q) ||
-        a.internId.toLowerCase().includes(q) ||
-        a.programName.toLowerCase().includes(q) ||
-        a.batchName.toLowerCase().includes(q) ||
-        a.mentorName.toLowerCase().includes(q) ||
-        a.collegeName.toLowerCase().includes(q);
-
-      const matchesProgram = filterProgram === 'all' || a.programName === filterProgram;
-      const matchesBatch = filterBatch === 'all' || a.batchName === filterBatch;
-      const matchesMentor = filterMentor === 'all' || a.mentorName === filterMentor;
-      const matchesCollege = filterCollege === 'all' || a.collegeName === filterCollege;
-      const matchesStatus = filterStatus === 'all' || a.status === filterStatus;
-
-      return matchesSearch && matchesProgram && matchesBatch && matchesMentor && matchesCollege && matchesStatus;
-    });
-  }, [allocations, searchTerm, filterProgram, filterBatch, filterMentor, filterCollege, filterStatus]);
-
-  // Unallocated students calculation
+  // Executive KPI summary calculations
   const unallocatedStudents = useMemo(() => {
     return students.filter(s => {
       const isAllocated = allocations.some(a => a.studentId === s.id && a.status === 'Allocated');
@@ -293,6 +251,8 @@ export default function AllocationManagementPage() {
     });
     return stats;
   }, [allocations]);
+
+  const collegesList = useMemo(() => Array.from(new Set(allocations.map(a => a.collegeName))), [allocations]);
 
   const programAllocationStats = useMemo(() => {
     const stats = { 'With Students': 0, 'Without Students': 0, 'Without Mentors': 0, 'Fully Allocated': 0 };
@@ -504,10 +464,10 @@ export default function AllocationManagementPage() {
   };
 
   const handleToggleSelectAll = () => {
-    if (selectedIds.length === filteredAllocations.length) {
+    if (selectedIds.length === allocations.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredAllocations.map(a => a.id));
+      setSelectedIds(allocations.map(a => a.id));
     }
   };
 
@@ -864,143 +824,128 @@ export default function AllocationManagementPage() {
 
           {/* TAB 2: STUDENT ALLOCATION */}
           {activeTab === 'students' && (
-            <div className="bg-white border border-border rounded-xl shadow-xs overflow-hidden">
-              
-              {/* Toolbar */}
-              <div className="p-4 border-b border-border bg-slate-50/50 flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row justify-between gap-4">
-                  <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-                    <input 
-                      type="text" 
-                      placeholder="Search students allocations..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-xs font-semibold focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                    />
-                  </div>
-                  <button 
-                    onClick={() => showToast('Allocation report downloaded.', 'success')}
-                    className="flex items-center gap-2 px-3 py-2 bg-white border border-border text-text-primary hover:bg-slate-50 rounded-lg text-xs font-bold transition-colors"
-                  >
-                    <Download className="h-4 w-4" />
-                    Export CSV
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <select
-                    value={filterProgram}
-                    onChange={(e) => setFilterProgram(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Programs</option>
-                    {programsList.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                  <select
-                    value={filterBatch}
-                    onChange={(e) => setFilterBatch(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Batches</option>
-                    {batchesList.map(b => <option key={b} value={b}>{b}</option>)}
-                  </select>
-                  <select
-                    value={filterMentor}
-                    onChange={(e) => setFilterMentor(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Mentors</option>
-                    {mentorsList.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                  <select
-                    value={filterCollege}
-                    onChange={(e) => setFilterCollege(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Colleges</option>
-                    {collegesList.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-border rounded-md text-xs text-text-secondary focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="Allocated">Allocated</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Unallocated">Unallocated</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Data Grid */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs whitespace-nowrap">
-                  <thead className="bg-slate-50 border-b border-border font-bold uppercase text-text-secondary">
-                    <tr>
-                      <th className="px-4 py-3">Student Name</th>
-                      <th className="px-4 py-3">Intern ID</th>
-                      <th className="px-4 py-3">Mapped Program</th>
-                      <th className="px-4 py-3">Cohort Batch</th>
-                      <th className="px-4 py-3">Mentor Mapping</th>
-                      <th className="px-4 py-3">College</th>
-                      <th className="px-4 py-3">Date</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border font-medium">
-                    {filteredAllocations.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(a => (
-                      <tr 
-                        key={a.id}
-                        className={`hover:bg-slate-50/50 cursor-pointer ${selectedAllocation?.id === a.id ? 'bg-blue-50/30' : ''}`}
-                        onClick={() => setSelectedAllocation(a)}
+            <EnhancedTable
+              data={allocations}
+              columns={[
+                { 
+                  key: 'studentName', 
+                  label: 'Student Name',
+                  render: (a: Allocation) => (
+                    <span 
+                      className="font-extrabold text-text-primary cursor-pointer hover:text-blue-600"
+                      onClick={() => setSelectedAllocation(a)}
+                    >
+                      {a.studentName}
+                    </span>
+                  )
+                },
+                { 
+                  key: 'internId', 
+                  label: 'Intern ID',
+                  render: (a: Allocation) => (
+                    <span className="font-mono font-bold text-text-secondary">{a.internId}</span>
+                  )
+                },
+                { 
+                  key: 'programName', 
+                  label: 'Mapped Program',
+                  render: (a: Allocation) => (
+                    <span className="text-text-secondary truncate max-w-[150px]">{a.programName}</span>
+                  )
+                },
+                { 
+                  key: 'batchName', 
+                  label: 'Cohort Batch',
+                  render: (a: Allocation) => (
+                    <span className="text-text-primary font-semibold">
+                      {a.batchName || <span className="italic text-rose-600 font-bold">Unassigned</span>}
+                    </span>
+                  )
+                },
+                { 
+                  key: 'mentorName', 
+                  label: 'Mentor Mapping',
+                  render: (a: Allocation) => (
+                    a.mentorName ? (
+                      <span className="font-semibold text-text-primary">{a.mentorName}</span>
+                    ) : (
+                      <span className="italic text-rose-600 font-bold">Unassigned</span>
+                    )
+                  )
+                },
+                { key: 'collegeName', label: 'College' },
+                { key: 'allocationDate', label: 'Date' },
+                { 
+                  key: 'status', 
+                  label: 'Status',
+                  render: (a: Allocation) => (
+                    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
+                      a.status === 'Allocated' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                      a.status === 'Pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-text-secondary'
+                    }`}>{a.status}</span>
+                  )
+                },
+                { 
+                  key: 'actions', 
+                  label: 'Actions',
+                  className: 'text-right',
+                  render: (a: Allocation) => (
+                    <div className="flex gap-1 justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAllocForm({ ...allocForm, status: a.status });
+                          setActiveActionModal({ type: 'edit', allocId: a.id });
+                        }}
+                        className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-[10.5px] font-bold text-text-primary rounded transition"
                       >
-                        <td className="px-4 py-3 font-extrabold text-text-primary">{a.studentName}</td>
-                        <td className="px-4 py-3 font-mono font-bold text-text-secondary">{a.internId}</td>
-                        <td className="px-4 py-3 text-text-secondary truncate max-w-[150px]">{a.programName}</td>
-                        <td className="px-4 py-3 text-text-primary font-semibold">{a.batchName || <span className="italic text-rose-600 font-bold">Unassigned</span>}</td>
-                        <td className="px-4 py-3">
-                          {a.mentorName ? (
-                            <span className="font-semibold text-text-primary">{a.mentorName}</span>
-                          ) : (
-                            <span className="italic text-rose-600 font-bold">Unassigned</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-text-secondary">{a.collegeName}</td>
-                        <td className="px-4 py-3 text-text-secondary">{a.allocationDate}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
-                            a.status === 'Allocated' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                            a.status === 'Pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-text-secondary'
-                          }`}>{a.status}</span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex gap-1 justify-end">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAllocForm({ ...allocForm, status: a.status });
-                                setActiveActionModal({ type: 'edit', allocId: a.id });
-                              }}
-                              className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-[10.5px] font-bold text-text-primary rounded transition"
-                            >
-                              Shift Status
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={Math.ceil((filteredAllocations?.length || 0) / itemsPerPage)} 
-          onPageChange={setCurrentPage} 
-        />
-
-            </div>
+                        Shift Status
+                      </button>
+                    </div>
+                  )
+                }
+              ]}
+              searchPlaceholder="Search students allocations..."
+              itemsPerPage={10}
+              emptyMessage="No student allocations found"
+              filters={[
+                { 
+                  key: 'programName', 
+                  label: 'Program', 
+                  type: 'select', 
+                  options: Array.from(new Set(allocations.map(a => a.programName))),
+                  onFilter: (data: Allocation[], value: any) => data.filter(a => a.programName === value)
+                },
+                { 
+                  key: 'batchName', 
+                  label: 'Batch', 
+                  type: 'select', 
+                  options: Array.from(new Set(allocations.map(a => a.batchName).filter(Boolean))),
+                  onFilter: (data: Allocation[], value: any) => data.filter(a => a.batchName === value)
+                },
+                { 
+                  key: 'mentorName', 
+                  label: 'Mentor', 
+                  type: 'select', 
+                  options: Array.from(new Set(allocations.map(a => a.mentorName).filter(Boolean))),
+                  onFilter: (data: Allocation[], value: any) => data.filter(a => a.mentorName === value)
+                },
+                { 
+                  key: 'collegeName', 
+                  label: 'College', 
+                  type: 'select', 
+                  options: Array.from(new Set(allocations.map(a => a.collegeName))),
+                  onFilter: (data: Allocation[], value: any) => data.filter(a => a.collegeName === value)
+                },
+                { 
+                  key: 'status', 
+                  label: 'Status', 
+                  type: 'select', 
+                  options: ['Allocated', 'Pending', 'Unallocated'],
+                  onFilter: (data: Allocation[], value: any) => data.filter(a => a.status === value)
+                }
+              ]}
+            />
           )}
 
           {/* TAB 3: BATCH ALLOCATION */}
