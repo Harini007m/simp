@@ -16,7 +16,7 @@ import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { useRouter } from 'next/navigation';
 import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
-import { Pagination } from '@/components/common/Pagination';
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 export default function EmployeeManagementPage() {
   const { user } = useAuth();
@@ -578,15 +578,6 @@ export default function EmployeeManagementPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeActionModal]);
 
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  
-  // Reset pagination on filter change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterDept, filterStatus, filterLocation, filterExperience, filterType]);
-
   return (
     <div className={`space-y-6 select-none ${
       (activeActionModal?.type === 'edit' || activeActionModal?.type === 'onboard') 
@@ -1033,141 +1024,101 @@ export default function EmployeeManagementPage() {
 
           {/* High-density employee table */}
           <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs whitespace-nowrap">
-                <thead className="bg-slate-50 border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 w-8">
-                      <input 
-                        type="checkbox" 
-                        checked={filteredEmployees.length > 0 && filteredEmployees.every(e => selectedIds.includes(e.id))}
-                        onChange={toggleSelectAll}
-                        className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
-                      />
-                    </th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Employee ID</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Employee Name</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Department</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Designation</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Role</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Reporting Manager</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Assigned Mentor</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Joining Date</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Type</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary">Current Status</th>
-                    <th className="px-4 py-3 font-bold text-text-secondary text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredEmployees.length > 0 ? (
-                    filteredEmployees.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((emp) => {
-                      const isSelected = selectedIds.includes(emp.id);
-                      
-                      // Find reporting manager name
-                      const managerName = employees.find(e => e.id === emp.managerId)?.name || 'None';
-                      
-                      // Find mentor name
-                      const mentorName = employees.find(e => e.id === emp.mentorId)?.name || 'None';
-
-                      return (
-                        <tr 
-                          key={emp.id} 
-                          className={`hover:bg-slate-50/50 transition-colors cursor-pointer group ${
-                            isSelected ? 'bg-blue-50/20' : ''
-                          }`}
-                          onClick={() => handleOpenProfile(emp)}
-                        >
-                          <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                            <input 
-                              type="checkbox" 
-                              checked={isSelected}
-                              onChange={() => toggleSelect(emp.id)}
-                              className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
-                            />
-                          </td>
-                          <td className="px-4 py-3 font-mono font-bold text-text-secondary">{emp.id}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2.5">
-                              <div className="h-8 w-8 rounded-full bg-slate-100 text-text-primary font-extrabold text-xs flex items-center justify-center shrink-0">
-                                {emp.avatar}
-                              </div>
-                              <div>
-                                <div className="font-bold text-text-primary group-hover:text-blue-600 transition-colors">{emp.name}</div>
-                                <div className="text-[10px] text-text-secondary">{emp.email}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="font-semibold text-text-primary bg-slate-100 px-2 py-0.5 rounded text-[10px]">
-                              {emp.organizationId}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-text-primary font-bold">{emp.designation}</td>
-                          <td className="px-4 py-3 text-text-secondary font-semibold">{emp.roleName}</td>
-                          <td className="px-4 py-3 text-text-secondary font-medium">{managerName}</td>
-                          <td className="px-4 py-3 text-text-secondary font-medium">{mentorName}</td>
-                          <td className="px-4 py-3 text-text-secondary font-medium">{emp.joinDate}</td>
-                          <td className="px-4 py-3">
-                            <span className="text-text-secondary font-bold">{emp.employmentType}</span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black ${
-                              emp.status === 'Active' 
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                                : emp.status === 'On Leave'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : emp.status === 'Probation'
-                                ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                                : emp.status === 'Notice Period'
-                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                : emp.status === 'Training'
-                                ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
-                                : 'bg-slate-100 text-text-secondary border border-border'
-                            }`}>
-                              {emp.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <button 
-                                onClick={() => handleOpenProfile(emp)}
-                                className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer"
-                                title="View Record Profile"
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                              </button>
-                              <PermissionGuard required="employee.edit">
-                                <button 
-                                  onClick={() => openEditModal(emp)}
-                                  className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer"
-                                  title="Edit Employee"
-                                >
-                                  <Edit className="h-3.5 w-3.5" />
-                                </button>
-                              </PermissionGuard>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={12} className="px-4 py-12 text-center text-text-secondary bg-white">
-                        <Users className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                        <p className="text-sm font-bold text-text-secondary">No employees match this selection</p>
-                        <p className="text-xs text-helper mt-1">Try relaxing filters or adjusting search queries.</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            {filteredEmployees.length > itemsPerPage && (
-              <Pagination 
-                currentPage={currentPage} 
-                totalPages={Math.ceil(filteredEmployees.length / itemsPerPage)} 
-                onPageChange={setCurrentPage} 
-              />
+            <EnhancedTable
+              data={filteredEmployees}
+              columns={[
+                { key: 'checkbox', label: '', render: (emp: Employee) => (
+                  <input 
+                    type="checkbox" 
+                    checked={selectedIds.includes(emp.id)}
+                    onChange={() => toggleSelect(emp.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="rounded border-border h-3.5 w-3.5 text-blue-600 focus:ring-primary cursor-pointer"
+                  />
+                )},
+                { key: 'id', label: 'Employee ID', render: (emp: Employee) => (
+                  <span className="font-mono font-bold text-text-secondary">{emp.id}</span>
+                )},
+                { key: 'name', label: 'Employee Name', render: (emp: Employee) => (
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-full bg-slate-100 text-text-primary font-extrabold text-xs flex items-center justify-center shrink-0">
+                      {emp.avatar}
+                    </div>
+                    <div>
+                      <div className="font-bold text-text-primary">{emp.name}</div>
+                      <div className="text-[10px] text-text-secondary">{emp.email}</div>
+                    </div>
+                  </div>
+                )},
+                { key: 'organizationId', label: 'Department', render: (emp: Employee) => (
+                  <span className="font-semibold text-text-primary bg-slate-100 px-2 py-0.5 rounded text-[10px]">
+                    {emp.organizationId}
+                  </span>
+                )},
+                { key: 'designation', label: 'Designation', render: (emp: Employee) => (
+                  <span className="text-text-primary font-bold">{emp.designation}</span>
+                )},
+                { key: 'roleName', label: 'Role', render: (emp: Employee) => (
+                  <span className="text-text-secondary font-semibold">{emp.roleName}</span>
+                )},
+                { key: 'managerId', label: 'Reporting Manager', render: (emp: Employee) => (
+                  <span className="text-text-secondary font-medium">{employees.find(e => e.id === emp.managerId)?.name || 'None'}</span>
+                )},
+                { key: 'mentorId', label: 'Assigned Mentor', render: (emp: Employee) => (
+                  <span className="text-text-secondary font-medium">{employees.find(e => e.id === emp.mentorId)?.name || 'None'}</span>
+                )},
+                { key: 'joinDate', label: 'Joining Date', render: (emp: Employee) => (
+                  <span className="text-text-secondary font-medium">{emp.joinDate}</span>
+                )},
+                { key: 'employmentType', label: 'Type', render: (emp: Employee) => (
+                  <span className="text-text-secondary font-bold">{emp.employmentType}</span>
+                )},
+                { key: 'status', label: 'Current Status', render: (emp: Employee) => (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black ${
+                    emp.status === 'Active' 
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                      : emp.status === 'On Leave'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      : emp.status === 'Probation'
+                      ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                      : emp.status === 'Notice Period'
+                      ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                      : emp.status === 'Training'
+                      ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
+                      : 'bg-slate-100 text-text-secondary border border-border'
+                  }`}>
+                    {emp.status}
+                  </span>
+                )},
+                { key: 'actions', label: 'Actions', render: (emp: Employee) => (
+                  <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <button 
+                      onClick={() => handleOpenProfile(emp)}
+                      className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer"
+                      title="View Record Profile"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </button>
+                    <PermissionGuard required="employee.edit">
+                      <button 
+                        onClick={() => openEditModal(emp)}
+                        className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer"
+                        title="Edit Employee"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </button>
+                    </PermissionGuard>
+                  </div>
+                )},
+              ]}
+              searchPlaceholder="Search by name, ID, phone, email..."
+              itemsPerPage={10}
+              emptyMessage="No employees match this selection."
+            />
+            {filteredEmployees.length > 10 && (
+              <div className="px-4 py-3 border-t border-border text-xs text-text-secondary font-semibold">
+                Showing {filteredEmployees.length} employees total
+              </div>
             )}
           </div>
         </div>
@@ -2050,51 +2001,42 @@ export default function EmployeeManagementPage() {
                   </h4>
 
                   <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-                    <table className="w-full text-left text-xs whitespace-nowrap">
-                      <thead className="bg-slate-50 border-b border-border">
-                        <tr>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Project Name</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Project Role</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Start Date</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">End Date</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Status</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary text-right">Performance Score</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {activeProfile.projects && activeProfile.projects.length > 0 ? (
-                          activeProfile.projects.map((proj, idx) => (
-                            <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3 font-bold text-text-primary flex items-center gap-1.5">
-                                <Briefcase className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                                {proj.name}
-                              </td>
-                              <td className="px-4 py-3 text-text-secondary font-semibold">{proj.role}</td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">{proj.startDate}</td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">{proj.endDate}</td>
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
-                                  proj.status === 'Completed' 
-                                    ? 'bg-emerald-50 text-emerald-700' 
-                                    : proj.status === 'Active'
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'bg-amber-50 text-amber-700'
-                                }`}>
-                                  {proj.status}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-right font-black text-text-primary">{proj.score} / 100</td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={6} className="px-4 py-6 text-center text-text-secondary">
-                              No active project assignments.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                    <EnhancedTable
+                      data={activeProfile.projects || []}
+                      columns={[
+                        { key: 'name', label: 'Project Name', render: (proj: EmployeeProject) => (
+                          <span className="flex items-center gap-1.5 font-bold text-text-primary">
+                            <Briefcase className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                            {proj.name}
+                          </span>
+                        )},
+                        { key: 'role', label: 'Project Role', render: (proj: EmployeeProject) => (
+                          <span className="text-text-secondary font-semibold">{proj.role}</span>
+                        )},
+                        { key: 'startDate', label: 'Start Date', render: (proj: EmployeeProject) => (
+                          <span className="text-text-secondary font-medium">{proj.startDate}</span>
+                        )},
+                        { key: 'endDate', label: 'End Date', render: (proj: EmployeeProject) => (
+                          <span className="text-text-secondary font-medium">{proj.endDate}</span>
+                        )},
+                        { key: 'status', label: 'Status', render: (proj: EmployeeProject) => (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                            proj.status === 'Completed' 
+                              ? 'bg-emerald-50 text-emerald-700' 
+                              : proj.status === 'Active'
+                              ? 'bg-blue-50 text-blue-700'
+                              : 'bg-amber-50 text-amber-700'
+                          }`}>
+                            {proj.status}
+                          </span>
+                        )},
+                        { key: 'score', label: 'Performance Score', render: (proj: EmployeeProject) => (
+                          <span className="text-right font-black text-text-primary">{proj.score} / 100</span>
+                        )},
+                      ]}
+                      itemsPerPage={10}
+                      emptyMessage="No active project assignments."
+                    />
                   </div>
 
                 </div>
