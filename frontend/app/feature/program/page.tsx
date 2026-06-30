@@ -1384,72 +1384,85 @@ export default function ProgramManagementPage() {
                   </div>
 
                   {/* Enrollments Table */}
-                  <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-                    <table className="w-full text-left text-xs whitespace-nowrap">
-                      <thead className="bg-slate-50 border-b border-border">
-                        <tr>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Student Name</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">College / Org</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Department</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Enrollment Date</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Attendance</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Performance</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Status</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {activeProfile.enrollments.length > 0 ? (
-                          activeProfile.enrollments.map((enr) => (
-                            <tr key={enr.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3">
-                                <div className="font-extrabold text-text-primary">{enr.name}</div>
-                                <div className="text-[9px] text-text-secondary font-mono">{enr.id}</div>
-                              </td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">{enr.college}</td>
-                              <td className="px-4 py-3 text-text-secondary font-semibold">{enr.department}</td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">{enr.enrollmentDate}</td>
-                              <td className="px-4 py-3 font-extrabold text-text-primary">{enr.attendance}%</td>
-                              <td className="px-4 py-3 font-extrabold text-blue-600">{enr.performance} / 100</td>
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-bold ${
-                                  enr.status === 'Approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-text-secondary'
-                                }`}>
-                                  {enr.status}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
-                                <div className="flex gap-2 justify-end">
-                                  {enr.status !== 'Approved' && (
-                                    <button 
-                                      onClick={() => handleEnrollmentStatus(activeProfile?.id, enr.id, 'Approved')}
-                                      className="text-emerald-600 hover:text-emerald-700 font-bold"
-                                    >
-                                      Approve
-                                    </button>
-                                  )}
-                                  {enr.status !== 'Rejected' && (
-                                    <button 
-                                      onClick={() => handleEnrollmentStatus(activeProfile?.id, enr.id, 'Rejected')}
-                                      className="text-rose-600 hover:text-rose-700 font-bold"
-                                    >
-                                      Reject
-                                    </button>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={8} className="px-4 py-6 text-center text-text-secondary bg-white">
-                              No active enrollments for this program.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  <EnhancedTable
+                    data={activeProfile.enrollments}
+                    searchPlaceholder="Search enrollments..."
+                    itemsPerPage={5}
+                    emptyMessage="No active enrollments for this program."
+                    columns={[
+                      {
+                        key: 'name',
+                        label: 'Student Name',
+                        render: (enr) => (
+                          <div>
+                            <div className="font-extrabold text-text-primary">{enr.name}</div>
+                            <div className="text-[9px] text-text-secondary font-mono">{enr.id}</div>
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 'college',
+                        label: 'College / Org',
+                        render: (enr) => <span className="text-text-secondary font-medium">{enr.college}</span>,
+                      },
+                      {
+                        key: 'department',
+                        label: 'Department',
+                        render: (enr) => <span className="text-text-secondary font-semibold">{enr.department}</span>,
+                      },
+                      {
+                        key: 'enrollmentDate',
+                        label: 'Enrollment Date',
+                        render: (enr) => <span className="text-text-secondary font-medium">{enr.enrollmentDate}</span>,
+                      },
+                      {
+                        key: 'attendance',
+                        label: 'Attendance',
+                        render: (enr) => <span className="font-extrabold text-text-primary">{enr.attendance}%</span>,
+                      },
+                      {
+                        key: 'performance',
+                        label: 'Performance',
+                        render: (enr) => <span className="font-extrabold text-blue-600">{enr.performance} / 100</span>,
+                      },
+                      {
+                        key: 'status',
+                        label: 'Status',
+                        render: (enr) => (
+                          <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                            enr.status === 'Approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-text-secondary'
+                          }`}>
+                            {enr.status}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'actions',
+                        label: 'Actions',
+                        className: 'text-right',
+                        render: (enr) => (
+                          <div className="flex gap-2 justify-end" onClick={e => e.stopPropagation()}>
+                            {enr.status !== 'Approved' && (
+                              <button 
+                                onClick={() => handleEnrollmentStatus(activeProfile?.id, enr.id, 'Approved')}
+                                className="text-emerald-600 hover:text-emerald-700 font-bold"
+                              >
+                                Approve
+                              </button>
+                            )}
+                            {enr.status !== 'Rejected' && (
+                              <button 
+                                onClick={() => handleEnrollmentStatus(activeProfile?.id, enr.id, 'Rejected')}
+                                className="text-rose-600 hover:text-rose-700 font-bold"
+                              >
+                                Reject
+                              </button>
+                            )}
+                          </div>
+                        ),
+                      },
+                    ]}
+                  />
 
                 </div>
               )}
@@ -1620,64 +1633,78 @@ export default function ProgramManagementPage() {
                   </div>
 
                   {/* Certificates Actions Table */}
-                  <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-                    <table className="w-full text-left text-xs whitespace-nowrap">
-                      <thead className="bg-slate-50 border-b border-border">
-                        <tr>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Certificate ID</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Student Name</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Date Issued</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary">Status</th>
-                          <th className="px-4 py-2.5 font-bold text-text-secondary text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {activeProfile.enrollments.slice(0, 10).map((enr) => {
-                          const issuedCert = activeProfile.certifications.list.find(c => c.studentName === enr.name);
-                          return (
-                            <tr key={enr.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3 font-mono font-bold text-text-secondary">
-                                {issuedCert ? issuedCert.id : 'N/A'}
-                              </td>
-                              <td className="px-4 py-3 font-bold text-text-primary">{enr.name}</td>
-                              <td className="px-4 py-3 text-text-secondary font-medium">
-                                {issuedCert ? issuedCert.issueDate : 'Not Issued'}
-                              </td>
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-bold ${
-                                  issuedCert?.status === 'Issued' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-text-secondary'
-                                }`}>
-                                  {issuedCert ? issuedCert.status : 'Pending'}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
-                                <div className="flex gap-2 justify-end">
-                                  {!issuedCert && (
-                                    <button 
-                                      onClick={() => handleGenerateCertificate(activeProfile?.id, enr.name)}
-                                      className="text-blue-600 hover:text-blue-700 font-bold"
-                                    >
-                                      Generate Certificate
-                                    </button>
-                                  )}
-                                  {issuedCert && (
-                                    <button 
-                                      onClick={() => {
-                                        showToast(`Revoking certificate ID ${issuedCert.id}`, 'info');
-                                      }}
-                                      className="text-rose-600 hover:text-rose-700 font-bold"
-                                    >
-                                      Revoke
-                                    </button>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                  <EnhancedTable
+                    data={activeProfile.enrollments.slice(0, 10).map(enr => ({
+                      ...enr,
+                      issuedCert: activeProfile.certifications.list.find(c => c.studentName === enr.name)
+                    }))}
+                    searchPlaceholder="Search certificates..."
+                    itemsPerPage={5}
+                    emptyMessage="No enrollment records found."
+                    columns={[
+                      {
+                        key: 'id',
+                        label: 'Certificate ID',
+                        render: (item) => (
+                          <span className="font-mono font-bold text-text-secondary">
+                            {item.issuedCert ? item.issuedCert.id : 'N/A'}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'name',
+                        label: 'Student Name',
+                        render: (item) => <span className="font-bold text-text-primary">{item.name}</span>,
+                      },
+                      {
+                        key: 'issuedCert',
+                        label: 'Date Issued',
+                        render: (item) => (
+                          <span className="text-text-secondary font-medium">
+                            {item.issuedCert ? item.issuedCert.issueDate : 'Not Issued'}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'issuedCert',
+                        label: 'Status',
+                        render: (item) => (
+                          <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                            item.issuedCert?.status === 'Issued' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-text-secondary'
+                          }`}>
+                            {item.issuedCert ? item.issuedCert.status : 'Pending'}
+                          </span>
+                        ),
+                      },
+                      {
+                        key: 'actions',
+                        label: 'Actions',
+                        className: 'text-right',
+                        render: (item) => (
+                          <div className="flex gap-2 justify-end" onClick={e => e.stopPropagation()}>
+                            {!item.issuedCert && (
+                              <button 
+                                onClick={() => handleGenerateCertificate(activeProfile?.id, item.name)}
+                                className="text-blue-600 hover:text-blue-700 font-bold"
+                              >
+                                Generate Certificate
+                              </button>
+                            )}
+                            {item.issuedCert && (
+                              <button 
+                                onClick={() => {
+                                  showToast(`Revoking certificate ID ${item.issuedCert?.id}`, 'info');
+                                }}
+                                className="text-rose-600 hover:text-rose-700 font-bold"
+                              >
+                                Revoke
+                              </button>
+                            )}
+                          </div>
+                        ),
+                      },
+                    ]}
+                  />
 
                 </div>
               )}
