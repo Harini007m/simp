@@ -8,13 +8,9 @@ import {
 import { performanceService } from '@/src/services/performance.service';
 import { StudentPerformance, BatchPerformance } from '@/src/types/api/performance.types';
 import { Drawer } from '@/components/feature/ui/Drawer';
-import { Pagination } from "@/components/common/Pagination";
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 export default function PerformanceManagementPage() {
-
-      // Pagination State
-      const [currentPage, setCurrentPage] = React.useState(1);
-      const itemsPerPage = 10;
 
   const [activeView, setActiveView] = useState<'dashboard' | 'directory'>('dashboard');
   const [performances, setPerformances] = useState<StudentPerformance[]>([]);
@@ -171,51 +167,38 @@ export default function PerformanceManagementPage() {
               </div>
             </div>
             <div className="flex-1 overflow-auto">
-              <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 sticky top-0 z-10 border-b border-border text-text-secondary font-medium">
-                  <tr>
-                    <th className="px-6 py-3">Student ID</th>
-                    <th className="px-6 py-3">Batch</th>
-                    <th className="px-6 py-3">Avg Score</th>
-                    <th className="px-6 py-3">Attendance</th>
-                    <th className="px-6 py-3">Task Completion</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredPerformances.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(p => (
-                    <tr key={p.studentId} className="hover:bg-blue-50/50 cursor-pointer transition-colors" onClick={() => handleStudentClick(p)}>
-                      <td className="px-6 py-4 font-medium text-text-primary flex items-center gap-3">
-                        <Users className="h-4 w-4 text-blue-500" />
-                        {p.studentId}
-                      </td>
-                      <td className="px-6 py-4 text-text-secondary">{p.batchId}</td>
-                      <td className="px-6 py-4 font-semibold text-text-primary">{p.average_score}%</td>
-                      <td className="px-6 py-4 text-text-secondary">{p.attendance_rate}%</td>
-                      <td className="px-6 py-4 text-text-secondary">{p.task_completion_rate}%</td>
-                      <td className="px-6 py-4">
-                        {p.isAtRisk ? (
-                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-rose-50 text-rose-700">At Risk</span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-700">On Track</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-1 text-text-secondary hover:text-blue-600 transition-colors">
-                          <Eye className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <EnhancedTable
+                data={filteredPerformances}
+                columns={[
+                  { key: 'studentId', label: 'Student ID', render: (p: StudentPerformance) => (
+                    <span className="flex items-center gap-3 font-medium text-text-primary">
+                      <Users className="h-4 w-4 text-blue-500" />
+                      {p.studentId}
+                    </span>
+                  )},
+                  { key: 'batchId', label: 'Batch' },
+                  { key: 'average_score', label: 'Avg Score', render: (p: StudentPerformance) => (
+                    <span className="font-semibold text-text-primary">{p.average_score}%</span>
+                  )},
+                  { key: 'attendance_rate', label: 'Attendance', render: (p: StudentPerformance) => (
+                    <span className="text-text-secondary">{p.attendance_rate}%</span>
+                  )},
+                  { key: 'task_completion_rate', label: 'Task Completion', render: (p: StudentPerformance) => (
+                    <span className="text-text-secondary">{p.task_completion_rate}%</span>
+                  )},
+                  { key: 'isAtRisk', label: 'Status', render: (p: StudentPerformance) => (
+                    p.isAtRisk ? (
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-rose-50 text-rose-700">At Risk</span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-700">On Track</span>
+                    )
+                  )},
+                ]}
+                searchPlaceholder="Search by student ID..."
+                itemsPerPage={10}
+                emptyMessage="No students found."
+              />
             </div>
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={Math.ceil((filteredPerformances?.length || 0) / itemsPerPage)} 
-          onPageChange={setCurrentPage} 
-        />
           </div>
         )}
       </div>
