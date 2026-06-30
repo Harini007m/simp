@@ -10,13 +10,9 @@ import {
 import { usePermissions } from '@/src/hooks/usePermissions';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
-import { Pagination } from "@/components/common/Pagination";
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 export default function HelpdeskPage() {
-
-      // Pagination State
-      const [currentPage, setCurrentPage] = React.useState(1);
-      const itemsPerPage = 10;
 
   const { hasPermission } = usePermissions();
   const { user } = useAuth();
@@ -199,83 +195,49 @@ export default function HelpdeskPage() {
 
       {/* Tickets List Card */}
       <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-text-secondary">
-            <thead className="bg-slate-50 text-[10px] uppercase font-bold tracking-wider text-text-secondary">
-              <tr>
-                <th className="px-5 py-4 font-bold">Ticket ID</th>
-                <th className="px-5 py-4 font-bold">Title</th>
-                <th className="px-5 py-4 font-bold">Status</th>
-                <th className="px-5 py-4 font-bold">Priority</th>
-                <th className="px-5 py-4 font-bold">Updated</th>
-                <th className="px-5 py-4 font-bold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {tickets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((ticket) => (
-                <tr 
-                  key={ticket.id} 
-                  onClick={() => handleOpenTicket(ticket)}
-                  className="hover:bg-slate-50/80 cursor-pointer transition-colors group"
-                >
-                  <td className="px-5 py-4 font-semibold text-text-primary font-mono text-xs">{ticket.ticketNumber}</td>
-                  <td className="px-5 py-4">
-                    <div className="font-bold text-text-primary group-hover:text-indigo-650 transition-colors">{ticket.title}</div>
-                    <div className="text-[11px] text-text-secondary mt-0.5">{ticket.category}</div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'bg-emerald-100 text-emerald-700' :
-                      ticket.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
-                      ticket.status === 'Waiting' ? 'bg-amber-100 text-amber-700' :
-                      'bg-slate-100 text-text-primary'
-                    }`}>
-                      {ticket.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
-                      ticket.priority === 'Critical' ? 'text-rose-600' :
-                      ticket.priority === 'High' ? 'text-orange-500' :
-                      ticket.priority === 'Medium' ? 'text-blue-500' :
-                      'text-text-secondary'
-                    }`}>
-                      {ticket.priority === 'Critical' && <AlertCircle className="w-3.5 h-3.5" />}
-                      {ticket.priority}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-1.5 text-text-secondary">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{new Date(ticket.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                    <button 
-                      onClick={() => handleOpenTicket(ticket)}
-                      className="text-indigo-650 hover:text-indigo-800 font-bold text-xs flex items-center gap-1 ml-auto bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-xl transition-all cursor-pointer"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {tickets.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-text-secondary">
-                    <LifeBuoy className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="font-semibold text-sm">No tickets found.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={Math.ceil((tickets?.length || 0) / itemsPerPage)} 
-          onPageChange={setCurrentPage} 
+        <EnhancedTable
+          data={tickets}
+          columns={[
+            { key: 'ticketNumber', label: 'Ticket ID', render: (ticket: Ticket) => (
+              <span className="font-semibold text-text-primary font-mono text-xs">{ticket.ticketNumber}</span>
+            )},
+            { key: 'title', label: 'Title', render: (ticket: Ticket) => (
+              <div>
+                <div className="font-bold text-text-primary group-hover:text-indigo-650 transition-colors">{ticket.title}</div>
+                <div className="text-[11px] text-text-secondary mt-0.5">{ticket.category}</div>
+              </div>
+            )},
+            { key: 'status', label: 'Status', render: (ticket: Ticket) => (
+              <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'bg-emerald-100 text-emerald-700' :
+                ticket.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
+                ticket.status === 'Waiting' ? 'bg-amber-100 text-amber-700' :
+                'bg-slate-100 text-text-primary'
+              }`}>
+                {ticket.status}
+              </span>
+            )},
+            { key: 'priority', label: 'Priority', render: (ticket: Ticket) => (
+              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
+                ticket.priority === 'Critical' ? 'text-rose-600' :
+                ticket.priority === 'High' ? 'text-orange-500' :
+                ticket.priority === 'Medium' ? 'text-blue-500' :
+                'text-text-secondary'
+              }`}>
+                {ticket.priority === 'Critical' && <AlertCircle className="w-3.5 h-3.5" />}
+                {ticket.priority}
+              </span>
+            )},
+            { key: 'updatedAt', label: 'Updated', render: (ticket: Ticket) => (
+              <div className="flex items-center gap-1.5 text-text-secondary">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{new Date(ticket.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+              </div>
+            )},
+          ]}
+          searchPlaceholder="Search tickets..."
+          itemsPerPage={10}
+          emptyMessage="No tickets found."
         />
       </div>
 
