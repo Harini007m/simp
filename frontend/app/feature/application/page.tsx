@@ -897,7 +897,7 @@ export default function ApplicationPage() {
             <div className="bg-white border border-border rounded-xl p-5 shadow-sm space-y-4">
               <h3 className="text-sm font-bold text-text-primary">Recruiter Review Speed & Volume</h3>
               <EnhancedTable
-                data={['Alice Vance', 'David Miller', 'Sarah'Connor'].map(rev => {
+                data={['Alice Vance', 'David Miller', 'Sarah Connor'].map(rev => {
                   const revApps = applications.filter(a => a.assignedReviewer === rev);
                   const scores = revApps.map(a => a.reviewScore).filter(Boolean) as number[];
                   const avg = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b, 0) / scores.length) : '-';
