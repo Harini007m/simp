@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { 
-  Briefcase, Search, Filter, Plus, ChevronRight, MapPin, Users,
+  Briefcase, Plus, ChevronRight, MapPin, Users,
   BarChart3, Clock, CheckCircle2, XCircle, LayoutDashboard, List,
   TrendingUp, UserPlus, FileText, Activity, Building, Calendar,
   UsersRound, ShieldCheck
@@ -18,22 +18,18 @@ import { openingMentorsService } from '@/src/services/opening-mentors.service';
 import { OpeningMentor } from '@/src/data/mock-opening-mentors';
 import { mentorService } from '@/src/services/mentor.service';
 import { MentorProfile } from '@/src/types/api/mentor.types';
-import { Pagination } from "@/components/common/Pagination";
+import { EnhancedTable } from '@/components/feature/ui/Table';
 
 type TabType = 'dashboard' | 'directory';
 type DrawerTabType = 'overview' | 'mentors' | 'applications' | 'analytics' | 'timeline';
 
 export default function OpportunityPage() {
 
-      // Pagination State
-      const [currentPage, setCurrentPage] = React.useState(1);
-      const itemsPerPage = 10;
-
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+
   
   // Drawer state
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
@@ -123,12 +119,6 @@ export default function OpportunityPage() {
   const opportunitiesWithMentors = new Set(opportunityMentors.map(m => m.opportunityId)).size;
   const mentorCoverage = totalOpenings > 0 ? Math.round((opportunitiesWithMentors / totalOpenings) * 100) : 0;
 
-  const filteredOpportunities = opportunities.filter(opp => 
-    opp.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    opp.mode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    opp.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const getStatusBadge = (status: string = 'Draft') => {
     switch (status) {
       case 'Open': return <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-100 text-emerald-700">Open</span>;
@@ -213,91 +203,72 @@ export default function OpportunityPage() {
     </div>
   );
 
-  const renderDirectory = () => (
-    <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="p-4 border-b border-border bg-slate-50 flex flex-col sm:flex-row justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
-          <input 
-            type="text" 
-            placeholder="Search by title, mode, or type..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-          />
+  const oppColumns = [
+    {
+      key: 'title',
+      label: 'Opportunity',
+      render: (opp: Opportunity) => (
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <Briefcase className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="font-semibold text-text-primary">{opp.title}</div>
+            <div className="text-xs text-text-secondary">ID: {opp.id} • Posted: {opp.postedDate}</div>
+          </div>
         </div>
-        <button className="flex items-center justify-center gap-2 px-4 py-2 border border-border bg-white rounded-lg text-sm font-medium text-text-secondary hover:bg-slate-50">
-          <Filter className="h-4 w-4" />
-          <span>Filters</span>
+      ),
+    },
+    {
+      key: 'type',
+      label: 'Type',
+      render: (opp: Opportunity) => (
+        <div className="flex flex-col gap-1">
+          <span className="font-medium text-text-primary">{opp.type}</span>
+          <span className="text-xs capitalize text-text-secondary">{opp.value}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'mode',
+      label: 'Location',
+      render: (opp: Opportunity) => (
+        <div className="flex items-center gap-1 text-text-secondary">
+          <MapPin className="h-3.5 w-3.5" />
+          <span>{opp.mode}</span>
+        </div>
+      ),
+    },
+    { key: 'seats', label: 'Seats', className: 'font-medium text-text-primary' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (opp: Opportunity) => getStatusBadge(opp.status),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      className: 'text-right',
+      render: (opp: Opportunity) => (
+        <button
+          onClick={() => openDrawer(opp)}
+          className="px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+        >
+          Manage
         </button>
-      </div>
+      ),
+    },
+  ];
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm text-text-secondary">
-          <thead className="bg-slate-50 text-xs uppercase font-semibold text-text-secondary border-b border-border">
-            <tr>
-              <th className="px-6 py-3">Opportunity</th>
-              <th className="px-6 py-3">Type</th>
-              <th className="px-6 py-3">Location</th>
-              <th className="px-6 py-3">Seats</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {filteredOpportunities.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(opp => (
-              <tr key={opp.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                      <Briefcase className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-text-primary">{opp.title}</div>
-                      <div className="text-xs text-text-secondary">ID: {opp.id} • Posted: {opp.postedDate}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-medium text-text-primary">{opp.type}</span>
-                    <span className="text-xs capitalize text-text-secondary">{opp.value}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-1 text-text-secondary">
-                    <MapPin className="h-3.5 w-3.5" />
-                    <span>{opp.mode}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 font-medium text-text-primary">{opp.seats}</td>
-                <td className="px-6 py-4">{getStatusBadge(opp.status)}</td>
-                <td className="px-6 py-4 text-right">
-                  <button 
-                    onClick={() => openDrawer(opp)}
-                    className="px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-                  >
-                    Manage
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filteredOpportunities.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-text-secondary">
-                  <Briefcase className="h-8 w-8 mx-auto text-slate-300 mb-2" />
-                  <p>No opportunities found.</p>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={Math.ceil((filteredOpportunities?.length || 0) / itemsPerPage)} 
-          onPageChange={setCurrentPage} 
-        />
+  const renderDirectory = () => (
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <EnhancedTable
+        data={opportunities}
+        columns={oppColumns}
+        searchPlaceholder="Search by title, mode, or type..."
+        itemsPerPage={10}
+        emptyMessage="No opportunities found."
+      />
     </div>
   );
 
