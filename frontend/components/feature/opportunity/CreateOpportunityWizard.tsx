@@ -7,6 +7,7 @@ import { Button } from '@/components/feature/ui/Button';
 import { Card } from '@/components/feature/ui/Card';
 import { ChevronRight, ChevronLeft, Briefcase, Calendar, MapPin, Users, Info, DollarSign } from 'lucide-react';
 import { opportunitiesService } from '@/src/services/opportunities.service';
+import { programService } from '@/src/services/program.service';
 import { Opportunity } from '@/src/types/opportunities.types';
 
 interface CreateOpportunityWizardProps {
@@ -37,6 +38,8 @@ export function CreateOpportunityWizard({
 
   // Form Fields
   const [title, setTitle] = useState('');
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [selectedProgram, setSelectedProgram] = useState<any | null>(null);
   const [type, setType] = useState('Tech');
   const [value, setValue] = useState<"free" | "paid" | "stipend" | "industrial" | "corporate" | "research">('free');
   const [description, setDescription] = useState('');
@@ -94,6 +97,19 @@ export function CreateOpportunityWizard({
       }
       setErrors({});
     }
+    // load programs for title suggestions
+    (async () => {
+      try {
+        const data = await programService.getPrograms();
+        setPrograms(data);
+        if (opportunityToView && (opportunityToView as any).programId) {
+          const match = data.find((p: any) => p.program_id === (opportunityToView as any).programId || p.id === (opportunityToView as any).programId);
+          if (match) setSelectedProgram(match);
+        }
+      } catch (err) {
+        console.debug('Failed to load programs for title suggestions', err);
+      }
+    })();
   }, [isOpen, opportunityToView, viewMode]);
 
   const validateStep0 = () => {
@@ -133,13 +149,15 @@ export function CreateOpportunityWizard({
 
     try {
       setIsSubmitting(true);
-      
-      await opportunitiesService.createOpportunity({
+      const payload: any = {
         role_name: title.trim(),
         role_description: description.trim(),
         project_title: title.trim(),
         opening_status: 'Active',
-      } as any);
+      };
+      if (selectedProgram) payload.program_id = selectedProgram.program_id || selectedProgram.id || selectedProgram.programId;
+
+      await opportunitiesService.createOpportunity(payload as any);
 
       if (onOpportunityCreated) {
         onOpportunityCreated();
@@ -165,20 +183,44 @@ export function CreateOpportunityWizard({
           <div className="space-y-6 p-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-label">Opportunity Title *</label>
-              <input
-                type="text"
-                value={title}
-                onChange={e => {
-                  setTitle(e.target.value);
-                  if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
-                }}
-                className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
-                  errors.title 
-                    ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
-                    : 'border-border focus:border-primary focus:ring-primary'
-                }`}
-                placeholder="e.g. Software Engineering Intern"
-              />
+              <div>
+                <input
+                  type="text"
+                  list="programs-list"
+                  value={title}
+                  onChange={e => {
+                    const v = e.target.value;
+                    setTitle(v);
+                    if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
+
+                    // check for exact program name match and autofill
+                    const match = programs.find((p: any) => String(p.program_name || p.title || p.name).trim() === v.trim());
+                    if (match) {
+                      setSelectedProgram(match);
+                      setType((match as any).type || (match as any).program_type || 'Tech');
+                      const weeks = (match as any).duration_weeks || (match as any).durationWeeks || ((match as any).duration_months ? (match as any).duration_months * 4 : 0);
+                      setDuration(weeks ? `${Math.round(weeks / 4)} Months` : '6 Months');
+                      setSeats((match as any).capacity ? String((match as any).capacity) : ((match as any).seats ? String((match as any).seats) : '5 Openings'));
+                      setEligibility((match as any).eligibility || (match as any).description || 'Any Degree');
+                      setStartDate((match as any).startDate || (match as any).start_date || '');
+                      setDescription((match as any).description || (match as any).program_description || '');
+                    } else {
+                      setSelectedProgram(null);
+                    }
+                  }}
+                  className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
+                    errors.title 
+                      ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
+                      : 'border-border focus:border-primary focus:ring-primary'
+                  }`}
+                  placeholder="Choose program or type a custom title"
+                />
+                <datalist id="programs-list">
+                  {programs.map(p => (
+                    <option key={p.program_id} value={p.program_name} />
+                  ))}
+                </datalist>
+              </div>
               {errors.title && <p className="text-xs font-semibold text-red-500 mt-1">{errors.title}</p>}
             </div>
 

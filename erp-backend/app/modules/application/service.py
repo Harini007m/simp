@@ -9,7 +9,14 @@ from app.modules.application.schemas import ApplicationCreate
 from app.models.profiles.student_profile import StudentProfile
 from app.models.system.verification import VerificationRecord
 from app.services.base import BaseService
+from sqlalchemy import select
+from app.models.internships.application import Application
 
+async def get_all(self):
+    result = await self.db.execute(
+        select(Application)
+    )
+    return result.scalars().all()
 
 class ApplicationService(BaseService):
     def __init__(self, db: AsyncSession):
@@ -51,3 +58,9 @@ class ApplicationService(BaseService):
                 status_code=403,
                 detail="Aadhaar verification lockout is active. The student cannot apply for another internship for 6 months.",
             )
+    
+    async def get_all(self):
+        result = await self.db.execute(
+            select(Application)
+        )
+        return result.scalars().all()
