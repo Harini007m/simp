@@ -379,6 +379,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     size: 'small'
   },
   {
+    
     widgetId: 'bookmarks',
     name: 'Bookmarks',
     description: 'Your saved bookmarks',
