@@ -35,6 +35,11 @@ def register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(SQLAlchemyError)
     async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
+        import traceback
+        with open("true_traceback.log", "a") as f:
+            f.write("=== DATABASE ERROR ===\n")
+            traceback.print_exc(file=f)
+            f.write(str(exc) + "\n\n")
         logger.error(f"Database Error: {str(exc)}")
         return error_response(
             message="A database error occurred. Please try again later.",
@@ -43,6 +48,18 @@ def register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(Exception)
     async def generic_exception_handler(request: Request, exc: Exception):
+        from fastapi import HTTPException
+        if isinstance(exc, HTTPException):
+            return error_response(
+                message=str(exc.detail),
+                status_code=exc.status_code
+            )
+            
+        import traceback
+        with open("true_traceback.log", "a") as f:
+            f.write("=== GENERIC ERROR ===\n")
+            traceback.print_exc(file=f)
+            f.write(str(exc) + "\n\n")
         logger.error(f"Unhandled Exception: {str(exc)}", exc_info=True)
         return error_response(
             message="An unexpected error occurred.",

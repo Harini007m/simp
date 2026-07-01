@@ -41,31 +41,158 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
     role = result.scalars().first()
     
     from app.models.rbac.module import Module
+    from app.models.rbac.feature import Feature
+    from app.models.rbac.permission import Permission
+    from app.models.rbac.role_permission import RolePermission
+    from app.models.rbac.user_module import UserModule
+    from sqlalchemy import or_
     
-    # In a full implementation, we'd join UserRole -> Role -> RolePermission -> Permission -> Feature -> Module
-    # For now, if the user is SUPER_ADMIN, return all seeded modules. Otherwise return empty.
     db_modules = []
     if role and role.code == "SUPER_ADMIN":
         module_result = await db.execute(select(Module))
         db_modules = module_result.scalars().all()
+    else:
+        role_module_ids_query = (
+            select(Module.id)
+            .join(Feature, Feature.module_id == Module.id)
+            .join(Permission, Permission.feature_id == Feature.id)
+            .join(RolePermission, RolePermission.permission_id == Permission.id)
+            .where(RolePermission.role_id == role.id)
+        ) if role else select(Module.id).where(False)
         
-    mapped_modules = [
-        {
-            "id": m.code, # Map DB code to frontend ID
+        user_module_ids_query = select(UserModule.module_id).where(UserModule.user_id == current_user.id)
+        
+        combined_module_ids_query = select(Module).where(
+            or_(
+                Module.id.in_(role_module_ids_query),
+                Module.id.in_(user_module_ids_query)
+            )
+        )
+        module_result = await db.execute(combined_module_ids_query)
+        db_modules = module_result.scalars().all()
+        
+    db_to_fe_module_map = {
+        'employee_management': 'employee',
+        'organization_management': 'organization',
+        'program_management': 'program',
+        'opportunity_management': 'opportunity',
+        'application_management': 'application',
+        'student_management': 'student',
+        'batch_management': 'batch',
+        'allocation': 'allocation',
+        'mentor_profile': 'mentor',
+        'lms_dashboard': 'lms',
+        'lms_management': 'lms_management',
+        'my_learning': 'my_learning',
+        'attendance_dashboard': 'attendance',
+        'attendance_management': 'attendance_management',
+        'my_attendance': 'my_attendance',
+        'task_dashboard': 'task',
+        'task_management': 'task_management',
+        'my_task': 'my_tasks',
+        'assessment_dashboard': 'assessment',
+        'assessment_management': 'assessment_management',
+        'my_assessment': 'my_assessments',
+        'submission': 'submission',
+        'performance': 'performance',
+        'college_coordinator': 'college_coordinator',
+        'common_files': 'common_file',
+        'reporting_manager': 'reporting_manager',
+        'leave_management': 'leave',
+        'activity_tracking': 'activity',
+        'escalation_engine': 'escalation',
+        'payment_management': 'payment',
+        'fee_structure': 'fee',
+        'invoice_and_receipt': 'billing',
+        'internship_wallet': 'wallet',
+        'finance_dashboard': 'finance',
+        'revenue_analytics': 'finance_analytics',
+        'notification_center': 'notification',
+        'notification': 'notification',
+        'announcement': 'announcement',
+        'communication_center': 'communication',
+        'communication': 'communication',
+        'message': 'communication',
+        'calendar_and_scheduler': 'calendar',
+        'calendar': 'calendar',
+        'email_and_template_management': 'email',
+        'email': 'email',
+        'certificate_management': 'certificate',
+        'certificate': 'certificate',
+        'college_certificate_dashboard': 'college_certificates',
+        'document_generation': 'document',
+        'document': 'document',
+        'placement_and_hiring': 'placement',
+        'placement': 'placement',
+        'alumni_management': 'alumni',
+        'alumni': 'alumni',
+        'analytics_dashboard': 'analytics',
+        'analytics': 'analytics',
+        'reports': 'reports',
+        'report_center': 'report_center', # report center doesn't exist, we use reports
+        'kpi_management': 'kpi',
+        'kpi': 'kpi',
+        'executive_dashboard': 'executive',
+        'executive': 'executive',
+        'data_export_center': 'export',
+        'export': 'export',
+        'export_center': 'export',
+        'help_desk__tickets': 'helpdesk',
+        'helpdesk': 'helpdesk',
+        'help_desk': 'helpdesk',
+        'digital_id_card': 'idcard',
+        'idcard': 'idcard',
+        'digital_id': 'idcard',
+        'self_service_portal': 'selfservice',
+        'self_service': 'selfservice',
+        'selfservice': 'selfservice',
+        'productivity': 'productivity',
+        'super_admin_settings': 'super_admin',
+        'super_admin': 'super_admin',
+    }
+    
+    mapped_modules = []
+    for m in db_modules:
+        fe_id = db_to_fe_module_map.get(m.code, m.code)
+        mapped_modules.append({
+            "id": fe_id,
             "code": m.code.upper(),
             "name": m.name,
             "description": m.description or "",
             "icon": "",
-            "route": "",
+            "route": m.route_path or "",
             "status": "ACTIVE",
             "features": []
-        }
-        for m in db_modules
-    ]
+        })
     
     permissions = []
     if role and role.code == "SUPER_ADMIN":
         permissions = ["all"]
+    else:
+        # Temporarily auto-grant frontend permissions for assigned modules
+        for m in mapped_modules:
+            mod_id = m["id"]
+            permissions.extend([
+                f"{mod_id}.view",
+                f"{mod_id}.create",
+                f"{mod_id}.update",
+                f"{mod_id}.delete",
+                f"{mod_id}.manage",
+                f"{mod_id}.export"
+            ])
+            # Special cases from FEATURE_REGISTRY
+            if mod_id == 'lms_management':
+                permissions.append('lms.create')
+            elif mod_id == 'attendance_management':
+                permissions.append('attendance.mark')
+            elif mod_id == 'task_management':
+                permissions.append('task.create')
+            elif mod_id == 'assessment_management':
+                permissions.append('assessment.create')
+            elif mod_id == 'finance_analytics':
+                permissions.append('analytics.finance.view')
+            elif mod_id == 'college_certificates':
+                permissions.append('certificate.view')
         
     user_data = CurrentUserResponse(
         user_id=current_user.id,

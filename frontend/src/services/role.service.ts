@@ -22,11 +22,12 @@ export const roleService = {
   async createRole(role: Omit<Role, 'id' | 'modulesCount' | 'usersCount' | 'color' | 'bg'> & { color?: string, bg?: string }): Promise<Role> {
     try {
       // Map desc to description for backend
-      const payload: RoleCreate = {
+      const payload: any = {
         name: role.name,
         code: role.code,
         description: role.desc,
-        is_system: false
+        is_system: false,
+        module_ids: role.moduleIds
       };
       return await roleApi.createRole(payload);
     } catch (error) {
@@ -37,9 +38,10 @@ export const roleService = {
 
   async updateRole(id: string, updatedData: Partial<Role>): Promise<Role | undefined> {
     try {
-      const payload: RoleUpdate = {};
+      const payload: any = {};
       if (updatedData.name !== undefined) payload.name = updatedData.name;
       if (updatedData.desc !== undefined) payload.description = updatedData.desc;
+      if (updatedData.moduleIds !== undefined) payload.module_ids = updatedData.moduleIds;
       
       return await roleApi.updateRole(id, payload);
     } catch (error) {
