@@ -1,0 +1,615 @@
+# AGENTS.md
+
+# ERP Database Team - AI Agent Operating Manual
+
+> **Project:** Internship ERP
+>
+> **Team:** Database Team
+>
+> **Status:** Living Documentation
+>
+> This document is the primary operating guide for AI agents working on the ERP Backend Database. It should evolve as the repository evolves.
+
+---
+
+# Primary Objective
+
+The Database Team is responsible for:
+
+- Database Architecture
+- Database Migration
+- Database Initialization
+- Database Seeding
+- Database Maintenance
+- Database Validation
+- Mock Data Generation
+- Database Reset Utilities
+
+The goal is to maintain a production-quality PostgreSQL database suitable for development, testing, and demonstration.
+
+---
+
+# Tech Stack
+
+Backend
+- FastAPI
+
+ORM
+- SQLAlchemy
+
+Database
+- PostgreSQL
+
+Hosting
+- AWS PostgreSQL
+
+Frontend
+- Next.js
+
+---
+
+# Repository Structure
+
+The repository contains two major directories.
+
+```
+erp-project/
+
+├── erp-frontend/
+│   └── Next.js
+
+└── erp-backend/
+    └── app/
+        ├── models/
+        │   ├── **/
+        │   └── *.py
+        │
+        ├── modules/
+        │   ├── **/
+        │   └── *.py
+        │
+        └── ...
+```
+
+---
+
+# Golden Rule
+
+## NEVER GUESS.
+
+If the repository contains the answer,
+inspect the repository.
+
+If the answer cannot be determined from the repository,
+
+report the uncertainty.
+
+Do NOT invent
+
+- table names
+- relationships
+- permissions
+- constraints
+- APIs
+- schemas
+
+Always inspect first.
+
+---
+
+# Repository Exploration (Mandatory)
+
+Before performing ANY database operation the AI Agent MUST explore the repository.
+
+Checklist
+
+- [ ] Explore entire backend
+- [ ] Explore app/models recursively
+- [ ] Explore app/modules recursively
+- [ ] Identify every SQLAlchemy Model
+- [ ] Identify every Enum
+- [ ] Identify every Foreign Key
+- [ ] Identify Constraints
+- [ ] Identify Relationships
+- [ ] Identify Association Tables
+- [ ] Identify Configuration Tables
+- [ ] Identify Seed Requirements
+- [ ] Identify Migration Strategy
+- [ ] Document discoveries in AGENTS.md
+
+The agent should continuously improve this document whenever new knowledge is discovered.
+
+---
+
+# Database Connection
+
+Task
+
+Connect backend to AWS PostgreSQL.
+
+Checklist
+
+- [ ] Read .env
+- [ ] Validate credentials
+- [ ] Connect to AWS PostgreSQL
+- [ ] Verify SQLAlchemy Connection
+- [ ] Verify Migration Connection
+
+---
+
+# Database Reset
+
+The database should be completely rebuilt.
+
+Workflow
+
+- Drop every table
+- Remove every constraint
+- Remove every index if required
+- Remove every sequence if required
+
+After completion
+
+AWS PostgreSQL should contain
+
+ZERO TABLES
+
+---
+
+Checklist
+
+- [ ] Drop all tables
+- [ ] Verify empty database
+
+---
+
+# Database Initialization
+
+After the database becomes empty
+
+The agent should
+
+- discover all models
+- import all models
+- execute migrations
+- initialize tables
+
+The agent MUST verify
+
+every discovered model
+has a corresponding table.
+
+Checklist
+
+- [ ] Discover Models
+- [ ] Run Migration
+- [ ] Create Tables
+- [ ] Validate Tables
+- [ ] Validate Foreign Keys
+
+---
+
+# Model Discovery Rules
+
+Primary location
+
+```
+erp-backend/app/models/
+```
+
+Explore recursively.
+
+Every subfolder.
+
+Every Python file.
+
+Secondary location
+
+```
+erp-backend/app/modules/
+```
+
+Explore recursively.
+
+Some SQLAlchemy Models may exist here.
+
+Never assume only one models.py exists.
+
+---
+
+# Seeding
+
+Create
+
+```
+seed.py
+```
+
+Purpose
+
+Populate every business table with realistic ERP data.
+
+No business table should remain empty.
+
+Seeding should be idempotent.
+
+Configuration data should never duplicate.
+
+---
+
+# Mock Data Requirements
+
+Minimum Dataset
+
+## Users
+
+- 1 Super Admin
+- 5 Mentors
+- 30 Students
+
+---
+
+Attendance
+
+Generate
+
+1 Month
+
+Daily attendance
+
+---
+
+Tasks
+
+Generate
+
+- Pending
+- In Progress
+- Completed
+- Overdue
+
+---
+
+Assessments
+
+Generate realistic assessments.
+
+---
+
+Submissions
+
+Generate submissions linked correctly.
+
+---
+
+Learning
+
+Generate
+
+- Courses
+- Progress
+- Learning Documents
+
+---
+
+Communication
+
+Generate
+
+- Messages
+- Emails
+- Notifications
+
+---
+
+Calendar
+
+Generate
+
+- Events
+- Meetings
+- Deadlines
+
+---
+
+Help Desk
+
+Generate
+
+- Tickets
+- Open
+- Closed
+- In Progress
+
+---
+
+Performance
+
+Generate
+
+- KPIs
+- Reports
+- Performance Metrics
+
+---
+
+Documents
+
+Generate
+
+- Certificates
+- Learning Documents
+- Reports
+- Exports
+
+---
+
+Dashboards
+
+Generate dashboard statistics.
+
+---
+
+Every Foreign Key
+
+MUST
+
+reference valid data.
+
+---
+
+# Roles
+
+## Super Admin
+
+Modules
+
+- Users
+- Roles
+- Module Registry
+- Security Center
+- Productivity
+- Self Service
+- Super Admin
+- Digital ID
+- Announcement
+- Notification
+
+---
+
+## Student
+
+Modules
+
+- My Learning
+- My Task
+- My Attendance
+- My Assessment
+- Submission
+- Message
+- Calendar
+- Email
+- Document
+- Report
+- Export Center
+- Help Desk
+- Digital ID
+- Self Service
+- Productivity
+
+---
+
+## Mentor
+
+Modules
+
+- LMS Dashboard
+- LMS Management
+- Attendance Dashboard
+- Attendance Management
+- Assessment Dashboard
+- Assessment Management
+- Task Dashboard
+- Task Management
+- Performance
+- Submission
+- Leave Management
+- Message
+- Calendar
+- Email
+- Certificate
+- Reports
+- KPIs
+- Help Desk
+- Digital ID
+- Self Service
+- Productivity
+
+---
+
+# Permission Discovery
+
+DO NOT assume
+
+how permissions are stored.
+
+Inspect repository.
+
+Locate
+
+- Role Model
+- Module Registry
+- Permission Tables
+- Role Module Mapping
+- Access Control Tables
+
+Then
+
+adapt to existing architecture.
+
+Never redesign unless instructed.
+
+---
+
+# Flush Utility
+
+Create
+
+```
+flush.py
+```
+
+Purpose
+
+Reset development database.
+
+---
+
+Should Delete
+
+- Students
+- Mentors
+- Attendance
+- Tasks
+- Assessments
+- Submissions
+- Emails
+- Notifications
+- Messages
+- Reports
+- Dashboards
+- Documents
+- Learning Records
+- Calendar Events
+- Help Desk
+- Activity Logs
+- Every Transaction Table
+
+---
+
+Should Preserve
+
+- Roles
+- Module Registry
+- Role Module Mapping
+- Permission Configuration
+- System Configuration
+- Default Super Admin (if present)
+
+The repository should be explored first to determine additional configuration tables that should also be preserved.
+
+---
+
+# Validation
+
+After migration
+
+Verify
+
+- Every model has table
+- No missing tables
+- No migration failures
+- No broken foreign keys
+
+After seeding
+
+Verify
+
+- No business table empty
+- No invalid references
+- Dashboard loads successfully
+- Every role has modules
+
+---
+
+# Knowledge Base
+
+Whenever the AI discovers
+
+- new models
+- new tables
+- new constraints
+- new relationships
+- new enums
+- new configuration
+
+Update this AGENTS.md.
+
+This file is the living documentation of the ERP Database.
+
+---
+
+# Team Progress Checklist
+
+## Repository Discovery
+
+- [ ] Backend explored
+- [ ] Models explored
+- [ ] Modules explored
+- [ ] Relationships documented
+- [ ] Constraints documented
+
+---
+
+## Database
+
+- [ ] AWS Connected
+- [ ] Database Dropped
+- [ ] Migration Completed
+- [ ] Tables Verified
+
+---
+
+## Seeding
+
+- [ ] Roles Seeded
+- [ ] Modules Seeded
+- [ ] Users Seeded
+- [ ] Students Seeded
+- [ ] Mentors Seeded
+- [ ] Attendance Seeded
+- [ ] Assessments Seeded
+- [ ] Tasks Seeded
+- [ ] Dashboard Seeded
+- [ ] Notifications Seeded
+- [ ] Messages Seeded
+- [ ] Documents Seeded
+- [ ] Calendar Seeded
+- [ ] Reports Seeded
+- [ ] Help Desk Seeded
+- [ ] Performance Seeded
+- [ ] Every Table Populated
+
+---
+
+## Utilities
+
+- [ ] seed.py Completed
+- [ ] flush.py Completed
+- [ ] Validation Completed
+
+---
+
+# AI Principles
+
+Always
+
+✔ Explore before coding
+
+✔ Inspect before modifying
+
+✔ Preserve existing architecture
+
+✔ Produce realistic data
+
+✔ Validate every operation
+
+✔ Keep AGENTS.md updated
+
+✔ Never guess
+
+✔ Never invent schema
+
+✔ Prefer repository knowledge over assumptions
+
+✔ Leave the repository in a working state
