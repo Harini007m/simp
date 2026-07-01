@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any, Generic, TypeVar, Sequence, List, Dict, Optional, Tuple
 from uuid import UUID
 from fastapi.encoders import jsonable_encoder
@@ -130,8 +131,8 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return None
             
         if hasattr(obj, 'deleted_at'):
-            from datetime import datetime, UTC
-            obj.deleted_at = datetime.now(UTC)
+            from datetime import datetime, timezone
+            obj.deleted_at = datetime.now(timezone.utc)
             db.add(obj)
         else:
             await db.delete(obj)

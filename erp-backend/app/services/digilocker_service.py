@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from urllib.parse import urlencode
 
@@ -131,7 +131,7 @@ class DigiLockerService:
         )
         result = await self.db.execute(stmt)
         record = result.scalars().first()
-        verification_date = datetime.now(UTC)
+        verification_date = datetime.now(timezone.utc)
 
         if record is None:
             record = VerificationRecord(
@@ -156,9 +156,9 @@ class DigiLockerService:
         payload = {
             "user_id": user_id,
             "student_profile_id": student_profile_id,
-            "nonce": nonce or datetime.now(UTC).isoformat(),
-            "exp": datetime.now(UTC) + timedelta(minutes=10),
-            "iat": datetime.now(UTC),
+            "nonce": nonce or datetime.now(timezone.utc).isoformat(),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
+            "iat": datetime.now(timezone.utc),
         }
         return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 

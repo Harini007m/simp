@@ -23,7 +23,7 @@ from app.models.core.mixins import BaseModel as Base
 
 random.seed(42)
 UTC = timezone.utc
-NOW = datetime.now(UTC)
+NOW = datetime.now(timezone.utc)
 SYNC_DATABASE_URL = settings.DATABASE_URL.replace("+asyncpg", "+psycopg2")
 
 engine = create_engine(SYNC_DATABASE_URL, future=True)
@@ -259,13 +259,15 @@ def numeric_value(column_name: str, index: int) -> Any:
 
 def temporal_value(column_name: str, index: int) -> Any:
     if column_name in {"created_at", "updated_at", "login_time", "last_activity_at", "publish_date", "scheduled_time", "payment_date", "verification_date", "expiry_date", "expires_at", "end_date", "logout_time", "account_locked_until", "issue_date", "drive_date", "joining_date", "start_date", "due_date"}:
-        if column_name in {"issue_date", "drive_date", "joining_date", "start_date", "end_date", "due_date"}:
+        if column_name in {"issue_date", "drive_date", "joining_date", "start_date", "due_date"}:
             return date.today() - timedelta(days=30 - index)
+        if column_name == "end_date":
+            return date.today() + timedelta(days=30 + index)
         if column_name in {"expires_at", "expiry_date", "account_locked_until"}:
             return NOW + timedelta(days=30 - index)
         return NOW - timedelta(days=index)
     if column_name == "date":
-        return date.today() - timedelta(days=index % 30)
+        return date.today() - timedelta(days=index)
     return None
 
 
