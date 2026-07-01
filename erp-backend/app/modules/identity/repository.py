@@ -59,4 +59,22 @@ class PermissionRepository:
             .where(Permission.code == permission_name)
         )
         result = await db.execute(stmt)
-        return result.scalars().first() is not None
+        if result.scalars().first():
+            return True
+            
+        # Check module overrides (if user has the module assigned explicitly, grant them basic access)
+        if ":" in permission_name:
+            module_code = permission_name.split(":")[0]
+            from app.models.rbac.user_module import UserModule
+            from app.models.rbac.module import Module
+            module_override_stmt = (
+                select(Module)
+                .join(UserModule, UserModule.module_id == Module.id)
+                .where(UserModule.user_id == user_id)
+                .where(Module.code == module_code)
+            )
+            mod_result = await db.execute(module_override_stmt)
+            if mod_result.scalars().first():
+                return True
+                
+        return False

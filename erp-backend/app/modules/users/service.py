@@ -44,6 +44,10 @@ class UserService(BaseCRUDService[User, UserCreate, UserUpdate]):
         return new_user
     async def update(self, *, id: UUID, obj_in: UserUpdate, user_id: UUID = None) -> User:
         obj_in_data = obj_in.model_dump(exclude_unset=True)
+        
+        role_id = obj_in_data.pop("roleId", None)
+        module_overrides = obj_in_data.pop("moduleOverrides", None)
+        
         if "password" in obj_in_data:
             password = obj_in_data.pop("password")
             obj_in_data["password_hash"] = hash_password(password)
@@ -52,7 +56,30 @@ class UserService(BaseCRUDService[User, UserCreate, UserUpdate]):
             status = obj_in_data["account_status"]
             obj_in_data["account_status"] = status.value if hasattr(status, "value") else status
             
-        return await super().update(id=id, obj_in=obj_in_data, user_id=user_id)
+        updated_user = await super().update(id=id, obj_in=obj_in_data, user_id=user_id)
+        
+        needs_commit = False
+        from sqlalchemy import delete
+        
+        if role_id is not None:
+            from app.models.rbac.user_role import UserRole
+            await self.db.execute(delete(UserRole).where(UserRole.user_id == id))
+            new_user_role = UserRole(user_id=id, role_id=role_id, created_by=user_id)
+            self.db.add(new_user_role)
+            needs_commit = True
+            
+        if module_overrides is not None:
+            from app.models.rbac.user_module import UserModule
+            await self.db.execute(delete(UserModule).where(UserModule.user_id == id))
+            for mod_id in module_overrides:
+                new_user_mod = UserModule(user_id=id, module_id=mod_id, created_by=user_id)
+                self.db.add(new_user_mod)
+            needs_commit = True
+            
+        if needs_commit:
+            await self.commit_transaction()
+            
+        return updated_user
         
     async def lock_account(self, id: UUID, user_id: UUID) -> User:
         # Business Workflow: Account Lockout

@@ -16,6 +16,8 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     account_status: Optional[StatusEnum] = None
     password: Optional[str] = None
+    roleId: Optional[UUID] = None
+    moduleOverrides: Optional[list[UUID]] = None
 
 class UserResponse(BaseModel):
     id: UUID
