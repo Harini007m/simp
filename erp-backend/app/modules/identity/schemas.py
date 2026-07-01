@@ -8,7 +8,7 @@ class Token(BaseModel):
     token_type: str = "Bearer"
 
 class LoginRequest(BaseModel):
-    username: EmailStr
+    username: str
     password: str
     
 class ForgotPasswordRequest(BaseModel):
