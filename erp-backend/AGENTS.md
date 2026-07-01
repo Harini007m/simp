@@ -127,6 +127,8 @@ Verified discoveries
 - 252 modules under `app.models` and `app.modules` were imported during discovery.
 - The live AWS PostgreSQL database was verified with a successful `SELECT 1` connection test.
 - Aadhaar verification metadata should be stored on `sys_verification_records` via `VerificationRecord`.
+- Seeding completed successfully and a live count check confirmed 0 empty tables.
+- `app/scripts/seed.py` is the current full-table mock-data seeder for the live AWS database.
 
 ---
 
@@ -613,31 +615,31 @@ This file is the living documentation of the ERP Database.
 
 ## Seeding
 
-- [ ] Roles Seeded
-- [ ] Modules Seeded
-- [ ] Users Seeded
-- [ ] Students Seeded
-- [ ] Mentors Seeded
-- [ ] Attendance Seeded
-- [ ] Assessments Seeded
-- [ ] Tasks Seeded
-- [ ] Dashboard Seeded
-- [ ] Notifications Seeded
-- [ ] Messages Seeded
-- [ ] Documents Seeded
-- [ ] Calendar Seeded
-- [ ] Reports Seeded
-- [ ] Help Desk Seeded
-- [ ] Performance Seeded
-- [ ] Every Table Populated
+- [x] Roles Seeded
+- [x] Modules Seeded
+- [x] Users Seeded
+- [x] Students Seeded
+- [x] Mentors Seeded
+- [x] Attendance Seeded
+- [x] Assessments Seeded
+- [x] Tasks Seeded
+- [x] Dashboard Seeded
+- [x] Notifications Seeded
+- [x] Messages Seeded
+- [x] Documents Seeded
+- [x] Calendar Seeded
+- [x] Reports Seeded
+- [x] Help Desk Seeded
+- [x] Performance Seeded
+- [x] Every Table Populated
 
 ---
 
 ## Utilities
 
-- [ ] seed.py Completed
-- [ ] flush.py Completed
-- [ ] Validation Completed
+- [x] seed.py Completed
+- [x] flush.py Completed
+- [x] Validation Completed
 
 ---
 
