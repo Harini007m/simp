@@ -44,6 +44,7 @@ async def get_modules(
             "name": m.name,
             "code": m.code,
             "description": m.description,
+            "route": m.route_path,
             "active": True # Add active flag if needed
         }
         for m in modules
@@ -65,6 +66,7 @@ async def get_module(
         "name": m.name,
         "code": m.code,
         "description": m.description,
+            "route": m.route_path,
         "active": True
     }
     return success_response(data=data)
@@ -78,7 +80,8 @@ async def create_module(
     m = Module(
         name=data.name,
         code=data.code,
-        description=data.description
+        description=data.description,
+        route_path=data.route
     )
     db.add(m)
     await db.commit()
@@ -88,6 +91,7 @@ async def create_module(
         "name": m.name,
         "code": m.code,
         "description": m.description,
+            "route": m.route_path,
         "active": True
     }
     return success_response(data=res_data, message="Module created successfully")
@@ -107,6 +111,7 @@ async def update_module(
     if data.name is not None: m.name = data.name
     if data.code is not None: m.code = data.code
     if data.description is not None: m.description = data.description
+    if data.route is not None: m.route_path = data.route
 
     await db.commit()
     await db.refresh(m)
@@ -115,6 +120,7 @@ async def update_module(
         "name": m.name,
         "code": m.code,
         "description": m.description,
+            "route": m.route_path,
         "active": True
     }
     return success_response(data=res_data, message="Module updated successfully")
