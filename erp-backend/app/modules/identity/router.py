@@ -78,7 +78,7 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
             "name": m.name,
             "description": m.description or "",
             "icon": "",
-            "route": m.path or "",
+            "route": m.route_path or "",
             "status": "ACTIVE",
             "features": []
         }
