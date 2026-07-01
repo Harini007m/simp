@@ -18,7 +18,7 @@ class IdentityService(BaseService):
         self.permission_repo = PermissionRepository(db)
 
     async def login(self, data: LoginRequest) -> dict:
-        user = await self.user_repo.get_by_email(self.db, data.username)
+        user = await self.user_repo.get_by_email_or_username(self.db, data.username)
         if not user or not verify_password(data.password, user.password_hash):
             raise HTTPException(status_code=401, detail="Invalid email or password")
             
