@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -46,7 +46,7 @@ class ApplicationService(BaseService):
             return
 
         lockout_ends = verification.verification_date + timedelta(days=180)
-        if datetime.now(UTC) < lockout_ends:
+        if datetime.now(timezone.utc) < lockout_ends:
             raise HTTPException(
                 status_code=403,
                 detail="Aadhaar verification lockout is active. The student cannot apply for another internship for 6 months.",

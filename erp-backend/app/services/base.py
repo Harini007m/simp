@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any, Generic, TypeVar, Sequence, Dict, Optional
 from uuid import UUID
 from fastapi import HTTPException
