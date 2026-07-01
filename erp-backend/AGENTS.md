@@ -528,6 +528,26 @@ Should Preserve
 
 The repository should be explored first to determine additional configuration tables that should also be preserved.
 
+Verified preserve set from the current ORM metadata:
+
+- `ref_*` reference tables
+- `rbac_actions`
+- `rbac_features`
+- `rbac_modules`
+- `rbac_permission_groups`
+- `rbac_permission_group_permissions`
+- `rbac_permissions`
+- `rbac_role_permissions`
+- `rbac_role_permission_groups`
+- `rbac_roles`
+- `comm_email_templates`
+- `sys_document_templates`
+- `sys_idcard_templates`
+- `sys_settings`
+- `sup_faqs`
+
+Flush deletes all other non-preserved tables in reverse foreign-key dependency order and keeps the default `SUPER_ADMIN` user row if it exists.
+
 ---
 
 # Validation
