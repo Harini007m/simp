@@ -24,28 +24,41 @@ SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
 ROLE_MODULES = {
     "SUPER_ADMIN": ["*"],
-    "HR": [
-        "employee", "organization", "program", "application", "batch", "communication",
-        "notification", "calendar", "email", "certificate", "document", "placement",
-        "alumni", "analytics", "reports", "helpdesk", "productivity", "idcard", "selfservice"
-    ],
-    "COLLEGE_COORDINATOR": [
-        "organization", "program", "batch", "student", "attendance", "performance",
-        "communication", "calendar", "reports"
+    "STUDENT": [
+        "dashboard", "my_learning", "my_task", "my_attendance", "my_assessment", 
+        "submission", "message", "calendar", "email", "document", "reports", 
+        "export_center", "help_desk", "digital_id", "self_service", "productivity"
     ],
     "MENTOR": [
-        "mentor", "task", "assessment", "submission", "performance", "communication"
+        "dashboard", "lms_dashboard", "lms_management", "attendance_dashboard", 
+        "attendance_management", "assessment_dashboard", "assessment_management", 
+        "task_dashboard", "task_management", "performance", "submission", 
+        "leave_management", "message", "calendar", "email", "certificate", 
+        "reports", "kpis", "help_desk", "digital_id", "self_service", "productivity"
     ],
-    "STUDENT": [
-        "dashboard", "lms", "attendance", "task", "assessment", "submission",
-        "calendar", "selfservice", "productivity", "idcard"
+    "COLLEGE_COORDINATOR": [
+        "dashboard", "lms_dashboard", "attendance_dashboard", "assessment_dashboard", 
+        "task_dashboard", "performance", "college_certificate_dashboard", "reports"
     ],
-    "MANAGEMENT": [
-        "dashboard", "organization", "program", "analytics", "executive",
-        "reports", "kpi", "placement", "communication"
+    "HR": [
+        "dashboard", "college_coordinator", "employee_management", "organization_management", 
+        "program_management", "opportunity_management", "application_management", 
+        "student_management", "batch_management", "allocation", "mentor_profile", 
+        "alumni_management", "analytics_dashboard", "kpi_management", "help_desk", 
+        "digital_id_card", "self_service_portal", "productivity", "announcement", 
+        "notification", "calendar"
+    ],
+    "REPORTING_MANAGER": [
+        "dashboard", "analytics_dashboard", "kpi_management", "executive_dashboard", 
+        "help_desk", "digital_id_card", "self_service_portal", "productivity", 
+        "announcement", "notification", "leave_management", "reporting_manager", 
+        "activity_tracking", "escalation_engine", "message", "calendar", "email"
     ],
     "FINANCE_MANAGER": [
-        "dashboard", "analytics", "reports", "executive"
+        "dashboard", "kpi_management", "help_desk", "digital_id_card", "self_service_portal", 
+        "productivity", "payment_management", "message", "calendar", "email", 
+        "fee_structure", "invoice_and_receipt", "internship_wallet", "finance_dashboard", 
+        "revenue_analytics"
     ]
 }
 
@@ -109,7 +122,7 @@ def update_roles():
             ("College Coordinator", "COLLEGE_COORDINATOR"),
             ("Mentor", "MENTOR"),
             ("Student", "STUDENT"),
-            ("Management", "MANAGEMENT"),
+            ("Reporting Manager", "REPORTING_MANAGER"),
             ("Finance Manager", "FINANCE_MANAGER")
         ]
         

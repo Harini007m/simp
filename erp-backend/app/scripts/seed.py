@@ -504,6 +504,7 @@ def seed_rbac_data(session: Session, state: dict[str, list[Any]]):
         {"name": "Placement", "code": "placement", "description": "Placement", "route_path": "/feature/placement"},
         {"name": "Alumni", "code": "alumni", "description": "Alumni", "route_path": "/feature/alumni"},
         {"name": "Analytics", "code": "analytics", "description": "Analytics", "route_path": "/feature/analytics"},
+        {"name": "Reports", "code": "reports", "description": "Reports", "route_path": "/feature/reports"},
         {"name": "Help Desk", "code": "helpdesk", "description": "Help desk", "route_path": "/feature/helpdesk"},
         {"name": "Digital ID", "code": "idcard", "description": "ID card", "route_path": "/feature/id-card"},
         {"name": "Self Service", "code": "selfservice", "description": "Self service", "route_path": "/feature/self-service"},

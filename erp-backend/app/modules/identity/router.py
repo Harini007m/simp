@@ -71,9 +71,91 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
         module_result = await db.execute(combined_module_ids_query)
         db_modules = module_result.scalars().all()
         
-    mapped_modules = [
-        {
-            "id": m.code, # Map DB code to frontend ID
+    db_to_fe_module_map = {
+        'employee_management': 'employee',
+        'organization_management': 'organization',
+        'program_management': 'program',
+        'opportunity_management': 'opportunity',
+        'application_management': 'application',
+        'student_management': 'student',
+        'batch_management': 'batch',
+        'allocation': 'allocation',
+        'mentor_profile': 'mentor',
+        'lms_dashboard': 'lms',
+        'lms_management': 'lms_management',
+        'my_learning': 'my_learning',
+        'attendance_dashboard': 'attendance',
+        'attendance_management': 'attendance_management',
+        'my_attendance': 'my_attendance',
+        'task_dashboard': 'task',
+        'task_management': 'task_management',
+        'my_task': 'my_tasks',
+        'assessment_dashboard': 'assessment',
+        'assessment_management': 'assessment_management',
+        'my_assessment': 'my_assessments',
+        'submission': 'submission',
+        'performance': 'performance',
+        'college_coordinator': 'college_coordinator',
+        'common_files': 'common_file',
+        'reporting_manager': 'reporting_manager',
+        'leave_management': 'leave',
+        'activity_tracking': 'activity',
+        'escalation_engine': 'escalation',
+        'payment_management': 'payment',
+        'fee_structure': 'fee',
+        'invoice_and_receipt': 'billing',
+        'internship_wallet': 'wallet',
+        'finance_dashboard': 'finance',
+        'revenue_analytics': 'finance_analytics',
+        'notification_center': 'notification',
+        'notification': 'notification',
+        'announcement': 'announcement',
+        'communication_center': 'communication',
+        'communication': 'communication',
+        'message': 'communication',
+        'calendar_and_scheduler': 'calendar',
+        'calendar': 'calendar',
+        'email_and_template_management': 'email',
+        'email': 'email',
+        'certificate_management': 'certificate',
+        'certificate': 'certificate',
+        'college_certificate_dashboard': 'college_certificates',
+        'document_generation': 'document',
+        'document': 'document',
+        'placement_and_hiring': 'placement',
+        'placement': 'placement',
+        'alumni_management': 'alumni',
+        'alumni': 'alumni',
+        'analytics_dashboard': 'analytics',
+        'analytics': 'analytics',
+        'reports': 'reports',
+        'report_center': 'report_center', # report center doesn't exist, we use reports
+        'kpi_management': 'kpi',
+        'kpi': 'kpi',
+        'executive_dashboard': 'executive',
+        'executive': 'executive',
+        'data_export_center': 'export',
+        'export': 'export',
+        'export_center': 'export',
+        'help_desk__tickets': 'helpdesk',
+        'helpdesk': 'helpdesk',
+        'help_desk': 'helpdesk',
+        'digital_id_card': 'idcard',
+        'idcard': 'idcard',
+        'digital_id': 'idcard',
+        'self_service_portal': 'selfservice',
+        'self_service': 'selfservice',
+        'selfservice': 'selfservice',
+        'productivity': 'productivity',
+        'super_admin_settings': 'super_admin',
+        'super_admin': 'super_admin',
+    }
+    
+    mapped_modules = []
+    for m in db_modules:
+        fe_id = db_to_fe_module_map.get(m.code, m.code)
+        mapped_modules.append({
+            "id": fe_id,
             "code": m.code.upper(),
             "name": m.name,
             "description": m.description or "",
@@ -81,9 +163,7 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
             "route": m.route_path or "",
             "status": "ACTIVE",
             "features": []
-        }
-        for m in db_modules
-    ]
+        })
     
     permissions = []
     if role and role.code == "SUPER_ADMIN":

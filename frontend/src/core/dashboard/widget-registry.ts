@@ -31,7 +31,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     size: 'large'
   },
 
-  // HR / Management Widgets
+  // HR / Reporting Manager Widgets
   {
     widgetId: 'employee_kpi',
     name: 'Employee KPI',
@@ -273,7 +273,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'High-level system usage and statistics',
     moduleId: 'analytics',
     permissionKey: 'analytics.view',
-    supportedRoles: ['Super Admin', 'HR', 'Management'],
+    supportedRoles: ['Super Admin', 'HR', 'Reporting Manager'],
     size: 'full'
   },
   {
@@ -282,7 +282,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Key performance indicators for executives',
     moduleId: 'executive',
     permissionKey: 'executive.view',
-    supportedRoles: ['Super Admin', 'Management'],
+    supportedRoles: ['Super Admin', 'Reporting Manager'],
     size: 'large'
   },
   {
@@ -309,7 +309,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Track revenue growth over time',
     moduleId: 'executive',
     permissionKey: 'executive.view',
-    supportedRoles: ['Super Admin', 'Finance Manager', 'Management'],
+    supportedRoles: ['Super Admin', 'Finance Manager', 'Reporting Manager'],
     size: 'medium'
   },
 
@@ -319,7 +319,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Summary of key performance indicators',
     moduleId: 'kpi',
     permissionKey: 'kpi.view',
-    supportedRoles: ['Super Admin', 'HR', 'Management'],
+    supportedRoles: ['Super Admin', 'HR', 'Reporting Manager'],
     size: 'large'
   },
 
