@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import traceback
 
 from app.core.config import settings
 from app.core.logging import setup_logging
@@ -142,3 +144,7 @@ app.include_router(wallet_router, prefix='/api/v1/wallet', tags=['Wallet'])
 @app.get("/", tags=["Health"])
 async def health_check():
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
+
+@app.get("/api/v1/test-error")
+async def test_error():
+    raise ValueError("Test error")

@@ -361,6 +361,7 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
         name: fullName.trim(),
         username: username.trim(),
         email: email.trim(),
+        password: password,
         roleId: selectedRole,
         roleName: roleName,
         status: userToEdit ? userToEdit.status : ('Active' as const),

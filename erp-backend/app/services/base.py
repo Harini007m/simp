@@ -21,8 +21,31 @@ class BaseService:
         self.db = db
         
     async def commit_transaction(self):
-        await self.db.commit()
+        from sqlalchemy.exc import IntegrityError
+        from fastapi import HTTPException
+        try:
+            await self.db.commit()
+        except IntegrityError as e:
+            await self.db.rollback()
+            raise HTTPException(status_code=400, detail="Database integrity error: This record already exists or violates a constraint.")
+        except Exception as e:
+            await self.db.rollback()
+            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
         
+    async def execute_with_integrity_check(self, coro):
+        from sqlalchemy.exc import IntegrityError
+        from fastapi import HTTPException
+        try:
+            return await coro
+        except IntegrityError as e:
+            await self.db.rollback()
+            raise HTTPException(status_code=400, detail="Database integrity error: This record already exists or violates a constraint.")
+        except HTTPException:
+            raise
+        except Exception as e:
+            await self.db.rollback()
+            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
     async def log_audit_event(self, action: str, entity: str, user_id: UUID, new_value: Any = None, old_value: Any = None):
         from app.core.audit import log_audit_event as create_audit_log
         await create_audit_log(
@@ -73,7 +96,7 @@ class BaseCRUDService(BaseService, Generic[ModelType, CreateSchemaType, UpdateSc
         )
 
     async def create(self, *, obj_in: CreateSchemaType, user_id: Optional[UUID] = None) -> ModelType:
-        obj = await self.repository.create(self.db, obj_in=obj_in)
+        obj = await self.execute_with_integrity_check(self.repository.create(self.db, obj_in=obj_in))
         if user_id:
             await self.log_audit_event("CREATE", self.repository.model.__name__, user_id, new_value=obj.id)
         await self.commit_transaction()
@@ -83,14 +106,14 @@ class BaseCRUDService(BaseService, Generic[ModelType, CreateSchemaType, UpdateSc
         self, *, id: Any, obj_in: UpdateSchemaType | dict[str, Any], user_id: Optional[UUID] = None
     ) -> ModelType:
         db_obj = await self.get(id)
-        obj = await self.repository.update(self.db, db_obj=db_obj, obj_in=obj_in)
+        obj = await self.execute_with_integrity_check(self.repository.update(self.db, db_obj=db_obj, obj_in=obj_in))
         if user_id:
             await self.log_audit_event("UPDATE", self.repository.model.__name__, user_id, new_value=obj.id)
         await self.commit_transaction()
         return obj
 
     async def delete(self, *, id: UUID, user_id: Optional[UUID] = None) -> ModelType:
-        obj = await self.repository.delete(self.db, id=id)
+        obj = await self.execute_with_integrity_check(self.repository.delete(self.db, id=id))
         if not obj:
             raise HTTPException(status_code=404, detail="Item not found")
         if user_id:

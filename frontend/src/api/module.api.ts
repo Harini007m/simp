@@ -3,7 +3,7 @@ import { Module } from '../types/api/module.types';
 
 export const moduleApi = {
   getModules: async (): Promise<Module[]> => {
-    const res = await apiClient.get<Module[]>('/api/v1/rbac/modules');
+    const res = await apiClient.get<Module[]>('/api/v1/rbac/modules/');
     return (res.data as any)?.data || res.data;
   },
 
@@ -13,7 +13,7 @@ export const moduleApi = {
   },
 
   createModule: async (data: Omit<Module, 'active'> & { active?: boolean }): Promise<Module> => {
-    const res = await apiClient.post<Module>('/api/v1/rbac/modules', data);
+    const res = await apiClient.post<Module>('/api/v1/rbac/modules/', data);
     return (res.data as any)?.data || res.data;
   },
 
