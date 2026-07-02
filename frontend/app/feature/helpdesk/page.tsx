@@ -12,6 +12,15 @@ import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { EnhancedTable } from '@/components/feature/ui/Table';
 
+const displayPriority = (priority: string): string => {
+  const p = priority?.toUpperCase();
+  if (p === 'LOW') return 'Low';
+  if (p === 'NORMAL') return 'Medium';
+  if (p === 'HIGH') return 'High';
+  if (p === 'URGENT' || p === 'CRITICAL') return 'Critical';
+  return priority || 'Medium';
+};
+
 export default function HelpdeskPage() {
 
   const { hasPermission } = usePermissions();
@@ -24,6 +33,11 @@ export default function HelpdeskPage() {
   const [isViewTicketOpen, setIsViewTicketOpen] = useState(false);
   const [newCommentText, setNewCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  // Resolve / Hierarchy / Satisfaction states
+  const [resolveRemark, setResolveRemark] = useState('');
+  const [isResolving, setIsResolving] = useState(false);
+  const [isSubmittingSatisfaction, setIsSubmittingSatisfaction] = useState(false);
 
   // Admin management state
   const [mgmtStatus, setMgmtStatus] = useState<TicketStatus>('Open');
@@ -156,6 +170,35 @@ export default function HelpdeskPage() {
     }
   };
 
+  const handleResolve = async (action: 'yes' | 'no') => {
+    if (!selectedTicket || !user) return;
+    setIsResolving(true);
+    try {
+      const updated = await HelpdeskService.resolveTicket(selectedTicket.id, action, resolveRemark);
+      setSelectedTicket(updated);
+      setResolveRemark('');
+      await loadData();
+    } catch (err) {
+      console.error("Failed to resolve ticket", err);
+    } finally {
+      setIsResolving(false);
+    }
+  };
+
+  const handleSatisfaction = async (status: 'satisfied' | 'not_satisfied') => {
+    if (!selectedTicket || !user) return;
+    setIsSubmittingSatisfaction(true);
+    try {
+      const updated = await HelpdeskService.updateSatisfaction(selectedTicket.id, status);
+      setSelectedTicket(updated);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to update satisfaction status", err);
+    } finally {
+      setIsSubmittingSatisfaction(false);
+    }
+  };
+
   if (!hasPermission('helpdesk.view')) {
     return (
       <div className="flex h-[50vh] items-center justify-center text-text-secondary font-sans">
@@ -217,17 +260,20 @@ export default function HelpdeskPage() {
                 {ticket.status}
               </span>
             )},
-            { key: 'priority', label: 'Priority', render: (ticket: Ticket) => (
-              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
-                ticket.priority === 'Critical' ? 'text-rose-600' :
-                ticket.priority === 'High' ? 'text-orange-500' :
-                ticket.priority === 'Medium' ? 'text-blue-500' :
-                'text-text-secondary'
-              }`}>
-                {ticket.priority === 'Critical' && <AlertCircle className="w-3.5 h-3.5" />}
-                {ticket.priority}
-              </span>
-            )},
+            { key: 'priority', label: 'Priority', render: (ticket: Ticket) => {
+              const p = displayPriority(ticket.priority);
+              return (
+                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
+                  p === 'Critical' ? 'text-rose-600' :
+                  p === 'High' ? 'text-orange-500' :
+                  p === 'Medium' ? 'text-blue-500' :
+                  'text-text-secondary'
+                }`}>
+                  {p === 'Critical' && <AlertCircle className="w-3.5 h-3.5" />}
+                  {p}
+                </span>
+              );
+            }},
             { key: 'updatedAt', label: 'Updated', render: (ticket: Ticket) => (
               <div className="flex items-center gap-1.5 text-text-secondary">
                 <Clock className="w-3.5 h-3.5" />
@@ -355,14 +401,19 @@ export default function HelpdeskPage() {
                   }`}>
                     {selectedTicket.status}
                   </span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    selectedTicket.priority === 'Critical' ? 'bg-rose-100 text-rose-700 animate-pulse' :
-                    selectedTicket.priority === 'High' ? 'bg-orange-100 text-orange-700' :
-                    selectedTicket.priority === 'Medium' ? 'bg-blue-100 text-blue-700' :
-                    'bg-slate-100 text-text-primary'
-                  }`}>
-                    {selectedTicket.priority} Priority
-                  </span>
+                  {(() => {
+                    const p = displayPriority(selectedTicket.priority);
+                    return (
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        p === 'Critical' ? 'bg-rose-100 text-rose-700 animate-pulse' :
+                        p === 'High' ? 'bg-orange-100 text-orange-700' :
+                        p === 'Medium' ? 'bg-blue-100 text-blue-700' :
+                        'bg-slate-100 text-text-primary'
+                      }`}>
+                        {p} Priority
+                      </span>
+                    );
+                  })()}
                   <span className="text-xs text-text-secondary font-semibold">•</span>
                   <span className="text-xs text-text-secondary font-bold">{selectedTicket.category}</span>
                 </div>
@@ -432,6 +483,78 @@ export default function HelpdeskPage() {
                       'Apply Updates'
                     )}
                   </button>
+                </div>
+              )}
+
+              {/* Hierarchy Resolve Panel (For Mentors, Admins, etc.) */}
+              {user?.roleName !== 'Student' && selectedTicket.status !== 'Resolved' && selectedTicket.status !== 'Closed' && (
+                <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-2 text-emerald-700">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Resolve Ticket (Hierarchy Flow)</span>
+                  </div>
+                  <p className="text-xs text-text-secondary">Are you able to resolve this student ticket? If no, it will be forwarded to the next higher level.</p>
+                  
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Resolution remark (required for Yes)..."
+                      value={resolveRemark}
+                      onChange={(e) => setResolveRemark(e.target.value)}
+                      className="w-full bg-white border border-border rounded-xl px-3 py-2 text-xs font-medium text-text-primary focus:outline-none"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleResolve('yes')}
+                        disabled={isResolving || !resolveRemark.trim()}
+                        className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white font-bold text-xs rounded-xl transition-all"
+                      >
+                        Yes, Resolve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleResolve('no')}
+                        disabled={isResolving}
+                        className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-300 text-white font-bold text-xs rounded-xl transition-all"
+                      >
+                        No, Forward
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Requester Satisfaction Check Panel (For Ticket Creator) */}
+              {selectedTicket.status === 'Resolved' && selectedTicket.createdBy === user?.user_id && (
+                <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-5 space-y-4 animate-pulse">
+                  <div className="flex items-center gap-2 text-amber-700">
+                    <AlertCircle className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Are you satisfied with the resolution?</span>
+                  </div>
+                  {selectedTicket.resolutionRemark && (
+                    <div className="text-xs bg-white p-2.5 rounded-xl border border-amber-200">
+                      <strong>Resolution Remark:</strong> {selectedTicket.resolutionRemark}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSatisfaction('satisfied')}
+                      disabled={isSubmittingSatisfaction}
+                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all"
+                    >
+                      Yes, Satisfied (Close)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSatisfaction('not_satisfied')}
+                      disabled={isSubmittingSatisfaction}
+                      className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl transition-all"
+                    >
+                      No, Re-apply
+                    </button>
+                  </div>
                 </div>
               )}
 

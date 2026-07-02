@@ -11,11 +11,15 @@ class Ticket(BaseModel):
     requester_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('auth_users.id', ondelete='CASCADE'), index=True, nullable=False)
     assigned_user_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey('auth_users.id', ondelete='SET NULL'), index=True)
     
+    ticket_number: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     subject: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     category: Mapped[str] = mapped_column(String(100), nullable=False)
     priority: Mapped[str] = mapped_column(String(50), default="NORMAL")
-    status: Mapped[str] = mapped_column(String(50), default="OPEN")
+    status: Mapped[str] = mapped_column(String(50), default="Open")
+    department: Mapped[Optional[str]] = mapped_column(String(100))
+    resolution_remark: Mapped[Optional[str]] = mapped_column(Text)
+    satisfaction_status: Mapped[Optional[str]] = mapped_column(String(50))
 
     messages: Mapped[List["TicketMessage"]] = relationship("TicketMessage", back_populates="ticket", cascade="all, delete-orphan")
 
