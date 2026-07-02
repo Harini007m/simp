@@ -14,7 +14,12 @@ from app.core.security import hash_password
 from app.models.system.document import DocumentTemplate, GeneratedDocument
 from app.models.authentication.user import User
 from app.models.core.reference.system import DocumentType
-from app.utils.pdf_generator import DOCUMENT_GENERATORS
+from app.utils.pdf_generator import (
+    generate_offer_letter,
+    generate_joining_letter,
+    generate_completion_certificate,
+    generate_recommendation_letter
+)
 
 router = APIRouter()
 
@@ -284,18 +289,17 @@ async def download_document_pdf(doc_id: uuid.UUID, db: AsyncSession = Depends(ge
         program = "Full Stack Web Development"  # Could be dynamic later
         stipend = "15000"
 
-        generator = DOCUMENT_GENERATORS.get(doc_type)
-        if not generator:
-            # Fallback to offer letter
-            generator = DOCUMENT_GENERATORS["Offer Letter"]
-
         # Determine kwargs based on doc type
         if doc_type in ("Offer Letter", "Internship Letter"):
-            pdf_bytes = generator(student_name=student_name, program=program, stipend=stipend)
+            pdf_bytes = generate_offer_letter(student_name=student_name, program=program, stipend=stipend)
+        elif doc_type == "Joining Letter":
+            pdf_bytes = generate_joining_letter(student_name=student_name, program=program)
         elif doc_type == "Completion Certificate":
-            pdf_bytes = generator(student_name=student_name, program=program, duration="6 Months")
+            pdf_bytes = generate_completion_certificate(student_name=student_name, program=program, duration="6 Months")
+        elif doc_type == "Recommendation Letter":
+            pdf_bytes = generate_recommendation_letter(student_name=student_name, program=program)
         else:
-            pdf_bytes = generator(student_name=student_name, program=program)
+            pdf_bytes = generate_offer_letter(student_name=student_name, program=program, stipend=stipend)
 
         filename = f"{doc_type.replace(' ', '_')}_{student_name.replace(' ', '_')}.pdf"
 
