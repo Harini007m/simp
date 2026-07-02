@@ -14,10 +14,15 @@ export const applicationApi = {
     const res = await apiClient.get<ApplicationResponse[]>('/api/v1/application/me/list');
     return res.data;
   },
+  // getAllApplications: async (): Promise<ApplicationResponse[]> => {
+  //   const res = await apiClient.get<ApplicationResponse[]>('/api/v1/application/admin/all');
+  //   return res.data;
+  // },
   getAllApplications: async (): Promise<ApplicationResponse[]> => {
-    const res = await apiClient.get<ApplicationResponse[]>('/api/v1/application/admin/all');
-    return res.data;
-  },
+  const res = await apiClient.get('/api/v1/application/admin/all');
+
+  return res.data.data;
+},
   reviewApplication: async (id: string, data: ApplicationReviewRequest): Promise<ApplicationResponse> => {
     const res = await apiClient.patch<ApplicationResponse>(`/api/v1/application/${id}/review`, data);
     return res.data;
