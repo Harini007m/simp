@@ -4,6 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from app.models.core.mixins import BaseModel
+from app.models.authentication.user import User
+from typing import List
 
 class StudentProfile(BaseModel):
     __tablename__ = 'profile_students'
@@ -24,3 +26,10 @@ class StudentProfile(BaseModel):
     
     # Unstructured skills data, or migrate to a junction table later if queryability is required
     skills: Mapped[Optional[dict]] = mapped_column(JSONB)
+    user: Mapped["User"] = relationship("User")
+
+    applications: Mapped[List["Application"]] = relationship(
+        "Application",
+        back_populates="student_profile",
+        cascade="all, delete-orphan",
+    )
