@@ -1,9 +1,15 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import get_db
+from fastapi import APIRouter
 
 router = APIRouter()
 
-@router.get("/")
-async def get_performance_list(db: AsyncSession = Depends(get_db)):
+@router.get("/students")
+async def get_performance_students():
     return []
+
+@router.get("/batches")
+async def get_performance_batches():
+    return []
+
+@router.get("/students/{studentId}")
+async def get_performance_student(studentId: str):
+    return None
