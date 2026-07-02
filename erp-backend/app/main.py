@@ -91,6 +91,7 @@ from app.modules.selfservice.router import router as selfservice_router
 from app.modules.verification.router import router as verification_router
 from app.modules.wallet.router import router as wallet_router
 from app.modules.billing.router import router as billing_router
+from app.modules.calendar.router import router as calendar_router
 
 app.include_router(employee_router, prefix='/api/v1/employee', tags=['Employee'])
 app.include_router(organization_router, prefix='/api/v1/organization', tags=['Organization'])
