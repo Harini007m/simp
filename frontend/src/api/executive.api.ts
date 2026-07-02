@@ -1,11 +1,10 @@
 import { apiClient } from './api.client';
 import { ExecutiveMetric, RiskIndicator } from '../types/executive.types';
-import {} from '../types/executive.types';
 
 export const ExecutiveApi = {
   getMetrics: async (): Promise<ExecutiveMetric[]> => {
     try {
-      const res = await apiClient.get('/api/v1/executive');
+      const res = await apiClient.get('/api/v1/executive/metrics');
       return res.data?.data || [];
     } catch (error) {
       return [];
@@ -13,7 +12,7 @@ export const ExecutiveApi = {
   },
   getRiskIndicators: async (): Promise<RiskIndicator[]> => {
     try {
-      const res = await apiClient.get('/api/v1/executive');
+      const res = await apiClient.get('/api/v1/executive/risks');
       return res.data?.data || [];
     } catch (error) {
       return [];

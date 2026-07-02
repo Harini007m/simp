@@ -80,15 +80,15 @@ export default function SelfServicePage() {
       
       // Override profile details with currently logged in user if available
       const mergedProfile = user ? {
-        ...data.profile,
+        ...(data?.profile || {}),
         name: user.name,
         email: user.email,
         role: user.roleName
-      } : data.profile;
+      } : (data?.profile || null);
       
-      setProfile(mergedProfile);
-      setEditForm(mergedProfile);
-      setRecentRequests(data.recentRequests);
+      setProfile(mergedProfile as any);
+      setEditForm(mergedProfile as any);
+      setRecentRequests(data?.recentRequests || []);
 
       const allCerts = await CertificateService.getCertificates();
       const myCerts = allCerts.filter(c => c.studentName === mergedProfile?.name && c.status === 'Issued');

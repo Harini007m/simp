@@ -1,8 +1,5 @@
 import { apiClient } from './api.client';
 import { DigitalIDCard } from '../types/idcard.types';
-import {} from '../types/idcards.types';
-
-const DELAY = 500;
 
 export const IDCardAPI = {
   getIDCards: async (): Promise<DigitalIDCard[]> => {
@@ -14,12 +11,12 @@ export const IDCardAPI = {
     }
   },
 
-  getMyIDCard: async (studentId: string): Promise<DigitalIDCard | null> => {
+  getMyIDCard: async (userId: string): Promise<DigitalIDCard | null> => {
     try {
-      const res = await apiClient.get('/api/v1/idcard');
-      return res.data?.data || null as any;
+      const res = await apiClient.get('/api/v1/idcard/my');
+      return res.data?.data || null;
     } catch (error) {
-      return null as any;
+      return null;
     }
   }
 };

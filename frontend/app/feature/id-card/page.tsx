@@ -656,14 +656,142 @@ export default function IDCardPage() {
   }, [user]);
 
   const handleDownloadPDF = () => {
-    alert("Digital ID Card PDF is being generated and compiled. Check your browser downloads!");
-    const element = document.createElement("a");
-    const file = new Blob(["Digital ID Card Data\n\nName: " + card?.studentName + "\nID: " + card?.studentId + "\nCard Number: " + card?.cardNumber], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = `${card?.studentName?.replace(/\s+/g, '_')}_ID_Card.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    if (typeof window === 'undefined') return;
+
+    alert("Your Digital ID Card PDF is being generated. Please wait...");
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = () => {
+      try {
+        const { jsPDF } = (window as any).jspdf;
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        // Page 1: Front
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.setTextColor(15, 23, 42); // slate-900
+        doc.text("PINESPHERE ENTERPRISE", 105, 30, { align: "center" });
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.setTextColor(100, 116, 139); // slate-500
+        doc.text("Official Digital Identity Card - Front Side", 105, 38, { align: "center" });
+
+        // Card Frame
+        doc.setDrawColor(226, 232, 240); // slate-200
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(60, 50, 90, 135, 6, 6, "FD");
+
+        // Accent Header Banner
+        doc.setFillColor(59, 130, 246); // blue-500
+        doc.rect(60, 50, 90, 30, "F");
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("PINESPHERE ENTERPRISE", 105, 67, { align: "center" });
+
+        // Name
+        doc.setTextColor(15, 23, 42);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text(card?.studentName || "User", 105, 102, { align: "center" });
+
+        // Program
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(59, 130, 246);
+        doc.text(card?.program || "Student", 105, 110, { align: "center" });
+
+        // Details grid
+        doc.setTextColor(100, 116, 139);
+        doc.setFontSize(8);
+        doc.text("ID NUMBER", 68, 128);
+        doc.text("DEPARTMENT", 112, 128);
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.text(card?.studentId || "N/A", 68, 134);
+        doc.text(card?.department || "N/A", 112, 134);
+
+        doc.setTextColor(100, 116, 139);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.text("BLOOD GROUP", 68, 146);
+        doc.text("EXPIRY DATE", 112, 146);
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.text(card?.bloodGroup || "N/A", 68, 152);
+        const expDate = card?.expiryDate ? new Date(card.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : "N/A";
+        doc.text(expDate, 112, 152);
+
+        // Decorative Footer
+        doc.setFillColor(16, 185, 129); // emerald-500
+        doc.rect(60, 182, 90, 3, "F");
+
+        // Page 2: Back
+        doc.addPage();
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.setTextColor(15, 23, 42);
+        doc.text("PINESPHERE ENTERPRISE", 105, 30, { align: "center" });
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.setTextColor(100, 116, 139);
+        doc.text("Official Digital Identity Card - Back Side", 105, 38, { align: "center" });
+
+        // Card Frame
+        doc.setDrawColor(226, 232, 240);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(60, 50, 90, 135, 6, 6, "FD");
+
+        // QR label
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(15, 23, 42);
+        doc.text("SCAN TO VERIFY IDENTITY", 105, 65, { align: "center" });
+
+        // Mock QR
+        doc.setDrawColor(100, 116, 139);
+        doc.rect(85, 75, 40, 40);
+        doc.setFontSize(6);
+        doc.text("[ VERIFICATION QR ]", 105, 96, { align: "center" });
+
+        // Terms
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        const terms = "This identity pass is the official property of Pinesphere. It must be displayed prominently at all times on company premises. If found, please return to nearest supervisor.";
+        const splitTerms = doc.splitTextToSize(terms, 78);
+        doc.text(splitTerms, 105, 130, { align: "center" });
+
+        // Emergency
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(239, 68, 68); // red-500
+        doc.text("EMERGENCY HOTLINE", 105, 155, { align: "center" });
+
+        doc.setFontSize(10);
+        doc.setTextColor(15, 23, 42);
+        doc.text(card?.emergencyContact || "+91 99999 00000", 105, 162, { align: "center" });
+
+        doc.save(`${card?.studentName?.replace(/\s+/g, '_')}_ID_Card.pdf`);
+      } catch (err) {
+        console.error("PDF Generation error", err);
+      }
+    };
+    script.onerror = () => {
+      alert("Failed to load PDF generator library. Please check your network connection.");
+    };
+    document.body.appendChild(script);
   };
 
   const handlePrint = () => {
