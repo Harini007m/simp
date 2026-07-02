@@ -193,6 +193,11 @@ export default function PerformanceManagementPage() {
                       <span className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-700">On Track</span>
                     )
                   )},
+                  { key: 'actions', label: '', className: 'text-right', render: (p: StudentPerformance) => (
+                    <button onClick={() => handleStudentClick(p)} className="p-1 text-text-secondary hover:text-blue-600 transition-colors">
+                      <Eye className="h-4 w-4" />
+                    </button>
+                  )},
                 ]}
                 searchPlaceholder="Search by student ID..."
                 itemsPerPage={10}

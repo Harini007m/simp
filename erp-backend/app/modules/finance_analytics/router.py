@@ -1,31 +1,19 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 
 router = APIRouter()
 
 @router.get("/")
-async def list_finance_analytics():
-    return {"success": True, "message": "finance_analytics listing", "data": []}
-
-@router.get("/{path:path}")
-async def get_all_finance_analytics(path: str):
-    return {"success": True, "message": f"finance_analytics get {path}", "data": []}
-
-@router.post("/")
-async def create_finance_analytics_root():
-    return {"success": True, "message": "finance_analytics created", "data": {}}
-
-@router.post("/{path:path}")
-async def post_all_finance_analytics(path: str):
-    return {"success": True, "message": f"finance_analytics post {path}", "data": {}}
-
-@router.put("/{path:path}")
-async def put_all_finance_analytics(path: str):
-    return {"success": True, "message": f"finance_analytics put {path}", "data": {}}
-
-@router.patch("/{path:path}")
-async def patch_all_finance_analytics(path: str):
-    return {"success": True, "message": f"finance_analytics patch {path}", "data": {}}
-
-@router.delete("/{path:path}")
-async def delete_all_finance_analytics(path: str):
-    return {"success": True, "message": f"finance_analytics delete {path}", "data": {}}
+async def get_analytics():
+    return {"data": {
+        "totalRealizedRevenue": 1500000,
+        "paymentMethodDistribution": [
+            {"method": "UPI", "amount": 800000},
+            {"method": "Credit Card", "amount": 400000},
+            {"method": "Bank Transfer", "amount": 300000}
+        ],
+        "transactionSuccessRate": [
+            {"status": "Success", "count": 1250},
+            {"status": "Failed", "count": 45},
+            {"status": "Pending", "count": 12}
+        ]
+    }}
