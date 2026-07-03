@@ -104,45 +104,58 @@ export default function RolesPage() {
             <Card key={role.id} className="flex flex-col hover:shadow-md transition-shadow bg-white">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <div className={`p-2.5 rounded-xl ${role.bg}`}>
-                    <Shield className={`h-6 w-6 ${role.color}`} />
+                  <div className={`p-2.5 rounded-xl ${role.bg || 'bg-slate-100'}`}>
+                    {role.icon ? (
+                      <img src={role.icon} alt={`${role.name} icon`} className="h-6 w-6 object-contain" />
+                    ) : (
+                      <Shield className={`h-6 w-6 ${role.color || 'text-slate-600'}`} />
+                    )}
                   </div>
-                  <div className="flex gap-1">
-                    <button 
-                      onClick={() => handleView(role)} 
-                      className="p-1.5 text-text-secondary hover:text-blue-600 transition-colors rounded-md hover:bg-slate-50"
-                      title="View"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleEdit(role)} 
-                      className="p-1.5 text-text-secondary hover:text-blue-600 transition-colors rounded-md hover:bg-slate-50"
-                      title="Edit"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(role)} 
-                      className="p-1.5 text-text-secondary hover:text-red-600 transition-colors rounded-md hover:bg-slate-50"
-                      title="Delete"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </button>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                      (role.isActive !== undefined ? role.isActive : role.status === 'Active') 
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                        : 'bg-slate-100 text-slate-700 border border-slate-200'
+                    }`}>
+                      {(role.isActive !== undefined ? role.isActive : role.status === 'Active') ? 'Active' : 'Inactive'}
+                    </span>
+                    <div className="flex gap-1">
+                      <button 
+                        onClick={() => handleView(role)} 
+                        className="p-1.5 text-text-secondary hover:text-blue-600 transition-colors rounded-md hover:bg-slate-50"
+                        title="View"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleEdit(role)} 
+                        className="p-1.5 text-text-secondary hover:text-blue-600 transition-colors rounded-md hover:bg-slate-50"
+                        title="Edit"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(role)} 
+                        className="p-1.5 text-text-secondary hover:text-red-600 transition-colors rounded-md hover:bg-slate-50"
+                        title="Delete"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <h3 className="text-lg font-bold text-text-primary mt-4">{role.name}</h3>
-                <p className="text-sm text-text-secondary mt-1 line-clamp-2 min-h-[40px]">{role.desc}</p>
+                <p className="text-sm text-text-secondary mt-1 line-clamp-2 min-h-[40px]">{role.desc || role.description || 'No description'}</p>
               </CardHeader>
               <div className="flex-1"></div>
               <CardFooter className="pt-4 border-t border-border flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-sm font-medium text-text-secondary">
                   <Shield className="h-4 w-4 text-text-secondary" />
-                  {role.modulesCount} Modules
+                  {role.modulesCount || role.moduleIds?.length || 0} Modules
                 </div>
                 <div className="flex items-center gap-1.5 text-sm font-medium text-text-secondary">
                   <Users className="h-4 w-4 text-text-secondary" />
-                  {role.usersCount} Users
+                  {role.usersCount || 0} Users
                 </div>
               </CardFooter>
             </Card>

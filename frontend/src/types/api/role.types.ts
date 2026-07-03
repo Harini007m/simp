@@ -3,6 +3,7 @@ export interface Role {
   name: string;
   code: string;
   desc: string;
+  description?: string;
   status: 'Active' | 'Inactive';
   modulesCount: number;
   usersCount: number;
@@ -10,7 +11,10 @@ export interface Role {
   bg: string;
   moduleIds: string[];
   permissions: string[];
+  icon?: string | null;
+  isActive: boolean;
+  is_system?: boolean;
 }
 
-export type RoleCreate = Omit<Role, 'id' | 'modulesCount' | 'usersCount'>;
+export type RoleCreate = Omit<Role, 'id' | 'modulesCount' | 'usersCount' | 'color' | 'bg'>;
 export type RoleUpdate = Partial<RoleCreate>;

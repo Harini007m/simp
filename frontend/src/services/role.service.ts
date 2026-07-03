@@ -21,12 +21,13 @@ export const roleService = {
 
   async createRole(role: Omit<Role, 'id' | 'modulesCount' | 'usersCount' | 'color' | 'bg'> & { color?: string, bg?: string }): Promise<Role> {
     try {
-      // Map desc to description for backend
       const payload: any = {
         name: role.name,
         code: role.code,
         description: role.desc,
         is_system: false,
+        is_active: role.isActive !== undefined ? role.isActive : true,
+        icon: role.icon,
         module_ids: role.moduleIds
       };
       return await roleApi.createRole(payload);
@@ -42,6 +43,8 @@ export const roleService = {
       if (updatedData.name !== undefined) payload.name = updatedData.name;
       if (updatedData.desc !== undefined) payload.description = updatedData.desc;
       if (updatedData.moduleIds !== undefined) payload.module_ids = updatedData.moduleIds;
+      if (updatedData.isActive !== undefined) payload.is_active = updatedData.isActive;
+      if (updatedData.icon !== undefined) payload.icon = updatedData.icon;
       
       return await roleApi.updateRole(id, payload);
     } catch (error) {
