@@ -104,7 +104,7 @@ export const FEATURE_REGISTRY: FeatureDefinition[] = [
   { moduleId: 'reports', featureId: 'reports_main', permissionKey: 'reports.view', displayName: 'Report Center', navigationLabel: 'Reports', route: '/feature/reports', icon: FileBarChart },
   { moduleId: 'kpi', featureId: 'kpi_main', permissionKey: 'kpi.view', displayName: 'KPI Management', navigationLabel: 'KPIs', route: '/feature/kpi', icon: Target },
   { moduleId: 'executive', featureId: 'executive_dashboard', permissionKey: 'executive.view', displayName: 'Executive Dashboard', navigationLabel: 'Executive Dashboard', route: '/feature/executive', icon: BarChart4 },
-  { moduleId: 'export', featureId: 'export_main', permissionKey: 'export.view', displayName: 'Data Export Center', navigationLabel: 'Export Center', route: '/feature/export', icon: DownloadCloud },
+
 
   // Phase 7: Support, Productivity & Experience
   { moduleId: 'helpdesk', featureId: 'helpdesk_main', permissionKey: 'helpdesk.view', displayName: 'Help Desk / Tickets', navigationLabel: 'Help Desk', route: '/feature/helpdesk', icon: LifeBuoy },

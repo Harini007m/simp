@@ -22,6 +22,9 @@ class UserService(BaseCRUDService[User, UserCreate, UserUpdate]):
         # Ensure account_status is set since exclude_unset=True drops defaults
         account_status = obj_in_data.get("account_status", obj_in.account_status)
         obj_in_data["account_status"] = account_status.value if hasattr(account_status, "value") else account_status
+        
+        entity_type = obj_in_data.pop("entityType", None)
+        entity_id = obj_in_data.pop("entityId", None)
             
         new_user = await super().create(obj_in=obj_in_data, user_id=user_id)
         
@@ -39,7 +42,33 @@ class UserService(BaseCRUDService[User, UserCreate, UserUpdate]):
                 self.db.add(user_mod)
                 
         if role_id or module_overrides:
-            await self.commit_transaction()
+            await self.db.flush()
+            
+        if entity_type and entity_id:
+            from sqlalchemy import select
+            
+            if entity_type == "employee":
+                from app.models.profiles.employee_profile import EmployeeProfile
+                profile = await self.db.scalar(select(EmployeeProfile).where(EmployeeProfile.id == entity_id))
+            elif entity_type == "student":
+                from app.models.profiles.student_profile import StudentProfile
+                profile = await self.db.scalar(select(StudentProfile).where(StudentProfile.id == entity_id))
+            elif entity_type == "organization":
+                from app.models.profiles.org_coordinator_profile import OrganizationCoordinatorProfile
+                profile = await self.db.scalar(select(OrganizationCoordinatorProfile).where(OrganizationCoordinatorProfile.id == entity_id))
+            else:
+                raise HTTPException(status_code=400, detail="Invalid entityType")
+                
+            if not profile:
+                raise HTTPException(status_code=404, detail="Entity not found")
+                
+            if getattr(profile, "user_id", None) is not None:
+                raise HTTPException(status_code=400, detail="Entity already linked to a user account")
+                
+            profile.user_id = new_user.id
+            self.db.add(profile)
+            
+        await self.commit_transaction()
             
         return new_user
     async def update(self, *, id: UUID, obj_in: UserUpdate, user_id: UUID = None) -> User:

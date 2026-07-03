@@ -8,3 +8,4 @@ from .role_permission import RolePermission, RolePermissionGroup
 from .user_role import UserRole
 from .user_permission_override import UserPermissionOverride
 from .user_module import UserModule
+from .role_module import RoleModule

@@ -8,9 +8,8 @@ export class HelpdeskService {
   }
 
   static async getMyTickets(userId: string): Promise<Ticket[]> {
-    const tickets = await HelpdeskAPI.getTickets();
-    return tickets.filter(t => t.createdBy === userId || t.assignedTo === userId)
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    const tickets = await HelpdeskAPI.getMyTickets(userId);
+    return tickets.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
 
   static async getTicketById(id: string): Promise<Ticket | null> {
@@ -31,5 +30,13 @@ export class HelpdeskService {
 
   static async updateTicketStatus(ticketId: string, status: TicketStatus, assigneeId?: string, assigneeName?: string): Promise<Ticket> {
     return HelpdeskAPI.updateTicketStatus(ticketId, status, assigneeId, assigneeName);
+  }
+
+  static async updateSatisfaction(ticketId: string, satisfactionStatus: string): Promise<Ticket> {
+    return HelpdeskAPI.updateSatisfaction(ticketId, satisfactionStatus);
+  }
+
+  static async resolveTicket(ticketId: string, resolveAction: 'yes' | 'no', remark?: string): Promise<Ticket> {
+    return HelpdeskAPI.resolveTicket(ticketId, resolveAction, remark);
   }
 }

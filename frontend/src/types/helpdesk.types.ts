@@ -32,6 +32,8 @@ export interface Ticket {
   slaBreach: boolean;
   slaDueDate: string;
   comments: TicketComment[];
+  resolutionRemark?: string;
+  satisfactionStatus?: string;
 }
 
 export interface KnowledgeBaseArticle {

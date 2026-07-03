@@ -41,40 +41,41 @@ export default function ProductivityPage() {
   };
 
   // --- TASK ACTIONS ---
-  const handleToggleTask = (taskId: string) => {
+  const handleToggleTask = async (taskId: string) => {
     if (!workspace) return;
-    setWorkspace({
-      ...workspace,
-      tasks: workspace.tasks.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t)
-    });
+    const task = workspace.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    try {
+      await ProductivityService.toggleTask(taskId, !task.completed);
+      await loadData();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const handleAddTask = (e: React.FormEvent) => {
+  const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workspace || !taskForm.title.trim()) return;
 
-    const newTask: PersonalTask = {
-      id: `PT-${Date.now()}`,
-      title: taskForm.title.trim(),
-      completed: false,
-      dueDate: new Date(taskForm.dueDate).toISOString()
-    };
-
-    setWorkspace({
-      ...workspace,
-      tasks: [newTask, ...workspace.tasks]
-    });
-    setTaskForm({ title: '', dueDate: new Date().toISOString().split('T')[0] });
-    setTaskModalOpen(false);
+    try {
+      await ProductivityService.createTask(taskForm.title.trim(), taskForm.dueDate);
+      setTaskForm({ title: '', dueDate: new Date().toISOString().split('T')[0] });
+      setTaskModalOpen(false);
+      await loadData();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const handleDeleteTask = (taskId: string, e: React.MouseEvent) => {
+  const handleDeleteTask = async (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation(); // prevent triggering row click checkbox toggle
     if (!workspace) return;
-    setWorkspace({
-      ...workspace,
-      tasks: workspace.tasks.filter(t => t.id !== taskId)
-    });
+    try {
+      await ProductivityService.deleteTask(taskId);
+      await loadData();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // --- NOTE ACTIONS ---
@@ -87,48 +88,39 @@ export default function ProductivityPage() {
     setNoteModalOpen(true);
   };
 
-  const handleSaveNote = (e: React.FormEvent) => {
+  const handleSaveNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workspace || !noteForm.content.trim()) return;
 
-    if (noteForm.id) {
-      // Editing existing note
-      setWorkspace({
-        ...workspace,
-        notes: workspace.notes.map(n => n.id === noteForm.id ? { 
-          ...n, 
-          content: noteForm.content.trim(), 
-          color: noteForm.color 
-        } : n)
-      });
-    } else {
-      // Adding new note
-      const newNote: StickyNote = {
-        id: `NOTE-${Date.now()}`,
-        content: noteForm.content.trim(),
-        color: noteForm.color,
-        createdAt: new Date().toISOString()
-      };
-      setWorkspace({
-        ...workspace,
-        notes: [newNote, ...workspace.notes]
-      });
+    try {
+      if (noteForm.id) {
+        // Editing existing note
+        await ProductivityService.updateNote(noteForm.id, noteForm.content.trim(), noteForm.color);
+      } else {
+        // Adding new note
+        await ProductivityService.createNote(noteForm.content.trim(), noteForm.color);
+      }
+      setNoteModalOpen(false);
+      setNoteForm({ id: '', content: '', color: 'yellow' });
+      await loadData();
+    } catch (e) {
+      console.error(e);
     }
-    setNoteModalOpen(false);
-    setNoteForm({ id: '', content: '', color: 'yellow' });
   };
 
-  const handleDeleteNote = (noteId: string, e: React.MouseEvent) => {
+  const handleDeleteNote = async (noteId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!workspace) return;
-    setWorkspace({
-      ...workspace,
-      notes: workspace.notes.filter(n => n.id !== noteId)
-    });
+    try {
+      await ProductivityService.deleteNote(noteId);
+      await loadData();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // --- BOOKMARK ACTIONS ---
-  const handleAddBookmark = (e: React.FormEvent) => {
+  const handleAddBookmark = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workspace || !bookmarkForm.title.trim() || !bookmarkForm.url.trim()) return;
 
@@ -137,29 +129,26 @@ export default function ProductivityPage() {
       url = 'https://' + url;
     }
 
-    const newBookmark: Bookmark = {
-      id: `BM-${Date.now()}`,
-      title: bookmarkForm.title.trim(),
-      url: url,
-      category: bookmarkForm.category.trim() || 'Work'
-    };
-
-    setWorkspace({
-      ...workspace,
-      bookmarks: [...workspace.bookmarks, newBookmark]
-    });
-    setBookmarkForm({ title: '', url: '', category: 'Work' });
-    setBookmarkModalOpen(false);
+    try {
+      await ProductivityService.createBookmark(bookmarkForm.title.trim(), url, bookmarkForm.category.trim() || 'Work');
+      setBookmarkForm({ title: '', url: '', category: 'Work' });
+      setBookmarkModalOpen(false);
+      await loadData();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const handleDeleteBookmark = (bookmarkId: string, e: React.MouseEvent) => {
+  const handleDeleteBookmark = async (bookmarkId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     if (!workspace) return;
-    setWorkspace({
-      ...workspace,
-      bookmarks: workspace.bookmarks.filter(b => b.id !== bookmarkId)
-    });
+    try {
+      await ProductivityService.deleteBookmark(bookmarkId);
+      await loadData();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   if (!hasPermission('productivity.view')) {
@@ -207,10 +196,10 @@ export default function ProductivityPage() {
             </button>
           </div>
           <div className="p-3 space-y-1.5 flex-grow overflow-y-auto custom-scrollbar">
-            {workspace.tasks.length === 0 ? (
+            {(workspace?.tasks || []).length === 0 ? (
               <div className="p-8 text-center text-xs text-text-secondary">No tasks created.</div>
             ) : (
-              workspace.tasks.map(task => (
+              (workspace?.tasks || []).map(task => (
                 <div 
                   key={task.id} 
                   onClick={() => handleToggleTask(task.id)}
@@ -262,10 +251,10 @@ export default function ProductivityPage() {
             </button>
           </div>
           <div className="p-4 space-y-4 flex-grow overflow-y-auto custom-scrollbar">
-            {workspace.notes.length === 0 ? (
+            {(workspace?.notes || []).length === 0 ? (
               <div className="p-8 text-center text-xs text-text-secondary">No notes created.</div>
             ) : (
-              workspace.notes.map(note => (
+              (workspace?.notes || []).map(note => (
                 <div 
                   key={note.id} 
                   onClick={() => handleOpenNoteModal(note)}
@@ -316,10 +305,10 @@ export default function ProductivityPage() {
             </button>
           </div>
           <div className="divide-y divide-border flex-grow overflow-y-auto custom-scrollbar">
-            {workspace.bookmarks.length === 0 ? (
+            {(workspace?.bookmarks || []).length === 0 ? (
               <div className="p-8 text-center text-xs text-text-secondary">No bookmarks saved.</div>
-            ) : (
-              workspace.bookmarks.map(bm => (
+) : (
+              (workspace?.bookmarks || []).map(bm => (
                 <div 
                   key={bm.id} 
                   className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group"
@@ -344,7 +333,15 @@ export default function ProductivityPage() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <ExternalLink className="w-4.5 h-4.5 text-slate-350 group-hover:text-blue-500 transition-colors p-0.5" />
+                    <a 
+                      href={bm.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="p-1.5 rounded-lg hover:bg-blue-50 text-text-secondary hover:text-blue-550 transition-colors flex items-center justify-center"
+                      title="Open link"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
                   </div>
                 </div>
               ))

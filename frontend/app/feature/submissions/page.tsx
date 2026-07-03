@@ -199,7 +199,7 @@ export default function SubmissionsManagementPage() {
                   label: '',
                   className: 'text-right',
                   render: (s: Submission) => (
-                    <button className="p-1 text-text-secondary hover:text-blue-600 transition-colors">
+                    <button onClick={() => handleSubmissionClick(s)} className="p-1 text-text-secondary hover:text-blue-600 transition-colors">
                       <Eye className="h-4 w-4" />
                     </button>
                   ),
@@ -421,7 +421,20 @@ export default function SubmissionsManagementPage() {
                             <div className="font-medium text-text-primary">File ID: {fid}</div>
                           </div>
                         </div>
-                        <button className="text-sm text-blue-600 font-medium hover:underline">Download</button>
+                        <button 
+                          onClick={() => {
+                            const element = document.createElement("a");
+                            const file = new Blob([`Dummy file content for ${fid}`], { type: 'text/plain' });
+                            element.href = URL.createObjectURL(file);
+                            element.download = `${fid}.txt`;
+                            document.body.appendChild(element);
+                            element.click();
+                            document.body.removeChild(element);
+                          }}
+                          className="text-sm text-blue-600 font-medium hover:underline"
+                        >
+                          Download
+                        </button>
                       </div>
                     ))
                   ) : (

@@ -8,6 +8,8 @@ import { Card } from '@/components/feature/ui/Card';
 import { ChevronRight, ChevronLeft, FileText, CheckCircle2 } from 'lucide-react';
 import { billingService } from '@/src/services/billing.service';
 import { Invoice } from '@/src/types/billing.types';
+import { studentService, ExtendedStudent } from '@/src/services/student.service';
+
 
 interface GenerateInvoiceWizardProps {
   isOpen: boolean;
@@ -33,8 +35,21 @@ export function GenerateInvoiceWizard({
   const [subTotal, setSubTotal] = useState('');
   const [taxAmount, setTaxAmount] = useState('');
 
+  // Dropdown data
+  const [students, setStudents] = useState<ExtendedStudent[]>([]);
+  const [batches, setBatches] = useState<string[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState('');
+
   // Error state
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    studentService.getStudents().then(data => {
+      setStudents(data);
+      const uniqueBatches = Array.from(new Set(data.map(s => s.batch?.name || s.internshipInfo?.batchName || 'Unassigned')));
+      setBatches(uniqueBatches);
+    });
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -50,8 +65,8 @@ export function GenerateInvoiceWizard({
 
   const validateStep0 = () => {
     const newErrors: Record<string, string> = {};
-    if (!studentId.trim()) newErrors.studentId = 'Student ID is required';
-    if (!studentName.trim()) newErrors.studentName = 'Student Name is required';
+    if (!selectedBatch) newErrors.selectedBatch = 'Batch is required';
+    if (!studentId) newErrors.studentId = 'Student is required';
     if (!dueDate.trim()) newErrors.dueDate = 'Due date is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -119,45 +134,58 @@ export function GenerateInvoiceWizard({
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
+        const filteredStudents = students.filter(s => (s.batch?.name || s.internshipInfo?.batchName || 'Unassigned') === selectedBatch);
         return (
           <div className="space-y-6 p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-label">Student ID *</label>
-                <input
-                  type="text"
+                <label className="text-sm font-bold text-label">Select Batch *</label>
+                <select
+                  value={selectedBatch}
+                  onChange={e => {
+                    setSelectedBatch(e.target.value);
+                    setStudentId('');
+                    setStudentName('');
+                    if (errors.selectedBatch) setErrors(prev => ({ ...prev, selectedBatch: '' }));
+                  }}
+                  className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
+                    errors.selectedBatch 
+                      ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
+                      : 'border-border focus:border-primary focus:ring-primary'
+                  }`}
+                >
+                  <option value="">-- Select Batch --</option>
+                  {batches.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+                {errors.selectedBatch && <p className="text-xs font-semibold text-red-500 mt-1">{errors.selectedBatch}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-label">Select Student *</label>
+                <select
                   value={studentId}
                   onChange={e => {
-                    setStudentId(e.target.value);
+                    const sid = e.target.value;
+                    setStudentId(sid);
+                    const stu = students.find(s => s.student_id === sid || s.id === sid);
+                    setStudentName(stu?.name || '');
                     if (errors.studentId) setErrors(prev => ({ ...prev, studentId: '' }));
                   }}
+                  disabled={!selectedBatch}
                   className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
                     errors.studentId 
                       ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
                       : 'border-border focus:border-primary focus:ring-primary'
-                  }`}
-                  placeholder="e.g. STU12345"
-                />
+                  } ${!selectedBatch ? 'bg-slate-100 cursor-not-allowed' : ''}`}
+                >
+                  <option value="">-- Select Student --</option>
+                  {filteredStudents.map(s => (
+                    <option key={s.id} value={s.student_id || s.id}>{s.name} ({s.student_id || s.id})</option>
+                  ))}
+                </select>
                 {errors.studentId && <p className="text-xs font-semibold text-red-500 mt-1">{errors.studentId}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-label">Student Name *</label>
-                <input
-                  type="text"
-                  value={studentName}
-                  onChange={e => {
-                    setStudentName(e.target.value);
-                    if (errors.studentName) setErrors(prev => ({ ...prev, studentName: '' }));
-                  }}
-                  className={`w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all ${
-                    errors.studentName 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
-                      : 'border-border focus:border-primary focus:ring-primary'
-                  }`}
-                  placeholder="e.g. John Doe"
-                />
-                {errors.studentName && <p className="text-xs font-semibold text-red-500 mt-1">{errors.studentName}</p>}
               </div>
             </div>
             
