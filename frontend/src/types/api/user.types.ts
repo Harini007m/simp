@@ -12,4 +12,6 @@ export interface User {
   collegeId?: string;
   batchId?: string;
   departmentId?: string;
+  entityType?: 'employee' | 'student' | 'organization';
+  entityId?: string;
 }

@@ -128,7 +128,7 @@ MODULE_ALIASES = {
 }
 
 
-@dataclass(slots=True)
+@dataclass
 class FlushResult:
     dry_run: bool
     tables: list[str]

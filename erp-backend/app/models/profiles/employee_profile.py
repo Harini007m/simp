@@ -12,9 +12,14 @@ class EmployeeProfile(BaseModel):
         {'comment': 'Base profile for internal organizational staff'}
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('auth_users.id', ondelete='CASCADE'), unique=True, index=True, nullable=False)
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey('auth_users.id', ondelete='SET NULL'), unique=True, index=True, nullable=True)
     organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('org_organizations.id', ondelete='RESTRICT'), index=True, nullable=False)
     department_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey('org_departments.id', ondelete='RESTRICT'), index=True)
+
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    phone: Mapped[Optional[str]] = mapped_column(String(20))
 
     employee_code: Mapped[str] = mapped_column(String(100), nullable=False)
     designation: Mapped[str] = mapped_column(String(150), nullable=False)
