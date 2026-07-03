@@ -9,6 +9,7 @@ import {
   Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock,
   PlusSquare, ArrowRight, Layers
 } from 'lucide-react';
+import { programService } from "@/src/services/program.service";
 import { batchService } from '@/src/services/batch.service';
 import { Batch, BatchStudent, BatchTimelineEvent, BatchProject } from '@/src/types/batches.types';
 import { useAuth } from '@/src/context/AuthContext';
@@ -24,6 +25,7 @@ export default function BatchManagementPage() {
   // Data state
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [programs, setPrograms] = useState<any[]>([]);
   
   // Selected batches for bulk operations
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -93,8 +95,15 @@ export default function BatchManagementPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const data = await batchService.getBatches();
-      setBatches(data);
+
+      const [batchData, programData] = await Promise.all([
+        batchService.getBatches(),
+        programService.getPrograms(),
+      ]);
+
+      setBatches(batchData);
+      setPrograms(programData);
+
     } catch (err) {
       console.error('Failed to load batch records', err);
       showToast('Error loading batch cohorts', 'error');
@@ -102,7 +111,7 @@ export default function BatchManagementPage() {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     loadData();
   }, []);
@@ -1813,38 +1822,37 @@ export default function BatchManagementPage() {
                         </div>
                       ) : (
                         <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-text-secondary">Program ID Mapped</label>
-                          <select 
-                            value={editForm.programId}
-                            onChange={e => {
-                              const pId = e.target.value;
-                              const pName = pId === 'prog-1' ? 'Summer Software Engineering Internship' : pId === 'prog-2' ? 'Data Science Boot Camp' : 'Sales Boot Camp';
-                              setEditForm({ ...editForm, programId: pId, programName: pName });
-                            }}
-                            className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
-                          >
-                            <option value="prog-1">Summer Software Engineering</option>
-                            <option value="prog-2">Data Science Boot Camp</option>
-                            <option value="prog-3">Sales Boot Camp</option>
-                          </select>
-                        </div>
-                      )}
+                          <label className="text-[10px] font-bold text-text-secondary">
+                            Program
+                          </label>
 
-                      {activeActionModal.type === 'edit' && (
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-bold text-text-secondary">Program ID Mapped</label>
-                          <select 
+                          <select
                             value={editForm.programId}
                             onChange={e => {
                               const pId = e.target.value;
-                              const pName = pId === 'prog-1' ? 'Summer Software Engineering Internship' : pId === 'prog-2' ? 'Data Science Boot Camp' : 'Sales Boot Camp';
-                              setEditForm({ ...editForm, programId: pId, programName: pName });
+
+                              const selectedProgram = programs.find(
+                                (program) => program.program_id === pId
+                              );
+
+                              setEditForm({
+                                ...editForm,
+                                programId: pId,
+                                programName: selectedProgram?.program_name || "",
+                              });
                             }}
                             className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
                           >
-                            <option value="prog-1">Summer Software Engineering</option>
-                            <option value="prog-2">Data Science Boot Camp</option>
-                            <option value="prog-3">Sales Boot Camp</option>
+                            <option value="">Select Program</option>
+
+                            {programs.map((program) => (
+                              <option
+                                key={program.program_id}
+                                value={program.program_id}
+                              >
+                                {program.program_name}
+                              </option>
+                            ))}
                           </select>
                         </div>
                       )}
