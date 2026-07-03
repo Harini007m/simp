@@ -43,6 +43,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
   const [iconFile, setIconFile] = useState<string | null>(null);
   const [iconFileName, setIconFileName] = useState<string | null>(null);
   const iconInputRef = useRef<HTMLInputElement>(null);
+  const [iconData, setIconData] = useState<string | null>(null);
 
   // Track previously assigned modules to default-assign 'View' ONLY when newly checked
   const prevAssignedRef = useRef<string[]>([]);
@@ -85,8 +86,8 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
       if (roleToEdit) {
         setRoleName(roleToEdit.name);
         setRoleCode(roleToEdit.code);
-        setDescription(roleToEdit.desc);
-        setRoleStatus(roleToEdit.status);
+        setDescription(roleToEdit.desc || roleToEdit.description || '');
+        setRoleStatus((roleToEdit.isActive !== undefined ? roleToEdit.isActive : roleToEdit.status === 'Active') ? 'Active' : 'Inactive');
         setAssignedModules(roleToEdit.moduleIds || []);
         
         // Parse permissions mapping from role permissions list (format is "moduleId:permissionName")
@@ -107,6 +108,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
         setSelectedPermissions(parsedPerms);
         setIconFile(null);
         setIconFileName(null);
+        setIconData(roleToEdit.icon || null);
         
         if (viewMode) {
           setCurrentStep(2);
@@ -122,6 +124,7 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
         setSelectedPermissions({});
         setIconFile(null);
         setIconFileName(null);
+        setIconData(null);
         setCurrentStep(0);
       }
     }
@@ -201,7 +204,9 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
       setIconFileName(file.name);
       const reader = new FileReader();
       reader.onload = (event) => {
-        setIconFile(event.target?.result as string);
+        const result = event.target?.result as string;
+        setIconFile(result);
+        setIconData(result);
       };
       reader.readAsDataURL(file);
     }
@@ -224,6 +229,8 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
         code: (roleCode || '').trim(),
         desc: (description || '').trim(),
         status: roleStatus,
+        isActive: roleStatus === 'Active',
+        icon: iconData,
         moduleIds: assignedModules,
         permissions: flatPermissions,
       };
@@ -345,7 +352,8 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                       onChange={() => {
                         if (!viewMode) setRoleStatus('Active');
                       }}
-                      className="h-4 w-4 text-blue-600 focus:ring-primary" 
+                      disabled={viewMode}
+                      className="h-4 w-4 text-blue-600 focus:ring-primary disabled:opacity-50" 
                     />
                     <span className="text-sm font-medium text-text-primary">Active</span>
                   </label>
@@ -357,7 +365,8 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                       onChange={() => {
                         if (!viewMode) setRoleStatus('Inactive');
                       }}
-                      className="h-4 w-4 text-blue-600 focus:ring-primary" 
+                      disabled={viewMode}
+                      className="h-4 w-4 text-blue-600 focus:ring-primary disabled:opacity-50" 
                     />
                     <span className="text-sm font-medium text-text-primary">Inactive</span>
                   </label>
@@ -445,6 +454,16 @@ export function CreateRoleWizard({ isOpen, onClose, onRoleCreated, roleToEdit, v
                     }`}>
                       {roleStatus}
                     </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-text-secondary">Icon</p>
+                    <div className="mt-1">
+                      {iconData ? (
+                        <img src={iconData} alt="Role Icon" className="h-8 w-8 object-contain border border-border rounded" />
+                      ) : (
+                        <p className="text-sm text-text-secondary italic">No icon uploaded</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
