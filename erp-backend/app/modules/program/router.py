@@ -3,6 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.dependencies import require_permission
+from app.models.authentication.user import User
 from app.models.organizations.department import Department
 from app.modules.program.service import ProgramService
 from app.modules.program.schemas import ProgramCreate
@@ -11,6 +13,7 @@ router = APIRouter()
 
 @router.get("/")
 async def get_programs(
+    current_user: User = Depends(require_permission("programs", "read")),
     db: AsyncSession = Depends(get_db)
 ):
     service = ProgramService(db)
@@ -34,6 +37,7 @@ async def get_programs(
 @router.post("/", status_code=201)
 async def create_program(
     payload: ProgramCreate,
+    current_user: User = Depends(require_permission("programs", "create")),
     db: AsyncSession = Depends(get_db),
 ):
     if payload.department_id is None:

@@ -7,11 +7,13 @@ import { Plus, Settings, ToggleLeft, ToggleRight } from 'lucide-react';
 import { moduleService } from '@/src/services/module.service';
 import { Module } from '@/src/types/api/module.types';
 import { FEATURE_REGISTRY } from '@/src/core/features/feature-registry';
+import { usePermissions } from '@/src/hooks/usePermissions';
 
 export default function ModuleRegistryPage() {
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { hasPermission } = usePermissions();
 
   const [modCode, setModCode] = useState('');
   const [modName, setModName] = useState('');
@@ -92,9 +94,11 @@ export default function ModuleRegistryPage() {
           <h1 className="text-2xl font-bold tracking-tight text-text-primary mt-2">Module Registry</h1>
           <p className="text-sm text-text-secondary mt-1">Manage and register system modules and feature directories.</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">
-          <Plus className="mr-2 h-4 w-4" /> Register Module
-        </Button>
+        {hasPermission('modules:create') && (
+          <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" /> Register Module
+          </Button>
+        )}
       </div>
 
       <EnhancedTable<Module>
@@ -137,7 +141,7 @@ export default function ModuleRegistryPage() {
             key: 'actions',
             label: 'Actions',
             className: 'text-right',
-            render: (m) => (
+            render: (m) => hasPermission('modules:update') ? (
               <button
                 onClick={() => handleToggleStatus(m)}
                 className={`p-1 transition-colors inline-flex items-center justify-center ${m.active ? 'text-emerald-600 hover:text-red-500' : 'text-text-secondary hover:text-emerald-500'}`}
@@ -145,7 +149,7 @@ export default function ModuleRegistryPage() {
               >
                 {m.active ? <ToggleRight className="h-6 w-6" /> : <ToggleLeft className="h-6 w-6" />}
               </button>
-            )
+            ) : <span className="text-xs text-text-secondary italic">Restricted</span>
           },
         ]}
       />

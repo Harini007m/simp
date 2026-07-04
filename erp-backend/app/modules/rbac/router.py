@@ -136,17 +136,19 @@ async def create_role(
 @router.post("/roles/assign-permissions", response_model=APIResponse[dict])
 async def assign_permissions(
     data: PermissionAssign,
-    # current_user: User = Depends(require_permission("roles", "update")),
+    current_user: User = Depends(require_permission("roles", "update")),
     db: AsyncSession = Depends(get_db),
 ):
     service = RoleService(db)
-    # Using dummy user_id if current_user is omitted for testing
-    result = await service.assign_permissions(data, user_id=None)
+    result = await service.assign_permissions(data, user_id=current_user.id)
     return success_response(data=result, message="Permissions assigned successfully")
 
 
 @router.get("/roles", response_model=APIResponse[dict])
-async def get_roles(db: AsyncSession = Depends(get_db)):
+async def get_roles(
+    current_user: User = Depends(require_permission("roles", "read")),
+    db: AsyncSession = Depends(get_db)
+):
     from sqlalchemy import select
     from app.models.rbac.role import Role
     from app.models.rbac.role_permission import RolePermission
@@ -192,7 +194,11 @@ async def get_roles(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/roles/{id}", response_model=APIResponse[dict])
-async def get_role(id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_role(
+    id: UUID, 
+    current_user: User = Depends(require_permission("roles", "read")),
+    db: AsyncSession = Depends(get_db)
+):
     service = RoleService(db)
     result = await service.get(id)
 
@@ -274,7 +280,11 @@ async def update_role(
 
 
 @router.delete("/roles/{id}", response_model=APIResponse[dict])
-async def delete_role(id: UUID, db: AsyncSession = Depends(get_db)):
+async def delete_role(
+    id: UUID, 
+    current_user: User = Depends(require_permission("roles", "delete")),
+    db: AsyncSession = Depends(get_db)
+):
     from sqlalchemy import select, func
     from app.models.rbac.user_role import UserRole
     from app.models.rbac.role import Role

@@ -7,6 +7,9 @@ from app.models.core.enums.status import StatusEnum
 
 if TYPE_CHECKING:
     from app.models.files.models import CommonFile
+    from app.models.profiles.student_profile import StudentProfile
+    from app.models.profiles.employee_profile import EmployeeProfile
+    from app.models.organizations.organization import Organization
 
 class User(BaseModel):
     __tablename__ = 'auth_users'
@@ -52,3 +55,8 @@ class User(BaseModel):
         foreign_keys="[CommonFile.approved_by]",
         back_populates="approved_by_user"
     )
+    
+    # Entity Mappings
+    student_profile: Mapped[Optional["StudentProfile"]] = relationship("StudentProfile", back_populates="user", uselist=False)
+    employee_profile: Mapped[Optional["EmployeeProfile"]] = relationship("EmployeeProfile", back_populates="user", uselist=False)
+    organization: Mapped[Optional["Organization"]] = relationship("Organization", back_populates="user", uselist=False)

@@ -4,7 +4,9 @@ from sqlalchemy import select
 from uuid import UUID
 from typing import List
 from app.core.database import get_db
+from app.core.dependencies import require_permission
 from app.core.responses import success_response, APIResponse
+from app.models.authentication.user import User
 from app.models.rbac.module import Module
 from pydantic import BaseModel
 
@@ -56,7 +58,7 @@ async def _module_display_index(db: AsyncSession, module_id: UUID) -> int | None
 
 @router.get("/", response_model=APIResponse[List[dict]])
 async def get_modules(
-    # current_user: User = Depends(require_permission("modules", "read")),
+    current_user: User = Depends(require_permission("modules", "read")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Module).order_by(Module.created_at, Module.name))
@@ -68,7 +70,7 @@ async def get_modules(
 @router.get("/{id}", response_model=APIResponse[dict])
 async def get_module(
     id: UUID,
-    # current_user: User = Depends(require_permission("modules", "read")),
+    current_user: User = Depends(require_permission("modules", "read")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Module).where(Module.id == id))
@@ -83,7 +85,7 @@ async def get_module(
 @router.post("/", response_model=APIResponse[dict])
 async def create_module(
     data: ModuleCreate,
-    # current_user: User = Depends(require_permission("modules", "create")),
+    current_user: User = Depends(require_permission("modules", "create")),
     db: AsyncSession = Depends(get_db),
 ):
     module = Module(
@@ -105,7 +107,7 @@ async def create_module(
 async def update_module(
     id: UUID,
     data: ModuleUpdate,
-    # current_user: User = Depends(require_permission("modules", "update")),
+    current_user: User = Depends(require_permission("modules", "update")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Module).where(Module.id == id))
@@ -133,7 +135,7 @@ async def update_module(
 @router.delete("/{id}", response_model=APIResponse[dict])
 async def delete_module(
     id: UUID,
-    # current_user: User = Depends(require_permission("modules", "delete")),
+    current_user: User = Depends(require_permission("modules", "delete")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Module).where(Module.id == id))

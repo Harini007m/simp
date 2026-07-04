@@ -22,9 +22,9 @@ function UsersPageContent() {
   // Tab and Entity states
   const [activeTab, setActiveTab] = useState<'accounts' | 'employees' | 'students' | 'organizations'>('accounts');
   
-  const [employees, setEmployees] = useState<ExtendedEmployee[]>([]);
-  const [students, setStudents] = useState<ExtendedStudent[]>([]);
-  const [organizations, setOrganizations] = useState<ExtendedCollege[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [organizations, setOrganizations] = useState<any[]>([]);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -44,7 +44,7 @@ function UsersPageContent() {
 
   const loadEmployees = async () => {
     try {
-      const emps = await employeeService.getEmployees();
+      const emps = await userService.getRegisteredEmployees();
       setEmployees(emps);
     } catch (err) {
       console.error('Failed to load employees', err);
@@ -53,7 +53,7 @@ function UsersPageContent() {
 
   const loadStudents = async () => {
     try {
-      const stus = await studentService.getStudents();
+      const stus = await userService.getRegisteredStudents();
       setStudents(stus);
     } catch (err) {
       console.error('Failed to load students', err);
@@ -62,7 +62,7 @@ function UsersPageContent() {
 
   const loadOrganizations = async () => {
     try {
-      const orgs = await organizationService.getOrganizations();
+      const orgs = await userService.getRegisteredOrganizations();
       setOrganizations(orgs);
     } catch (err) {
       console.error('Failed to load organizations', err);
@@ -105,10 +105,11 @@ function UsersPageContent() {
     return data.find(u => u.email.toLowerCase() === email.toLowerCase());
   };
 
-  const handleCreateUserForEmployee = (employee: ExtendedEmployee) => {
+  const handleCreateUserForEmployee = (employee: any) => {
     setAutofillData({
-      name: employee.name,
-      email: employee.email || employee.official_email,
+      id: `emp-${employee.id}`,
+      name: employee.name || '',
+      email: employee.email || '',
       phone: employee.phone || ''
     });
     setSelectedUser(null);
@@ -116,20 +117,22 @@ function UsersPageContent() {
     setIsCreateWizardOpen(true);
   };
 
-  const handleCreateUserForStudent = (student: ExtendedStudent) => {
+  const handleCreateUserForStudent = (student: any) => {
     setAutofillData({
-      name: student.name || student.personalInfo?.name || '',
-      email: student.email || student.official_email || student.personalInfo?.email || '',
-      phone: student.phone || student.personalInfo?.phone || ''
+      id: `stu-${student.id}`,
+      name: student.name || '',
+      email: student.email || '',
+      phone: student.phone || ''
     });
     setSelectedUser(null);
     setViewMode(false);
     setIsCreateWizardOpen(true);
   };
 
-  const handleCreateUserForOrganization = (org: ExtendedCollege) => {
+  const handleCreateUserForOrganization = (org: any) => {
     setAutofillData({
-      name: org.name || org.college_name || '',
+      id: `org-${org.id}`,
+      name: org.name || '',
       email: org.email || '',
       phone: org.phone || ''
     });
@@ -332,12 +335,12 @@ function UsersPageContent() {
               {
                 key: 'designation',
                 label: 'Designation',
-                render: (emp) => <span className="text-text-secondary">{emp.designation || emp.roleName}</span>,
+                render: (emp) => <span className="text-text-secondary">{emp.designation}</span>,
               },
               {
                 key: 'email',
                 label: 'Email',
-                render: (emp) => <span className="text-text-secondary">{emp.email || emp.official_email || ''}</span>,
+                render: (emp) => <span className="text-text-secondary">{emp.email || ''}</span>,
               },
               {
                 key: 'phone',
@@ -348,10 +351,8 @@ function UsersPageContent() {
                 key: 'account',
                 label: 'User Account',
                 render: (emp) => {
-                  const emailVal = emp.email || emp.official_email || '';
-                  const linkedUser = getLinkedUser(emailVal);
-                  return linkedUser ? (
-                    <Badge variant="success">Linked: @{linkedUser.username}</Badge>
+                  return emp.has_account ? (
+                    <Badge variant="success">Linked: @{emp.username}</Badge>
                   ) : (
                     <Badge variant="secondary">No Account</Badge>
                   );
@@ -362,13 +363,12 @@ function UsersPageContent() {
                 label: 'Actions',
                 className: 'text-right',
                 render: (emp) => {
-                  const emailVal = emp.email || emp.official_email || '';
-                  const linkedUser = getLinkedUser(emailVal);
-                  return linkedUser ? (
+                  return emp.has_account ? (
                     <button
-                      onClick={() => handleView(linkedUser)}
+                      onClick={() => handleView(getLinkedUser(emp.email) as any)}
                       className="p-1 hover:text-blue-600 transition-colors inline-flex items-center justify-center"
                       title="View User Account"
+                      disabled={!getLinkedUser(emp.email)}
                     >
                       <Eye className="h-4 w-4 text-slate-455 hover:text-blue-600" />
                     </button>
@@ -395,7 +395,7 @@ function UsersPageContent() {
                 key: 'name',
                 label: 'Student',
                 render: (stu) => {
-                  const nameVal = stu.name || stu.personalInfo?.name || '';
+                  const nameVal = stu.name || '';
                   const initials = nameVal
                     ? nameVal.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
                     : 'ST';
@@ -404,38 +404,34 @@ function UsersPageContent() {
                       <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-text-primary">
                         {initials}
                       </div>
-                      <span className="font-medium text-text-primary">{nameVal}</span>
+                      <span className="font-medium text-text-primary">{nameVal || stu.enrollment_number}</span>
                     </div>
                   );
                 },
               },
               {
                 key: 'college',
-                label: 'College / Department',
+                label: 'Enrollment Number',
                 render: (stu) => {
-                  const collegeVal = stu.academicInfo?.college || 'N/A';
-                  const deptVal = stu.academicInfo?.department || '';
-                  return <span className="text-text-secondary">{collegeVal} {deptVal ? `(${deptVal})` : ''}</span>;
+                  return <span className="text-text-secondary">{stu.enrollment_number}</span>;
                 },
               },
               {
                 key: 'email',
                 label: 'Email',
-                render: (stu) => <span className="text-text-secondary">{stu.email || stu.official_email || stu.personalInfo?.email || ''}</span>,
+                render: (stu) => <span className="text-text-secondary">{stu.email || ''}</span>,
               },
               {
                 key: 'phone',
                 label: 'Phone',
-                render: (stu) => <span className="text-text-secondary">{stu.phone || stu.personalInfo?.phone || 'N/A'}</span>,
+                render: (stu) => <span className="text-text-secondary">{stu.phone || 'N/A'}</span>,
               },
               {
                 key: 'account',
                 label: 'User Account',
                 render: (stu) => {
-                  const emailVal = stu.email || stu.official_email || stu.personalInfo?.email || '';
-                  const linkedUser = getLinkedUser(emailVal);
-                  return linkedUser ? (
-                    <Badge variant="success">Linked: @{linkedUser.username}</Badge>
+                  return stu.has_account ? (
+                    <Badge variant="success">Linked: @{stu.username}</Badge>
                   ) : (
                     <Badge variant="secondary">No Account</Badge>
                   );
@@ -446,13 +442,12 @@ function UsersPageContent() {
                 label: 'Actions',
                 className: 'text-right',
                 render: (stu) => {
-                  const emailVal = stu.email || stu.official_email || stu.personalInfo?.email || '';
-                  const linkedUser = getLinkedUser(emailVal);
-                  return linkedUser ? (
+                  return stu.has_account ? (
                     <button
-                      onClick={() => handleView(linkedUser)}
+                      onClick={() => handleView(getLinkedUser(stu.email) as any)}
                       className="p-1 hover:text-blue-600 transition-colors inline-flex items-center justify-center"
                       title="View User Account"
+                      disabled={!getLinkedUser(stu.email)}
                     >
                       <Eye className="h-4 w-4 text-slate-455 hover:text-blue-600" />
                     </button>
@@ -496,7 +491,7 @@ function UsersPageContent() {
               {
                 key: 'code',
                 label: 'Code',
-                render: (org) => <span className="text-text-secondary">{org.code || org.college_code || ''}</span>,
+                render: (org) => <span className="text-text-secondary">{org.code || ''}</span>,
               },
               {
                 key: 'email',
@@ -512,10 +507,8 @@ function UsersPageContent() {
                 key: 'account',
                 label: 'User Account',
                 render: (org) => {
-                  const emailVal = org.email || '';
-                  const linkedUser = getLinkedUser(emailVal);
-                  return linkedUser ? (
-                    <Badge variant="success">Linked: @{linkedUser.username}</Badge>
+                  return org.has_account ? (
+                    <Badge variant="success">Linked: @{org.username}</Badge>
                   ) : (
                     <Badge variant="secondary">No Account</Badge>
                   );
@@ -526,13 +519,12 @@ function UsersPageContent() {
                 label: 'Actions',
                 className: 'text-right',
                 render: (org) => {
-                  const emailVal = org.email || '';
-                  const linkedUser = getLinkedUser(emailVal);
-                  return linkedUser ? (
+                  return org.has_account ? (
                     <button
-                      onClick={() => handleView(linkedUser)}
+                      onClick={() => handleView(getLinkedUser(org.email) as any)}
                       className="p-1 hover:text-blue-600 transition-colors inline-flex items-center justify-center"
                       title="View User Account"
+                      disabled={!getLinkedUser(org.email)}
                     >
                       <Eye className="h-4 w-4 text-slate-455 hover:text-blue-600" />
                     </button>

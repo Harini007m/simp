@@ -1,4 +1,7 @@
+import uuid
 from typing import Optional, List
+
+from sqlalchemy import String, Text, Integer, JSON, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Enum as SQLEnum
 from app.models.core.mixins import BaseModel
@@ -34,3 +37,6 @@ class Organization(BaseModel):
     campuses: Mapped[List["Campus"]] = relationship("Campus", back_populates="organization", cascade="all, delete-orphan")
     departments: Mapped[List["Department"]] = relationship("Department", back_populates="organization", cascade="all, delete-orphan")
     coordinators: Mapped[List["OrganizationCoordinator"]] = relationship("OrganizationCoordinator", back_populates="organization", cascade="all, delete-orphan")
+
+    user_id: Mapped[Optional["uuid.UUID"]] = mapped_column(ForeignKey('auth_users.id', ondelete='SET NULL'), unique=True, index=True, nullable=True)
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="organization")

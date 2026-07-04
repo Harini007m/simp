@@ -135,3 +135,139 @@ async def delete_user(
     service = UserService(db)
     await service.delete(id=id, user_id=current_user.id)
     return success_response(data={"deleted": True}, message="User deleted successfully")
+
+@router.get("/registered/employees", response_model=APIResponse[list])
+async def get_registered_employees(
+    current_user: User = Depends(require_permission("users", "read")),
+    db: AsyncSession = Depends(get_db)
+):
+    from sqlalchemy import select
+    from app.models.profiles.employee_profile import EmployeeProfile
+    from app.models.authentication.user import User
+    
+    query = select(EmployeeProfile.id, EmployeeProfile.first_name, EmployeeProfile.last_name, EmployeeProfile.email, EmployeeProfile.phone, EmployeeProfile.employee_code, EmployeeProfile.department_id, EmployeeProfile.designation, EmployeeProfile.user_id, User.username).outerjoin(User, EmployeeProfile.user_id == User.id)
+    result = await db.execute(query)
+    
+    items = []
+    for row in result:
+        items.append({
+            "id": row.id,
+            "name": f"{row.first_name} {row.last_name}",
+            "email": row.email,
+            "phone": row.phone,
+            "employee_code": row.employee_code,
+            "department_id": row.department_id,
+            "designation": row.designation,
+            "has_account": row.user_id is not None,
+            "username": row.username,
+            "account_status": "Linked" if row.user_id else "No Account"
+        })
+        
+    return success_response(data=items)
+
+@router.get("/registered/students", response_model=APIResponse[list])
+async def get_registered_students(
+    current_user: User = Depends(require_permission("users", "read")),
+    db: AsyncSession = Depends(get_db)
+):
+    from sqlalchemy import select
+    from app.models.profiles.student_profile import StudentProfile
+    from app.models.authentication.user import User
+    
+    query = select(StudentProfile.id, StudentProfile.enrollment_number, StudentProfile.user_id, User.username, User.email).outerjoin(User, StudentProfile.user_id == User.id)
+    result = await db.execute(query)
+    
+    items = []
+    for row in result:
+        items.append({
+            "id": row.id,
+            "enrollment_number": row.enrollment_number,
+            "email": getattr(row, 'email', None),
+            "has_account": row.user_id is not None,
+            "username": getattr(row, 'username', None),
+            "account_status": "Linked" if row.user_id else "No Account"
+        })
+        
+    return success_response(data=items)
+
+@router.get("/registered/organizations", response_model=APIResponse[list])
+async def get_registered_organizations(
+    current_user: User = Depends(require_permission("users", "read")),
+    db: AsyncSession = Depends(get_db)
+):
+    from sqlalchemy import select
+    from app.models.organizations.organization import Organization
+    from app.models.authentication.user import User
+    
+    query = select(Organization.id, Organization.name, Organization.code, Organization.email, Organization.phone, Organization.user_id, User.username).outerjoin(User, Organization.user_id == User.id)
+    result = await db.execute(query)
+    
+    items = []
+    for row in result:
+        items.append({
+            "id": row.id,
+            "name": row.name,
+            "code": row.code,
+            "email": row.email,
+            "phone": row.phone,
+            "has_account": getattr(row, 'user_id', None) is not None,
+            "username": getattr(row, 'username', None),
+            "account_status": "Linked" if getattr(row, 'user_id', None) else "No Account"
+        })
+        
+    return success_response(data=items)
+
+@router.get("/registered/{entity_type}/{id}", response_model=APIResponse[dict])
+async def get_registered_entity(
+    entity_type: str,
+    id: UUID,
+    current_user: User = Depends(require_permission("users", "read")),
+    db: AsyncSession = Depends(get_db)
+):
+    from sqlalchemy import select
+    from fastapi import HTTPException
+    
+    if entity_type == "employee":
+        from app.models.profiles.employee_profile import EmployeeProfile
+        profile = await db.scalar(select(EmployeeProfile).where(EmployeeProfile.id == id))
+        if not profile: raise HTTPException(404, "Employee not found")
+        return success_response(data={
+            "id": profile.id,
+            "name": f"{profile.first_name} {profile.last_name}",
+            "email": profile.email,
+            "phone": profile.phone,
+            "department_id": profile.department_id,
+            "designation": profile.designation,
+            "code": profile.employee_code,
+            "has_account": profile.user_id is not None
+        })
+    elif entity_type == "student":
+        from app.models.profiles.student_profile import StudentProfile
+        from app.models.authentication.user import User
+        query = select(StudentProfile, User).outerjoin(User, StudentProfile.user_id == User.id).where(StudentProfile.id == id)
+        result = await db.execute(query)
+        row = result.first()
+        if not row: raise HTTPException(404, "Student not found")
+        profile, user = row
+        return success_response(data={
+            "id": profile.id,
+            "enrollment_number": profile.enrollment_number,
+            "email": user.email if user else "",
+            "phone": user.phone if user else "",
+            "department_id": profile.department_id,
+            "has_account": profile.user_id is not None
+        })
+    elif entity_type == "organization":
+        from app.models.organizations.organization import Organization
+        profile = await db.scalar(select(Organization).where(Organization.id == id))
+        if not profile: raise HTTPException(404, "Organization not found")
+        return success_response(data={
+            "id": profile.id,
+            "name": profile.name,
+            "code": profile.code,
+            "email": profile.email,
+            "phone": profile.phone,
+            "has_account": getattr(profile, 'user_id', None) is not None
+        })
+    else:
+        raise HTTPException(400, "Invalid entity type")

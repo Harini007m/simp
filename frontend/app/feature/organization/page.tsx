@@ -14,6 +14,7 @@ import { Organization, OrganizationDepartment, OrganizationCoordinator, Organiza
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
 import { EnhancedTable } from '@/components/feature/ui/Table';
+import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
 
 export default function OrganizationManagementPage() {
   const { user } = useAuth();
@@ -612,21 +613,25 @@ export default function OrganizationManagementPage() {
             </button>
           </div>
 
-          <button 
-            onClick={handleExportData}
-            className="flex items-center gap-1.5 px-3 py-2 border border-border hover:border-secondary hover:bg-slate-50 bg-white rounded-lg text-xs font-bold text-text-primary shadow-sm transition-all duration-200 cursor-pointer"
-          >
-            <FileDown className="h-3.5 w-3.5" />
-            <span>Export Chart</span>
-          </button>
+          <PermissionGuard required="organizations:export">
+            <button 
+              onClick={handleExportData}
+              className="flex items-center gap-1.5 px-3 py-2 border border-border hover:border-secondary hover:bg-slate-50 bg-white rounded-lg text-xs font-bold text-text-primary shadow-sm transition-all duration-200 cursor-pointer"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+              <span>Export Chart</span>
+            </button>
+          </PermissionGuard>
           
-          <button 
-            onClick={openOnboardModal}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>Onboard College</span>
-          </button>
+          <PermissionGuard required="organizations:create">
+            <button 
+              onClick={openOnboardModal}
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Onboard College</span>
+            </button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -953,9 +958,11 @@ export default function OrganizationManagementPage() {
                     <button onClick={() => handleOpenProfile(org)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Open Profile File">
                       <Eye className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => openEditModal(org)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Edit Organization">
-                      <Edit className="h-3.5 w-3.5" />
-                    </button>
+                    <PermissionGuard required="organizations:update">
+                      <button onClick={() => openEditModal(org)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Edit Organization">
+                        <Edit className="h-3.5 w-3.5" />
+                      </button>
+                    </PermissionGuard>
                   </div>
                 ),
               },
@@ -1059,13 +1066,15 @@ export default function OrganizationManagementPage() {
 
               {/* Sticky action buttons list */}
               <div className="flex items-center flex-wrap gap-2">
-                <button 
-                  onClick={() => openEditModal(activeProfile)}
-                  className="bg-slate-800 hover:bg-slate-700 border border-border text-white px-2.5 py-1.5 rounded text-[11px] font-bold transition-all duration-150 cursor-pointer flex items-center gap-1"
-                >
-                  <Edit className="h-3 w-3" />
-                  <span>Edit Info</span>
-                </button>
+                <PermissionGuard required="organizations:update">
+                  <button 
+                    onClick={() => openEditModal(activeProfile)}
+                    className="bg-slate-800 hover:bg-slate-700 border border-border text-white px-2.5 py-1.5 rounded text-[11px] font-bold transition-all duration-150 cursor-pointer flex items-center gap-1"
+                  >
+                    <Edit className="h-3 w-3" />
+                    <span>Edit Info</span>
+                  </button>
+                </PermissionGuard>
                 <button 
                   onClick={() => {
                     setPartnershipStatusInput(activeProfile.partnershipStatus);

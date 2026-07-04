@@ -26,6 +26,7 @@ class BulkCoordinatorRequest(BaseModel):
 
 @router.get("/colleges", response_model=APIResponse[List[CollegeResponse]])
 async def get_colleges(
+    current_user: User = Depends(require_permission("organizations", "read")),
     db: AsyncSession = Depends(get_db)
 ):
     service = OrganizationService(db)
@@ -94,6 +95,7 @@ async def update_college(
 
 @router.get("/departments", response_model=APIResponse[List[DepartmentResponse]])
 async def get_departments(
+    current_user: User = Depends(require_permission("organizations", "read")),
     db: AsyncSession = Depends(get_db)
 ):
     service = OrganizationService(db)

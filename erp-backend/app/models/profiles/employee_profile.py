@@ -24,3 +24,5 @@ class EmployeeProfile(BaseModel):
     employee_code: Mapped[str] = mapped_column(String(100), nullable=False)
     designation: Mapped[str] = mapped_column(String(150), nullable=False)
     date_of_joining: Mapped[Optional[date]] = mapped_column(Date)
+    
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="employee_profile")

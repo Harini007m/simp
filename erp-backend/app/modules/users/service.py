@@ -55,8 +55,8 @@ class UserService(BaseCRUDService[User, UserCreate, UserUpdate]):
                 from app.models.profiles.student_profile import StudentProfile
                 profile = await self.db.scalar(select(StudentProfile).where(StudentProfile.id == entity_id))
             elif entity_type == "organization":
-                from app.models.profiles.org_coordinator_profile import OrganizationCoordinatorProfile
-                profile = await self.db.scalar(select(OrganizationCoordinatorProfile).where(OrganizationCoordinatorProfile.id == entity_id))
+                from app.models.organizations.organization import Organization
+                profile = await self.db.scalar(select(Organization).where(Organization.id == entity_id))
             else:
                 raise HTTPException(status_code=400, detail="Invalid entityType")
                 

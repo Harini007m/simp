@@ -89,5 +89,32 @@ export const userService = {
   async deleteUser(id: string): Promise<boolean> {
     const res = await apiClient.delete(`/api/v1/users/${id}`);
     return !!res.data;
+  },
+
+  async getRegisteredEmployees(): Promise<any[]> {
+    try {
+      const res = await apiClient.get('/api/v1/users/registered/employees');
+      return res.data?.data || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async getRegisteredStudents(): Promise<any[]> {
+    try {
+      const res = await apiClient.get('/api/v1/users/registered/students');
+      return res.data?.data || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async getRegisteredOrganizations(): Promise<any[]> {
+    try {
+      const res = await apiClient.get('/api/v1/users/registered/organizations');
+      return res.data?.data || [];
+    } catch (e) {
+      return [];
+    }
   }
 };

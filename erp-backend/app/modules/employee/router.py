@@ -7,7 +7,7 @@ from sqlalchemy import select, or_
 from uuid import UUID, uuid4
 from typing import List, Optional
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_permission
 from app.core.security import hash_password
 from app.core.responses import success_response, APIResponse
 from app.models.authentication.user import User
@@ -139,7 +139,10 @@ async def _resolve_department(db: AsyncSession, organization_id, value: str):
 
 
 @router.get("/", response_model=APIResponse[List[dict]])
-async def get_employee_list(db: AsyncSession = Depends(get_db)):
+async def get_employee_list(
+    current_user: User = Depends(require_permission("employee", "read")),
+    db: AsyncSession = Depends(get_db)
+):
     try:
         from app.models.profiles.employee_profile import EmployeeProfile
         from app.models.organizations.organization import Organization
@@ -167,7 +170,7 @@ async def get_employee_list(db: AsyncSession = Depends(get_db)):
 async def update_employee(
     id: UUID,
     data: EmployeeUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("employee", "update")),
     db: AsyncSession = Depends(get_db),
 ):
     from app.models.profiles.employee_profile import EmployeeProfile
@@ -243,7 +246,7 @@ async def update_employee(
 @router.post("/", response_model=APIResponse[dict])
 async def create_employee(
     data: EmployeeCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("employee", "create")),
     db: AsyncSession = Depends(get_db),
 ):
     from app.models.authentication.user import User
@@ -327,7 +330,7 @@ async def create_employee(
 @router.post("/bulk/status", response_model=APIResponse[dict])
 async def bulk_update_status(
     data: BulkStatusRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("employee", "update")),
     db: AsyncSession = Depends(get_db),
 ):
     from app.models.profiles.employee_profile import EmployeeProfile
@@ -349,7 +352,7 @@ async def bulk_update_status(
 @router.post("/bulk/department", response_model=APIResponse[dict])
 async def bulk_update_department(
     data: BulkDepartmentRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("employee", "update")),
     db: AsyncSession = Depends(get_db),
 ):
     from app.models.profiles.employee_profile import EmployeeProfile
@@ -370,7 +373,7 @@ async def bulk_update_department(
 @router.post("/bulk/mentor", response_model=APIResponse[dict])
 async def bulk_update_mentor(
     data: BulkMentorRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("employee", "update")),
     db: AsyncSession = Depends(get_db),
 ):
     # The current schema does not persist a mentor_id on employee profiles.

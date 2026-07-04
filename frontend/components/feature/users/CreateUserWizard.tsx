@@ -11,9 +11,8 @@ import { Module } from '@/src/types/modules.types';
 import { roleService } from '@/src/services/role.service';
 import { moduleService } from '@/src/services/module.service';
 import { userService } from '@/src/services/user.service';
-import { employeeService, ExtendedEmployee } from '@/src/services/employee.service';
-import { studentService, ExtendedStudent } from '@/src/services/student.service';
 import { organizationService, ExtendedCollege } from '@/src/services/organization.service';
+import { User } from '@/src/types/api/user.types';
 import { User } from '@/src/types/api/user.types';
 
 interface CreateUserWizardProps {
@@ -23,6 +22,7 @@ interface CreateUserWizardProps {
   userToEdit?: User | null;
   viewMode?: boolean;
   autofillData?: {
+    id?: string;
     name: string;
     email: string;
     phone: string;
@@ -74,53 +74,49 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
         const [loadedRoles, loadedModules, loadedEmployees, loadedStudents, loadedOrganizations, loadedUsers] = await Promise.all([
           roleService.getRoles(),
           moduleService.getModules(),
-          employeeService.getEmployees(),
-          studentService.getStudents(),
-          organizationService.getOrganizations(),
+          userService.getRegisteredEmployees(),
+          userService.getRegisteredStudents(),
+          userService.getRegisteredOrganizations(),
           userService.getUsers()
         ]);
         
-        const userEmails = new Set(loadedUsers.map(u => u.email.toLowerCase()));
         const entities: AutofillEntity[] = [];
 
         loadedEmployees.forEach(emp => {
-          const email = (emp.email || emp.official_email || '').toLowerCase();
-          if (email && !userEmails.has(email)) {
+          if (!emp.has_account) {
             entities.push({
-              id: `emp-${emp.id || emp.employee_id}`,
-              name: emp.name,
-              email: emp.email || emp.official_email,
+              id: `emp-${emp.id}`,
+              name: emp.name || '',
+              email: emp.email || '',
               phone: emp.phone || '',
               type: 'Employee',
-              detail: emp.designation || emp.roleName || ''
+              detail: emp.designation || ''
             });
           }
         });
 
         loadedStudents.forEach(stu => {
-          const email = (stu.email || stu.official_email || stu.personalInfo?.email || '').toLowerCase();
-          if (email && !userEmails.has(email)) {
+          if (!stu.has_account) {
             entities.push({
-              id: `stu-${stu.id || stu.student_id}`,
-              name: stu.name || stu.personalInfo?.name || '',
-              email: stu.email || stu.official_email || stu.personalInfo?.email || '',
-              phone: stu.phone || stu.personalInfo?.phone || '',
+              id: `stu-${stu.id}`,
+              name: stu.name || '',
+              email: stu.email || '',
+              phone: stu.phone || '',
               type: 'Student',
-              detail: stu.academicInfo?.college || ''
+              detail: stu.enrollment_number || ''
             });
           }
         });
 
         loadedOrganizations.forEach(org => {
-          const email = (org.email || '').toLowerCase();
-          if (email && !userEmails.has(email)) {
+          if (!org.has_account) {
             entities.push({
-              id: `org-${org.id || org.college_id}`,
-              name: org.name || org.college_name || '',
+              id: `org-${org.id}`,
+              name: org.name || '',
               email: org.email || '',
               phone: org.phone || '',
               type: 'Organization',
-              detail: org.code || org.college_code || ''
+              detail: org.code || ''
             });
           }
         });
@@ -174,6 +170,9 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
             setCurrentStep(0);
           }
         } else if (autofillData) {
+          if (autofillData.id) {
+            setSelectedEntityId(autofillData.id);
+          }
           setFullName(autofillData.name);
           setUsername('');
           setEmail(autofillData.email);
@@ -357,6 +356,19 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
       const roleObj = roles.find(r => r.id === selectedRole);
       const roleName = roleObj ? roleObj.name : 'User';
       
+      let entityType = undefined;
+      let entityId = undefined;
+      if (selectedEntityId) {
+        const parts = selectedEntityId.split('-');
+        const typeMap: Record<string, string> = {
+          'emp': 'employee',
+          'stu': 'student',
+          'org': 'organization'
+        };
+        entityType = typeMap[parts[0]];
+        entityId = parts.slice(1).join('-');
+      }
+
       const userData = {
         name: fullName.trim(),
         username: username.trim(),
@@ -370,7 +382,9 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
           return !defaultModuleIds.includes(id);
         }),
         avatar: avatar || fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
-        sendEmail: sendEmail
+        sendEmail: sendEmail,
+        entityType: entityType,
+        entityId: entityId
       };
       
       if (userToEdit) {

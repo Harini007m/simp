@@ -5,6 +5,7 @@ import { Shield, ShieldAlert, Key, Activity, AlertTriangle, CheckCircle2, Lock, 
 import { sessionService } from '@/src/services/session.service';
 import { UserSession } from '@/src/types/user-sessions.types';
 import { EnhancedTable } from '@/components/feature/ui/Table';
+import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
 
 export default function SecurityCenterPage() {
 
@@ -202,12 +203,14 @@ export default function SecurityCenterPage() {
               className: 'text-right',
               render: (s) => (
                 s.status === 'Active' ? (
-                  <button 
-                    onClick={() => handleTerminate(s.id)}
-                    className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
-                  >
-                    Force Logout
-                  </button>
+                  <PermissionGuard required="security.update">
+                    <button 
+                      onClick={() => handleTerminate(s.id)}
+                      className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
+                    >
+                      Force Logout
+                    </button>
+                  </PermissionGuard>
                 ) : null
               )
             },

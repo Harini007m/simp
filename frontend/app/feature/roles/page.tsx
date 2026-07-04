@@ -8,6 +8,7 @@ import { CreateRoleWizard } from '../../../components/feature/roles/CreateRoleWi
 import { Role } from '@/src/types/api/role.types';
 import { roleService } from '@/src/services/role.service';
 import { Pagination } from '@/components/common/Pagination';
+import { usePermissions } from '@/src/hooks/usePermissions';
 
 export default function RolesPage() {
   const [isCreateWizardOpen, setIsCreateWizardOpen] = useState(false);
@@ -15,6 +16,7 @@ export default function RolesPage() {
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [viewMode, setViewMode] = useState(false);
+  const { hasPermission } = usePermissions();
 
   const loadRoles = async () => {
     try {
@@ -67,16 +69,18 @@ export default function RolesPage() {
           <h1 className="text-2xl font-bold tracking-tight text-text-primary">Roles</h1>
           <p className="text-sm text-text-secondary mt-1">Manage system roles, permissions, and module access.</p>
         </div>
-        <Button 
-          onClick={() => {
-            setSelectedRole(null);
-            setViewMode(false);
-            setIsCreateWizardOpen(true);
-          }} 
-          className="w-full sm:w-auto"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Create Role
-        </Button>
+        {hasPermission('roles:create') && (
+          <Button 
+            onClick={() => {
+              setSelectedRole(null);
+              setViewMode(false);
+              setIsCreateWizardOpen(true);
+            }} 
+            className="w-full sm:w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Create Role
+          </Button>
+        )}
       </div>
 
       <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-border shadow-sm">
@@ -127,20 +131,24 @@ export default function RolesPage() {
                       >
                         <Eye className="h-4 w-4" />
                       </button>
-                      <button 
-                        onClick={() => handleEdit(role)} 
-                        className="p-1.5 text-text-secondary hover:text-blue-600 transition-colors rounded-md hover:bg-slate-50"
-                        title="Edit"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(role)} 
-                        className="p-1.5 text-text-secondary hover:text-red-600 transition-colors rounded-md hover:bg-slate-50"
-                        title="Delete"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </button>
+                      {hasPermission('roles:update') && (
+                        <button 
+                          onClick={() => handleEdit(role)} 
+                          className="p-1.5 text-text-secondary hover:text-blue-600 transition-colors rounded-md hover:bg-slate-50"
+                          title="Edit"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      )}
+                      {hasPermission('roles:delete') && (
+                        <button 
+                          onClick={() => handleDelete(role)} 
+                          className="p-1.5 text-text-secondary hover:text-red-600 transition-colors rounded-md hover:bg-slate-50"
+                          title="Delete"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -14,7 +14,7 @@ class StudentProfile(BaseModel):
         {'comment': 'Profile data specifically for students and interns'}
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('auth_users.id', ondelete='CASCADE'), unique=True, index=True, nullable=False)
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey('auth_users.id', ondelete='SET NULL'), unique=True, index=True, nullable=True)
     organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('org_organizations.id', ondelete='RESTRICT'), index=True, nullable=False)
     department_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey('org_departments.id', ondelete='RESTRICT'), index=True)
     batch_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey('acad_batches.id', ondelete='RESTRICT'), index=True)
@@ -26,7 +26,7 @@ class StudentProfile(BaseModel):
     
     # Unstructured skills data, or migrate to a junction table later if queryability is required
     skills: Mapped[Optional[dict]] = mapped_column(JSONB)
-    user: Mapped["User"] = relationship("User")
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="student_profile")
 
     applications: Mapped[List["Application"]] = relationship(
         "Application",
