@@ -114,4 +114,51 @@ class OpportunityService(BaseService):
 
         await self.commit_transaction()
 
+    async def get_mentors(self, opportunity_id):
+        from app.models.internships.opportunity_mentor import OpportunityMentor
+        from sqlalchemy import select
         
+        result = await self.db.execute(
+            select(OpportunityMentor).where(OpportunityMentor.opportunity_id == opportunity_id)
+        )
+        return result.scalars().all()
+
+    async def assign_mentor(self, opportunity_id, mentor_profile_id):
+        from app.models.internships.opportunity_mentor import OpportunityMentor
+        
+        # Check if already assigned
+        from sqlalchemy import select
+        result = await self.db.execute(
+            select(OpportunityMentor).where(
+                OpportunityMentor.opportunity_id == opportunity_id,
+                OpportunityMentor.mentor_profile_id == mentor_profile_id
+            )
+        )
+        existing = result.scalars().first()
+        if existing:
+            return existing
+            
+        mentor = OpportunityMentor(
+            opportunity_id=opportunity_id,
+            mentor_profile_id=mentor_profile_id
+        )
+        self.db.add(mentor)
+        await self.commit_transaction()
+        await self.db.refresh(mentor)
+        return mentor
+
+    async def remove_mentor(self, opportunity_id, mentor_profile_id):
+        from app.models.internships.opportunity_mentor import OpportunityMentor
+        from sqlalchemy import select
+        
+        result = await self.db.execute(
+            select(OpportunityMentor).where(
+                OpportunityMentor.opportunity_id == opportunity_id,
+                OpportunityMentor.mentor_profile_id == mentor_profile_id
+            )
+        )
+        mentor = result.scalars().first()
+        
+        if mentor:
+            await self.db.delete(mentor)
+            await self.commit_transaction()
