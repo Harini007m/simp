@@ -239,10 +239,8 @@ class ApplicationService(BaseService):
         existing = result.scalars().first()
 
         if existing:
-            raise HTTPException(
-                status_code=400,
-                detail="Application already submitted.",
-            )
+            await self.db.delete(existing)
+            await self.db.flush()
 
         application = await self.repository.create(
             self.db,

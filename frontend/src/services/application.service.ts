@@ -14,6 +14,7 @@ export const applicationService = {
     const pr = ad.professionalInformation || {};
     const mo = ad.motivation || {};
     const pc = ad.personalInformation || {};
+    const isd = ad.internshipSpecificData || {};
 
     return {
       ...app,
@@ -38,7 +39,18 @@ export const applicationService = {
       linkedinUrl: pr.linkedinUrl || '',
       portfolioUrl: pr.portfolioUrl || '',
       projectExperience: pr.projectExperience || '',
-      resumeUrl: ad.resume_url || (ad.documents && ad.documents.resume) || '',
+      paymentMode: isd.paymentMode || '',
+      transactionId: isd.transactionId || '',
+      paymentScreenshot: isd.paymentScreenshot?.name || '',
+      relevantExperience: isd.relevantExperience || '',
+      preferredTechStack: isd.preferredTechStack || '',
+      technicalExperience: isd.technicalExperience || '',
+      researchArea: isd.researchArea || '',
+      publications: isd.publications || '',
+      researchStatement: isd.researchStatement || '',
+      resumeUrl: ad.resume_url || (ad.documents?.resume?.name) || '',
+      resumeBase64: ad.documents?.resume?.base64 || '',
+      resumeType: ad.documents?.resume?.type || '',
       whyInternship: mo.whyInternship || '',
       internshipType: ad.internshipType || 'free',
       opportunityId: app.opening_id,
