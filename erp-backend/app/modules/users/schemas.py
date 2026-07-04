@@ -27,3 +27,5 @@ class UserResponse(BaseModel):
     username: str
     email: str
     account_status: StatusEnum
+    roleName: Optional[str] = None
+    roleId: Optional[UUID] = None

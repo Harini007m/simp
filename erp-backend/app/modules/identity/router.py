@@ -96,8 +96,10 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
         'submission': 'submission',
         'performance': 'performance',
         'college_coordinator': 'college_coordinator',
+        'college_coordinator_mod': 'college_coordinator',
         'common_files': 'common_file',
         'reporting_manager': 'reporting_manager',
+        'reporting_manager_mod': 'reporting_manager',
         'leave_management': 'leave',
         'activity_tracking': 'activity',
         'escalation_engine': 'escalation',
@@ -150,7 +152,8 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
     
     mapped_modules = []
     for m in db_modules:
-        fe_id = db_to_fe_module_map.get(m.code, m.code)
+        code_lower = m.code.lower()
+        fe_id = db_to_fe_module_map.get(code_lower, code_lower)
         mapped_modules.append({
             "id": fe_id,
             "code": m.code.upper(),

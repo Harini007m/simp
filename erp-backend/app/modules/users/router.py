@@ -19,7 +19,46 @@ async def search_users(
 ):
     service = UserService(db)
     result = await service.search_paginated(params)
-    return success_response(data=result.model_dump())
+    
+    # Fetch roles for all users in the page
+    from app.models.rbac.user_role import UserRole
+    from app.models.rbac.role import Role
+    from sqlalchemy import select
+    
+    user_ids = [user.id for user in result.items]
+    roles_map = {}
+    if user_ids:
+        roles_query = await db.execute(
+            select(UserRole.user_id, Role.id, Role.name)
+            .join(Role, UserRole.role_id == Role.id)
+            .where(UserRole.user_id.in_(user_ids))
+        )
+        for row in roles_query:
+            roles_map[row[0]] = {"roleId": row[1], "roleName": row[2]}
+            
+    # Serialize items
+    items_dump = []
+    for user in result.items:
+        user_dict = {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "account_status": user.account_status,
+            "created_at": user.created_at,
+        }
+        role_info = roles_map.get(user.id)
+        if role_info:
+            user_dict["roleId"] = role_info["roleId"]
+            user_dict["roleName"] = role_info["roleName"]
+        items_dump.append(user_dict)
+        
+    return success_response(data={
+        "items": items_dump,
+        "total": result.total,
+        "page": result.page,
+        "page_size": result.page_size,
+        "total_pages": result.total_pages
+    })
 
 @router.post("/", response_model=APIResponse[UserResponse])
 async def create_user(
