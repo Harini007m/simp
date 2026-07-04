@@ -548,3 +548,835 @@ Traceback (most recent call last):
 socket.gaierror: [Errno 8] nodename nor servname provided, or not known
 [Errno 8] nodename nor servname provided, or not known
 
+=== DATABASE ERROR ===
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 526, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, self._invalidate_schema_cache_asof
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 773, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, name=self._prepared_statement_name_func()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 638, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 657, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 443, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedTableError: relation "auth_users" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedTableError'>: relation "auth_users" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 136, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 473, in app
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/dependencies/utils.py", line 678, in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/core/dependencies.py", line 33, in get_current_user
+    user = await UserRepository(db).get_by_email(db, "admin@pinesphere.com")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/modules/identity/repository.py", line 29, in get_by_email
+    result = await db.execute(select(User).filter(User.email == email))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/ext/asyncio/session.py", line 448, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "auth_users" does not exist
+[SQL: SELECT auth_users.username, auth_users.email, auth_users.phone, auth_users.password_hash, auth_users.account_status, auth_users.email_verified, auth_users.phone_verified, auth_users.last_login_at, auth_users.failed_login_attempts, auth_users.account_locked_until, auth_users.password_changed_at, auth_users.mfa_enabled, auth_users.profile_image_url, auth_users.id, auth_users.created_at, auth_users.updated_at, auth_users.created_by, auth_users.updated_by, auth_users.deleted_at, auth_users.version_id 
+FROM auth_users 
+WHERE auth_users.email = $1::VARCHAR]
+[parameters: ('admin@pinesphere.com',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+(sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "auth_users" does not exist
+[SQL: SELECT auth_users.username, auth_users.email, auth_users.phone, auth_users.password_hash, auth_users.account_status, auth_users.email_verified, auth_users.phone_verified, auth_users.last_login_at, auth_users.failed_login_attempts, auth_users.account_locked_until, auth_users.password_changed_at, auth_users.mfa_enabled, auth_users.profile_image_url, auth_users.id, auth_users.created_at, auth_users.updated_at, auth_users.created_by, auth_users.updated_by, auth_users.deleted_at, auth_users.version_id 
+FROM auth_users 
+WHERE auth_users.email = $1::VARCHAR]
+[parameters: ('admin@pinesphere.com',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+=== DATABASE ERROR ===
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 526, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, self._invalidate_schema_cache_asof
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 773, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, name=self._prepared_statement_name_func()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 638, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 657, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 443, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedTableError: relation "intern_opportunities" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedTableError'>: relation "intern_opportunities" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 136, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 690, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 344, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/modules/opportunity/router.py", line 25, in get_opportunities
+    opportunities = await service.get_all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/modules/opportunity/service.py", line 24, in get_all
+    return await self.repository.get_all(self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/modules/opportunity/repository.py", line 29, in get_all
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/ext/asyncio/session.py", line 448, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "intern_opportunities" does not exist
+[SQL: SELECT intern_opportunities.company_id, intern_opportunities.title, intern_opportunities.description, intern_opportunities.location, intern_opportunities.stipend, intern_opportunities.duration_weeks, intern_opportunities.requirements, intern_opportunities.status, intern_opportunities.deadline, intern_opportunities.id, intern_opportunities.created_at, intern_opportunities.updated_at, intern_opportunities.created_by, intern_opportunities.updated_by, intern_opportunities.deleted_at, intern_opportunities.version_id 
+FROM intern_opportunities ORDER BY intern_opportunities.created_at DESC]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+(sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "intern_opportunities" does not exist
+[SQL: SELECT intern_opportunities.company_id, intern_opportunities.title, intern_opportunities.description, intern_opportunities.location, intern_opportunities.stipend, intern_opportunities.duration_weeks, intern_opportunities.requirements, intern_opportunities.status, intern_opportunities.deadline, intern_opportunities.id, intern_opportunities.created_at, intern_opportunities.updated_at, intern_opportunities.created_by, intern_opportunities.updated_by, intern_opportunities.deleted_at, intern_opportunities.version_id 
+FROM intern_opportunities ORDER BY intern_opportunities.created_at DESC]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+=== DATABASE ERROR ===
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 526, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, self._invalidate_schema_cache_asof
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 773, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, name=self._prepared_statement_name_func()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 638, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 657, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 443, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedTableError: relation "auth_users" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedTableError'>: relation "auth_users" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 136, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 473, in app
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/dependencies/utils.py", line 678, in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/core/dependencies.py", line 33, in get_current_user
+    user = await UserRepository(db).get_by_email(db, "admin@pinesphere.com")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/modules/identity/repository.py", line 29, in get_by_email
+    result = await db.execute(select(User).filter(User.email == email))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/ext/asyncio/session.py", line 448, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "auth_users" does not exist
+[SQL: SELECT auth_users.username, auth_users.email, auth_users.phone, auth_users.password_hash, auth_users.account_status, auth_users.email_verified, auth_users.phone_verified, auth_users.last_login_at, auth_users.failed_login_attempts, auth_users.account_locked_until, auth_users.password_changed_at, auth_users.mfa_enabled, auth_users.profile_image_url, auth_users.id, auth_users.created_at, auth_users.updated_at, auth_users.created_by, auth_users.updated_by, auth_users.deleted_at, auth_users.version_id 
+FROM auth_users 
+WHERE auth_users.email = $1::VARCHAR]
+[parameters: ('admin@pinesphere.com',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+(sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "auth_users" does not exist
+[SQL: SELECT auth_users.username, auth_users.email, auth_users.phone, auth_users.password_hash, auth_users.account_status, auth_users.email_verified, auth_users.phone_verified, auth_users.last_login_at, auth_users.failed_login_attempts, auth_users.account_locked_until, auth_users.password_changed_at, auth_users.mfa_enabled, auth_users.profile_image_url, auth_users.id, auth_users.created_at, auth_users.updated_at, auth_users.created_by, auth_users.updated_by, auth_users.deleted_at, auth_users.version_id 
+FROM auth_users 
+WHERE auth_users.email = $1::VARCHAR]
+[parameters: ('admin@pinesphere.com',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+=== DATABASE ERROR ===
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 526, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, self._invalidate_schema_cache_asof
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 773, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, name=self._prepared_statement_name_func()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 638, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 657, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/asyncpg/connection.py", line 443, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedTableError: relation "intern_opportunities" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedTableError'>: relation "intern_opportunities" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 136, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 690, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/fastapi/routing.py", line 344, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/modules/opportunity/router.py", line 25, in get_opportunities
+    opportunities = await service.get_all()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/modules/opportunity/service.py", line 24, in get_all
+    return await self.repository.get_all(self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/app/modules/opportunity/repository.py", line 29, in get_all
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/ext/asyncio/session.py", line 448, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/mnt/stuffs/PROJECTS/pine/simp/erp-backend/venv/lib64/python3.14/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "intern_opportunities" does not exist
+[SQL: SELECT intern_opportunities.company_id, intern_opportunities.title, intern_opportunities.description, intern_opportunities.location, intern_opportunities.stipend, intern_opportunities.duration_weeks, intern_opportunities.requirements, intern_opportunities.status, intern_opportunities.deadline, intern_opportunities.id, intern_opportunities.created_at, intern_opportunities.updated_at, intern_opportunities.created_by, intern_opportunities.updated_by, intern_opportunities.deleted_at, intern_opportunities.version_id 
+FROM intern_opportunities ORDER BY intern_opportunities.created_at DESC]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+(sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "intern_opportunities" does not exist
+[SQL: SELECT intern_opportunities.company_id, intern_opportunities.title, intern_opportunities.description, intern_opportunities.location, intern_opportunities.stipend, intern_opportunities.duration_weeks, intern_opportunities.requirements, intern_opportunities.status, intern_opportunities.deadline, intern_opportunities.id, intern_opportunities.created_at, intern_opportunities.updated_at, intern_opportunities.created_by, intern_opportunities.updated_by, intern_opportunities.deleted_at, intern_opportunities.version_id 
+FROM intern_opportunities ORDER BY intern_opportunities.created_at DESC]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
