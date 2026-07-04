@@ -71,7 +71,6 @@ class OpportunityService(BaseService):
 
         # Send Opportunity Published notifications to students
         try:
-            from sqlalchemy import select
             from app.models.authentication.user import User as DBUser
             from app.models.profiles.student_profile import StudentProfile
             from app.services.notification_service import notification_service
