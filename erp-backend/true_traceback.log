@@ -1380,3 +1380,53 @@ FROM intern_opportunities ORDER BY intern_opportunities.created_at DESC]
 FROM intern_opportunities ORDER BY intern_opportunities.created_at DESC]
 (Background on this error at: https://sqlalche.me/e/20/f405)
 
+=== GENERIC ERROR ===
+Traceback (most recent call last):
+  File "D:\E\Projects\simp\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\starlette\middleware\cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\E\Projects\simp\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\starlette\routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 2683, in app
+    await route.handle(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 1753, in handle
+    await self.original_router.handle(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 2738, in handle
+    await included_router._handle_selected(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 1773, in _handle_selected
+    await original_route.handle(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 1264, in handle
+    await app(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 150, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\E\Projects\simp\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 136, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 690, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\E\Projects\simp\venv\Lib\site-packages\fastapi\routing.py", line 344, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\E\Projects\simp\erp-backend\app\modules\helpdesk\router.py", line 397, in update_ticket
+    assignee_roles = await get_user_roles(db, ticket.assigned_user_id or current_user.id)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\E\Projects\simp\erp-backend\app\modules\helpdesk\router.py", line 27, in get_user_roles
+    stmt = select(Role.code).join(UserRole, UserRole.role_id == Role.id).where(UserRole.user_id == current_user.id)
+                                                                                                   ^^^^^^^^^^^^^^^
+AttributeError: 'AsyncSession' object has no attribute 'id'
+'AsyncSession' object has no attribute 'id'
+
