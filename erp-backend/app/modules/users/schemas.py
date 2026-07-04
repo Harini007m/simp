@@ -13,6 +13,7 @@ class UserCreate(BaseModel):
     entityType: Optional[str] = None # 'employee', 'student', 'organization'
     entityId: Optional[UUID] = None
     sendEmail: Optional[bool] = None
+    forcePasswordChange: Optional[bool] = False
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None

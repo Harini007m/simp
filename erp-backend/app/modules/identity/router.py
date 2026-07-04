@@ -202,7 +202,8 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
         roleId=role.id if role else current_user.id,
         roleCode=role.code if role else "STUDENT",
         modules=mapped_modules,
-        permissions=permissions
+        permissions=permissions,
+        forcePasswordChange=getattr(current_user, "force_password_change", False)
     )
     return success_response(data=user_data, message="Current user retrieved successfully")
 

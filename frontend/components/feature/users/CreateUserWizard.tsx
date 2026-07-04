@@ -384,7 +384,8 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
         avatar: avatar || fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
         sendEmail: sendEmail,
         entityType: entityType,
-        entityId: entityId
+        entityId: entityId,
+        forcePasswordChange: forcePasswordChange
       };
       
       if (userToEdit) {

@@ -108,10 +108,12 @@ class IdentityService(BaseService):
             raise HTTPException(status_code=400, detail="Invalid old password")
             
         user.password_hash = hash_password(data.new_password)
+        user.force_password_change = False
         self.db.add(user)
         
         await self.log_audit_event("CHANGE_PASSWORD", "User", user_id)
         await self.commit_transaction()
+        
         return {"success": True}
 
     async def forgot_password(self, data: ForgotPasswordRequest) -> dict:

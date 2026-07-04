@@ -43,5 +43,14 @@ export const authApi = {
   resetPassword: async (data: ForgotPasswordReset): Promise<AuthActionResponse> => {
     const res = await apiClient.post<any>('/api/v1/auth/forgot-password/reset', data);
     return res.data.data;
+  },
+  changePassword: async (data: ChangePasswordRequest): Promise<AuthActionResponse> => {
+    const res = await apiClient.post<any>('/api/v1/auth/change-password', data);
+    return res.data;
   }
 };
+
+export interface ChangePasswordRequest {
+  old_password: string;
+  new_password: string;
+}

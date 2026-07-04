@@ -14,4 +14,5 @@ export interface User {
   departmentId?: string;
   entityType?: 'employee' | 'student' | 'organization';
   entityId?: string;
+  forcePasswordChange?: boolean;
 }

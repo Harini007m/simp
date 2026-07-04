@@ -37,6 +37,7 @@ class CurrentUserResponse(BaseModel):
     roleCode: str
     modules: List[dict] = []
     permissions: List[str] = []
+    forcePasswordChange: bool = False
 
 class RegisterRequest(BaseModel):
     name: str

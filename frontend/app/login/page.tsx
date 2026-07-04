@@ -38,13 +38,20 @@ const LoginPage = () => {
         
         await login();
         
+        // Fetch current user immediately to check forcePasswordChange
+        const currentUser = await authService.getCurrentUser();
+        
         if (typeof window !== 'undefined') {
           localStorage.setItem('pinesphere_username', username.trim());
         }
         
         // Brief delay to let the toast show
         setTimeout(() => {
-          router.push('/dashboard');
+          if (currentUser?.forcePasswordChange) {
+            router.push('/force-password-change');
+          } else {
+            router.push('/dashboard');
+          }
         }, 800);
       } else {
         setToastConfig({

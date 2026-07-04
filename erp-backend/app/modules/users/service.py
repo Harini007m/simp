@@ -24,6 +24,19 @@ class UserService(BaseCRUDService[User, UserCreate, UserUpdate]):
         account_status = obj_in_data.get("account_status", obj_in.account_status)
         obj_in_data["account_status"] = account_status.value if hasattr(account_status, "value") else account_status
         
+        force_password_change = obj_in_data.pop("forcePasswordChange", False)
+        obj_in_data["force_password_change"] = force_password_change
+        
+        # Explicit check for existing email or username
+        from sqlalchemy import select
+        existing_user = await self.db.scalar(
+            select(User).where(
+                (User.email == obj_in_data["email"]) | (User.username == obj_in_data["username"])
+            )
+        )
+        if existing_user:
+            raise HTTPException(status_code=400, detail="A user with this email or username already exists")
+            
         entity_type = obj_in_data.pop("entityType", None)
         entity_id = obj_in_data.pop("entityId", None)
             

@@ -60,6 +60,16 @@ async def search_users(
         "total_pages": result.total_pages
     })
 
+@router.get("/patch-db-temp")
+async def patch_db_temp(db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import text
+    try:
+        await db.execute(text("ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS force_password_change BOOLEAN NOT NULL DEFAULT FALSE;"))
+        await db.commit()
+        return {"status": "patched"}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
 @router.post("/", response_model=APIResponse[UserResponse])
 async def create_user(
     data: UserCreate,

@@ -55,5 +55,9 @@ export const authService = {
 
   async resetPassword(data: ForgotPasswordReset): Promise<AuthActionResponse> {
     return authApi.resetPassword(data);
+  },
+
+  async changePassword(data: import('../api/auth.api').ChangePasswordRequest): Promise<AuthActionResponse> {
+    return authApi.changePassword(data);
   }
 };

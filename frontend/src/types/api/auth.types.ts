@@ -38,6 +38,7 @@ export interface CurrentUserResponse {
   roleCode: string;
   modules: Module[];
   permissions: string[];
+  forcePasswordChange?: boolean;
 }
 
 export interface AuthActionResponse {
