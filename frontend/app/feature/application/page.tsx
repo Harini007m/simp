@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   FileText, Plus, ChevronRight, Briefcase, User, 
   CheckCircle2, XCircle, AlertTriangle, TrendingUp, Download, 
@@ -30,6 +31,7 @@ export default function ApplicationPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   
   // Selection State
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -51,14 +53,11 @@ export default function ApplicationPage() {
   const [bulkReviewerName, setBulkReviewerName] = useState('');
   const [showBulkReviewerInput, setShowBulkReviewerInput] = useState(false);
 
-  // Resume Fullscreen State
-  const [showResumeFullScreen, setShowResumeFullScreen] = useState(false);
-
   // Toast State
-  const [toast, setToast] = useState<{ show: boolean; title: string; message: string; type: 'success' | 'info' | 'warning' } | null>(null);
+  const [toast, setToast] = useState<{ show: boolean; title: string; message: string; type: 'success' | 'info' | 'warning' | 'error' } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const triggerToast = (title: string, message: string, type: 'success' | 'info' | 'warning') => {
+  const triggerToast = (title: string, message: string, type: 'success' | 'info' | 'warning' | 'error') => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToast({ show: true, title, message, type });
     toastTimerRef.current = setTimeout(() => {
@@ -66,14 +65,37 @@ export default function ApplicationPage() {
     }, 4000);
   };
 
+  const handleDownloadResume = () => {
+    if (reviewApp?.resumeBase64) {
+      const link = document.createElement('a');
+      link.href = reviewApp.resumeBase64;
+      link.download = reviewApp.resumeUrl || 'resume.pdf';
+      link.click();
+      triggerToast('Download Started', `Downloading ${reviewApp.resumeUrl}...`, 'success');
+    } else {
+      triggerToast('Download Error', `Could not download ${reviewApp?.resumeUrl}.`, 'error');
+    }
+  };
+
   // Load Data
-  const loadData = React.useCallback(async (showLoader = true) => {
+    const loadData = React.useCallback(async (showLoader = true) => {
     if (showLoader) setLoading(true);
     try {
       const appData = await applicationService.getApplications();
       const oppData = await opportunitiesService.getOpportunities();
       setApplications([...appData]);
       setOpportunities(oppData);
+
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const appId = params.get('applicationId');
+        if (appId) {
+          const appToSelect = appData.find((a: any) => a.id === appId);
+          if (appToSelect) {
+            setReviewApp(appToSelect);
+          }
+        }
+      }
     } catch (err) {
       console.error('Failed to load applications data', err);
       triggerToast('Error', 'Failed to retrieve application records.', 'warning');
@@ -110,6 +132,7 @@ export default function ApplicationPage() {
   // Handle Scorecard submission
   const handleSaveEvaluation = async () => {
     if (!reviewApp) return;
+    setActionLoading('save');
     try {
       const avgScore = Math.round((techScore + commScore + acadScore + cultureScore) * 2.5); // normalized to 100
       const updates = {
@@ -133,11 +156,14 @@ export default function ApplicationPage() {
     } catch (err) {
       console.error(err);
       triggerToast('Error', 'Failed to save candidate evaluation details.', 'warning');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   // Quick Action Buttons
   const handleQuickStatus = async (id: string, status: ApplicationStatus) => {
+    setActionLoading(status);
     try {
       const updated = await applicationService.updateApplicationStatus(id, status);
       if (updated) {
@@ -150,10 +176,13 @@ export default function ApplicationPage() {
     } catch (err) {
       console.error(err);
       triggerToast('Error', 'Failed to update pipeline stage.', 'warning');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleApproveAndCreateUser = async (app: Application) => {
+    setActionLoading('Approve');
     try {
       const updated = await applicationService.updateApplicationStatus(app.id, 'Selected');
       if (updated) {
@@ -167,6 +196,8 @@ export default function ApplicationPage() {
     } catch (err) {
       console.error(err);
       triggerToast('Error', 'Failed to approve candidate application.', 'warning');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -971,36 +1002,42 @@ export default function ApplicationPage() {
                 </div>
               </div>
 
-              {/* Status transition fast click actions */}
               <div className="flex items-center gap-1.5">
-                <button 
-                  onClick={() => handleQuickStatus(reviewApp.id, 'Shortlisted')}
-                  disabled={reviewApp.status === 'Shortlisted'}
-                  className="px-3.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Shortlist
-                </button>
-                <button 
-                  onClick={() => handleQuickStatus(reviewApp.id, 'Interview Scheduled')}
-                  disabled={reviewApp.status === 'Interview Scheduled'}
-                  className="px-3.5 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Schedule Interview
-                </button>
-                <button 
-                  onClick={() => handleApproveAndCreateUser(reviewApp)}
-                  disabled={reviewApp.status === 'Selected' || reviewApp.status === 'Accepted'}
-                  className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Approve / Select
-                </button>
-                <button 
-                  onClick={() => handleQuickStatus(reviewApp.id, 'Rejected')}
-                  disabled={reviewApp.status === 'Rejected'}
-                  className="px-3.5 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Reject
-                </button>
+                {(() => {
+                  const isTerminal = reviewApp.status === 'Rejected' || reviewApp.status === 'Selected' || reviewApp.status === 'Accepted';
+                  return (
+                    <>
+                      <button 
+                        onClick={() => handleQuickStatus(reviewApp.id, 'Shortlisted')}
+                        disabled={reviewApp.status === 'Shortlisted' || actionLoading !== null || isTerminal}
+                        className="px-3.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {actionLoading === 'Shortlisted' ? 'Processing...' : 'Shortlist'}
+                      </button>
+                      <button 
+                        onClick={() => handleQuickStatus(reviewApp.id, 'Interview Scheduled')}
+                        disabled={reviewApp.status === 'Interview Scheduled' || actionLoading !== null || isTerminal}
+                        className="px-3.5 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {actionLoading === 'Interview Scheduled' ? 'Processing...' : 'Schedule Interview'}
+                      </button>
+                      <button 
+                        onClick={() => handleApproveAndCreateUser(reviewApp)}
+                        disabled={isTerminal || actionLoading !== null}
+                        className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {actionLoading === 'Approve' ? 'Processing...' : 'Approve / Select'}
+                      </button>
+                      <button 
+                        onClick={() => handleQuickStatus(reviewApp.id, 'Rejected')}
+                        disabled={isTerminal || actionLoading !== null}
+                        className="px-3.5 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-lg text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {actionLoading === 'Rejected' ? 'Processing...' : 'Reject'}
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 
@@ -1127,7 +1164,7 @@ export default function ApplicationPage() {
                     </div>
                     <div>
                       <span className="text-text-secondary font-semibold block uppercase text-[10px]">Project Work Experience</span>
-                      <p className="text-text-primary leading-relaxed mt-1 bg-slate-50 p-2.5 rounded-lg border border-border">
+                      <p className="text-text-primary leading-relaxed break-all mt-1 bg-slate-50 p-2.5 rounded-lg border border-border">
                         {reviewApp.projectExperience}
                       </p>
                     </div>
@@ -1202,7 +1239,7 @@ export default function ApplicationPage() {
                     <div className="text-xs space-y-3.5">
                       <div>
                         <span className="text-text-secondary font-semibold block uppercase text-[10px]">Candidate Relevant Experience</span>
-                        <p className="text-text-primary leading-relaxed mt-1 font-medium bg-slate-50 p-2.5 rounded-lg border border-border">{reviewApp.relevantExperience || 'N/A'}</p>
+                        <p className="text-text-primary leading-relaxed break-all mt-1 font-medium bg-slate-50 p-2.5 rounded-lg border border-border">{reviewApp.relevantExperience || 'N/A'}</p>
                       </div>
                       <div>
                         <span className="text-text-secondary font-semibold block uppercase text-[10px]">AI-Generated Experience Evaluation</span>
@@ -1231,7 +1268,7 @@ export default function ApplicationPage() {
                       </div>
                       <div>
                         <span className="text-text-secondary font-semibold block uppercase text-[10px]">Prior Tech Environment History</span>
-                        <p className="text-text-primary leading-relaxed mt-1 bg-slate-50 p-2.5 rounded-lg border border-border">{reviewApp.technicalExperience || 'N/A'}</p>
+                        <p className="text-text-primary leading-relaxed break-all mt-1 bg-slate-50 p-2.5 rounded-lg border border-border">{reviewApp.technicalExperience || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
@@ -1256,7 +1293,7 @@ export default function ApplicationPage() {
                       </div>
                       <div>
                         <span className="text-text-secondary font-semibold block uppercase text-[10px]">Research Statement Summary</span>
-                        <p className="text-text-primary leading-relaxed mt-1 bg-slate-50 p-2.5 rounded-lg border border-border">{reviewApp.researchStatement || 'N/A'}</p>
+                        <p className="text-text-primary leading-relaxed break-all mt-1 bg-slate-50 p-2.5 rounded-lg border border-border">{reviewApp.researchStatement || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
@@ -1271,18 +1308,21 @@ export default function ApplicationPage() {
                     </h4>
                     <div className="flex gap-2">
                       <button 
-                        onClick={() => setShowResumeFullScreen(true)}
+                        onClick={handleDownloadResume}
                         className="text-blue-600 hover:text-blue-800 text-[10px] font-bold inline-flex items-center gap-0.5 cursor-pointer"
                       >
-                        <Eye className="h-3 w-3" />
-                        <span>Preview Fullscreen</span>
+                        <Download className="h-3 w-3" />
+                        <span>Download Document</span>
                       </button>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                     {/* Simulated document PDF wrapper */}
-                    <div className="md:col-span-2 border border-border rounded-xl p-4 bg-slate-100 flex flex-col items-center justify-center min-h-[140px]">
+                    <div 
+                      onClick={handleDownloadResume}
+                      className="md:col-span-2 border border-border rounded-xl p-4 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer flex flex-col items-center justify-center min-h-[140px]"
+                    >
                       <FileText className="h-12 w-12 text-slate-300" />
                       <span className="font-bold text-text-primary mt-2">{reviewApp.resumeUrl}</span>
                       <span className="text-[10px] text-text-secondary mt-0.5">Mock Resume Document Attached</span>
@@ -1304,7 +1344,7 @@ export default function ApplicationPage() {
                   <div className="text-xs space-y-3">
                     <div>
                       <span className="text-text-secondary font-semibold block uppercase text-[10px]">Why do you want this Internship?</span>
-                      <p className="text-text-primary leading-relaxed mt-1.5 bg-slate-50 p-2.5 rounded-lg border border-border">{reviewApp.whyInternship}</p>
+                      <p className="text-text-primary leading-relaxed break-all mt-1.5 bg-slate-50 p-2.5 rounded-lg border border-border">{reviewApp.whyInternship}</p>
                     </div>
                     <div className="grid grid-cols-3 gap-3 pt-1 text-[11px]">
                       <div className="bg-slate-50 p-2 rounded border border-border text-center">
@@ -1489,10 +1529,11 @@ export default function ApplicationPage() {
 
                   <button 
                     onClick={handleSaveEvaluation}
-                    className="w-full py-2 bg-slate-900 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    disabled={actionLoading !== null}
+                    className="w-full py-2 bg-slate-900 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Check className="h-4 w-4" />
-                    <span>Save Evaluation Details</span>
+                    <span>{actionLoading === 'save' ? 'Saving...' : 'Save Evaluation Details'}</span>
                   </button>
                 </div>
               </div>
@@ -1500,43 +1541,6 @@ export default function ApplicationPage() {
           </div>
         )}
       </Drawer>
-
-      {/* Embedded Resume Fullscreen Preview Modal */}
-      {showResumeFullScreen && reviewApp && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-4xl h-[90vh] flex flex-col shadow-2xl animate-slide-in">
-            <div className="shrink-0 p-4 border-b border-border flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-black text-text-primary leading-tight">Resume Preview: {reviewApp.candidateName}</h3>
-                <span className="text-[10px] text-text-secondary font-mono mt-0.5">{reviewApp.resumeUrl}</span>
-              </div>
-              <button 
-                onClick={() => setShowResumeFullScreen(false)}
-                className="p-1 text-text-secondary hover:text-text-primary bg-slate-100 rounded-lg"
-              >
-                <XCircle className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex-1 bg-slate-100 overflow-y-auto p-12 flex flex-col items-center justify-center">
-              <FileText className="h-20 w-20 text-slate-300" />
-              <span className="font-bold text-text-primary text-lg mt-4">{reviewApp.resumeUrl}</span>
-              <p className="text-sm text-text-secondary max-w-md text-center mt-2">
-                This is a simulated document view container representing candidate resume records. Recruiter tools allow downloading or exporting this file dynamically.
-              </p>
-              <button 
-                onClick={() => {
-                  triggerToast('Download Started', `Downloading file ${reviewApp.resumeUrl}...`, 'success');
-                  setShowResumeFullScreen(false);
-                }}
-                className="mt-6 px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl flex items-center gap-1.5"
-              >
-                <Download className="h-4 w-4" />
-                Download Document
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <AddCandidateDrawer
         isOpen={isAddDrawerOpen}
