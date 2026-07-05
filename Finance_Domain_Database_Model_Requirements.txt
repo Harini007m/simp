@@ -1,0 +1,43 @@
+﻿Finance Domain - Database Model Requirements
+Objective
+The following SQLAlchemy models are required to complete the remaining Finance backend modules of the ERP. Existing finance models (FeeStructure, Invoice, InvoiceItem, Receipt, and PaymentTransaction) are already available and should be reused wherever applicable.
+1. Wallet Management
+* Wallet - Master wallet information for students, organizations, employees, and internal wallets.
+* WalletTransaction - Stores all wallet credits, debits, transfers, refunds, scholarships, incentives, cashback, and adjustments.
+* WalletAdjustment - Manual financial adjustments performed by Finance.
+* WalletRefund - Refunds credited back into wallets.
+* WalletLimit - Wallet limits, overdraft settings, and balance constraints.
+* WalletFreezeHistory - Freeze/unfreeze history.
+* WalletAuditLog - Immutable audit trail for all wallet operations.
+2. Billing & Invoice Management
+* BillingTemplate - Invoice, receipt, reminder, and PDF templates.
+* InvoiceReminder - Reminder history for due invoices (Upcoming Due, Due Today, Overdue, Failed Payment).
+* RefundRequest - Refund requests awaiting approval.
+* RefundTransaction - Completed refund transactions.
+* PaymentGatewayLog - Gateway request/response logs, verification data, webhook payloads, and reconciliation information.
+3. Payment Collection Management
+* PaymentGateway - Gateway configuration and provider information.
+* PaymentReconciliation - ERP vs Gateway vs Bank reconciliation records.
+* PaymentLog - Complete payment lifecycle and audit events.
+Relationship Requirements
+* Wallet → WalletTransaction, WalletAdjustment, WalletRefund, WalletLimit, WalletFreezeHistory, WalletAuditLog
+* Invoice → InvoiceItem, Receipt, RefundRequest, InvoiceReminder
+* RefundRequest → RefundTransaction
+* PaymentTransaction → PaymentGatewayLog, PaymentReconciliation, PaymentLog
+Existing Models to Reuse
+* FeeStructure
+* Invoice
+* InvoiceItem
+* Receipt
+* PaymentTransaction
+Modules Depending on These Models
+* Wallet Management
+* Billing & Invoice Management
+* Payment Collection Management
+* Finance Dashboard (remaining functionality)
+* Finance Analytics (remaining functionality)
+Implementation Notes
+* Follow existing SQLAlchemy conventions, mixins, enums, and naming standards.
+* Define appropriate foreign keys, indexes, relationships, and constraints.
+* Create Alembic migrations for all new models.
+* Design models for seamless integration with Finance Dashboard, Revenue Analytics, Billing, Wallet, Notifications, and Audit Logs.

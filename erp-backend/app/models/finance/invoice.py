@@ -24,6 +24,8 @@ class Invoice(BaseModel):
     due_date: Mapped[date] = mapped_column(Date, nullable=False)
 
     items: Mapped[List["InvoiceItem"]] = relationship("InvoiceItem", back_populates="invoice", cascade="all, delete-orphan")
+    reminders: Mapped[List["InvoiceReminder"]] = relationship("InvoiceReminder", back_populates="invoice", cascade="all, delete-orphan")
+    refund_requests: Mapped[List["RefundRequest"]] = relationship("RefundRequest", back_populates="invoice", cascade="all, delete-orphan")
 
 class InvoiceItem(BaseModel):
     __tablename__ = 'fin_invoice_items'
