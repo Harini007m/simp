@@ -13,6 +13,15 @@ export const AlumniApi = {
     }
   },
 
+  getAlumniById: async (id: string): Promise<AlumniProfile | null> => {
+    try {
+      const res = await apiClient.get(`/api/v1/alumni/${id}`);
+      return res.data?.data || null;
+    } catch (error) {
+      return null;
+    }
+  },
+
   createAlumni: async (alumni: Partial<AlumniProfile>): Promise<AlumniProfile> => {
     try {
       const res = await apiClient.post('/api/v1/alumni', alumni);

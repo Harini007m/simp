@@ -4,6 +4,10 @@ export const AlumniService = {
   getAlumni: async () => {
     return await AlumniApi.getAlumni();
   },
+
+  getAlumniById: async (id: string) => {
+    return await AlumniApi.getAlumniById(id);
+  },
   
   getTotalAlumniCount: async () => {
     const al = await AlumniApi.getAlumni();

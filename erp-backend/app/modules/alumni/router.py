@@ -59,6 +59,68 @@ async def list_alumni(db: AsyncSession = Depends(get_db)):
         traceback.print_exc()
         return success_response(data=[])
 
+@router.get("/{alumni_id}")
+async def get_alumni_detail(alumni_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    try:
+        from sqlalchemy.orm import selectinload
+        stmt = (
+            select(AlumniProfile)
+            .options(selectinload(AlumniProfile.career_history))
+            .where(AlumniProfile.id == alumni_id)
+        )
+        result = await db.execute(stmt)
+        alum = result.scalars().first()
+        
+        if not alum:
+            raise HTTPException(status_code=404, detail="Alumnus profile not found")
+            
+        # Get student and user info
+        stmt_info = (
+            select(StudentProfile, User, Program)
+            .join(User, StudentProfile.user_id == User.id)
+            .outerjoin(Program, StudentProfile.department_id == Program.department_id)
+            .where(StudentProfile.id == alum.student_profile_id)
+        )
+        info_res = await db.execute(stmt_info)
+        info_rec = info_res.first()
+        
+        student, user, program = info_rec if info_rec else (None, None, None)
+        
+        return success_response(data={
+            "id": str(alum.id),
+            "studentId": student.enrollment_number if student else "",
+            "name": user.username if user else "Unknown",
+            "email": user.email if user else "",
+            "phone": user.phone if user else "",
+            "program": program.name if program else "General",
+            "batch": f"Class of {int(alum.graduation_year)}",
+            "graduationYear": int(alum.graduation_year),
+            "currentCompany": alum.current_company or "Self-Employed",
+            "currentDesignation": alum.current_designation or "Software Engineer",
+            "linkedInUrl": student.linkedin_url if student else "",
+            "isMentoring": alum.is_mentoring,
+            "referralsProvided": alum.referrals_provided,
+            "lastUpdated": alum.updated_at.isoformat() if hasattr(alum, 'updated_at') and alum.updated_at else datetime.now().isoformat(),
+            "careerHistory": [
+                {
+                    "id": str(c.id),
+                    "companyName": c.company_name,
+                    "designation": c.designation,
+                    "startDate": c.start_date.isoformat(),
+                    "endDate": c.end_date.isoformat() if c.end_date else None,
+                    "isCurrent": c.is_current,
+                    "location": c.location
+                } for c in alum.career_history
+            ],
+            "achievements": [] # Fallback for now as it's not in the model yet
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/")
 async def create_alumni(payload: AlumniCreate, db: AsyncSession = Depends(get_db)):
     try:

@@ -23,8 +23,10 @@ function AttendanceTrendChart({ data }: { data: AnalyticsDataPoint[] }) {
   const chartWidth = width - paddingLeft - paddingRight;
   const chartHeight = height - paddingTop - paddingBottom;
   
-  const minVal = 70; // 70% min for clear scaling
-  const maxVal = 100; // 100% max
+  // Calculate min/max from actual data
+  const values = data.map(d => d.value);
+  const minVal = Math.max(0, Math.min(...values) - 5);
+  const maxVal = Math.min(100, Math.max(...values) + 5);
   const range = maxVal - minVal;
   
   const getX = (index: number) => {
@@ -47,6 +49,9 @@ function AttendanceTrendChart({ data }: { data: AnalyticsDataPoint[] }) {
   areaPath += ` L ${getX(data.length - 1)} ${paddingTop + chartHeight}`;
   areaPath += ` L ${getX(0)} ${paddingTop + chartHeight} Z`;
 
+  // Calculate average from actual data
+  const average = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
+
   return (
     <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
       <div className="flex justify-between items-center mb-5">
@@ -56,7 +61,7 @@ function AttendanceTrendChart({ data }: { data: AnalyticsDataPoint[] }) {
         </div>
         <div className="text-right">
           <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-full font-bold">
-            Average: 88.2%
+            Average: {average}%
           </span>
         </div>
       </div>
@@ -75,13 +80,13 @@ function AttendanceTrendChart({ data }: { data: AnalyticsDataPoint[] }) {
           </defs>
 
           {/* Gridlines */}
-          {[70, 80, 90, 100].map((val) => {
+          {[minVal, minVal + (range * 0.25), minVal + (range * 0.5), minVal + (range * 0.75), maxVal].map((val) => {
             const y = getY(val);
             return (
               <g key={val}>
                 <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke="#f1f5f9" strokeWidth="0.75" />
                 <text x={paddingLeft - 8} y={y + 3} fill="#94a3b8" fontSize="8" textAnchor="end" className="font-mono">
-                  {val}%
+                  {Math.round(val)}%
                 </text>
               </g>
             );
@@ -138,17 +143,9 @@ export default function AnalyticsDashboardPage() {
     try {
       const data = await AnalyticsService.getDashboardData();
       
-      // Simulate date range updates
-      let factor = 1.0;
-      if (dateFilter === '90d') factor = 0.98;
-      else if (dateFilter === '180d') factor = 0.95;
-      
+      // Use actual data without artificial scaling
       if (data.summary) {
-        setSummary({
-          ...data.summary,
-          totalStudents: Math.round(data.summary.totalStudents * factor),
-          activeInterns: Math.round(data.summary.activeInterns * factor)
-        });
+        setSummary(data.summary);
       }
       setAttendance(data.attendanceTrend || []);
       setPrograms(data.topPrograms || []);
@@ -171,14 +168,15 @@ export default function AnalyticsDashboardPage() {
         `Placement Rate,${summary.placementRate}%`,
         `Completion Rate,${summary.completionRate}%`,
         `Certificates Issued,${summary.certificatesIssued}`,
-        `Average Score,${summary.averageScore}%`
+        `Average Score,${summary.averageScore}%`,
+        `Attendance Rate,${summary.attendanceRate}%`
       ].join("\n");
       
       const blob = new Blob([headers + rows], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Pinesphere_Analytics_Report_${dateFilter}.csv`;
+      link.download = `Analytics_Report_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -213,24 +211,10 @@ export default function AnalyticsDashboardPage() {
             <LineChart className="w-6 h-6 text-indigo-650" />
             Enterprise Analytics Dashboard
           </h1>
-          <p className="text-text-secondary text-sm mt-0.5">High-level insights into organization performance, academic metrics, and batch attendance.</p>
+          <p className="text-text-secondary text-sm mt-0.5">Real-time insights into organization performance, academic metrics, and batch attendance.</p>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Date range filter selector */}
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-border text-xs">
-            <Calendar className="w-3.5 h-3.5 text-text-secondary ml-1" />
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-transparent font-bold text-text-primary focus:outline-none cursor-pointer pr-1"
-            >
-              <option value="30d">Last 30 Days</option>
-              <option value="90d">Last 3 Months</option>
-              <option value="180d">Last 6 Months</option>
-            </select>
-          </div>
-
           {hasPermission('analytics.export') && (
             <button 
               onClick={handleExportCSV}
@@ -283,8 +267,12 @@ export default function AnalyticsDashboardPage() {
             <Briefcase className="w-4 h-4 text-emerald-500" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-emerald-600 font-mono tracking-tight">{summary.placementRate}%</div>
-            <p className="text-[10px] text-emerald-500 font-semibold mt-1.5 uppercase tracking-wide">✓ Exceeds target</p>
+            <div className={`text-2xl font-extrabold font-mono tracking-tight ${summary.placementRate >= 60 ? 'text-emerald-600' : 'text-orange-600'}`}>
+              {summary.placementRate}%
+            </div>
+            <p className={`text-[10px] font-semibold mt-1.5 uppercase tracking-wide ${summary.placementRate >= 60 ? 'text-emerald-500' : 'text-orange-500'}`}>
+              {summary.placementRate >= 60 ? '✓ Strong performance' : '⚠ Needs improvement'}
+            </p>
           </div>
         </div>
 
@@ -294,8 +282,12 @@ export default function AnalyticsDashboardPage() {
             <GraduationCap className="w-4 h-4 text-blue-500" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-blue-600 font-mono tracking-tight">{summary.completionRate}%</div>
-            <p className="text-[10px] text-blue-500 font-semibold mt-1.5 uppercase tracking-wide">✓ Stable performance</p>
+            <div className={`text-2xl font-extrabold font-mono tracking-tight ${summary.completionRate >= 70 ? 'text-blue-600' : 'text-orange-600'}`}>
+              {summary.completionRate}%
+            </div>
+            <p className={`text-[10px] font-semibold mt-1.5 uppercase tracking-wide ${summary.completionRate >= 70 ? 'text-blue-500' : 'text-orange-500'}`}>
+              {summary.completionRate >= 70 ? '✓ On track' : '⚠ Below target'}
+            </p>
           </div>
         </div>
       </div>
@@ -314,18 +306,18 @@ export default function AnalyticsDashboardPage() {
             <Award className="w-36 h-36" />
           </div>
           <div>
-            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">Audit Credentials</span>
-            <h2 className="text-base font-bold mb-1 mt-0.5 text-slate-100">Certificates Issued</h2>
-            <p className="text-text-secondary text-[11px] mb-6">Verified digital credentials generated</p>
-            <div className="text-4xl font-extrabold text-white font-mono tracking-tight">{summary.certificatesIssued.toLocaleString()}</div>
+            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">Performance Metrics</span>
+            <h2 className="text-base font-bold mb-1 mt-0.5 text-slate-100">Average Score</h2>
+            <p className="text-text-secondary text-[11px] mb-6">Student performance across all assessments</p>
+            <div className="text-4xl font-extrabold text-white font-mono tracking-tight">{summary.averageScore}%</div>
             <p className="text-emerald-400 text-xs font-bold mt-2 flex items-center gap-1">
-              <span>+12% growth rate</span>
+              <span>Attendance: {summary.attendanceRate}%</span>
             </p>
           </div>
           
           <div className="mt-6 pt-5 border-t border-border">
-            <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Average Course Score</h3>
-            <div className="text-2xl font-extrabold text-white font-mono tracking-tight">{summary.averageScore}%</div>
+            <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Certificates Issued</h3>
+            <div className="text-2xl font-extrabold text-white font-mono tracking-tight">{summary.certificatesIssued.toLocaleString()}</div>
           </div>
         </div>
       </div>
@@ -338,48 +330,67 @@ export default function AnalyticsDashboardPage() {
             Top Performing Programs
           </h2>
           <div className="space-y-4 pt-1">
-            {programs.map(program => (
-              <div key={program.id} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-text-primary">{program.name}</span>
-                  <span className="text-text-secondary font-mono">{program.value.toLocaleString()} Accounts ({program.percentage}%)</span>
+            {programs.length > 0 ? (
+              programs.map(program => (
+                <div key={program.id} className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span className="text-text-primary">{program.name}</span>
+                    <span className="text-text-secondary font-mono">{program.value.toLocaleString()} Students ({program.percentage}%)</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-gradient-to-r from-indigo-500 to-blue-500 h-full rounded-full transition-all duration-500"
+                      style={{ width: `${program.percentage}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                  <div 
-                    className="bg-indigo-650 h-full rounded-full transition-all duration-1000" 
-                    style={{ width: `${program.percentage}%` }}
-                  />
-                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center text-text-secondary">
+                <p className="text-sm font-semibold">No program data available</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
-        {/* Quick Insights advisories */}
-        <div className="bg-white rounded-2xl border border-border shadow-sm p-6 flex flex-col justify-between">
-          <div>
-            <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider mb-3">Enterprise Insights</h2>
-            <div className="space-y-3">
-              <div className="flex items-start gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <p className="text-xs font-medium text-text-secondary leading-normal">
-                  **Web Development** remains the largest program driving 36% of overall student enrollment.
-                </p>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <p className="text-xs font-medium text-text-secondary leading-normal">
-                  Placement rate target achieved at **76.8%**, indicating high employer engagement this cycle.
-                </p>
-              </div>
+        {/* Key Insights */}
+        <div className="bg-white rounded-2xl border border-border shadow-sm p-6 space-y-4">
+          <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-text-secondary" />
+            Key Insights
+          </h2>
+          <div className="space-y-3">
+            <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+              <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Attendance Health</p>
+              <p className="text-sm font-bold text-indigo-900 mt-1">{summary.attendanceRate}% Average</p>
+              <p className="text-[10px] text-indigo-600 mt-0.5">
+                {summary.attendanceRate >= 85 ? '✓ Excellent engagement' : summary.attendanceRate >= 75 ? '→ Good participation' : '⚠ Needs attention'}
+              </p>
             </div>
-          </div>
-          <div className="pt-4 mt-4 border-t border-border text-[10px] font-bold text-text-secondary uppercase tracking-wider">
-            Verified Audited Stats ✓
+            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+              <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Completion Status</p>
+              <p className="text-sm font-bold text-emerald-900 mt-1">{summary.certificatesIssued} Certified</p>
+              <p className="text-[10px] text-emerald-600 mt-0.5">
+                {summary.completionRate >= 70 ? '✓ Strong completion rate' : '→ In progress'}
+              </p>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
+              <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Placement Outlook</p>
+              <p className="text-sm font-bold text-blue-900 mt-1">{summary.placementRate}% Placed</p>
+              <p className="text-[10px] text-blue-600 mt-0.5">
+                {summary.placementRate >= 60 ? '✓ Strong placements' : '→ Growing opportunities'}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Data Freshness Notice */}
+      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center">
+        <p className="text-xs font-semibold text-text-secondary">
+          📊 Dashboard data is updated in real-time from your organization's database
+        </p>
+      </div>
     </div>
   );
 }
