@@ -300,8 +300,9 @@ export default function BatchManagementPage() {
       start_date: editForm.startDate || '2026-05-01',
       end_date: editForm.endDate || '2026-08-01',
 
-      max_capacity: Number(editForm.capacity) || 30
-    });
+      max_capacity: Number(editForm.capacity) || 30,
+      internship_type: editForm.internshipType
+    } as any);
 
     if (newB) {
       setBatches([...batches, newB]);
