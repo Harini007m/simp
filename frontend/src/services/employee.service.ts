@@ -115,5 +115,15 @@ export const employeeService = {
       console.debug('Failed bulk department update:', e);
       return false;
     }
+  },
+
+  async deleteEmployee(id: string): Promise<boolean> {
+    try {
+      await employeeApi.deleteEmployee(id);
+      return true;
+    } catch (e) {
+      console.error('Failed to delete employee:', e);
+      return false;
+    }
   }
 };

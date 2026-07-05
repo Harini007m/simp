@@ -6,8 +6,9 @@ import {
   Briefcase, Plus, ChevronRight, MapPin, Users,
   BarChart3, Clock, CheckCircle2, XCircle, LayoutDashboard, List,
   TrendingUp, UserPlus, FileText, Activity, Building, Calendar,
-  UsersRound, ShieldCheck, GraduationCap, Search, X
+  UsersRound, ShieldCheck, GraduationCap, Search, X, Trash
 } from 'lucide-react';
+import { PermissionGuard } from '@/components/feature/ui/PermissionGuard';
 
 import { opportunitiesService } from '@/src/services/opportunities.service';
 import { Opportunity } from '@/src/types/opportunities.types';
@@ -51,6 +52,22 @@ export default function OpportunityPage() {
   const [isAssignMentorOpen, setIsAssignMentorOpen] = useState(false);
   const [availableMentors, setAvailableMentors] = useState<MentorProfile[]>([]);
   const [assignForm, setAssignForm] = useState({ mentorId: '', role: 'Lead Mentor', workload: 10 });
+
+  const handleDeleteOpportunity = async (id: string) => {
+    try {
+      const ok = await opportunitiesService.deleteOpportunity(id);
+      if (ok) {
+        setOpportunities(opportunities.filter(o => o.id !== id));
+        setIsDrawerOpen(false);
+        setSelectedOpportunity(null);
+      } else {
+        alert('Failed to delete opportunity');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting opportunity');
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -509,6 +526,19 @@ export default function OpportunityPage() {
                     </div>
                   </div>
                 </div>
+                <PermissionGuard required="opportunities:delete">
+                  <button 
+                    onClick={() => {
+                      if (confirm(`Are you sure you want to delete opportunity ${selectedOpportunity.title}?`)) {
+                        handleDeleteOpportunity(selectedOpportunity.id);
+                      }
+                    }}
+                    className="bg-red-950 hover:bg-red-900 border border-red-800 text-red-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 cursor-pointer flex items-center gap-1"
+                  >
+                    <Trash className="h-3.5 w-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </PermissionGuard>
               </div>
             </div>
 

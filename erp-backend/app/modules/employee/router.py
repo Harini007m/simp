@@ -82,9 +82,19 @@ def _backend_status(value: Optional[str]) -> str:
     return StatusEnum.ACTIVE.value
 
 
-def _employee_payload(profile, user, organization=None, department=None):
-    first_name = (user.username or user.email or "").split(" ")[0]
-    last_name = " ".join((user.username or "").split(" ")[1:])
+def _employee_payload(profile, user=None, organization=None, department=None):
+    if user:
+        first_name = (user.username or user.email or "").split(" ")[0]
+        last_name = " ".join((user.username or "").split(" ")[1:])
+        email = user.email
+        phone = user.phone or ""
+        status = _frontend_status(user.account_status)
+    else:
+        first_name = profile.first_name or ""
+        last_name = profile.last_name or ""
+        email = profile.email or ""
+        phone = profile.phone or ""
+        status = "Active"
     organization_code = getattr(organization, "code", None) or str(getattr(organization, "id", ""))
     department_code = getattr(department, "code", None) or str(getattr(department, "id", ""))
     return {
@@ -92,10 +102,10 @@ def _employee_payload(profile, user, organization=None, department=None):
         "employee_code": profile.employee_code,
         "first_name": first_name,
         "last_name": last_name,
-        "official_email": user.email,
+        "official_email": email,
         "designation": profile.designation,
-        "phone_number": user.phone or "",
-        "status": _frontend_status(user.account_status),
+        "phone_number": phone,
+        "status": status,
         "organization_id": str(profile.organization_id),
         "organization_code": organization_code,
         "department_id": str(profile.department_id) if profile.department_id else "",
@@ -151,7 +161,7 @@ async def get_employee_list(
 
         result = await db.execute(
             select(EmployeeProfile, User, Organization, Department)
-            .join(User, User.id == EmployeeProfile.user_id)
+            .outerjoin(User, User.id == EmployeeProfile.user_id)
             .join(Organization, Organization.id == EmployeeProfile.organization_id)
             .outerjoin(Department, Department.id == EmployeeProfile.department_id)
             .order_by(EmployeeProfile.created_at.desc())
@@ -179,7 +189,7 @@ async def update_employee(
 
     result = await db.execute(
         select(EmployeeProfile, User, Organization, Department)
-        .join(User, User.id == EmployeeProfile.user_id)
+        .outerjoin(User, User.id == EmployeeProfile.user_id)
         .join(Organization, Organization.id == EmployeeProfile.organization_id)
         .outerjoin(Department, Department.id == EmployeeProfile.department_id)
         .where(EmployeeProfile.id == id)
@@ -192,21 +202,36 @@ async def update_employee(
     update_data = data.model_dump(exclude_unset=True)
 
     if update_data.get("name"):
-        user.username = update_data["name"]
         parts = update_data["name"].split(" ")
         profile.first_name = parts[0]
         profile.last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
+        if user:
+            user.username = update_data["name"]
     if update_data.get("email"):
-        existing_email = await db.execute(
-            select(User).where(User.email == update_data["email"], User.id != user.id)
+        existing_profile_email = await db.execute(
+            select(EmployeeProfile).where(EmployeeProfile.email == update_data["email"], EmployeeProfile.id != profile.id)
         )
-        if existing_email.scalars().first():
+        if existing_profile_email.scalars().first():
             raise HTTPException(status_code=409, detail="Employee email already exists")
-        user.email = update_data["email"]
+
+        if user:
+            existing_email = await db.execute(
+                select(User).where(User.email == update_data["email"], User.id != user.id)
+            )
+            if existing_email.scalars().first():
+                raise HTTPException(status_code=409, detail="Employee email already exists")
+            user.email = update_data["email"]
+        else:
+            existing_email = await db.execute(
+                select(User).where(User.email == update_data["email"])
+            )
+            if existing_email.scalars().first():
+                raise HTTPException(status_code=409, detail="Employee email already exists")
         profile.email = update_data["email"]
     if update_data.get("phone") is not None:
-        user.phone = update_data["phone"]
         profile.phone = update_data["phone"]
+        if user:
+            user.phone = update_data["phone"]
     if update_data.get("designation"):
         profile.designation = update_data["designation"]
     if update_data.get("employee_code"):
@@ -222,7 +247,8 @@ async def update_employee(
             except ValueError:
                 pass
     if update_data.get("status"):
-        user.account_status = _backend_status(update_data["status"])
+        if user:
+            user.account_status = _backend_status(update_data["status"])
     if update_data.get("organizationId"):
         organization_obj = await _resolve_organization(db, update_data["organizationId"])
         if organization_obj:
@@ -236,11 +262,13 @@ async def update_employee(
             profile.department_id = department_obj.id
             department = department_obj
 
-    db.add(user)
+    if user:
+        db.add(user)
     db.add(profile)
     await db.commit()
     await db.refresh(profile)
-    await db.refresh(user)
+    if user:
+        await db.refresh(user)
 
     return success_response(
         data=_employee_payload(profile, user, organization, department),
@@ -271,34 +299,17 @@ async def create_employee(
     )
     department = dept_result.scalars().first()
 
-    full_name = f"{data.first_name.strip()} {data.last_name.strip()}".strip()
-    username_base = full_name or data.official_email.split("@")[0]
-    username = username_base
-    suffix = 1
-    while True:
-        existing = await db.execute(select(User).where(User.username == username))
-        if not existing.scalars().first():
-            break
-        suffix += 1
-        username = f"{username_base} {suffix}"
-
-    existing_email = await db.execute(select(User).where(User.email == data.official_email))
-    if existing_email.scalars().first():
+    existing_profile_email = await db.execute(
+        select(EmployeeProfile).where(EmployeeProfile.email == data.official_email)
+    )
+    if existing_profile_email.scalars().first():
         raise HTTPException(status_code=409, detail="Employee email already exists")
 
-    new_user = User(
-        username=username,
-        email=data.official_email,
-        phone=data.phone_number,
-        password_hash=hash_password("ChangeMe@123"),
-        account_status=StatusEnum.ACTIVE.value,
-        email_verified=True,
-        phone_verified=False,
-        created_by=current_user.id,
-        updated_by=current_user.id,
+    existing_user_email = await db.execute(
+        select(User).where(User.email == data.official_email)
     )
-    db.add(new_user)
-    await db.flush()
+    if existing_user_email.scalars().first():
+        raise HTTPException(status_code=409, detail="Employee email already exists")
 
     joining_date_value = None
     if data.joining_date:
@@ -313,7 +324,7 @@ async def create_employee(
                 joining_date_value = None
 
     emp = EmployeeProfile(
-        user_id=new_user.id,
+        user_id=None,
         organization_id=organization.id,
         department_id=department.id if department else None,
         first_name=data.first_name.strip(),
@@ -331,7 +342,7 @@ async def create_employee(
     await db.refresh(emp)
 
     res_data = {
-        **_employee_payload(emp, new_user, organization, department),
+        **_employee_payload(emp, None, organization, department),
     }
     return success_response(data=res_data, message="Employee created successfully")
 
@@ -391,3 +402,21 @@ async def bulk_update_mentor(
         data={"updated": len(data.ids), "mentorId": data.mentorId},
         message="Mentor assignment recorded",
     )
+
+
+@router.delete("/{id}", response_model=APIResponse[dict])
+async def delete_employee(
+    id: UUID,
+    current_user: User = Depends(require_permission("employee", "delete")),
+    db: AsyncSession = Depends(get_db)
+):
+    from app.models.profiles.employee_profile import EmployeeProfile
+
+    result = await db.execute(select(EmployeeProfile).where(EmployeeProfile.id == id))
+    profile = result.scalars().first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    await db.delete(profile)
+    await db.commit()
+    return success_response(message="Employee deleted successfully")

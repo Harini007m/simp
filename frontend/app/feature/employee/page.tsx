@@ -498,6 +498,22 @@ export default function EmployeeManagementPage() {
     }
   };
 
+  const handleDeleteEmployee = async (id: string) => {
+    try {
+      const ok = await employeeService.deleteEmployee(id);
+      if (ok) {
+        setEmployees(employees.filter(e => e.id !== id));
+        setActiveProfile(null);
+        showToast('Employee deleted successfully');
+      } else {
+        showToast('Failed to delete employee', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Error deleting employee', 'error');
+    }
+  };
+
   // Pre-fill fields for editing
   const openEditModal = (emp: Employee) => {
     setEditForm({
@@ -1249,6 +1265,19 @@ export default function EmployeeManagementPage() {
                   <RefreshCw className="h-3 w-3 text-emerald-400" />
                   <span>Status</span>
                 </button>
+                <PermissionGuard required="employee:delete">
+                  <button 
+                    onClick={() => {
+                      if (confirm(`Are you sure you want to delete employee ${activeProfile.name}?`)) {
+                        handleDeleteEmployee(activeProfile.id);
+                      }
+                    }}
+                    className="bg-red-950 hover:bg-red-900 border border-red-800 text-red-200 px-2.5 py-1.5 rounded text-[11px] font-bold transition-all duration-150 cursor-pointer flex items-center gap-1"
+                  >
+                    <Trash className="h-3 w-3" />
+                    <span>Delete</span>
+                  </button>
+                </PermissionGuard>
               </div>
 
             </div>

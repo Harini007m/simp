@@ -84,6 +84,16 @@ class OpportunitiesService {
   const res = await opportunityApi.createOpening(opp);
   return this.mapToExtended(res);
 }
+
+  async deleteOpportunity(id: string): Promise<boolean> {
+    try {
+      await opportunityApi.deleteOpening(id);
+      return true;
+    } catch (e) {
+      console.error('Failed to delete opportunity:', e);
+      return false;
+    }
+  }
 }
 
 export const opportunitiesService = new OpportunitiesService();
