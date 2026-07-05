@@ -2,7 +2,10 @@ import { employeeApi } from '../api/employee.api';
 import { EmployeeCreate, EmployeeResponse } from '../types/api/employee.types';
 import { Employee, MOCK_EMPLOYEES } from '../data/mock-employees';
 
-export type ExtendedEmployee = EmployeeResponse & Employee;
+export type ExtendedEmployee = EmployeeResponse & Employee & {
+  has_account?: boolean;
+  username?: string;
+};
 
 export const employeeService = {
   mapToExtended(emp: EmployeeResponse): ExtendedEmployee {
@@ -113,6 +116,16 @@ export const employeeService = {
       return true;
     } catch (e) {
       console.debug('Failed bulk department update:', e);
+      return false;
+    }
+  },
+
+  async deleteEmployee(id: string): Promise<boolean> {
+    try {
+      await employeeApi.deleteEmployee(id);
+      return true;
+    } catch (e) {
+      console.error('Failed to delete employee:', e);
       return false;
     }
   }

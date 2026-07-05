@@ -17,5 +17,9 @@ export const programApi = {
   createProgram: async (data: ProgramCreate): Promise<ProgramResponse> => {
     const res = await apiClient.post<ProgramResponse>('/api/v1/program', data);
     return res.data;
+  },
+  updateProgram: async (id: string, data: Partial<ProgramCreate>): Promise<ProgramResponse> => {
+    const res = await apiClient.put<ProgramResponse>(`/api/v1/program/${id}`, data);
+    return res.data;
   }
 };

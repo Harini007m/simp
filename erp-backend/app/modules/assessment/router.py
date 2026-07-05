@@ -120,6 +120,44 @@ async def get_assessment_list(db: AsyncSession = Depends(get_db)):
         "assessments": result
     }]
 
+@router.get("/quizzes/student/{student_id}")
+async def get_student_assessments(student_id: str, db: AsyncSession = Depends(get_db)):
+    svc = QuizAssessmentService(db)
+    quizzes, submissions = await svc.get_all_quizzes()
+    
+    student_subs = [s for s in submissions if s.student_id == student_id]
+    
+    result = []
+    for q in quizzes:
+        import json
+        sec_settings = q.security_settings
+        if isinstance(sec_settings, str):
+            sec_settings = json.loads(sec_settings)
+            
+        questions = q.questions
+        if isinstance(questions, str):
+            questions = json.loads(questions)
+
+        my_attempt = next((s for s in student_subs if s.assessment_id == q.id), None)
+        
+        mapped = {
+            "id": q.frontend_id,
+            "title": q.title,
+            "type": q.type,
+            "duration": q.duration,
+            "passingMarks": q.passing_marks,
+            "negativeMarking": q.negative_marking,
+            "securitySettings": sec_settings,
+            "questions": questions,
+            "status": "Completed" if my_attempt else "Active",
+            "score": my_attempt.score if my_attempt else None,
+            "passed": my_attempt.passed if my_attempt else None,
+            "attempts": my_attempt.attempts if my_attempt else 0
+        }
+        result.append(mapped)
+        
+    return result
+
 @router.post("/quizzes")
 async def create_assessment(data: QuizAssessmentCreate, request: Request, db: AsyncSession = Depends(get_db)):
     user_id = None

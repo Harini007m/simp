@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Building2, Users, Plus, ChevronRight, FileDown, 
   Activity, FileText, Check, ExternalLink, Clock, BookOpen, AlertCircle, 
@@ -613,7 +614,7 @@ export default function OrganizationManagementPage() {
             </button>
           </div>
 
-          <PermissionGuard required="organizations:export">
+          <PermissionGuard required="organization.export">
             <button 
               onClick={handleExportData}
               className="flex items-center gap-1.5 px-3 py-2 border border-border hover:border-secondary hover:bg-slate-50 bg-white rounded-lg text-xs font-bold text-text-primary shadow-sm transition-all duration-200 cursor-pointer"
@@ -623,7 +624,7 @@ export default function OrganizationManagementPage() {
             </button>
           </PermissionGuard>
           
-          <PermissionGuard required="organizations:create">
+          <PermissionGuard required="organization.create">
             <button 
               onClick={openOnboardModal}
               className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer"
@@ -958,7 +959,7 @@ export default function OrganizationManagementPage() {
                     <button onClick={() => handleOpenProfile(org)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Open Profile File">
                       <Eye className="h-3.5 w-3.5" />
                     </button>
-                    <PermissionGuard required="organizations:update">
+                    <PermissionGuard required="organization.update">
                       <button onClick={() => openEditModal(org)} className="p-1 hover:bg-slate-100 rounded text-text-secondary hover:text-text-primary cursor-pointer" title="Edit Organization">
                         <Edit className="h-3.5 w-3.5" />
                       </button>
@@ -1066,7 +1067,7 @@ export default function OrganizationManagementPage() {
 
               {/* Sticky action buttons list */}
               <div className="flex items-center flex-wrap gap-2">
-                <PermissionGuard required="organizations:update">
+                <PermissionGuard required="organization.update">
                   <button 
                     onClick={() => openEditModal(activeProfile)}
                     className="bg-slate-800 hover:bg-slate-700 border border-border text-white px-2.5 py-1.5 rounded text-[11px] font-bold transition-all duration-150 cursor-pointer flex items-center gap-1"
@@ -1085,77 +1086,8 @@ export default function OrganizationManagementPage() {
                   <RefreshCw className="h-3 w-3 text-emerald-400" />
                   <span>Partnership</span>
                 </button>
-                <button 
-                  onClick={() => {
-                    setDeptForm({ name: '', hod: '', studentsCount: 120, facultyCount: 15, internshipsCount: 80, placementRate: 92 });
-                    setActiveActionModal({ type: 'department' });
-                  }}
-                  className="bg-slate-800 hover:bg-slate-700 border border-border text-white px-2.5 py-1.5 rounded text-[11px] font-bold transition-all duration-150 cursor-pointer flex items-center gap-1 text-purple-400"
-                >
-                  <PlusCircle className="h-3 w-3" />
-                  <span>Add Dept</span>
-                </button>
-                <button 
-                  onClick={() => {
-                    setCoordinatorNameInput('');
-                    setActiveActionModal({ type: 'coordinator' });
-                  }}
-                  className="bg-slate-800 hover:bg-slate-700 border border-border text-white px-2.5 py-1.5 rounded text-[11px] font-bold transition-all duration-150 cursor-pointer flex items-center gap-1 text-text-secondary"
-                >
-                  <UserCheck className="h-3 w-3" />
-                  <span>Liaison</span>
-                </button>
-                <button 
-                  onClick={() => {
-                    setNotifyMsg('');
-                    setActiveActionModal({ type: 'notify' });
-                  }}
-                  className="bg-slate-800 hover:bg-slate-700 border border-border text-white px-2.5 py-1.5 rounded text-[11px] font-bold transition-all duration-150 cursor-pointer flex items-center gap-1 text-blue-400"
-                >
-                  <Send className="h-3 w-3" />
-                  <span>Notify</span>
-                </button>
-                <button 
-                  onClick={() => {
-                    showToast(`Single College placement audit compiled & exported for ${activeProfile.name}`);
-                  }}
-                  className="bg-slate-800 hover:bg-slate-700 border border-border text-slate-300 hover:text-white p-1.5 rounded cursor-pointer"
-                  title="Export Data Summary"
-                >
-                  <FileDown className="h-4 w-4" />
-                </button>
               </div>
 
-            </div>
-
-            {/* TAB STRIP */}
-            <div className="bg-white border-b border-border px-6 overflow-x-auto flex shrink-0 scrollbar-none">
-              {[
-                { id: 'overview', label: 'Overview' },
-                { id: 'departments', label: 'Departments Management' },
-                { id: 'coordinators', label: 'Coordinators & Staff' },
-                { id: 'students', label: 'Student Relationships' },
-                { id: 'programs', label: 'Internship Programs' },
-                { id: 'placements', label: 'Placement Analytics' },
-                { id: 'metadata', label: 'Metadata & MoU Center' },
-                { id: 'timeline', label: 'Timeline log' },
-                { id: 'certificates', label: 'Certificate Verification' }
-              ].map((tab) => {
-                const isActive = profileTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setProfileTab(tab.id as any)}
-                    className={`py-3 px-4 font-bold text-xs border-b-2 transition-all shrink-0 cursor-pointer ${
-                      isActive 
-                        ? 'border-blue-600 text-blue-600' 
-                        : 'border-transparent text-text-secondary hover:text-text-primary'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
             </div>
 
             {/* TABS CONTAINER */}
@@ -1729,10 +1661,10 @@ export default function OrganizationManagementPage() {
       </Drawer>
 
       {/* ------------------ OPERATIONAL MODALS ------------------ */}
-      {activeActionModal && (
+      {activeActionModal && typeof document !== 'undefined' && createPortal(
         <div className={`z-[100] flex transition-all ${
           (activeActionModal.type === 'edit' || activeActionModal.type === 'onboard') 
-            ? 'absolute inset-0 bg-white p-0 items-start justify-stretch' 
+            ? 'fixed inset-y-0 left-0 lg:left-72 right-0 bg-white p-0 items-start justify-stretch' 
             : 'fixed inset-0 bg-slate-900/50 backdrop-blur-sm p-4 items-center justify-center'
         }`}>
           <div className={`bg-white overflow-hidden transition-all duration-300 ${
@@ -2198,7 +2130,8 @@ export default function OrganizationManagementPage() {
 
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

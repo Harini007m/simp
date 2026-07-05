@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
@@ -41,3 +41,7 @@ class PaymentTransaction(BaseModel):
 
     user: Mapped[Optional["User"]] = relationship("User", back_populates="payment_transactions")
     application: Mapped[Optional["Application"]] = relationship("Application", back_populates="payments")
+
+    gateway_logs: Mapped[List["PaymentGatewayLog"]] = relationship("PaymentGatewayLog", back_populates="payment_transaction", cascade="all, delete-orphan")
+    reconciliations: Mapped[List["PaymentReconciliation"]] = relationship("PaymentReconciliation", back_populates="payment_transaction", cascade="all, delete-orphan")
+    payment_logs: Mapped[List["PaymentLog"]] = relationship("PaymentLog", back_populates="payment_transaction", cascade="all, delete-orphan")
