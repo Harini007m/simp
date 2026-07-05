@@ -7852,3 +7852,133 @@ WHERE auth_users.email = $1::VARCHAR OR auth_users.username = $2::VARCHAR]
 [parameters: ('admin@gmail.com', 'admin@gmail.com')]
 (Background on this error at: https://sqlalche.me/e/20/f405)
 
+=== DATABASE ERROR ===
+Traceback (most recent call last):
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 550, in _prepare_and_execute
+    self._rows = deque(await prepared_stmt.fetch(*parameters))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\asyncpg\prepared_stmt.py", line 177, in fetch
+    data = await self.__bind_execute(args, 0, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\asyncpg\prepared_stmt.py", line 268, in __bind_execute
+    data, status, _ = await self.__do_execute(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\asyncpg\prepared_stmt.py", line 257, in __do_execute
+    return await executor(protocol)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 205, in bind_execute
+asyncpg.exceptions.UniqueViolationError: duplicate key value violates unique constraint "ix_auth_users_phone"
+DETAIL:  Key (phone)=(09786232825) already exists.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.IntegrityError: <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "ix_auth_users_phone"
+DETAIL:  Key (phone)=(09786232825) already exists.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\pinesphere\simp\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\fastapi\routing.py", line 136, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\fastapi\routing.py", line 690, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\fastapi\routing.py", line 344, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\erp-backend\app\modules\application\router.py", line 82, in create_application
+    raise e
+  File "D:\pinesphere\simp\erp-backend\app\modules\application\router.py", line 75, in create_application
+    application = await service.create(
+                  ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\erp-backend\app\modules\application\service.py", line 186, in create
+    await self.db.flush()
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\ext\asyncio\session.py", line 786, in flush
+    await greenlet_spawn(self.sync_session.flush, objects=objects)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4353, in flush
+    self._flush(objects)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4488, in _flush
+    with util.safe_reraise():
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 122, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4449, in _flush
+    flush_context.execute()
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 465, in execute
+    rec.execute(self)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 641, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 94, in save_obj
+    _emit_insert_statements(
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1234, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "D:\pinesphere\simp\venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.IntegrityError: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "ix_auth_users_phone"
+DETAIL:  Key (phone)=(09786232825) already exists.
+[SQL: INSERT INTO auth_users (username, email, phone, password_hash, account_status, email_verified, phone_verified, last_login_at, failed_login_attempts, account_locked_until, password_changed_at, mfa_enabled, force_password_change, account_expires_at, profile_image_url, id, created_at, updated_at, created_by, updated_by, deleted_at, version_id) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::BOOLEAN, $7::BOOLEAN, $8::TIMESTAMP WITH TIME ZONE, $9::INTEGER, $10::TIMESTAMP WITH TIME ZONE, $11::TIMESTAMP WITH TIME ZONE, $12::BOOLEAN, $13::BOOLEAN, $14::TIMESTAMP WITH TIME ZONE, $15::VARCHAR, $16::UUID, $17::TIMESTAMP WITH TIME ZONE, $18::TIMESTAMP WITH TIME ZONE, $19::UUID, $20::UUID, $21::TIMESTAMP WITH TIME ZONE, $22::INTEGER)]
+[parameters: ('h_b1cd1e87', 'h@gmail.com', '09786232825', 'auto-generated-placeholder', 'ACTIVE', False, False, None, 0, None, None, False, False, None, None, UUID('8d3b5aca-84b8-4a57-9d53-efdfaad12f7c'), datetime.datetime(2026, 7, 5, 5, 12, 33, 983692, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 7, 5, 5, 12, 33, 983692, tzinfo=datetime.timezone.utc), None, None, None, 1)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+(sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.UniqueViolationError'>: duplicate key value violates unique constraint "ix_auth_users_phone"
+DETAIL:  Key (phone)=(09786232825) already exists.
+[SQL: INSERT INTO auth_users (username, email, phone, password_hash, account_status, email_verified, phone_verified, last_login_at, failed_login_attempts, account_locked_until, password_changed_at, mfa_enabled, force_password_change, account_expires_at, profile_image_url, id, created_at, updated_at, created_by, updated_by, deleted_at, version_id) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::BOOLEAN, $7::BOOLEAN, $8::TIMESTAMP WITH TIME ZONE, $9::INTEGER, $10::TIMESTAMP WITH TIME ZONE, $11::TIMESTAMP WITH TIME ZONE, $12::BOOLEAN, $13::BOOLEAN, $14::TIMESTAMP WITH TIME ZONE, $15::VARCHAR, $16::UUID, $17::TIMESTAMP WITH TIME ZONE, $18::TIMESTAMP WITH TIME ZONE, $19::UUID, $20::UUID, $21::TIMESTAMP WITH TIME ZONE, $22::INTEGER)]
+[parameters: ('h_b1cd1e87', 'h@gmail.com', '09786232825', 'auto-generated-placeholder', 'ACTIVE', False, False, None, 0, None, None, False, False, None, None, UUID('8d3b5aca-84b8-4a57-9d53-efdfaad12f7c'), datetime.datetime(2026, 7, 5, 5, 12, 33, 983692, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 7, 5, 5, 12, 33, 983692, tzinfo=datetime.timezone.utc), None, None, None, 1)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
