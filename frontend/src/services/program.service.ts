@@ -12,9 +12,9 @@ export const programService = {
       title: prog.program_name,
       code: prog.program_code,
       organizationId: 'ORG-000',
-      durationWeeks: 12,
-      status: 'Active',
-      type: 'Free Internship',
+      durationWeeks: prog.duration_weeks || 12,
+      status: (prog.status as any) || 'Active',
+      type: prog.internship_type_id || 'Free Internship',
       startDate: new Date().toISOString(),
       endDate: new Date().toISOString(),
       studentsEnrolled: 0,
@@ -64,7 +64,31 @@ export const programService = {
   },
 
   async updateProgram(id: string, updates: Partial<ExtendedProgram>): Promise<ExtendedProgram | undefined> {
-    return undefined;
+    try {
+      const payload: Partial<ProgramCreate> = {
+        program_name: updates.program_name || updates.title,
+        program_code: updates.program_code || updates.code,
+        duration_weeks: updates.duration_weeks || updates.durationWeeks,
+        internship_type_id: updates.internship_type_id || updates.program_type || updates.type,
+        program_description: updates.program_description || updates.description,
+      };
+      
+      const res = await programApi.updateProgram(id, payload);
+      const mapped = this.mapToExtended(res);
+      if (updates.metadata) {
+        mapped.metadata = {
+          ...mapped.metadata,
+          ...updates.metadata
+        };
+      }
+      if (updates.status) {
+        mapped.status = updates.status;
+      }
+      return mapped;
+    } catch (e) {
+      console.error("Error updating program:", e);
+      return undefined;
+    }
   },
 
   async bulkUpdateStatus(ids: string[], status: string): Promise<boolean> {
