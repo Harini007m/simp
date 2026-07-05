@@ -35,14 +35,15 @@ export const batchService = {
   async updateBatch(id: string, updates: Partial<ExtendedBatch>): Promise<ExtendedBatch | undefined> {
     try {
       const current = await batchApi.getBatch(id);
-      const req: BatchCreate = {
+      const req: any = {
         program_id: current.program_id,
         batch_code: updates.code || current.batch_code,
         batch_name: updates.name || current.batch_name,
         max_capacity: updates.capacity || current.max_capacity,
         start_date: current.start_date,
         end_date: current.end_date,
-        batch_status: updates.status || current.batch_status
+        batch_status: updates.status || current.batch_status,
+        internship_type: updates.internshipType || (updates as any).internship_type || (current as any).internship_type
       };
       const res = await batchApi.updateBatch(id, req);
       return this.mapToExtended(res);
@@ -82,8 +83,8 @@ export const batchService = {
       capacity: b.max_capacity,
       status: b.batch_status as any,
       programId: b.program_id,
-      programName: 'Sample Program',
-      internshipType: 'Paid Internship',
+      programName: (b as any).program_name || 'Sample Program',
+      internshipType: (b as any).internship_type || (b as any).internshipType ,
       startDate: b.start_date,
       endDate: b.end_date || new Date().toISOString().split('T')[0],
       completionRate: 0,

@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { 
   Users, Plus, ChevronRight, FileDown, MoreVertical, 
   GraduationCap, CheckCircle2, XCircle, AlertCircle, Calendar, Award, 
   FileText, Building, Clock, TrendingUp, Download, RefreshCw, UserCheck, 
   MapPin, Activity, Mail, Phone, Shield, Printer, QrCode, Briefcase, 
-  UserX, Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock
+  UserX, Check, Trash, PlusCircle, LayoutGrid, Eye, Send, Lock, Search, ChevronDown, X
 } from 'lucide-react';
 import { studentService } from '@/src/services/student.service';
+import { TndceCollege } from '@/src/types/api/student.types';
 import { Student, StudentDocument, StudentTimelineEvent, StudentBatch } from '@/src/types/students.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { Drawer } from '@/components/feature/ui/Drawer';
@@ -52,6 +53,7 @@ export default function StudentLifecycleManagementPage() {
     gender: '',
     address: '',
     college: '',
+    college_id: '',
     department: 'CSE' as Student['academicInfo']['department'],
     degree: '',
     year: 1,
@@ -65,6 +67,15 @@ export default function StudentLifecycleManagementPage() {
     joiningDate: '',
     expectedCompletion: '',
   });
+
+  // College autocomplete state
+  const [colleges, setColleges] = useState<TndceCollege[]>([]);
+  const [collegesLoading, setCollegesLoading] = useState(false);
+  const [collegesError, setCollegesError] = useState(false);
+  const [collegeSearch, setCollegeSearch] = useState('');
+  const [collegeDropdownOpen, setCollegeDropdownOpen] = useState(false);
+  const [collegeHighlightIdx, setCollegeHighlightIdx] = useState(-1);
+  const collegeDropdownRef = useRef<HTMLDivElement>(null);
 
   const [batchForm, setBatchForm] = useState({
     name: '',
@@ -117,7 +128,77 @@ export default function StudentLifecycleManagementPage() {
 
   useEffect(() => {
     loadData();
+    // Fetch college list once on mount
+    const fetchColleges = async () => {
+      setCollegesLoading(true);
+      setCollegesError(false);
+      try {
+        const data = await studentService.getColleges();
+        setColleges(data);
+      } catch (e) {
+        setCollegesError(true);
+      } finally {
+        setCollegesLoading(false);
+      }
+    };
+    fetchColleges();
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (collegeDropdownRef.current && !collegeDropdownRef.current.contains(e.target as Node)) {
+        setCollegeDropdownOpen(false);
+        setCollegeHighlightIdx(-1);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredColleges = useMemo(() => {
+    if (!collegeSearch.trim()) return colleges;
+    const q = collegeSearch.toLowerCase();
+    return colleges.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      c.district.toLowerCase().includes(q) ||
+      c.region.toLowerCase().includes(q) ||
+      c.college_type.toLowerCase().includes(q)
+    );
+  }, [colleges, collegeSearch]);
+
+  const handleCollegeKeyDown = (e: React.KeyboardEvent) => {
+    if (!collegeDropdownOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') { setCollegeDropdownOpen(true); }
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      setCollegeHighlightIdx(prev => Math.min(prev + 1, filteredColleges.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      setCollegeHighlightIdx(prev => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter' && collegeHighlightIdx >= 0) {
+      const selected = filteredColleges[collegeHighlightIdx];
+      setEditForm(prev => ({ ...prev, college: selected.name, college_id: selected.id }));
+      setCollegeSearch('');
+      setCollegeDropdownOpen(false);
+      setCollegeHighlightIdx(-1);
+    } else if (e.key === 'Escape') {
+      setCollegeDropdownOpen(false);
+      setCollegeHighlightIdx(-1);
+    }
+  };
+
+  const selectCollege = (col: TndceCollege) => {
+    setEditForm(prev => ({ ...prev, college: col.name, college_id: col.id }));
+    setCollegeSearch('');
+    setCollegeDropdownOpen(false);
+    setCollegeHighlightIdx(-1);
+  };
+
+  const clearCollege = () => {
+    setEditForm(prev => ({ ...prev, college: '', college_id: '' }));
+    setCollegeSearch('');
+  };
 
   // Keyboard Shortcuts listener (Esc to close)
   useEffect(() => {
@@ -201,6 +282,84 @@ export default function StudentLifecycleManagementPage() {
       top: sorted.slice(0, 4),
       bottom: [...sorted].reverse().slice(0, 4).filter(s => s.performance.overallPerformance < 75)
     };
+  }, [students]);
+
+  // Academic Top Performers (CGPA >= 8.5 or Assessment Score >= 90%)
+  const academicTopPerformers = useMemo(() => {
+    const list = students.filter(s => {
+      const cgpa = s.academicInfo?.cgpa || 0;
+      const score = s.performance?.assessmentScore || 0;
+      return cgpa >= 8.5 || score >= 90;
+    });
+    const sorted = [...list].sort((a, b) => {
+      const scoreB = b.performance?.assessmentScore || ((b.academicInfo?.cgpa || 0) * 10);
+      const scoreA = a.performance?.assessmentScore || ((a.academicInfo?.cgpa || 0) * 10);
+      return scoreB - scoreA;
+    });
+    return sorted.map((s, idx) => ({
+      id: s.id,
+      name: s.personalInfo.name,
+      department: s.academicInfo.department,
+      batch: s.internshipInfo.batchName || 'Unassigned',
+      score: s.performance?.assessmentScore || Math.round((s.academicInfo?.cgpa || 0) * 10),
+      rank: idx + 1,
+      avatar: s.personalInfo.avatar,
+      cgpa: s.academicInfo.cgpa
+    }));
+  }, [students]);
+
+  // At-Risk Cohort (Attendance < 75% or Assessment Average < 60% or Pending Tasks > 2 or LMS Inactive > 7)
+  const atRiskCohort = useMemo(() => {
+    const riskList: any[] = [];
+    students.forEach(s => {
+      let isRisk = false;
+      const reasons: string[] = [];
+      let riskScore = 0;
+
+      const attScore = s.performance?.attendanceScore || 0;
+      if (attScore < 75) {
+        isRisk = true;
+        reasons.push(`Low Attendance (${attScore}%)`);
+        riskScore += (75 - attScore) * 1.5;
+      }
+
+      const assessScore = s.performance?.assessmentScore || 0;
+      if (assessScore < 60) {
+        isRisk = true;
+        reasons.push(`Low Assessment Score (${assessScore}%)`);
+        riskScore += (60 - assessScore) * 2.0;
+      }
+
+      const pendingTasks = (s.performance as any)?.pendingTasks || 0;
+      if (pendingTasks > 2) {
+        isRisk = true;
+        reasons.push(`${pendingTasks} Pending Tasks`);
+        riskScore += pendingTasks * 10;
+      }
+
+      const lmsInactiveDays = (s.performance as any)?.lmsInactiveDays || 0;
+      if (lmsInactiveDays > 7) {
+        isRisk = true;
+        reasons.push(`LMS Inactive ${lmsInactiveDays} days`);
+        riskScore += (lmsInactiveDays - 7) * 5;
+      }
+
+      if (isRisk) {
+        riskList.push({
+          id: s.id,
+          name: s.personalInfo.name,
+          batch: s.internshipInfo.batchName || 'Unassigned',
+          attendancePct: attScore,
+          riskScore: Math.min(Math.round(riskScore), 100),
+          reason: reasons.join(', '),
+          avatar: s.personalInfo.avatar,
+          college: s.academicInfo.college,
+          department: s.academicInfo.department
+        });
+      }
+    });
+
+    return riskList.sort((a, b) => b.riskScore - a.riskScore);
   }, [students]);
 
   // Global Activity Feed based on timeline logs
@@ -307,6 +466,7 @@ export default function StudentLifecycleManagementPage() {
       gender: student.personalInfo.gender,
       address: student.personalInfo.address,
       college: student.academicInfo.college,
+      college_id: (student as any).college_id || '',
       department: student.academicInfo.department,
       degree: student.academicInfo.degree,
       year: student.academicInfo.year,
@@ -360,8 +520,9 @@ export default function StudentLifecycleManagementPage() {
         mentorName: editForm.mentorName || 'Bob Johnson',
         joiningDate: editForm.joiningDate,
         expectedCompletion: editForm.expectedCompletion
-      }
-    });
+      },
+      college_id: editForm.college_id || undefined
+    } as any);
 
     if (updated) {
       setStudents(students.map(s => s.id === targetId ? updated : s));
@@ -375,15 +536,60 @@ export default function StudentLifecycleManagementPage() {
 
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newStu = await studentService.createStudent({
-      application_id: 'app-1',
-      program_id: 'prog-1'
-    } as any);
+    const parts = editForm.name.trim().split(" ");
+    const firstName = parts[0] || "Student";
+    const lastName = parts.slice(1).join(" ") || "Name";
 
-    if (newStu) {
-      setStudents([...students, newStu]);
-      showToast(`Enrolled student ${newStu.personalInfo.name} with ID ${newStu.internId}`);
-      setActiveActionModal(null);
+    try {
+      const newStu = await studentService.createStudent({
+        first_name: firstName,
+        last_name: lastName,
+        email: editForm.email,
+        phone: editForm.phone,
+        enrollment_number: `ENR${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`,
+        department: editForm.department,
+        degree: editForm.degree,
+        year: Number(editForm.year),
+        cgpa: Number(editForm.cgpa),
+        graduation_year: Number(editForm.graduationYear),
+        program: editForm.program,
+        internship_type: editForm.internshipType,
+        batch_name: editForm.batchName,
+        mentor_id: editForm.mentorId,
+        joining_date: editForm.joiningDate || new Date().toISOString().split('T')[0],
+        dob: editForm.dob,
+        gender: editForm.gender,
+        address: editForm.address,
+        status: 'Applied',
+        college_id: editForm.college_id || undefined
+      } as any);
+
+      if (newStu) {
+        setStudents([...students, newStu]);
+        showToast(`Enrolled student ${newStu.personalInfo.name} with ID ${newStu.internId}`);
+        setActiveActionModal(null);
+      }
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.response?.data?.detail || 'Failed to enroll student', 'error');
+    }
+  };
+
+  const handleDeleteStudent = async (id: string) => {
+    const student = students.find(s => s.id === id);
+    if (!student) return;
+    if (confirm(`Are you sure you want to delete student ${student.personalInfo.name}?`)) {
+      const ok = await studentService.deleteStudent(id);
+      if (ok) {
+        setStudents(students.filter(s => s.id !== id));
+        if (activeProfile?.id === id) {
+          setIsProfileDrawerOpen(false);
+          setActiveProfile(null);
+        }
+        showToast('Student deleted successfully');
+      } else {
+        showToast('Failed to delete student', 'error');
+      }
     }
   };
 
@@ -836,16 +1042,18 @@ export default function StudentLifecycleManagementPage() {
           
           <PermissionGuard required="student.create">
             <button 
-              onClick={() => {
-                setEditForm({
-                  name: '', email: '', phone: '', dob: '', gender: 'Male', address: '', college: '',
-                  department: 'CSE', degree: 'B.Tech', year: 3, cgpa: 8.5, graduationYear: 2027,
-                  program: 'Summer Software Engineering Internship', internshipType: 'Free Internship',
-                  batchName: 'Alpha Cohort 2026', mentorId: 'emp-2', mentorName: 'Bob Johnson',
-                  joiningDate: '', expectedCompletion: ''
-                });
-                setActiveActionModal({ type: 'onboard' });
-              }}
+                onClick={() => {
+                  setEditForm({
+                    name: '', email: '', phone: '', dob: '', gender: 'Male', address: '', college: '',
+                    college_id: '',
+                    department: 'CSE', degree: 'B.Tech', year: 3, cgpa: 8.5, graduationYear: 2027,
+                    program: 'Summer Software Engineering Internship', internshipType: 'Free Internship',
+                    batchName: 'Alpha Cohort 2026', mentorId: 'emp-2', mentorName: 'Bob Johnson',
+                    joiningDate: '', expectedCompletion: ''
+                  });
+                  setCollegeSearch('');
+                  setActiveActionModal({ type: 'onboard' });
+                }}
               className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -986,29 +1194,36 @@ export default function StudentLifecycleManagementPage() {
             <div className="bg-white border border-border rounded-xl p-5 shadow-xs space-y-4 lg:col-span-1">
               <h3 className="text-xs font-black uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
                 <TrendingUp className="h-4 w-4 text-emerald-600" />
-                Academic Top Performers (90%+)
+                Academic Top Performers
               </h3>
               <div className="space-y-3">
-                {sortedPerformers.top.map(s => (
-                  <div 
-                    key={s.id} 
-                    onClick={() => handleOpenProfile(s)}
-                    className="flex items-center justify-between border-b border-border pb-2 cursor-pointer hover:bg-slate-50/50 p-1.5 rounded-lg transition"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs">
-                        {s.personalInfo.avatar}
+                {academicTopPerformers.length > 0 ? (
+                  academicTopPerformers.slice(0, 5).map(s => (
+                    <div 
+                      key={s.id} 
+                      onClick={() => {
+                        const original = students.find(st => st.id === s.id);
+                        if (original) handleOpenProfile(original);
+                      }}
+                      className="flex items-center justify-between border-b border-border pb-2 cursor-pointer hover:bg-slate-50/50 p-1.5 rounded-lg transition"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                          #{s.rank}
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-text-primary">{s.name}</div>
+                          <div className="text-[10px] text-text-secondary">Dept: {s.department} | Batch: {s.batch}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-xs font-bold text-text-primary">{s.personalInfo.name}</div>
-                        <div className="text-[10px] text-text-secondary">{s.academicInfo.college} | {s.academicInfo.department}</div>
-                      </div>
+                      <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                        {s.score}% / CGPA: {s.cgpa}
+                      </span>
                     </div>
-                    <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-                      {s.performance.overallPerformance}%
-                    </span>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <div className="text-center py-6 text-xs text-text-secondary">No academic top performers found.</div>
+                )}
               </div>
             </div>
 
@@ -1016,32 +1231,40 @@ export default function StudentLifecycleManagementPage() {
             <div className="bg-white border border-border rounded-xl p-5 shadow-xs space-y-4 lg:col-span-1">
               <h3 className="text-xs font-black uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
                 <AlertCircle className="h-4 w-4 text-rose-600" />
-                At-Risk Cohort (Below 75%)
+                At-Risk Cohort
               </h3>
               <div className="space-y-3">
-                {sortedPerformers.bottom.length > 0 ? (
-                  sortedPerformers.bottom.map(s => (
+                {atRiskCohort.length > 0 ? (
+                  atRiskCohort.slice(0, 5).map(s => (
                     <div 
                       key={s.id} 
-                      onClick={() => handleOpenProfile(s)}
-                      className="flex items-center justify-between border-b border-border pb-2 cursor-pointer hover:bg-slate-50/50 p-1.5 rounded-lg transition"
+                      onClick={() => {
+                        const original = students.find(st => st.id === s.id);
+                        if (original) handleOpenProfile(original);
+                      }}
+                      className="border-b border-border pb-2 cursor-pointer hover:bg-slate-50/50 p-1.5 rounded-lg transition space-y-1"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-rose-50 text-rose-700 flex items-center justify-center font-bold text-xs">
-                          {s.personalInfo.avatar}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-rose-50 text-rose-700 flex items-center justify-center font-bold text-xs">
+                            {s.avatar}
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-text-primary">{s.name}</div>
+                            <div className="text-[10px] text-text-secondary">Batch: {s.batch} | Att: {s.attendancePct}%</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-xs font-bold text-text-primary">{s.personalInfo.name}</div>
-                          <div className="text-[10px] text-text-secondary">{s.academicInfo.college} | {s.academicInfo.department}</div>
-                        </div>
+                        <span className="text-xs font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
+                          Risk: {s.riskScore}%
+                        </span>
                       </div>
-                      <span className="text-xs font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
-                        {s.performance.overallPerformance}%
-                      </span>
+                      <div className="text-[10px] text-rose-700 bg-rose-50/50 px-2 py-1 rounded">
+                        Reason: {s.reason}
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-6 text-xs text-text-secondary">No students are currently marked below 75% threshold.</div>
+                  <div className="text-center py-6 text-xs text-text-secondary">No students are currently marked in the at-risk cohort.</div>
                 )}
               </div>
             </div>
@@ -1196,7 +1419,7 @@ export default function StudentLifecycleManagementPage() {
                     <button onClick={() => handleOpenProfile(s)} className="p-1 hover:text-blue-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="View Profile Workspace">
                       <Eye className="h-4 w-4" />
                     </button>
-                    <PermissionGuard required="student.edit">
+                    <PermissionGuard required="student.update">
                       <button onClick={() => openEditModal(s)} className="p-1 hover:text-amber-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="Edit Personal/Academic Info">
                         <PlusCircle className="h-4 w-4" />
                       </button>
@@ -1204,6 +1427,11 @@ export default function StudentLifecycleManagementPage() {
                     <button onClick={() => handleGenerateCertificate(s.id)} className="p-1 hover:text-emerald-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="Generate Certificates">
                       <Award className="h-4 w-4" />
                     </button>
+                    <PermissionGuard required="student.delete">
+                      <button onClick={() => handleDeleteStudent(s.id)} className="p-1 hover:text-rose-600 hover:bg-slate-100 rounded text-text-secondary transition-colors" title="Delete Student Record">
+                        <Trash className="h-4 w-4" />
+                      </button>
+                    </PermissionGuard>
                   </div>
                 ),
               },
@@ -1313,7 +1541,7 @@ export default function StudentLifecycleManagementPage() {
 
               {/* Header Actions */}
               <div className="flex flex-wrap items-center gap-1.5">
-                <PermissionGuard required="student.edit">
+                <PermissionGuard required="student.update">
                   <button
                     onClick={() => openEditModal(activeProfile)}
                     className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 rounded transition"
@@ -1348,6 +1576,14 @@ export default function StudentLifecycleManagementPage() {
                 >
                   Generate Cert
                 </button>
+                <PermissionGuard required="student.delete">
+                  <button
+                    onClick={() => handleDeleteStudent(activeProfile.id)}
+                    className="px-2 py-1 bg-red-600 hover:bg-red-700 text-xs font-bold text-white rounded transition"
+                  >
+                    Delete Student
+                  </button>
+                </PermissionGuard>
               </div>
             </div>
 
@@ -2184,13 +2420,75 @@ export default function StudentLifecycleManagementPage() {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-text-secondary">Institution *</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={editForm.college}
-                          onChange={e => setEditForm({ ...editForm, college: e.target.value })}
-                          className="w-full bg-slate-50 border border-border rounded p-1.5 text-xs font-semibold text-text-primary focus:outline-none"
-                        />
+                        <div className="relative" ref={collegeDropdownRef}>
+                          {/* Selected pill or input */}
+                          <div
+                            className={`flex items-center gap-1 w-full bg-slate-50 border rounded p-1.5 text-xs font-semibold text-text-primary focus-within:ring-1 focus-within:ring-blue-400 cursor-text ${
+                              collegeDropdownOpen ? 'border-blue-400' : 'border-border'
+                            }`}
+                            onClick={() => { setCollegeDropdownOpen(true); }}
+                          >
+                            {editForm.college && !collegeDropdownOpen ? (
+                              <>
+                                <span className="flex-1 truncate text-xs text-blue-700 font-bold">{editForm.college}</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); clearCollege(); }}
+                                  className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </>
+                            ) : (
+                              <input
+                                type="text"
+                                autoFocus={collegeDropdownOpen}
+                                placeholder={editForm.college || (collegesLoading ? 'Loading colleges...' : 'Search by name, district, region...')}
+                                value={collegeSearch}
+                                onChange={e => { setCollegeSearch(e.target.value); setCollegeDropdownOpen(true); setCollegeHighlightIdx(-1); }}
+                                onKeyDown={handleCollegeKeyDown}
+                                onFocus={() => setCollegeDropdownOpen(true)}
+                                className="flex-1 bg-transparent outline-none text-xs font-semibold placeholder-gray-400"
+                              />
+                            )}
+                            {!editForm.college && <ChevronDown className="h-3 w-3 text-gray-400 shrink-0" />}
+                          </div>
+
+                          {/* Dropdown list */}
+                          {collegeDropdownOpen && (
+                            <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-blue-200 rounded-lg shadow-xl max-h-52 overflow-y-auto">
+                              {collegesLoading ? (
+                                <div className="flex items-center gap-2 px-3 py-4 text-xs text-gray-400">
+                                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                                  Loading colleges...
+                                </div>
+                              ) : collegesError ? (
+                                <div className="flex items-center gap-2 px-3 py-4 text-xs text-red-400">
+                                  <AlertCircle className="h-3.5 w-3.5" />
+                                  Unable to fetch colleges
+                                </div>
+                              ) : filteredColleges.length === 0 ? (
+                                <div className="px-3 py-4 text-xs text-gray-400">No colleges found</div>
+                              ) : (
+                                filteredColleges.map((col, idx) => (
+                                  <button
+                                    key={col.id}
+                                    type="button"
+                                    onMouseDown={() => selectCollege(col)}
+                                    className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+                                      idx === collegeHighlightIdx
+                                        ? 'bg-blue-50 text-blue-700'
+                                        : 'hover:bg-slate-50 text-text-primary'
+                                    }`}
+                                  >
+                                    <div className="font-semibold truncate">{col.name}</div>
+                                    <div className="text-[10px] text-gray-400">{col.district} · {col.region} · {col.college_type}</div>
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-text-secondary">Department</label>

@@ -22,5 +22,8 @@ export const employeeApi = {
   },
   bulkAssignMentor: async (ids: string[], mentorId: string): Promise<void> => {
     await apiClient.post('/api/v1/employee/bulk/mentor', { ids, mentorId });
+  },
+  deleteEmployee: async (id: string): Promise<void> => {
+    await apiClient.delete(`/api/v1/employee/${id}`);
   }
 };
