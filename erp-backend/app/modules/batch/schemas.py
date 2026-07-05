@@ -37,6 +37,7 @@ class BatchCreate(BaseModel):
     )
 
     batch_status: Optional[str] = None
+    internship_type: Optional[str] = None
 
 
 # ------------------------------------------------------------------
@@ -72,6 +73,7 @@ class BatchUpdate(BaseModel):
     )
 
     batch_status: Optional[str] = None
+    internship_type: Optional[str] = None
 
 
 # ------------------------------------------------------------------
@@ -95,6 +97,9 @@ class BatchResponse(BaseModel):
     end_date: date
 
     max_capacity: int
+
+    program_name: Optional[str] = None
+    internship_type: Optional[str] = None
 
     created_at: str
     updated_at: str
