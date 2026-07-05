@@ -644,7 +644,10 @@ export function CreateUserWizard({ isOpen, onClose, onUserCreated, userToEdit, v
                   <div 
                     key={role.id}
                     onClick={() => {
-                      if (!viewMode) setSelectedRole(role.id);
+                      if (!viewMode) {
+                        setSelectedRole(role.id);
+                        setAssignedModules(role.moduleIds || []);
+                      }
                     }}
                     className={`relative rounded-lg border p-4 cursor-pointer transition-all ${
                       selectedRole === role.id 

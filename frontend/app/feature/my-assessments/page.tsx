@@ -6,6 +6,7 @@ import {
   Play, Users, Award, Eye, XCircle, Camera, Mic, Volume2, ShieldCheck, ArrowRight, HelpCircle,
   ChevronRight, Calendar
 } from 'lucide-react';
+import { useAuth } from '../../../src/context/AuthContext';
 
 interface StudentQuiz {
   id: string;
@@ -76,6 +77,7 @@ const DEFAULT_QUIZZES: StudentQuiz[] = [
 ];
 
 export default function MyAssessmentsPage() {
+  const { user } = useAuth();
   const [quizzes, setQuizzes] = useState<StudentQuiz[]>(DEFAULT_QUIZZES);
   const [selectedQuiz, setSelectedQuiz] = useState<StudentQuiz | null>(null);
   
@@ -96,27 +98,12 @@ export default function MyAssessmentsPage() {
 
   useEffect(() => {
     const loadQuizzes = async () => {
+      if (!user) return;
       try {
-        const res = await fetch('http://localhost:8000/api/v1/assessment/quizzes');
+        const res = await fetch(`http://localhost:8000/api/v1/assessment/quizzes/student/${user.id}`);
         if (res.ok) {
           const data = await res.json();
-          const batch = data.find((b: any) => b.id === 'batch-ai-2026');
-          if (batch) {
-            const mapped = batch.assessments.map((a: any) => {
-              const myAttempt = a.attempts.find((att: any) => att.studentId === 'stu-12');
-              if (myAttempt) {
-                return {
-                  ...a,
-                  status: 'Completed',
-                  score: myAttempt.score,
-                  passed: myAttempt.passed,
-                  attempts: myAttempt.attempts
-                };
-              }
-              return { ...a, status: 'Active' };
-            });
-            setQuizzes(mapped);
-          }
+          setQuizzes(data);
         }
       } catch (err) {
         console.error('Error fetching quizzes', err);
@@ -126,7 +113,7 @@ export default function MyAssessmentsPage() {
     loadQuizzes();
     const interval = setInterval(loadQuizzes, 15000); // Poll every 15s
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   // Timer effect during exam
   useEffect(() => {
@@ -235,8 +222,8 @@ export default function MyAssessmentsPage() {
 
       const submissionAttempt = {
         asmId: selectedQuiz.id,
-        studentId: 'stu-12',
-        studentName: 'Ananya Desai',
+        studentId: user?.id || 'unknown',
+        studentName: user ? `${user.firstName} ${user.lastName}` : 'Unknown Student',
         attempts: 1,
         score: score,
         status: 'Completed',
